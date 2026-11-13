@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
 // Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
-let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(require('path').join(require('child_process').execSync('npm root -g').toString().trim(), 'playwright'))); }
+const { launchBrowser, ffmpeg } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
@@ -12,7 +12,7 @@ const [input, output = 'out.mp4'] = args.filter((a, i) => !a.startsWith('--') &&
 if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N] [--width W] [--height H] [--gif] [--frames-only]'); process.exit(1); }
 
 (async () => {
-  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  const browser = await launchBrowser();
   const page = await browser.newPage();
   page.on('pageerror', (e) => console.error('page error:', e.message));
   // Offline fallback: serve three.js CDN URLs from a local node_modules/three if one exists
@@ -48,11 +48,11 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   const pattern = path.join(dir, 'f%05d.png');
   if (flag('--gif')) {
     const gif = output.replace(/\.[^.]+$/, '.gif');
-    execFileSync('ffmpeg', ['-y', '-framerate', String(fps), '-i', pattern, '-vf',
+    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, '-vf',
       `fps=${Math.min(fps, 30)},scale=${Math.min(w, 720)}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse`, gif], { stdio: 'inherit' });
     console.log('gif ->', gif);
   } else {
-    execFileSync('ffmpeg', ['-y', '-framerate', String(fps), '-i', pattern, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
+    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
     console.log('video ->', output);
   }
   fs.rmSync(dir, { recursive: true, force: true });

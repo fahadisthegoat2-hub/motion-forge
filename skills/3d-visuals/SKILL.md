@@ -3,7 +3,7 @@ name: 3d-visuals
 description: Build high-quality real-time 3D visuals with Three.js (or React Three Fiber) — scenes, hero renders, product shots, stylized worlds, shaders, particles and post-processing. Use when the user asks for 3D, a 3D scene, WebGL, Three.js, a 3D model/render, or a 3D effect.
 ---
 
-> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
 > **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
 
 # 3D Visuals

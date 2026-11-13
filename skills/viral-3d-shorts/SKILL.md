@@ -3,7 +3,7 @@ name: viral-3d-shorts
 description: Produce vertical 3D-animated story/explainer shorts (TikTok, YouTube Shorts, Reels) in the popular clean semi-realistic CG style — "what happens if", body/medical cutaways, POV stories, survival scenarios, weird facts. Use when the user asks for a 3D short, viral 3D video, Zack D. Films-style / 3D explainer-style content, or a 3D story video.
 ---
 
-> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
 > **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
 
 # Viral 3D Shorts — the clean semi-real CG look
@@ -46,8 +46,8 @@ copy a creator's logo, name, intro, or recurring characters onto shirts or title
 7. **Device render (default for final quality):** build the whole short as ONE HTML with a
    shot timeline (`shots=[{start,end,setup(),update(t)}]`, one `window.__mf` for the full
    duration, captions drawn in-scene), include `templates/device_render_panel.html` before
-   </body>, and publish it with the Artifact tool if available (else give the local file
-   path). The user clicks **Render MP4** and it renders on their own GPU at the tier their
+   </body>, and publish it with the Artifact tool if available, else open it with
+   `node ${CLAUDE_PLUGIN_ROOT}/scripts/open_in_chrome.js short.html`. The user clicks **Render MP4** and it renders on their own GPU at the tier their
    specs support. Custom GLB models must be fetchable URLs or base64-embedded.
 8. Run `viral-growth` → write `publish.md` (titles, description, tags, hashtags, pinned
    comment, cover frame). Final message: artifact link/MP4 path + publish pack, nothing else.

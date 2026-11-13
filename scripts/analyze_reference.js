@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Measure reference images (no Python): palette, values, contrast, saturation, temperature.
 // Usage: node analyze_reference.js img1 [img2 ...] [--colors 8]
-let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(require('path').join(require('child_process').execSync('npm root -g').toString().trim(), 'playwright'))); }
+const { launchBrowser, ffmpeg } = require('./lib/deps');
 const fs = require('fs'), path = require('path');
 
 const args = process.argv.slice(2);
@@ -12,7 +12,7 @@ if (!args.length) { console.error('usage: analyze_reference.js img [img...] [--c
 const mime = (f) => ({ '.jpg': 'jpeg', '.jpeg': 'jpeg', '.webp': 'webp', '.gif': 'gif' }[path.extname(f).toLowerCase()] || 'png');
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await launchBrowser();
   const page = await browser.newPage();
   const out = [];
   for (const file of args) {

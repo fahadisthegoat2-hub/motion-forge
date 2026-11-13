@@ -3,7 +3,7 @@ name: quality-review
 description: Mandatory deep quality pass before delivering any 3D scene, animation, motion graphic, short or script. Inspects every part (code, frames, timing, story, audio sync, metadata), finds what's wrong, fixes it and re-checks. Use before showing results to the user, or when the user asks to check, review, fix, or polish something.
 ---
 
-> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** unless the user said "Blender/Python allowed".
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** unless the user said "Blender/Python allowed".
 
 # Quality Review — take your time, find everything, fix it
 

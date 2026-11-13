@@ -3,7 +3,7 @@ name: realistic-humans
 description: Create realistic or semi-realistic 3D humans and believable backgrounds/environments in Blender (Cycles/EEVEE, scripted via bpy) or Three.js — skin, eyes, hair, clothing, posing, facial expressions, lighting and sets. Use when the user asks for a realistic person, character, human model, crowd, realistic background, room, street, or cinematic 3D environment.
 ---
 
-> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
 > **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
 
 # Realistic Humans & Sets
