@@ -1,4 +1,4 @@
-motion-forge plugin is active. Use its skills automatically — the user should never have to name them.
+Motion Video plugin is active. Use its skills automatically — the user should never have to name them.
 
 ROUTING (load every matching skill, in this order, before working):
 - Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → realistic-humans → custom-animation → quality-review → viral-growth

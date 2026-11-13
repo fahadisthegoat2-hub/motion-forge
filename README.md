@@ -1,4 +1,4 @@
-# motion-forge — Claude Code plugin
+# Motion Video — Claude Code plugin
 
 Viral 3D story shorts, realistic humans and sets, twist-driven scripts, reference style
 learning, custom animation, motion graphics, on-device rendering (Good / High / Epic),
@@ -12,7 +12,7 @@ itself the first time it runs. Blender and Python are never installed.
 claude plugin marketplace add fahadisthegoat2-hub/motion-forge
 ```
 ```bash
-claude plugin install motion-forge@motion-forge-marketplace
+claude plugin install motion-video@motion-video-marketplace
 ```
 
 ### Auto-enable in every session (incl. Claude Code on the web)
@@ -21,11 +21,11 @@ Add this to `~/.claude/settings.json` (all your sessions on that computer) or to
 ```json
 {
   "extraKnownMarketplaces": {
-    "motion-forge-marketplace": {
+    "motion-video-marketplace": {
       "source": { "source": "github", "repo": "fahadisthegoat2-hub/motion-forge" }
     }
   },
-  "enabledPlugins": { "motion-forge@motion-forge-marketplace": true }
+  "enabledPlugins": { "motion-video@motion-video-marketplace": true }
 }
 ```
 
