@@ -18,7 +18,7 @@ ROUTING (load every matching skill, in this order, before working):
 ALWAYS:
 - 3D people/scenes: copy templates/studio_scene.html and follow templates/SCENE_API.md. Use the user's characters/ folder first. Never stiff: layer clips + look + face + talk, cross-fade everything, feet locked, camera always alive.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props, never copy their logos/text. Rebuild the look with materials, colors and lighting.
-- Before a final render, ask the user: Good, High or Epic.
+- Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU (~3 min per video-second at 1080p); use cloud renders only for 540p QA previews or if the user asks.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed by the scripts). Never install or run Blender or Python unless the user says "Blender/Python allowed".
 - Be credit-efficient: work silently, batch tool calls, one final message.
