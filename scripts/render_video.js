@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+// Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
+// Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
+let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(require('path').join(require('child_process').execSync('npm root -g').toString().trim(), 'playwright'))); }
+const { execFileSync } = require('child_process');
+const fs = require('fs'), path = require('path');
+
+const args = process.argv.slice(2);
+const flag = (n) => args.includes(n);
+const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
+const [input, output = 'out.mp4'] = args.filter((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(fps|width|height|quality)$/));
+if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N] [--width W] [--height H] [--gif] [--frames-only]'); process.exit(1); }
+
+(async () => {
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  const page = await browser.newPage();
+  page.on('pageerror', (e) => console.error('page error:', e.message));
+  // Offline fallback: serve three.js CDN URLs from a local node_modules/three if one exists
+  const localThree = [process.cwd(), path.dirname(path.resolve(input)), __dirname, ...(process.env.NODE_PATH || '').split(':')]
+    .map((d) => path.join(d, d.endsWith('node_modules') ? 'three' : 'node_modules/three')).find((d) => fs.existsSync(d));
+  if (localThree) await page.route(/cdn\.jsdelivr\.net\/npm\/three@[^/]+\/(.*)/, (route) => {
+    const rel = route.request().url().match(/three@[^/]+\/(.*)/)[1];
+    const f = path.join(localThree, rel);
+    fs.existsSync(f) ? route.fulfill({ path: f, contentType: 'application/javascript' }) : route.continue();
+  });
+  await page.goto('file://' + path.resolve(input));
+  await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 60000 });
+  const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height }));
+  const Q = { good: [1, 30, 18], high: [1, 60, 16], epic: [4 / 3, 60, 14] }[opt('--quality', '')];
+  const bw = mf.width || 1920, bh = mf.height || 1080;
+  const fps = Q ? Q[1] : +opt('--fps', mf.fps || 60), crf = String(Q ? Q[2] : 16);
+  const w = Q ? Math.round(bw * Q[0] / 2) * 2 : +opt('--width', bw), h = Q ? Math.round(bh * Q[0] / 2) * 2 : +opt('--height', bh);
+  await page.setViewportSize({ width: w, height: h });
+  await page.evaluate(() => { window.__mfManual = true; document.getElementById('mf-panel')?.remove(); window.dispatchEvent(new Event('resize')); });
+
+  const dir = output.replace(/\.[^.]+$/, '') + '_frames';
+  fs.mkdirSync(dir, { recursive: true });
+  const total = Math.round(mf.duration * fps);
+  for (let f = 0; f < total; f++) {
+    await page.evaluate((t) => __mf.render(t), f / fps);
+    await page.screenshot({ path: path.join(dir, `f${String(f).padStart(5, '0')}.png`) });
+    if (f % fps === 0) process.stdout.write(`\rframe ${f}/${total}`);
+  }
+  await browser.close();
+  console.log(`\nframes -> ${dir}`);
+  if (flag('--frames-only')) return;
+
+  const pattern = path.join(dir, 'f%05d.png');
+  if (flag('--gif')) {
+    const gif = output.replace(/\.[^.]+$/, '.gif');
+    execFileSync('ffmpeg', ['-y', '-framerate', String(fps), '-i', pattern, '-vf',
+      `fps=${Math.min(fps, 30)},scale=${Math.min(w, 720)}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse`, gif], { stdio: 'inherit' });
+    console.log('gif ->', gif);
+  } else {
+    execFileSync('ffmpeg', ['-y', '-framerate', String(fps), '-i', pattern, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
+    console.log('video ->', output);
+  }
+  fs.rmSync(dir, { recursive: true, force: true });
+})().catch((e) => { console.error(e); process.exit(1); });

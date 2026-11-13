@@ -1,0 +1,56 @@
+---
+name: custom-animation
+description: Design and code custom animations with real animator craft — keyframes, easing curves, springs, secondary motion, character/object rigs, procedural and 3D animation (Three.js, GSAP, CSS, Web Animations, canvas). Use when the user asks to animate something, make motion feel better, create an animation, or rig/move a 3D object or character.
+---
+
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
+> **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
+
+# Custom Animation — animator's craft in code
+
+## Apply the 12 principles (translated to code)
+| Principle | Implementation |
+|---|---|
+| Squash & stretch | Scale Y↓ X↑ on impact, preserve volume: `sx = 1/sqrt(sy)` |
+| Anticipation | Small reverse move (5–15%) before the main action, 80–150ms |
+| Staging | One focal motion at a time; dim/slow everything else |
+| Straight-ahead vs pose-to-pose | Physics/procedural vs keyframed timelines |
+| Follow-through & overlap | Children lag parents: offset 2–6 frames, or spring-follow |
+| Slow in/out | Never linear except mechanical/looping rotation |
+| Arcs | Interpolate paths on curves (`CatmullRomCurve3`, bezier), not straight lines |
+| Secondary action | Breathing, blinks, hair/antenna springs, cloth wobble |
+| Timing | Heavy = slow settle; light = quick, more overshoot |
+| Exaggeration | Push poses 20–30% past "realistic" for clarity |
+| Solid drawing | Keep volumes consistent across poses |
+| Appeal | Clear silhouettes in every key pose |
+
+## Easing vocabulary (pick by intent)
+- Enter: `expo.out` / `cubic-bezier(0.16,1,0.3,1)` — fast arrival, soft settle
+- Exit: `cubic-bezier(0.7,0,0.84,0)` (in) — exits accelerate away, shorter than enters
+- Move on screen: `cubic-bezier(0.65,0,0.35,1)` (inOut)
+- Playful: `back.out(1.7)` or a spring
+- **Springs** for anything interactive (interruptible, physical):
+  ```js
+  // semi-implicit Euler; stiffness 120–300, damping 12–26
+  v += (-k*(x - target) - c*v) * dt; x += v * dt;
+  ```
+
+## Timing defaults (60fps)
+Micro UI 120–200ms · element enter 300–500ms · scene transition 600–900ms ·
+stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
+
+## Tools
+- **GSAP** (`gsap@3.12.5`, cdnjs): timelines with labels, `"<"`/`">-0.2"` overlap,
+  `CustomEase`-like bezier strings. Make timelines seekable: `tl.pause(); tl.seek(t)`.
+- **Three.js**: `AnimationMixer` + `AnimationClip`/`KeyframeTrack` for authored clips;
+  blend with `crossFadeTo`; bones via `SkinnedMesh`; procedural IK with lookAt + springs.
+- **CSS/WAAPI** for DOM UI motion; animate only `transform`/`opacity`.
+
+## Workflow
+1. Write a **beat sheet**: time → action → easing → why (intent).
+2. Block key poses (pose-to-pose), check silhouettes.
+3. Add timing/spacing, then overlap + secondary motion.
+4. Polish: arcs, settle, micro-holds. Respect `prefers-reduced-motion`.
+5. Expose `window.__mf = {duration, fps, render(t)}` and render frames to check spacing
+   (`scripts/render_video.js --frames-only`) — look at the frame strip like an animator's
+   onion skin.

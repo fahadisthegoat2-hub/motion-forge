@@ -1,0 +1,11 @@
+{
+  "name": "motion-forge-marketplace",
+  "owner": { "name": "motion-forge" },
+  "plugins": [
+    {
+      "name": "motion-forge",
+      "source": "./",
+      "description": "3D visuals, reference-image style learning, custom animation and motion graphics."
+    }
+  ]
+}

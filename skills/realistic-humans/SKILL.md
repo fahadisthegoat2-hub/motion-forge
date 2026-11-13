@@ -1,0 +1,61 @@
+---
+name: realistic-humans
+description: Create realistic or semi-realistic 3D humans and believable backgrounds/environments in Blender (Cycles/EEVEE, scripted via bpy) or Three.js — skin, eyes, hair, clothing, posing, facial expressions, lighting and sets. Use when the user asks for a realistic person, character, human model, crowd, realistic background, room, street, or cinematic 3D environment.
+---
+
+> **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the browser, Node + Playwright, ffmpeg. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
+> **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
+
+# Realistic Humans & Sets
+
+## Pipeline
+1. **Three.js (DEFAULT)** — start from `${CLAUDE_PLUGIN_ROOT}/templates/studio_scene.html`
+   (ACES tone mapping, soft key/fill/rim, gradient cyclorama, contact shadow, DoF, 9:16,
+   GLB loader, `window.__mf` for rendering). Load a rigged human GLB, then upgrade its
+   materials: skin → `MeshPhysicalMaterial` (roughness 0.45, `sheen` 0.25 warm tint,
+   `clearcoat` 0.05, slight `thickness`/`attenuationColor` #c86a50 for fake SSS);
+   cloth → `sheen` 0.5. Render to MP4 with `scripts/render_video.js`.
+2. **Blender + Cycles (ONLY if user said "Blender/Python allowed")** —
+   `blender -b -P ${CLAUDE_PLUGIN_ROOT}/scripts/blender_base_scene.py -- --out renders/ --character model.fbx --render`.
+
+## Getting the human (never model a body from primitives)
+| Source | Use |
+|---|---|
+| User-provided GLB/FBX (ask first) | Best — their own characters |
+| Three.js sample rigs (`cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/` Xbot.glb, Michelle.glb, Soldier.glb) | Instant placeholder humans with animations |
+| MPFB2 (MakeHuman, needs Blender) | Free scriptable bodies — Blender mode only |
+| Character Creator 4 / Daz Genesis | Highest-quality semi-real look (export FBX/GLB) |
+| Mixamo (free Adobe acct) | Auto-rig + thousands of body animations |
+| Poly Haven / Sketchfab (CC0/CC-BY) | Props, clothing, set dressing |
+Ask the user which assets they have; check licenses before shipping.
+
+## Skin & face realism checklist
+- Principled BSDF: Subsurface Weight 0.15–0.3, Radius (1.0, 0.35, 0.2), Scale ~0.01 m,
+  Roughness 0.35–0.5 with a variation map (oilier T-zone), Specular IOR Level 0.5.
+- Normal/pore detail map at low strength (0.2–0.4); slight redness on nose, ears, knuckles.
+- **Eyes sell the shot**: separate cornea (glass, IOR 1.376), wet tear line, catchlight
+  from the key light, 1–2mm eyelid shadow (AO).
+- Hair: particle/curves hair or hair cards; bald heads need specular breakup + stubble.
+- Micro-asymmetry (brows, mouth corners); never perfectly symmetric poses.
+- Expression = brows + eyelids + mouth corners together. Push it 20–30% for comedy/drama.
+
+## Clothing
+Fabric with sheen 0.3–0.6, weave normal map, cloth sim or sculpted folds at joints,
+contact shadows where shirt meets body. Saturated solid colors read best on mobile.
+
+## Backgrounds
+- **Studio seamless (shorts look)**: curved cyclorama, vertical gradient
+  (e.g. #7fd3f0 → #1e8fc7), soft floor shadow, slight vignette.
+- **Environments**: HDRI from Poly Haven for light, real-scale geometry (doors 2.1 m,
+  counters 0.9 m), bevel every edge, dirt/wear masks, volumetric haze through windows,
+  foreground occluder for depth, shallow DoF (f/2.8–4) to hide background simplicity.
+
+## Camera & render
+35mm wide/establishing, 50mm medium, 85mm close-up faces. AgX view, "Medium High
+Contrast" look. Cycles 128–256 samples + OpenImageDenoise. Motion blur on. 9:16 =
+1080×1920 for shorts.
+
+## Avoid the uncanny valley
+Dead eyes (no catchlight), plastic skin (uniform roughness), floating feet, T-pose
+leftovers, frozen face during dialogue — always add blinks (every 2–5s), breathing, and
+micro head motion.
