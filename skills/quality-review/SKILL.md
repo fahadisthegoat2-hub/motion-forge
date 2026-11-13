@@ -13,6 +13,7 @@ Be your own harshest critic. Do not tell the user it's done until it passes.
 - Re-read every file you wrote; check console errors (`page.on('pageerror')`).
 - Render a **preview strip**: 540p, 8–12 evenly spaced frames + every shot boundary
   (`render_video.js scene.html prev.mp4 --width 540 --height 960 --fps 2 --frames-only`).
+- For motion, also render 1–2s around each key action at 8–12fps and view as a strip (onion skin).
 - Combine frames into one contact sheet to view in a single Read:
   `ffmpeg -i prev_frames/f%05d.png -vf "scale=180:-1,tile=6x2" sheet.png`
 
@@ -23,7 +24,7 @@ no aliasing shimmer · correct aspect/resolution · loop seam clean (if looping)
 **Visual**: NO reference image used as a texture/print and no copied logos or text on clothing · clear focal point every frame · readable silhouette · value contrast ·
 colors match style bible · skin not plastic, eyes have catchlights · text inside safe area,
 legible at phone size.
-**Motion**: no linear easing on organic motion · no pops/snaps between frames · arcs ·
+**Motion**: no stiff shots (something changes every ~1s; look/face/talk layered on clips) · no foot skating (walk ≈1.45 m/s, run ≈2.57 m/s) · no instant turns/snaps · eyes alive (look targets change) · no Xbot/mannequin used as a person · no linear easing on organic motion · no pops/snaps between frames · arcs ·
 overlap/secondary motion · holds long enough to read · camera moves motivated.
 **Story** (shorts): hook in ≤2s · re-hook every 5–8s · climax lands · twist is fair
 (clue planted) · ending loops to opening · captions match VO timing.

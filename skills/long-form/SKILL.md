@@ -40,7 +40,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
   `${CLAUDE_PLUGIN_ROOT}/templates/studio_scene.html` (Epic = 2560×1440). Use wider lenses
   for establishing shots, real environments (not only studio backdrop) — see `realistic-humans`.
 - **Chapters**: build one HTML with a shot timeline and set
-  `CONFIG.chapters = [{name, start, end}, …]` matching the story chapters (keep each ≤ ~2–3 min
+  `chapter: 'Name'` on the first shot of each story chapter (see `templates/SCENE_API.md`) (keep each ≤ ~2–3 min
   so iPads/phones don't run out of memory). The device render panel then shows **Part**: all
   parts (one MP4 each) or a single part.
 - If the scene file would get huge, split into one HTML per chapter (each with its own

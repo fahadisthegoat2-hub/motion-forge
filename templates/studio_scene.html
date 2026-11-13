@@ -1,32 +1,125 @@
 <!doctype html>
-<!-- motion-forge studio template: clean semi-real CG look, 9:16, Three.js only.
-     Copy, then edit CONFIG + animate(t). Render: node scripts/render_video.js this.html out.mp4 -->
-<html><head><meta charset="utf-8"><title>Studio Scene</title>
-<style>html,body{margin:0;height:100%;overflow:hidden;background:#1e8fc7}canvas{display:block}</style>
+<!-- Motion Video studio template — clean semi-real CG look. Three.js only (no Blender/Python).
+     Edit ONLY the "DIRECTION" block (CONFIG, CAST, SHOTS, CAPTIONS). Everything is a pure function of time t,
+     so previews, cloud renders and on-device renders are frame-identical.
+     Render: node scripts/render_video.js this.html out.mp4 --quality good|high|epic   (or the on-page panel) -->
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion Video Scene</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#0b78d0}canvas{display:block;width:100%;height:100%;object-fit:contain}</style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head><body>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+/* ================================ DIRECTION ================================ */
+const LIB = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/';
 
 const CONFIG = {
-  character: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/Xbot.glb',
-  clip: 'idle',                 // animation clip name in the GLB (if any)
-  shirt: '#b6f22e',             // hero wardrobe color
-  bgTop: '#0b78d0', bgBottom: '#6fd6fb',
-  duration: 5, fps: 30, width: 1080, height: 1920,   // long-form: width 1920, height 1080
-  chapters: null,               // long-form: [{ name: 'Cold open', start: 0, end: 45 }, ...]
+  width: 1080, height: 1920, fps: 30,          // long-form: width 1920, height 1080
+  bgTop: '#0b78d0', bgBottom: '#6fd6fb',       // studio cyclorama gradient
+  grain: 0.035, vignette: 0.28,
+  // Clip libraries (Mixamo-style rigs). Any clip auto-retargets onto any humanoid in CAST.
+  // Add your own Mixamo FBX files here, e.g. 'animations/Waving.fbx' → clip name 'waving'.
+  animations: [LIB + 'Xbot.glb', LIB + 'Soldier.glb'],
 };
 
+// Characters: first URL that loads wins. Best: your own models in the repo's characters/ folder
+// (Avaturn GLB = face + blink/expressions; Mixamo FBX = body). Fallback: sample semi-real man.
+const CAST = {
+  hero: {
+    urls: ['characters/hero.glb', 'characters/hero.fbx', LIB + 'readyplayer.me.glb'],
+    height: 1.80,                                 // metres; model is auto-scaled to this
+    wardrobe: { top: '#b6f22e', bottom: null, shoes: null },   // solid colors (null = keep original)
+  },
+};
+
+// Shots play back-to-back. Inside a shot every key list is [[time, value, ease?], ...] in shot-local seconds.
+// Clips: idle, walk, run, agree, headshake, sad_pose, sneak_pose (+ any you add). 'camera' = look at the lens.
+// Faces: smile, shock, worried, sad, angry (0..1). talk: [[start,end],...] mouth flaps while speaking.
+const SHOTS = [
+  {
+    name: 'Hook', dur: 3.0, chapter: null, fadeIn: 0.25,
+    camera: { pos: [[0, [0.25, 1.62, 2.6]], [3, [0.05, 1.6, 1.85], 'inOutSine']], look: [[0, [0, 1.55, 0]]], fov: 30, handheld: 1 },
+    cast: {
+      hero: {
+        pos: [[0, [0, 0, 0]]], rotY: [[0, 0]],
+        clips: [{ clip: 'idle', start: 0, end: 3 }],
+        look: [[0, [0.8, 1.5, 1]], [0.9, 'camera', 'outCubic']],
+        face: { worried: [[0, 0], [1.2, 0.7, 'outCubic']] },
+        talk: [[1.0, 2.7]],
+      },
+    },
+  },
+  {
+    name: 'Reaction', dur: 3.0,
+    camera: { pos: [[0, [-1.4, 1.35, 3.4]], [3, [-1.0, 1.4, 3.0], 'inOutSine']], look: [[0, [0, 1.15, 0]]], fov: 34, handheld: 1,
+      shakes: [{ t: 1.25, amp: 1.0, decay: 0.35 }] },
+    cast: {
+      hero: {
+        clips: [{ clip: 'idle', start: 0, end: 1.2 }, { clip: 'headshake', start: 1.1, end: 3, fade: 0.25 }],
+        look: [[0, 'camera']],
+        face: { shock: [[1.15, 0], [1.35, 1, 'outBack'], [2.6, 0.4]] },
+      },
+    },
+  },
+];
+
+// Word-by-word captions (drawn into the video). hi = words to highlight.
+const CAPTIONS = [
+  { t: 0.15, text: 'WHAT HAPPENS IF', hi: ['HAPPENS'] },
+  { t: 1.6, text: 'YOU NEVER SLEEP?', hi: ['NEVER'] },
+  { t: 4.2, text: 'DAY 3…', hi: ['3…'] },
+];
+/* ============================== END DIRECTION ============================== */
+
+/* ---------- math helpers (deterministic) ---------- */
+const EASE = {
+  linear: (x) => x, inSine: (x) => 1 - Math.cos(x * Math.PI / 2), outSine: (x) => Math.sin(x * Math.PI / 2),
+  inOutSine: (x) => -(Math.cos(Math.PI * x) - 1) / 2, inCubic: (x) => x ** 3, outCubic: (x) => 1 - (1 - x) ** 3,
+  inOutCubic: (x) => x < .5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2, outExpo: (x) => x === 1 ? 1 : 1 - 2 ** (-10 * x),
+  inOutExpo: (x) => x === 0 ? 0 : x === 1 ? 1 : x < .5 ? 2 ** (20 * x - 10) / 2 : (2 - 2 ** (-20 * x + 10)) / 2,
+  outBack: (x) => 1 + 2.70158 * (x - 1) ** 3 + 1.70158 * (x - 1) ** 2,
+  outElastic: (x) => x === 0 ? 0 : x === 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1,
+  spring: (x) => 1 - Math.exp(-6 * x) * Math.cos(9 * x),
+};
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+const noise = (x, seed = 0) => { const i = Math.floor(x), f = x - i; return (hash(i + seed * 57) * (1 - smooth(f)) + hash(i + 1 + seed * 57) * smooth(f)) * 2 - 1; };
+const fbm = (x, seed = 0) => noise(x, seed) * .65 + noise(x * 2.3, seed + 9) * .35;
+const lerpV = (a, b, e) => Array.isArray(a) ? a.map((v, i) => v + (b[i] - v) * e) : a + (b - a) * e;
+// key([[t,v,ease],...], t, resolve) → value at t
+function key(keys, t, resolve = (v) => v) {
+  if (keys === undefined || keys === null) return undefined;
+  if (!Array.isArray(keys) || !Array.isArray(keys[0])) return resolve(keys);
+  if (t <= keys[0][0]) return resolve(keys[0][1]);
+  for (let i = 0; i < keys.length - 1; i++) {
+    const [t0, v0] = keys[i], [t1, v1, e] = keys[i + 1];
+    if (t < t1) return lerpV(resolve(v0), resolve(v1), (EASE[e] || EASE.inOutCubic)((t - t0) / (t1 - t0)));
+  }
+  return resolve(keys[keys.length - 1][1]);
+}
+const TOTAL = SHOTS.reduce((s, x) => s + x.dur, 0);
+function shotAt(t) {
+  let acc = 0;
+  for (let i = 0; i < SHOTS.length; i++) { if (t < acc + SHOTS[i].dur || i === SHOTS.length - 1) return { shot: SHOTS[i], i, local: t - acc, start: acc }; acc += SHOTS[i].dur; }
+}
+const CHAPTERS = (() => { const out = []; let acc = 0; for (const s of SHOTS) { if (s.chapter) out.push({ name: s.chapter, start: acc }); acc += s.dur; }
+  return out.length ? out.map((c, i) => ({ ...c, end: out[i + 1] ? out[i + 1].start : TOTAL })) : null; })();
+
+/* ---------- renderer / scene ---------- */
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; // punchier saturation than AgX for this look
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -35,88 +128,362 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.45;
+scene.environmentIntensity = 0.35;
 
-// Gradient cyclorama: big inverted sphere with vertical gradient + floor shadow catcher
 const bg = new THREE.Mesh(new THREE.SphereGeometry(40, 48, 24), new THREE.ShaderMaterial({
   side: THREE.BackSide, depthWrite: false,
   uniforms: { top: { value: new THREE.Color(CONFIG.bgTop) }, bot: { value: new THREE.Color(CONFIG.bgBottom) } },
   vertexShader: 'varying vec3 p; void main(){ p = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-  fragmentShader: 'uniform vec3 top, bot; varying vec3 p; void main(){ float h = smoothstep(-2., 18., p.y); gl_FragColor = vec4(mix(bot, top, h), 1.); }',
+  fragmentShader: 'uniform vec3 top, bot; varying vec3 p; void main(){ float h = smoothstep(-2., 16., p.y); gl_FragColor = vec4(mix(bot, top, h), 1.); }',
 }));
 scene.add(bg);
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: 0.22, color: '#0a3a66' }));
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: 0.25, color: '#0a3a66' }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
-// Lights: soft key (front 45°), cool fill, rim on shoulders
-const key = new THREE.DirectionalLight('#fff4ea', 2.6); key.position.set(2.5, 4, 3.5);
-key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 6; key.shadow.bias = -0.0005;
-Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3 });
-const fill = new THREE.HemisphereLight('#cfe9ff', '#5a7a90', 0.9);
-const rim = new THREE.DirectionalLight('#bfe2ff', 2.2); rim.position.set(-2.5, 3, -3);
-scene.add(key, fill, rim);
+const key1 = new THREE.DirectionalLight('#fff1e2', 3.3); key1.position.set(2.6, 3.8, 2.9);
+key1.castShadow = true; key1.shadow.mapSize.set(2048, 2048); key1.shadow.bias = -0.0004; key1.shadow.normalBias = 0.02;
+Object.assign(key1.shadow.camera, { left: -2.5, right: 2.5, top: 3, bottom: -1, near: 0.5, far: 15 });
+const fill = new THREE.HemisphereLight('#d6ecff', '#6b7f8c', 0.55);
+const rim = new THREE.DirectionalLight('#bfe2ff', 2.4); rim.position.set(-2.6, 3.2, -3);
+const rim2 = new THREE.DirectionalLight('#ffe2c8', 0.9); rim2.position.set(2.8, 2.2, -2.5);
+scene.add(key1, fill, rim, rim2);
 
-const camera = new THREE.PerspectiveCamera(32, CONFIG.width / CONFIG.height, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(32, CONFIG.width / CONFIG.height, 0.05, 100);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bokeh = new BokehPass(scene, camera, { focus: 5.5, aperture: 0.0015, maxblur: 0.006 });
+const bokeh = new BokehPass(scene, camera, { focus: 3, aperture: 0.0012, maxblur: 0.005 });
 composer.addPass(bokeh);
 composer.addPass(new OutputPass());
+const grade = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGrain: { value: CONFIG.grain }, uVig: { value: CONFIG.vignette }, uFade: { value: 0 }, uFlash: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime, uGrain, uVig, uFade, uFlash; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime*61.7) * 43758.5453); }
+    void main(){ vec4 c = texture2D(tDiffuse, vUv); vec2 d = vUv - .5;
+      c.rgb *= 1. - uVig * smoothstep(.25, .85, length(d * vec2(1., 1.2)));
+      c.rgb += (h(vUv * 1000.) - .5) * uGrain;
+      c.rgb = mix(c.rgb, vec3(1.), uFlash); c.rgb *= 1. - uFade; gl_FragColor = c; }`,
+});
+composer.addPass(grade);
 
-window.__mfReady = false; // renderer waits until assets load
-// Character
-let mixer, character;
-new GLTFLoader().load(CONFIG.character, (gltf) => {
-  character = gltf.scene;
-  character.traverse((o) => {
-    if (!o.isMesh) return;
-    o.castShadow = true;
-    const m = o.material, name = (m.name + o.name).toLowerCase();
-    const skin = /skin|body|head|face|joints/.test(name);
-    o.material = new THREE.MeshPhysicalMaterial({
-      map: m.map, normalMap: m.normalMap,
-      color: skin ? m.color : /shirt|top|surface/.test(name) ? new THREE.Color(CONFIG.shirt) : m.color,
-      roughness: skin ? 0.45 : 0.7, metalness: 0,
-      sheen: skin ? 0.25 : 0.5, sheenColor: new THREE.Color(skin ? '#ffb39a' : '#ffffff'),
-      clearcoat: skin ? 0.05 : 0,
+/* ---------- captions HUD ---------- */
+const capCanvas = document.createElement('canvas'), capCtx = capCanvas.getContext('2d');
+const capTex = new THREE.CanvasTexture(capCanvas); capTex.colorSpace = THREE.SRGBColorSpace;
+const hud = new THREE.Scene(), hudCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+hud.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ map: capTex, transparent: true, toneMapped: false, depthTest: false })));
+function drawCaptions(t, w, h) {
+  if (capCanvas.width !== w || capCanvas.height !== h) { capCanvas.width = w; capCanvas.height = h; capTex.dispose(); }   // GPU storage is immutable → re-allocate
+  capCtx.clearRect(0, 0, w, h);
+  const idx = CAPTIONS.findLastIndex((c) => t >= c.t);
+  if (idx >= 0) {
+    const c = CAPTIONS[idx], end = c.t1 ?? (CAPTIONS[idx + 1]?.t ?? TOTAL);
+    if (t < end) {
+      const words = c.text.split(' '), size = Math.round(Math.min(w, h) * 0.085), gap = 0.16;
+      capCtx.font = `900 ${size}px Inter, "Arial Black", "Helvetica Neue", Arial, sans-serif`;
+      capCtx.textBaseline = 'middle'; capCtx.lineJoin = 'round';
+      const space = size * 0.28, widths = words.map((x) => capCtx.measureText(x).width);
+      // wrap into lines that fit 86% width
+      const lines = [[]]; let lw = 0;
+      words.forEach((wd, i) => { if (lw + widths[i] > w * 0.86 && lines.at(-1).length) { lines.push([]); lw = 0; } lines.at(-1).push(i); lw += widths[i] + space; });
+      const y0 = h * (h > w ? 0.68 : 0.82) - (lines.length - 1) * size * 0.6;
+      const outA = clamp((end - t) / 0.12);
+      lines.forEach((ln, li) => {
+        const total = ln.reduce((s, i) => s + widths[i], 0) + space * (ln.length - 1); let x = (w - total) / 2;
+        ln.forEach((i) => {
+          const p = clamp((t - c.t - i * gap) / 0.14); if (p <= 0) { x += widths[i] + space; return; }
+          const s = (0.6 + 0.4 * EASE.outBack(p)) * (0.9 + 0.1 * outA), cx = x + widths[i] / 2, cy = y0 + li * size * 1.2;
+          capCtx.save(); capCtx.globalAlpha = Math.min(p * 2, 1) * outA; capCtx.translate(cx, cy); capCtx.scale(s, s);
+          capCtx.lineWidth = size * 0.16; capCtx.strokeStyle = 'rgba(0,0,0,.85)'; capCtx.strokeText(words[i], -widths[i] / 2, 0);
+          capCtx.fillStyle = (c.hi || []).includes(words[i]) ? '#ffe14d' : '#ffffff'; capCtx.fillText(words[i], -widths[i] / 2, 0);
+          capCtx.restore(); x += widths[i] + space;
+        });
+      });
+    }
+  }
+  capTex.needsUpdate = true;
+}
+
+/* ---------- loading ---------- */
+const gltfLoader = new GLTFLoader(), fbxLoader = new FBXLoader();
+const loadAny = (url) => (/\.fbx$/i.test(url) ? fbxLoader : gltfLoader).loadAsync(url).then((r) => ({ scene: r.scene || r, animations: r.animations || [] }));
+async function loadFirst(urls) { for (const u of urls) { try { return { ...(await loadAny(u)), url: u }; } catch {} } return null; }
+const normName = (n) => n.replace(/^mixamorig\d*[:_]?/i, '').replace(/^.*[:|]/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+/* ---------- retargeting: world-space rotation transfer with rest-direction calibration ---------- */
+function boneMap(root) { const m = {}; root.traverse((o) => { if (o.isBone && !m[normName(o.name)]) m[normName(o.name)] = o; }); return m; }
+function restData(root, map) {
+  root.updateMatrixWorld(true); const d = {};
+  for (const [k, b] of Object.entries(map)) d[k] = { q: b.getWorldQuaternion(new THREE.Quaternion()), p: b.getWorldPosition(new THREE.Vector3()), local: b.quaternion.clone(), lp: b.position.clone() };
+  return d;
+}
+const CHILD_HINT = { hips: 'spine', spine: 'spine1', spine1: 'spine2', spine2: 'neck', neck: 'head', leftshoulder: 'leftarm', leftarm: 'leftforearm', leftforearm: 'lefthand',
+  rightshoulder: 'rightarm', rightarm: 'rightforearm', rightforearm: 'righthand', leftupleg: 'leftleg', leftleg: 'leftfoot', leftfoot: 'lefttoebase', rightupleg: 'rightleg', rightleg: 'rightfoot', rightfoot: 'righttoebase',
+  lefthand: 'lefthandmiddle1', righthand: 'righthandmiddle1' };
+function retargetClip(src, clip, tgt) {
+  const sMap = boneMap(src.root), tMap = boneMap(tgt.root);
+  const pairs = Object.keys(tMap).filter((k) => sMap[k] && !/eye|end$/.test(k));
+  const C = {};
+  for (const k of pairs) {   // calibrate rest-pose differences (T-pose vs A-pose) using bone directions
+    const ck = CHILD_HINT[k]; C[k] = new THREE.Quaternion();
+    if (ck && src.rest[ck] && tgt.rest[ck] && src.rest[k] && k !== 'hips') {
+      const dS = src.rest[ck].p.clone().sub(src.rest[k].p).normalize(), dT = tgt.rest[ck].p.clone().sub(tgt.rest[k].p).normalize();
+      if (dS.lengthSq() > 0 && dT.lengthSq() > 0) C[k].setFromUnitVectors(dT, dS);
+    }
+  }
+  const mixer = new THREE.AnimationMixer(src.root), action = mixer.clipAction(clip); action.play();
+  const fps = 30, n = Math.max(2, Math.round(clip.duration * fps) + 1), times = new Float32Array(n);
+  const order = []; tgt.root.traverse((o) => { if (o.isBone) order.push(o); });
+  const qv = {}; pairs.forEach((k) => (qv[k] = new Float32Array(n * 4)));
+  const hipsPos = new Float32Array(n * 3);
+  const hS = src.rest.hips, hT = tgt.rest.hips, scale = hT && hS ? hT.p.y / Math.max(hS.p.y, 1e-6) : 1;
+  const newW = new Map(), tmpQ = new THREE.Quaternion(), tmpP = new THREE.Quaternion(), prev = {};
+  let gAcc = 0, gTime = 0, prevFoot = null;   // ground speed from the planted foot (works for in-place and root-motion clips)
+  for (let f = 0; f < n; f++) {
+    const t = Math.min(f / fps, clip.duration); times[f] = t; mixer.setTime(t); src.root.updateMatrixWorld(true); newW.clear();
+    for (const b of order) {
+      const k = normName(b.name), parentW = b.parent && newW.has(b.parent) ? newW.get(b.parent) : b.parent ? b.parent.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion();
+      let world;
+      if (qv[k]) {
+        const delta = sMap[k].getWorldQuaternion(tmpQ).multiply(tmpP.copy(src.rest[k].q).invert());
+        world = delta.clone().multiply(C[k]).multiply(tgt.rest[k].q);
+        const local = parentW.clone().invert().multiply(world);
+        if (prev[k] && prev[k].dot(local) < 0) local.set(-local.x, -local.y, -local.z, -local.w);
+        prev[k] = local.clone(); local.toArray(qv[k], f * 4);
+      } else world = parentW.clone().multiply(tgt.rest[k] ? tgt.rest[k].local : b.quaternion);
+      newW.set(b, world);
+    }
+    if (sMap.hips && sMap.leftfoot && sMap.rightfoot) {
+      const hp = sMap.hips.getWorldPosition(new THREE.Vector3()), lf = sMap.leftfoot.getWorldPosition(new THREE.Vector3()), rf = sMap.rightfoot.getWorldPosition(new THREE.Vector3());
+      const low = lf.y < rf.y ? 'l' : 'r', rel = (low === 'l' ? lf : rf).sub(hp).multiplyScalar(scale);
+      if (prevFoot && prevFoot.side === low) { gAcc += Math.hypot(rel.x - prevFoot.rel.x, rel.z - prevFoot.rel.z); gTime += 1 / fps; }
+      prevFoot = { side: low, rel };
+    }
+    if (sMap.hips && tMap.hips) {
+      const d = sMap.hips.getWorldPosition(new THREE.Vector3()).sub(hS.p).multiplyScalar(scale);
+      d.x = 0; d.z = 0;   // in-place: characters are positioned by the shot, not the clip
+      const wp = hT.p.clone().add(d), lp = tMap.hips.parent ? tMap.hips.parent.worldToLocal(wp) : wp; lp.toArray(hipsPos, f * 3);
+    }
+  }
+  action.stop(); mixer.uncacheRoot(src.root);
+  const tracks = pairs.map((k) => new THREE.QuaternionKeyframeTrack(`${tMap[k].name}.quaternion`, times, qv[k]));
+  if (tMap.hips) tracks.push(new THREE.VectorKeyframeTrack(`${tMap.hips.name}.position`, times, hipsPos));
+  const out = new THREE.AnimationClip(clip.name, clip.duration, tracks);
+  out.rootSpeed = gTime > 0.2 ? gAcc / gTime : 0;   // natural ground speed in m/s (0 for idles/poses)
+  return out;
+}
+
+/* ---------- materials ---------- */
+const COPY = ['map', 'normalMap', 'normalScale', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap', 'emissive', 'color', 'transparent', 'alphaTest', 'opacity', 'side', 'alphaMap'];
+function upgradeMaterials(root, wardrobe) {
+  root.traverse((o) => {
+    if (!o.isMesh) return; o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const out = mats.map((m) => {
+      const n = ((m.name || '') + ' ' + o.name).toLowerCase(), p = new THREE.MeshPhysicalMaterial();
+      COPY.forEach((k) => { if (m[k] !== undefined && m[k] !== null) p[k] = m[k].clone ? m[k].clone() : m[k]; });
+      p.metalness = 0; p.roughness = m.roughness ?? 0.6; p.name = m.name;
+      if (/eye/.test(n)) Object.assign(p, { roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.03 });
+      else if (/teeth|tooth/.test(n)) Object.assign(p, { roughness: 0.35, clearcoat: 0.4 });
+      else if (/skin|body|head|face|arm|leg/.test(n) && !/outfit|top|bottom|shoe|foot|wear/.test(n))
+        { p.color.multiply(new THREE.Color('#ffe2d2')); Object.assign(p, { roughness: p.roughnessMap ? 0.9 : 0.5, sheen: 0.35, sheenRoughness: 0.55, sheenColor: new THREE.Color('#ff9e86'), clearcoat: 0.06, clearcoatRoughness: 0.45 }); }
+      else if (/hair|beard|brow|lash/.test(n)) Object.assign(p, { roughness: 0.62, sheen: 0.4, sheenColor: new THREE.Color('#ffffff') });
+      else Object.assign(p, { roughness: Math.max(p.roughness, 0.7), sheen: 0.5, sheenRoughness: 0.8, sheenColor: new THREE.Color('#ffffff') });
+      const slot = /top|shirt|torso|jacket/.test(n) ? 'top' : /bottom|pant|trouser|jean|short/.test(n) ? 'bottom' : /foot|shoe|sneaker|boot/.test(n) ? 'shoes' : null;
+      if (slot && wardrobe && wardrobe[slot]) { p.map = null; p.color = new THREE.Color(wardrobe[slot]); }   // plain solid clothing
+      if (p.map) p.map.colorSpace = THREE.SRGBColorSpace;
+      return p;
     });
+    o.material = Array.isArray(o.material) ? out : out[0];
   });
-  scene.add(character);
-  if (gltf.animations.length) {
-    mixer = new THREE.AnimationMixer(character);
-    const clip = THREE.AnimationClip.findByName(gltf.animations, CONFIG.clip) || gltf.animations[0];
-    mixer.clipAction(clip).play();
+}
+
+/* ---------- characters ---------- */
+const FACE = {   // expression → morph weights (ARKit names + Ready-Player-Me fallbacks)
+  smile: { mouthSmile: 1, mouthSmile_L: 1, mouthSmile_R: 1, mouthSmileLeft: 1, mouthSmileRight: 1, cheekSquint_L: .4, cheekSquint_R: .4 },
+  shock: { jawOpen: .55, mouthOpen: .7, eyeWide_L: 1, eyeWide_R: 1, eyeWideLeft: 1, eyeWideRight: 1, browInnerUp: 1, browOuterUp_L: .8, browOuterUp_R: .8 },
+  worried: { browInnerUp: .9, mouthFrown_L: .5, mouthFrown_R: .5, mouthFrownLeft: .5, mouthFrownRight: .5, mouthStretch_L: .3, mouthStretch_R: .3 },
+  sad: { browInnerUp: .8, mouthFrown_L: .8, mouthFrown_R: .8, mouthFrownLeft: .8, mouthFrownRight: .8, eyeSquint_L: .2, eyeSquint_R: .2 },
+  angry: { browDown_L: 1, browDown_R: 1, browDownLeft: 1, browDownRight: 1, noseSneer_L: .6, noseSneer_R: .6, mouthPress_L: .5, mouthPress_R: .5 },
+};
+const BLINK = ['eyeBlink_L', 'eyeBlink_R', 'eyeBlinkLeft', 'eyeBlinkRight', 'eyesClosed', 'blink'];
+const TALK = ['jawOpen', 'mouthOpen', 'viseme_aa'];
+const characters = {};
+const clipLib = {};
+const sources = [];
+
+function setupCharacter(id, data, def) {
+  const root = new THREE.Group(), model = data.scene; root.add(model);
+  const box = new THREE.Box3().setFromObject(model), h = box.max.y - box.min.y;
+  model.scale.setScalar((def.height || 1.8) / h); model.position.y = -box.min.y * model.scale.y;
+  upgradeMaterials(model, def.wardrobe); scene.add(root);
+  const bones = boneMap(model), morphMeshes = [];
+  model.traverse((o) => { if (o.isMesh && o.morphTargetDictionary) morphMeshes.push(o); });
+  const rest = restData(model, bones);
+  const ch = { id, root, model, bones, rest, morphMeshes, mixer: new THREE.AnimationMixer(model), actions: {}, spring: null, def };
+  ch.hasMorph = (name) => morphMeshes.some((m) => m.morphTargetDictionary[name] !== undefined);
+  ch.setMorph = (name, v) => morphMeshes.forEach((m) => { const i = m.morphTargetDictionary[name]; if (i !== undefined) m.morphTargetInfluences[i] = Math.max(m.morphTargetInfluences[i], clamp(v)); });
+  data.animations.forEach((c) => (clipLib[normName(c.name || 'clip')] ??= { clip: c, src: { root: model, rest } }));
+  characters[id] = ch;
+}
+function clipFor(ch, name) {
+  const k = normName(name); ch.actions[k] ??= (() => {
+    const lib = clipLib[k]; if (!lib) { console.warn('missing clip', name); return null; }
+    let clip = lib.clip;
+    if (lib.src.root !== ch.model) {   // bake with the character at the origin so its current placement isn't baked in
+      const p = ch.root.position.clone(), r = ch.root.rotation.clone(); ch.root.position.set(0, 0, 0); ch.root.rotation.set(0, 0, 0); ch.root.updateMatrixWorld(true);
+      clip = retargetClip(lib.src, lib.clip, { root: ch.model, rest: ch.rest }); ch.root.position.copy(p); ch.root.rotation.copy(r); ch.root.updateMatrixWorld(true);
+    }
+    const a = ch.mixer.clipAction(clip); a.play(); a.setEffectiveWeight(0); return a;
+  })();
+  return ch.actions[k];
+}
+
+/* ---------- life layer: breathing, look-at with springs, saccades, blinks, talk, faces, sway ---------- */
+const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _q3 = new THREE.Quaternion(), _e = new THREE.Euler(0, 0, 0, 'YXZ'), _v = new THREE.Vector3();
+function rotateInRootSpace(ch, bone, pitch, yaw, roll = 0) {
+  if (!bone) return;
+  const rootQ = ch.root.getWorldQuaternion(_q3);
+  const delta = _q.setFromEuler(_e.set(pitch, yaw, roll)); delta.premultiply(rootQ).multiply(_q2.copy(rootQ).invert());
+  const parentW = bone.parent.getWorldQuaternion(new THREE.Quaternion());
+  const world = bone.getWorldQuaternion(new THREE.Quaternion()).premultiply(delta);
+  bone.quaternion.copy(parentW.invert().multiply(world)); bone.updateMatrixWorld(true);
+}
+function lookTargetAt(ch, cast, t, camPosAt) {
+  const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : x));
+  if (!v) return null;
+  const head = ch.rest.head ? ch.rest.head.p : new THREE.Vector3(0, 1.6, 0);
+  const local = ch.root.worldToLocal(_v.set(...v));
+  const dx = local.x - head.x * ch.model.scale.x, dy = local.y - head.y * ch.model.scale.y, dz = local.z - head.z * ch.model.scale.z;
+  return [clamp(-Math.atan2(dy, Math.hypot(dx, dz)), -0.6, 0.6), clamp(Math.atan2(dx, dz), -1.2, 1.2)];
+}
+function life(ch, cast, t, tGlobal, camPosAt) {
+  const B = ch.bones, seed = ch.id.length * 13.7;
+  // spring-smoothed look (deterministic fixed-step simulation, resimulated on seek)
+  const goal = (tt) => lookTargetAt(ch, cast, tt, camPosAt) || [0, 0];
+  if (!ch.spring || tGlobal < ch.spring.t - 1e-6 || tGlobal - ch.spring.t > 2) ch.spring = { t: tGlobal, x: goal(t), v: [0, 0] };
+  const dt = 1 / 240, w = 9;
+  while (ch.spring.t < tGlobal - 1e-9) {
+    const step = Math.min(dt, tGlobal - ch.spring.t), g = goal(t - (tGlobal - ch.spring.t - step));
+    for (let i = 0; i < 2; i++) { const a = w * w * (g[i] - ch.spring.x[i]) - 2 * w * ch.spring.v[i]; ch.spring.v[i] += a * step; ch.spring.x[i] += ch.spring.v[i] * step; }
+    ch.spring.t += step;
+  }
+  const [pitch, yaw] = ch.spring.x, g = goal(t);
+  ch.root.updateMatrixWorld(true);
+  // breathing (4s cycle, slight chest + shoulder lift)
+  const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
+  rotateInRootSpace(ch, B.spine1, -0.012 * br, 0);
+  rotateInRootSpace(ch, B.leftshoulder, 0, 0, 0.012 * br); rotateInRootSpace(ch, B.rightshoulder, 0, 0, -0.012 * br);
+  // weight shift / sway (slow, subtle)
+  rotateInRootSpace(ch, B.hips, 0, 0.02 * fbm(tGlobal * 0.25, seed), 0.012 * fbm(tGlobal * 0.2, seed + 3));
+  // look distribution: spine2 15% · neck 35% · head 50% (+ micro noise), eyes lead
+  rotateInRootSpace(ch, B.spine2, pitch * 0.1, yaw * 0.15);
+  rotateInRootSpace(ch, B.neck, pitch * 0.35, yaw * 0.35);
+  const talking = (cast?.talk || []).some(([a, b]) => t >= a && t <= b);
+  const nod = talking ? 0.03 * Math.max(0, noise(tGlobal * 3.1, seed + 7)) : 0;
+  rotateInRootSpace(ch, B.head, pitch * 0.5 + 0.012 * fbm(tGlobal * 0.6, seed + 1) + nod, yaw * 0.5 + 0.015 * fbm(tGlobal * 0.5, seed + 2), 0.01 * fbm(tGlobal * 0.4, seed + 5));
+  // eyes: remaining angle to target + saccades (eyes move first, head catches up)
+  let acc = 0, k = 0; while (acc + 0.45 + hash(k + seed) * 1.6 <= tGlobal) { acc += 0.45 + hash(k + seed) * 1.6; k++; }
+  const sac = [(hash(k * 3 + seed) - .5) * 0.06, (hash(k * 7 + seed) - .5) * 0.1];
+  const ep = clamp(g[0] - pitch * 0.95 + sac[0], -0.35, 0.35), ey = clamp(g[1] - yaw * 0.95 + sac[1], -0.45, 0.45);
+  rotateInRootSpace(ch, B.lefteye, ep, ey); rotateInRootSpace(ch, B.righteye, ep, ey);
+  // morph targets: reset, then faces / talk / blink
+  ch.morphMeshes.forEach((m) => m.morphTargetInfluences.fill(0));
+  for (const [name, keys] of Object.entries(cast?.face || {})) { const wv = key(keys, t) || 0; for (const [mn, mw] of Object.entries(FACE[name] || { [name]: 1 })) ch.setMorph(mn, mw * wv); }
+  if (talking) { const m = clamp(0.15 + 0.85 * Math.abs(noise(tGlobal * 9, seed + 11)) * (0.6 + 0.4 * noise(tGlobal * 2.3, seed))); TALK.forEach((n) => ch.setMorph(n, m * (n === 'jawOpen' ? 0.45 : 0.8))); }
+  let bt = 0, j = 0; while (bt + 2 + hash(j * 5 + seed) * 3 <= tGlobal) { bt += 2 + hash(j * 5 + seed) * 3; j++; }
+  const since = tGlobal - bt, blink = since < 0.07 ? since / 0.07 : since < 0.2 ? 1 - (since - 0.07) / 0.13 : 0;
+  BLINK.forEach((n) => ch.setMorph(n, blink));
+}
+
+/* ---------- per-frame evaluation ---------- */
+function pathLen(keys, t0, t1) { let L = 0, p = key(keys, t0); for (let x = t0 + 1 / 60; x <= t1 + 1e-9; x += 1 / 60) { const q = key(keys, Math.min(x, t1)); L += Math.hypot(q[0] - p[0], q[2] - p[2]); p = q; } return L; }
+function applyClips(ch, cast, t) {
+  for (const [k, b] of Object.entries(ch.bones)) { const r = ch.rest[k]; if (r) { b.quaternion.copy(r.local); b.position.copy(r.lp); } }   // reset → no accumulation on bones the clip doesn't drive (eyes etc.)
+  for (const a of Object.values(ch.actions)) if (a) a.setEffectiveWeight(0);
+  const list = cast?.clips || [{ clip: 'idle', start: 0, end: 1e9 }], ws = [];
+  list.forEach((e, i) => {
+    const fade = e.fade ?? 0.3, fadeOut = list[i + 1]?.fade ?? fade;
+    const win = (e.start <= 0 ? 1 : smooth((t - e.start) / fade)) * (1 - smooth((t - e.end) / fadeOut));
+    if (win > 0.001) ws.push([e, win]);
+  });
+  const sum = ws.reduce((s, x) => s + x[1], 0) || 1;
+  for (const [e, w] of ws) {
+    const a = clipFor(ch, e.clip); if (!a) continue;
+    const d = a.getClip().duration, rs = a.getClip().rootSpeed || 0;
+    let lt = Math.max(0, t - e.start) * (typeof e.speed === 'number' ? e.speed : 1) + (e.offset || 0);
+    if (e.speed === undefined && rs > 0.2 && cast?.pos && pathLen(cast.pos, Math.max(e.start, 0), e.end) > 0.1)
+      lt = pathLen(cast.pos, Math.max(e.start, 0), t) / rs + (e.offset || 0);   // feet lock to the ground: cycle phase follows distance travelled
+    a.time = e.loop === false ? Math.min(lt, d - 1e-4) : lt % d; a.setEffectiveWeight(Math.max(a.getEffectiveWeight(), w / sum));
+  }
+  ch.mixer.update(0);
+}
+function cameraAt(shot, lt, tGlobal) {
+  const c = shot.camera || {};
+  const p = key(c.pos, lt) || [0, 1.6, 3], l = key(c.look, lt) || [0, 1.4, 0];
+  const hh = (c.handheld ?? 1) * 0.012;
+  const pos = [p[0] + hh * fbm(tGlobal * 0.7, 21), p[1] + hh * fbm(tGlobal * 0.6, 22), p[2] + hh * 0.5 * fbm(tGlobal * 0.5, 23)];
+  let sx = 0, sy = 0;
+  for (const s of c.shakes || []) { const d = lt - s.t; if (d >= 0) { const e = s.amp * 0.035 * Math.exp(-d / (s.decay || 0.4)); sx += e * noise(tGlobal * 38, 31); sy += e * noise(tGlobal * 41, 32); } }
+  return { pos, look: [l[0] + sx, l[1] + sy, l[2]], fov: key(c.fov, lt) || 32 };
+}
+function render(tGlobal) {
+  const { shot, local } = shotAt(clamp(tGlobal, 0, TOTAL - 1e-4)), shotStart = tGlobal - local;
+  const cam = cameraAt(shot, local, tGlobal);
+  camera.position.set(...cam.pos); camera.lookAt(...cam.look); camera.fov = cam.fov; camera.updateProjectionMatrix();
+  const camPosAt = (lt) => cameraAt(shot, lt, shotStart + lt).pos;
+  for (const ch of Object.values(characters)) {
+    const cast = shot.cast?.[ch.id];
+    ch.root.visible = !!cast || shot.cast === undefined;
+    if (!ch.root.visible) continue;
+    ch.root.position.set(...(key(cast?.pos, local) || [0, 0, 0])); ch.root.rotation.y = key(cast?.rotY, local) || 0;
+    applyClips(ch, cast, local); ch.root.updateMatrixWorld(true);
+    life(ch, cast, local, tGlobal, camPosAt);
+  }
+  const hero = Object.values(characters)[0];
+  if (hero?.bones.head) bokeh.uniforms.focus.value = camera.position.distanceTo(hero.bones.head.getWorldPosition(_v));
+  grade.uniforms.uTime.value = tGlobal;
+  grade.uniforms.uFade.value = Math.max(shot.fadeIn ? 1 - smooth(local / shot.fadeIn) : 0, shot.fadeOut ? smooth((local - (shot.dur - shot.fadeOut)) / shot.fadeOut) : 0);
+  grade.uniforms.uFlash.value = shot.flash ? Math.max(0, 1 - local / 0.15) : 0;
+  composer.render();
+  const size = renderer.getDrawingBufferSize(new THREE.Vector2());
+  drawCaptions(tGlobal, size.x, size.y);
+  renderer.autoClear = false; renderer.clearDepth(); renderer.render(hud, hudCam); renderer.autoClear = true;
+}
+
+/* ---------- boot ---------- */
+window.__mfReady = false;
+(async () => {
+  for (const [id, def] of Object.entries(CAST)) {
+    const data = await loadFirst(def.urls);
+    if (data) setupCharacter(id, data, def);
+    else console.warn('character failed to load:', id);
+  }
+  for (const url of CONFIG.animations) {
+    const data = await loadFirst([url]); if (!data) continue;
+    data.scene.updateMatrixWorld(true);
+    const bones = boneMap(data.scene), src = { root: data.scene, rest: restData(data.scene, bones) };
+    const base = url.split('/').pop().replace(/\.\w+$/, '');
+    data.animations.forEach((c) => { const n = /mixamo\.com|take 001|^clip$/i.test(c.name) ? base : c.name; c.name = n; clipLib[normName(n)] ??= { clip: c, src }; });
   }
   window.__mfReady = true;
-}, undefined, (err) => {   // model unreachable: stand-in capsule so the shot still renders
-  console.warn('character load failed, using stand-in:', err.message || err);
-  character = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 1.1, 8, 24),
-    new THREE.MeshPhysicalMaterial({ color: CONFIG.shirt, roughness: 0.6, sheen: 0.5 }));
-  character.position.y = 0.9; character.castShadow = true; scene.add(character);
-  window.__mfReady = true;
-});
-
-// ---- Shot animation: everything derives from t (seconds) ----
-const ease = (x) => 1 - Math.pow(1 - x, 3);
-function animate(t) {
-  const p = ease(Math.min(t / CONFIG.duration, 1));
-  camera.position.set(Math.sin(t * 0.3) * 0.15, 1.25, 6.2 - p * 1.2);   // slow push-in + drift
-  camera.lookAt(0, 1.05, 0);
-  bokeh.uniforms.focus.value = camera.position.z;
-  if (mixer) mixer.setTime(t);
-}
+  window.__mfClips = () => Object.fromEntries(Object.entries(characters).flatMap(([id, ch]) => Object.entries(clipLib).map(([k]) => { const a = clipFor(ch, k); return [id + ':' + k, +(a?.getClip().rootSpeed || 0).toFixed(2)]; })));
+})();
 
 function resize() {
-  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  const w = innerWidth, h = innerHeight, ar = CONFIG.width / CONFIG.height;
+  const W = Math.round(Math.min(w, h * ar)), H = Math.round(W / ar);
+  renderer.setSize(W, H, false); composer.setSize(W, H); camera.aspect = ar; camera.updateProjectionMatrix();
+  renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px';
 }
-addEventListener('resize', resize); resize();
+addEventListener('resize', () => { if (!window.__mfManual) resize(); }); resize();
 
-window.__mf = { duration: CONFIG.duration, fps: CONFIG.fps, width: CONFIG.width, height: CONFIG.height, canvas: renderer.domElement, chapters: CONFIG.chapters,
-  setSize(w, h) { renderer.setPixelRatio(1); renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); },
-  render(t) { animate(t); composer.render(); } };
+window.__mf = {
+  duration: TOTAL, fps: CONFIG.fps, width: CONFIG.width, height: CONFIG.height, canvas: renderer.domElement, chapters: CHAPTERS,
+  setSize(w, h) { renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%'; },
+  render,
+};
 const clock = new THREE.Clock();
-renderer.setAnimationLoop(() => { if (!window.__mfManual) __mf.render(clock.getElapsedTime() % CONFIG.duration); });
+renderer.setAnimationLoop(() => { if (window.__mfReady && !window.__mfManual) render(clock.getElapsedTime() % TOTAL); });
 </script>
 <!-- motion-forge DEVICE RENDER PANEL — paste before </body> of any scene exposing window.__mf.
      Renders frame-perfect on the viewer's own GPU (WebCodecs) and downloads MP4s. No server, no Python.

@@ -61,4 +61,19 @@ function threeDir() {
   return p;
 }
 
-module.exports = { launchBrowser, ffmpeg, threeDir, DEPS };
+// three.js sample assets (models) from git when the CDN is unreachable.
+function threeRepoFile(tag, rel) {
+  const dir = path.join(DEPS, 'three-src-' + tag), f = path.join(dir, rel);
+  if (fs.existsSync(f)) return f;
+  try {
+    if (!fs.existsSync(path.join(dir, '.git'))) {
+      log('fetching three.js sample assets (one time)…'); fs.mkdirSync(DEPS, { recursive: true });
+      execFileSync('git', ['clone', '-q', '--depth', '1', '--filter=blob:none', '--sparse', '--branch', tag, 'https://github.com/mrdoob/three.js', dir],
+        { stdio: 'ignore', env: { ...process.env, GIT_LFS_SKIP_SMUDGE: '1' } });
+    }
+    const buf = execFileSync('git', ['-C', dir, 'show', 'HEAD:' + rel], { maxBuffer: 256 * 1024 * 1024 });
+    fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, buf); return f;
+  } catch { return null; }
+}
+
+module.exports = { launchBrowser, ffmpeg, threeDir, threeRepoFile, DEPS };

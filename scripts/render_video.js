@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
 // Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--chapter N | --start S --end E] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
-const { launchBrowser, ffmpeg, threeDir } = require('./lib/deps');
+const { launchBrowser, ffmpeg, threeDir, threeRepoFile } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
@@ -22,6 +22,12 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
     const f = path.join(localThree, rel);
     fs.existsSync(f) ? route.fulfill({ path: f, contentType: 'application/javascript' }) : route.continue();
   });
+  // three.js sample models: CDN first, git cache fallback (cloud sessions often block the CDN)
+  await page.route(/cdn\.jsdelivr\.net\/gh\/mrdoob\/three\.js@([^/]+)\/(.+)$/, async (route) => {
+    const [, tag, rel] = route.request().url().match(/three\.js@([^/]+)\/(.+)$/);
+    try { const resp = await route.fetch({ timeout: 8000 }); if (resp.ok()) return route.fulfill({ response: resp }); } catch {}
+    const f = threeRepoFile(tag, rel); return f ? route.fulfill({ path: f }) : route.abort();
+  });
   await page.goto('file://' + path.resolve(input));
   await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 60000 });
   const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height, chapters: __mf.chapters }));
@@ -32,7 +38,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   const fps = Q ? Q[1] : +opt('--fps', mf.fps || 60), crf = String(Q ? Q[2] : 16);
   const w = Q ? Math.round(bw * Q[0] / 2) * 2 : +opt('--width', bw), h = Q ? Math.round(bh * Q[0] / 2) * 2 : +opt('--height', bh);
   await page.setViewportSize({ width: w, height: h });
-  await page.evaluate(() => { window.__mfManual = true; document.getElementById('mf-panel')?.remove(); window.dispatchEvent(new Event('resize')); });
+  await page.evaluate(([w, h]) => { document.getElementById('mf-panel')?.remove(); window.dispatchEvent(new Event('resize')); window.__mf.setSize?.(w, h); window.__mfManual = true; }, [w, h]);
 
   const dir = output.replace(/\.[^.]+$/, '') + '_frames';
   fs.mkdirSync(dir, { recursive: true });

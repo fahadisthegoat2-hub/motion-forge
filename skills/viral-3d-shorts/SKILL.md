@@ -39,7 +39,8 @@ copy a creator's logo, name, intro, or recurring characters onto shirts or title
 - Captions: bold sans, 1–3 words at a time, centered lower third, key word highlighted.
 - Sound: whooshes on cuts, low boom on the twist, subtle riser into climax.
 
-## Production pipeline
+## Production
+- Scene format: `${CLAUDE_PLUGIN_ROOT}/templates/SCENE_API.md` (CAST / SHOTS / CAPTIONS, auto life layer). pipeline
 1. Script with the `story-writing` skill (hook → escalation → climax → twist).
 2. Turn the script into a **shot list** (shot #, duration, framing, camera move, action,
    expression, VO line, SFX).

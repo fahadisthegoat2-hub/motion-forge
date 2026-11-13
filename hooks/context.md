@@ -12,6 +12,7 @@ ROUTING (load every matching skill, in this order, before working):
 - Before delivering ANYTHING visual or written → quality-review
 
 ALWAYS:
+- 3D people/scenes: copy templates/studio_scene.html and follow templates/SCENE_API.md. Use the user's characters/ folder first. Never stiff: layer clips + look + face + talk, cross-fade everything, feet locked, camera always alive.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props, never copy their logos/text. Rebuild the look with materials, colors and lighting.
 - Before a final render, ask the user: Good, High or Epic.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).

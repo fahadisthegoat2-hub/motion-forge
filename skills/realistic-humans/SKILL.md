@@ -1,6 +1,6 @@
 ---
 name: realistic-humans
-description: Create realistic or semi-realistic 3D humans and believable backgrounds/environments in Blender (Cycles/EEVEE, scripted via bpy) or Three.js — skin, eyes, hair, clothing, posing, facial expressions, lighting and sets. Use when the user asks for a realistic person, character, human model, crowd, realistic background, room, street, or cinematic 3D environment.
+description: Create realistic or semi-realistic 3D humans and believable backgrounds/environments in Three.js (Blender only when allowed) — skin, eyes, hair, clothing, posing, facial expressions, lighting and sets. Use when the user asks for a realistic person, character, human model, crowd, realistic background, room, street, or cinematic 3D environment.
 ---
 
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
@@ -16,25 +16,25 @@ description: Create realistic or semi-realistic 3D humans and believable backgro
 # Realistic Humans & Sets
 
 ## Pipeline
-1. **Three.js (DEFAULT)** — start from `${CLAUDE_PLUGIN_ROOT}/templates/studio_scene.html`
-   (ACES tone mapping, soft key/fill/rim, gradient cyclorama, contact shadow, DoF, 9:16,
-   GLB loader, `window.__mf` for rendering). Load a rigged human GLB, then upgrade its
-   materials: skin → `MeshPhysicalMaterial` (roughness 0.45, `sheen` 0.25 warm tint,
-   `clearcoat` 0.05, slight `thickness`/`attenuationColor` #c86a50 for fake SSS);
-   cloth → `sheen` 0.5. Render to MP4 with `scripts/render_video.js`.
+1. **Three.js (DEFAULT)** — copy `${CLAUDE_PLUGIN_ROOT}/templates/studio_scene.html` and follow
+   `${CLAUDE_PLUGIN_ROOT}/templates/SCENE_API.md`. It already does: auto-scale, material upgrade
+   (warm skin sheen, glossy eyes with catchlights, fabric sheen), solid wardrobe colors, soft
+   key/fill/rim + contact shadows, DoF, grain/vignette, auto-retargeted Mixamo clips and the
+   always-on life layer (breathing, saccades, blinks, look-at, talk).
 2. **Blender + Cycles (ONLY if user said "Blender/Python allowed")** —
    `blender -b -P ${CLAUDE_PLUGIN_ROOT}/scripts/blender_base_scene.py -- --out renders/ --character model.fbx --render`.
 
-## Getting the human (never model a body from primitives)
-| Source | Use |
-|---|---|
-| User-provided GLB/FBX (ask first) | Best — their own characters |
-| Three.js sample rigs (`cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/` Xbot.glb, Michelle.glb, Soldier.glb) | Instant placeholder humans with animations |
-| MPFB2 (MakeHuman, needs Blender) | Free scriptable bodies — Blender mode only |
-| Character Creator 4 / Daz Genesis | Highest-quality semi-real look (export FBX/GLB) |
-| Mixamo (free Adobe acct) | Auto-rig + thousands of body animations |
-| Poly Haven / Sketchfab (CC0/CC-BY) | Props, clothing, set dressing |
-Ask the user which assets they have; check licenses before shipping.
+## Getting the human (never model a body from primitives, never use Xbot as a person)
+| Priority | Source | Notes |
+|---|---|---|
+| 1 | `characters/*.glb|fbx` in the project | The user's own. Check this folder first, every time. |
+| 2 | **Avaturn** GLB (free, iPad-friendly) | Realistic, ARKit face shapes → blinks + expressions |
+| 3 | **Mixamo** FBX (free Adobe acct) | Good bodies, no face shapes |
+| 4 | Sample `readyplayer.me.glb` (template default) | Placeholder semi-real man (hat, mustache) |
+If the result needs a specific look the sample can't give (casual tee, woman, child), tell the
+user once, in one line, how to add a character (see `characters/README.md`) — then continue with
+the sample instead of blocking. Multiple people = multiple CAST entries (vary height 1.6–1.9,
+wardrobe colors). Extra motions: Mixamo FBX "Without Skin" in `animations/`.
 
 ## Skin & face realism checklist
 - Principled BSDF: Subsurface Weight 0.15–0.3, Radius (1.0, 0.35, 0.2), Scale ~0.01 m,
@@ -57,10 +57,10 @@ contact shadows where shirt meets body. Saturated solid colors read best on mobi
   counters 0.9 m), bevel every edge, dirt/wear masks, volumetric haze through windows,
   foreground occluder for depth, shallow DoF (f/2.8–4) to hide background simplicity.
 
-## Camera & render
-35mm wide/establishing, 50mm medium, 85mm close-up faces. AgX view, "Medium High
-Contrast" look. Cycles 128–256 samples + OpenImageDenoise. Motion blur on. 9:16 =
-1080×1920 for shorts.
+## Camera & framing
+fov 38–45 wide/establishing, 30–34 medium, 22–28 close-up faces (vertical fov). Eye-line
+slightly above lens for heroic, below for vulnerable. Always some `handheld` (0.5–1.2).
+Blender mode only: Cycles 128–256 samples + denoise, AgX.
 
 ## Avoid the uncanny valley
 Dead eyes (no catchlight), plastic skin (uniform roughness), floating feet, T-pose
