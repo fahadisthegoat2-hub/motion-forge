@@ -33,6 +33,7 @@ Add this to `~/.claude/settings.json` (all your sessions on that computer) or to
 | Command | Does |
 |---|---|
 | `/forge-short <premise>` | Full 3D short: twist script → scenes → QA → render → publish pack |
+| `/forge-long <premise> [minutes]` | Long-form 16:9 video: chapters, twists, renders in parts |
 | `/forge-story <premise>` | Hook → escalation → climax → plot-twist script |
 | `/forge-learn <images>` | Learns a reusable style from reference images |
 | `/forge-3d <idea>` | Polished 3D scene |

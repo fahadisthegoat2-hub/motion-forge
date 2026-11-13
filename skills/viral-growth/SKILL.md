@@ -38,3 +38,11 @@ description: Growth expert for short-form video — maximize views, watch time, 
   myths, everyday-object secrets, karma/twist stories.
 - Iterate: same format, new topic; double down on videos with >80% viewed.
 - Never: fake facts presented as real, misleading thumbnails, reuse others' branding.
+
+## Long-form (YouTube 16:9) publish pack
+- **Title** ≤ 60 chars, same curiosity rules; **thumbnail concept**: 1 face with strong
+  emotion + 1 object + ≤ 3 words, high contrast, readable at phone size. Give 3 concepts.
+- **Description**: 2-line hook, 2–3 sentence summary, **chapter timestamps** (first must be
+  0:00, each ≥ 10s), CTA to next episode, 3 hashtags.
+- **Tags**: 15–20; **pinned comment**; **end screen**: point to the next episode at the last 20s.
+- First 30 seconds decide the video — check the cold open delivers on the title + thumbnail.

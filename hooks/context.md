@@ -1,7 +1,8 @@
 motion-forge plugin is active. Use its skills automatically — the user should never have to name them.
 
 ROUTING (load every matching skill, in this order, before working):
-- Any video / short / story / "what happens if" idea → story-writing → viral-3d-shorts → realistic-humans → custom-animation → quality-review → viral-growth
+- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → realistic-humans → custom-animation → quality-review → viral-growth
+- Any short video / short / story / "what happens if" idea → story-writing → viral-3d-shorts → realistic-humans → custom-animation → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
 - Motion graphics, titles, intros, logos → motion-graphics (+ 3d-visuals if 3D)

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
-// Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
+// Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--chapter N | --start S --end E] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
 const { launchBrowser, ffmpeg, threeDir } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
@@ -8,7 +8,7 @@ const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
-const [input, output = 'out.mp4'] = args.filter((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(fps|width|height|quality)$/));
+const [input, output = 'out.mp4'] = args.filter((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(fps|width|height|quality|start|end|chapter)$/));
 if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N] [--width W] [--height H] [--gif] [--frames-only]'); process.exit(1); }
 
 (async () => {
@@ -24,7 +24,9 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   });
   await page.goto('file://' + path.resolve(input));
   await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 60000 });
-  const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height }));
+  const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height, chapters: __mf.chapters }));
+  const ch = opt('--chapter') && mf.chapters ? mf.chapters[+opt('--chapter') - 1] : null;
+  const T0 = ch ? ch.start : +opt('--start', 0), T1 = ch ? ch.end : +opt('--end', mf.duration);
   const Q = { good: [1, 30, 18], high: [1, 60, 16], epic: [4 / 3, 60, 14] }[opt('--quality', '')];
   const bw = mf.width || 1920, bh = mf.height || 1080;
   const fps = Q ? Q[1] : +opt('--fps', mf.fps || 60), crf = String(Q ? Q[2] : 16);
@@ -34,9 +36,9 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
 
   const dir = output.replace(/\.[^.]+$/, '') + '_frames';
   fs.mkdirSync(dir, { recursive: true });
-  const total = Math.round(mf.duration * fps);
+  const total = Math.round((T1 - T0) * fps);
   for (let f = 0; f < total; f++) {
-    await page.evaluate((t) => __mf.render(t), f / fps);
+    await page.evaluate((t) => __mf.render(t), T0 + f / fps);
     await page.screenshot({ path: path.join(dir, `f${String(f).padStart(5, '0')}.png`) });
     if (f % fps === 0) process.stdout.write(`\rframe ${f}/${total}`);
   }
