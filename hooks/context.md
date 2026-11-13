@@ -12,6 +12,7 @@ ROUTING (load every matching skill, in this order, before working):
 - Before delivering ANYTHING visual or written → quality-review
 
 ALWAYS:
+- Reference images are for studying the style ONLY — never paste them onto shirts, textures or props, never copy their logos/text. Rebuild the look with materials, colors and lighting.
 - Before a final render, ask the user: Good, High or Epic.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed by the scripts). Never install or run Blender or Python unless the user says "Blender/Python allowed".

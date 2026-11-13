@@ -6,6 +6,13 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need on first run. **Do NOT install or run Blender or Python** unless the user said "Blender/Python allowed".
 > **Efficiency:** Work silently, batch tool calls, one final message. Ask Good / High / Epic before the final render. Run `quality-review` before delivering.
 
+
+> **Reference images are for STUDY ONLY.** Never use a reference image (or a crop of it) as a texture,
+> decal, shirt print, poster, background plate or any other image inside the scene, and never copy
+> text, logos or names from it onto clothing or props. Recreate the *look* from scratch with
+> materials, colors, lighting and shapes. Clothing = plain solid colors (or a simple original
+> pattern) unless the user explicitly asks for a print.
+
 # Long-Form 3D Videos
 
 ## Story structure (10-min example — scale proportionally)

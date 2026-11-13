@@ -20,7 +20,7 @@ Be your own harshest critic. Do not tell the user it's done until it passes.
 **Technical**: no JS errors · assets loaded (no stand-in capsule left) · no black/blank
 frames · no z-fighting, clipping through body/floor, floating feet · shadows present ·
 no aliasing shimmer · correct aspect/resolution · loop seam clean (if looping).
-**Visual**: clear focal point every frame · readable silhouette · value contrast ·
+**Visual**: NO reference image used as a texture/print and no copied logos or text on clothing · clear focal point every frame · readable silhouette · value contrast ·
 colors match style bible · skin not plastic, eyes have catchlights · text inside safe area,
 legible at phone size.
 **Motion**: no linear easing on organic motion · no pops/snaps between frames · arcs ·

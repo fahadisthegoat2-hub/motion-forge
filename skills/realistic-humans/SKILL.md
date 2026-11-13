@@ -6,6 +6,13 @@ description: Create realistic or semi-realistic 3D humans and believable backgro
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
 > **Efficiency:** Work silently — batch tool calls, no narration, no recaps. Preview at 540p / few frames (internal checks only). Final output is never below Good (1080×1920 @30fps) — always ask the user Good, High or Epic before the final render. Message the user only when done or truly blocked. Before delivering, run the `quality-review` skill.
 
+
+> **Reference images are for STUDY ONLY.** Never use a reference image (or a crop of it) as a texture,
+> decal, shirt print, poster, background plate or any other image inside the scene, and never copy
+> text, logos or names from it onto clothing or props. Recreate the *look* from scratch with
+> materials, colors, lighting and shapes. Clothing = plain solid colors (or a simple original
+> pattern) unless the user explicitly asks for a print.
+
 # Realistic Humans & Sets
 
 ## Pipeline
