@@ -1,0 +1,8 @@
+{
+  "extraKnownMarketplaces": {
+    "motion-forge-marketplace": {
+      "source": { "source": "github", "repo": "fahadisthegoat2-hub/motion-forge" }
+    }
+  },
+  "enabledPlugins": { "motion-forge@motion-forge-marketplace": true }
+}

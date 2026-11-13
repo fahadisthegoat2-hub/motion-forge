@@ -52,4 +52,13 @@ function ffmpeg() {
   return p;
 }
 
-module.exports = { launchBrowser, ffmpeg, DEPS };
+// Local three.js copy so cloud sessions render even if the CDN is blocked.
+function threeDir() {
+  const find = () => [process.cwd(), DEPS, globalRoot()].filter(Boolean)
+    .map((r) => path.join(r, r.endsWith('node_modules') ? 'three' : 'node_modules/three')).find((p) => fs.existsSync(p));
+  let p = find();
+  if (!p) { try { npmInstall(['three@0.170.0']); p = find(); } catch {} }
+  return p;
+}
+
+module.exports = { launchBrowser, ffmpeg, threeDir, DEPS };

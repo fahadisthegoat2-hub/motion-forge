@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
 // Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
-const { launchBrowser, ffmpeg } = require('./lib/deps');
+const { launchBrowser, ffmpeg, threeDir } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
@@ -16,8 +16,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   const page = await browser.newPage();
   page.on('pageerror', (e) => console.error('page error:', e.message));
   // Offline fallback: serve three.js CDN URLs from a local node_modules/three if one exists
-  const localThree = [process.cwd(), path.dirname(path.resolve(input)), __dirname, ...(process.env.NODE_PATH || '').split(':')]
-    .map((d) => path.join(d, d.endsWith('node_modules') ? 'three' : 'node_modules/three')).find((d) => fs.existsSync(d));
+  const localThree = threeDir();
   if (localThree) await page.route(/cdn\.jsdelivr\.net\/npm\/three@[^/]+\/(.*)/, (route) => {
     const rel = route.request().url().match(/three@[^/]+\/(.*)/)[1];
     const f = path.join(localThree, rel);
