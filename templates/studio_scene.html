@@ -278,7 +278,8 @@ function applyLook(name, set) {
   rim.color.set(L.rim[0]); rim.intensity = L.rim[1]; rim2.color.set(L.rim2[0]); rim2.intensity = L.rim2[1];
   scene.environmentIntensity = L.env; renderer.toneMappingExposure = L.exposure;
   scene.fog = L.fog ? new THREE.FogExp2(L.fog[0], L.fog[1]) : (set.type === 'outdoor' ? new THREE.FogExp2('#c9d8e6', 0.012) : null);
-  const top = set.type === 'outdoor' ? '#5f93d6' : (CONFIG.bgTop || L.bg[0]), bot = set.type === 'outdoor' ? '#cfe0ef' : (CONFIG.bgBottom || L.bg[1]);
+  const tint = (sky, lk) => '#' + new THREE.Color(sky).lerp(new THREE.Color(lk), name === 'clean-cg' ? 0 : 0.6).getHexString();
+  const top = set.type === 'outdoor' ? tint('#5f93d6', L.bg[0]) : (CONFIG.bgTop || L.bg[0]), bot = set.type === 'outdoor' ? tint('#cfe0ef', L.bg[1]) : (CONFIG.bgBottom || L.bg[1]);
   set.sky.material.uniforms.top.value.set(top); set.sky.material.uniforms.bot.value.set(bot);
   set.sky.material.uniforms.sunCol.value.copy(set.sunCol || new THREE.Color(0, 0, 0));
   set.sky.material.uniforms.sun.value.copy(key1.position).normalize();
@@ -631,9 +632,11 @@ void main(){
   vec2 uv = gl_PointCoord - .5; float c = cos(vRot), s = sin(vRot); vec2 r = mat2(c, -s, s, c) * uv;
   vec2 sd = vSeed.xy * 31.;
   vec4 outC;
-  if (uMode == 0) {           // FIRE — noise-eroded, temperature ramp, HDR
-    float d = length(r * vec2(1., 1.25));
-    float n = fbm(r * 3.2 + sd + vec2(0., -vT * 2.5));
+  if (uMode == 0) {           // FIRE — flame tongues: teardrop, domain-warped noise advected upward, temperature ramp
+    float ang = (vSeed.z - .5) * .5; vec2 f = mat2(cos(ang), -sin(ang), sin(ang), cos(ang)) * uv;
+    vec2 w = f + .12 * vec2(fbm(f * 4. + sd + vec2(0., vT * 3.)) - .5, 0.);
+    float d = length(vec2(w.x * (1. + (.5 - w.y) * 1.25), w.y * .85));
+    float n = fbm(vec2(w.x * 3.2, w.y * 2.2 + vT * 3.5) + sd);
     float m = smoothstep(.5, .05, d) * smoothstep(.2, .65, n + (.45 - d) * 1.1 - vT * .45);
     float temp = clamp((1. - vT) * 1.4 * m + n * .25 - .1, 0., 1.);
     vec3 col = temp < .5 ? mix(uColC, uColB, temp * 2.) : mix(uColB, uColA, (temp - .5) * 2.);
@@ -652,7 +655,7 @@ void main(){
   } else if (uMode == 2) {    // SPARK — motion-streaked hot core + glow
     vec2 q = vec2(r.x / (1. + vStretch * uStretchK), r.y);
     float d2 = dot(q, q);
-    float core = exp(-d2 * 140.), glow = exp(-d2 * 22.) * .35;
+    float core = exp(-d2 * 260.), glow = exp(-d2 * 40.) * .18;
     vec3 col = mix(uColA, uColB, vT);
     float a = (core + glow) * pow(1. - vT, 1.5) * uIntensity;
     outC = vec4(col * a, 0.);
@@ -722,7 +725,7 @@ const FXP = {
       colA: '#fff2c8', colB: '#ff7a1a', colC: '#5a0e00', hdr: 1.3, intensity: 0.9, seed: sd + 1 }));
     parts.push(emitter({ mode: 'smoke', count: 170, t0: t + 0.06, t1: t + 0.5, life: [2.6, 4.8], speed: [1.2, 3.4], drag: 1.5, buoy: 0.85, spread: 1, turb: 0.15, size: [0.9, 3.4], shape: [0.4, 0.3, 0.4], scale: s,
       colA: '#77706a', colB: '#16130f', colC: '#ff6a1a', opacity: 0.85, seed: sd + 2 }));
-    parts.push(emitter({ mode: 'spark', count: 240, t0: t, burst: 0.06, life: [0.6, 1.7], speed: [4, 12], drag: 0.7, gravity: 9.8, spread: 1, bounce: 0.35, size: [0.14, 0.08], scale: s,
+    parts.push(emitter({ mode: 'spark', count: 240, t0: t, burst: 0.06, life: [0.6, 1.7], speed: [4, 12], drag: 0.7, gravity: 9.8, spread: 1, bounce: 0.35, size: [0.09, 0.05], scale: s,
       colA: '#fff1c0', colB: '#ff5a10', hdr: 3, stretch: 6, seed: sd + 3 }));
     parts.push(emitter({ mode: 'spark', count: 90, t0: t + 0.1, t1: t + 1.2, life: [1.5, 3.5], speed: [0.5, 2.2], drag: 0.6, buoy: 0.5, gravity: 0.2, turb: 0.45, size: [0.06, 0.04], scale: s,
       colA: '#ffcf70', colB: '#ff3a00', hdr: 4, seed: sd + 4 }));
@@ -765,7 +768,7 @@ const FXP = {
     parts.push(emitter({ mode: 'spark', count: 70, t0: t0 - 2, t1, life: [1.4, 3], speed: [0.3, 1.2], spread: 0.5, buoy: 0.9, turb: 0.7, turbF: 3, size: [0.05, 0.03], scale: s,
       colA: '#ffd48a', colB: '#ff4400', hdr: 4, seed: sd + 3 }));
     const L = new THREE.PointLight('#ff8c3a', 0, 0, 2); L.position.y = 0.6 * s;
-    parts.push({ obj: L, update(lt) { L.intensity = lt < t0 || lt > t1 + 0.3 ? 0 : 40 * s * s * (0.75 + 0.25 * fbm(lt * 9, sd)); } });
+    parts.push({ obj: L, update(lt) { L.intensity = lt < t0 || lt > t1 + 0.3 ? 0 : 16 * s * s * (0.75 + 0.25 * fbm(lt * 9, sd)); } });
     return { parts };
   },
   smoke(f, dur) {
@@ -776,7 +779,7 @@ const FXP = {
   sparks(f) {
     const s = f.scale ?? 1, t = f.t ?? 0;
     return { parts: [emitter({ mode: 'spark', count: f.count ?? 160, t0: t, burst: f.burst ?? 0.08, life: [0.4, 1.3], speed: [3, 8], dir: f.dir || [0, 1, 0], spread: f.spread ?? 0.6, gravity: 9.8, drag: 0.5,
-      bounce: 0.4, size: [0.1, 0.05], scale: s, colA: f.color || '#fff1c0', colB: '#ff5a10', hdr: 5, stretch: 7, seed: f.seed ?? 4 })], shakes: [{ t, amp: 0.25 * s, decay: 0.2 }] };
+      bounce: 0.4, size: [0.06, 0.035], scale: s, colA: f.color || '#ffd890', colB: '#ff4a08', hdr: 4, stretch: 7, seed: f.seed ?? 4 })], shakes: [{ t, amp: 0.25 * s, decay: 0.2 }] };
   },
   magic(f, dur) {
     const s = f.scale ?? 1, t0 = f.start ?? 0, t1 = f.end ?? dur, ca = f.color || '#7ad8ff', cb = f.color2 || '#c27aff', parts = [];
@@ -858,7 +861,7 @@ const FXP = {
           const v = [p.clone().add(side), p.clone().sub(side), q.clone().add(side), q.clone().sub(side)];
           [v[0], v[1], v[2], v[2], v[1], v[3]].forEach((x) => { arr[o++] = x.x; arr[o++] = x.y; arr[o++] = x.z; }); } });
       geo.attributes.position.needsUpdate = true; } },
-      { obj: L, update(lt) { L.intensity = 4000 * flick(lt - t); } }],
+      { obj: L, update(lt) { L.intensity = 1200 * flick(lt - t); } }],
       absolute: true, shakes: [{ t, amp: 0.5, decay: 0.3 }], flashes: [{ t, amp: 0.35 }] };
   },
 };
