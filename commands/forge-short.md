@@ -2,7 +2,7 @@
 description: Make a full vertical 3D story short — script, scenes, QA, on-device render, publish pack
 argument-hint: <premise> [seconds]
 ---
-Use `story-writing`, `viral-3d-shorts`, `realistic-humans`, `custom-animation`,
+Use `story-writing`, `art-direction`, `viral-3d-shorts`, `realistic-humans`, `custom-animation`, `vfx`,
 `quality-review` and `viral-growth`. Premise: $ARGUMENTS
 
 Tool policy: Three.js + Node + ffmpeg only; no Blender/Python unless I said

@@ -2,7 +2,7 @@
 description: Make a long-form 16:9 3D video — chaptered script with twists, scenes, parts render, publish pack
 argument-hint: <topic or premise> [minutes]
 ---
-Use `long-form` with `story-writing`, `realistic-humans`, `custom-animation`,
+Use `long-form` with `story-writing`, `art-direction`, `realistic-humans`, `custom-animation`, `vfx`,
 `quality-review` and `viral-growth`. Premise: $ARGUMENTS
 
 Work silently. Steps: chaptered script (cold open → chapters with mini-cliffhangers →
