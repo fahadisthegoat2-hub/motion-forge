@@ -42,6 +42,9 @@ Add this to `~/.claude/settings.json` (all your sessions on that computer) or to
 
 Say **"Blender/Python allowed"** to unlock the Blender pipeline.
 
+All skills load automatically: a startup hook tells Claude which skills to use for every
+kind of request, so you never have to name them.
+
 ## Render on your device
 Scenes open in Chrome with a **Render on this device** panel: pick Good, High or Epic,
 click Render MP4, and it renders on your GPU and downloads the video.
