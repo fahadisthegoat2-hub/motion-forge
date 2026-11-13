@@ -63,6 +63,15 @@ stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
   cut on action (start the next shot mid-movement).
 - **Hold key poses** ≥ 0.4s so they read on a phone.
 
+## Body language toolkit (template)
+- `gestures: [{ type, start, end, side: right|left|both, amount }]` — `point, handsup, shrug,
+  armsout, fistpump, shield, think, facepalm, wave, lean, slump, scared`. Each has automatic
+  anticipation (counter-move), overshoot (`outBack`), a living hold and a soft settle; they
+  layer on top of any clip. Stack 1–2 per line of dialogue — talking without hands = stiff.
+- Blasts/impacts (`explosion`, `shockwave`) automatically make nearby characters recoil
+  (lean away + head whip + flinch + shock face). Add `shield`/`scared` gestures for the hold.
+- Extra Mixamo motions: `animations/*.fbx` ("Without Skin") → retargeted onto everyone.
+
 ## Workflow
 1. Write a **beat sheet**: time → action → easing → why (intent).
 2. Block key poses (pose-to-pose), check silhouettes.

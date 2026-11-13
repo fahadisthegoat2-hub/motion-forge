@@ -13,6 +13,12 @@ so T-pose and A-pose rigs both work).
 Built-in clips: `idle, walk, run, agree, headshake, sad_pose, sneak_pose` (+ `tpose`).
 User clips: Mixamo FBX in `animations/` → add `'animations/Waving.fbx'` → clip `waving`.
 
+**look** (`CONFIG.look` or per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
+dreamy · horror · golden-hour` — light rig + split-tone grade + bloom + fog + chromatic aberration + grain.
+**set** (`CONFIG.set` or per-shot `shot.set`): `studio` (gradient cyclorama) · `void` (dark glossy floor) ·
+`outdoor` (grass, hills, sky with sun) · `interior` (wood floor, plaster walls, window + light shaft) ·
+`street-night` (wet concrete, buildings with lit windows, street lamp + beam, dust) · `{ url, scale, pos, rotY }` GLB.
+
 ## CAST
 ```js
 hero: { urls: ['characters/hero.glb', 'characters/hero.fbx', LIB + 'readyplayer.me.glb'],
@@ -31,7 +37,10 @@ sheen + warmth, glossy eyes, fabric sheen). `wardrobe` = plain solid clothing co
     look: keys([x,y,z] | 'camera'),                      // head+neck+spine+eyes, spring-smoothed
     face: { smile|shock|worried|sad|angry: keys(0..1) }, // ARKit/RPM morphs, auto-mapped
     talk: [[start, end], ...],                           // mouth flap + speech head-nods
-  } } }
+    gestures: [{ type, start, end, side?, amount? }],    // point handsup shrug armsout fistpump shield think facepalm wave lean slump scared
+  } },
+  fx: [{ type, t | start/end, pos, scale, ... }],        // see skills/vfx — explosion fire smoke sparks magic lightning shockwave beam dust embers rain snow splash
+  look?, set?, flash? }
 ```
 **keys** = `[[time, value, ease?], ...]` in shot-local seconds. Eases: `linear inSine outSine
 inOutSine inCubic outCubic inOutCubic outExpo inOutExpo outBack outElastic spring`.

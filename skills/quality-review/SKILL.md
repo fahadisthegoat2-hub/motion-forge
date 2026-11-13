@@ -26,6 +26,11 @@ colors match style bible · skin not plastic, eyes have catchlights · text insi
 legible at phone size.
 **Motion**: no stiff shots (something changes every ~1s; look/face/talk layered on clips) · no foot skating (walk ≈1.45 m/s, run ≈2.57 m/s) · no instant turns/snaps · eyes alive (look targets change) · no Xbot/mannequin used as a person · no linear easing on organic motion · no pops/snaps between frames · arcs ·
 overlap/secondary motion · holds long enough to read · camera moves motivated.
+**VFX**: every effect layered (core + smoke/sparks/debris + light + shake + reaction) · no
+white-out frames (bloom not washing the screen) · no plain shapes · effects lit the scene ·
+smoke dissipates slowly, never pops off.
+**Taste**: look matches mood · motivated light + rim on hero · ≤2 saturated colors · framing
+varies shot to shot · at least one signature touch · would pass as a studio short.
 **Story** (shorts): hook in ≤2s · re-hook every 5–8s · climax lands · twist is fair
 (clue planted) · ending loops to opening · captions match VO timing.
 **Publish**: title/desc/tags present and honest (no misleading claims).

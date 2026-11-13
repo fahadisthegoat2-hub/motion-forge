@@ -36,6 +36,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 - Facts must be accurate; label dramatizations.
 
 ## Production
+- Always apply `art-direction` (look brief, per-shot `look`/`set`; vary sets across chapters) and `vfx` for action beats; study `references/` (images + videos) with `reference-learning` first if present.
 - **Format**: 16:9 — set `CONFIG.width = 1920, CONFIG.height = 1080` in
   `${CLAUDE_PLUGIN_ROOT}/templates/studio_scene.html` (Epic = 2560×1440). Use wider lenses
   for establishing shots, real environments (not only studio backdrop) — see `realistic-humans`.

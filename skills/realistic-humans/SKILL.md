@@ -46,6 +46,15 @@ wardrobe colors). Extra motions: Mixamo FBX "Without Skin" in `animations/`.
 - Micro-asymmetry (brows, mouth corners); never perfectly symmetric poses.
 - Expression = brows + eyelids + mouth corners together. Push it 20–30% for comedy/drama.
 
+## Detail pass (hair, brows, eyes — "sculpted", not plastic)
+- The template auto-upgrades hair/brows/lashes/beards: anisotropic highlight band, soft
+  sheen, alpha-to-coverage edges (no jagged cards). Pick characters whose hair is modelled
+  in clumps (Avaturn styles) — clumped silhouettes read "sculpted".
+- Eyes: glossy clearcoat cornea + catchlight from the key; keep key light in front-side so
+  both eyes catch it; saccades + blinks are automatic.
+- Faces read at phone size: light from 30–45° above/side (short-side lighting), rim on hair.
+- Close-ups (fov 20–26): add `dust` in front for depth; bokeh focus is auto on the hero's head.
+
 ## Clothing
 Fabric with sheen 0.3–0.6, weave normal map, cloth sim or sculpted folds at joints,
 contact shadows where shirt meets body. Saturated solid colors read best on mobile.

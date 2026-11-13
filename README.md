@@ -1,8 +1,10 @@
 # Motion Video — Claude Code plugin
 
-Viral 3D story shorts, realistic humans and sets, twist-driven scripts, reference style
-learning, custom animation, motion graphics, on-device rendering (Good / High / Epic),
-and growth packs (titles, descriptions, tags).
+Turns any idea into a finished **3D animated short or long video**: twist-driven scripts,
+semi-real characters with living animation (auto-retargeted Mixamo clips, gestures, eyes,
+breathing, foot-locked walks), cinema-grade VFX (explosions, fire, smoke, lightning, magic,
+weather, light shafts), 8 film looks, real environments, reference image & video study,
+quality review, on-device rendering (Good / High / Epic) and growth packs.
 
 ## Install (any computer, any session)
 You need **Node.js** (nodejs.org → LTS) and **Google Chrome**. Everything else downloads
@@ -45,6 +47,11 @@ Say **"Blender/Python allowed"** to unlock the Blender pipeline.
 
 All skills load automatically: a startup hook tells Claude which skills to use for every
 kind of request, so you never have to name them.
+
+## Your folders (upload on iPad: GitHub → Add file → Upload files)
+- `characters/` — your people (Avaturn GLB best, Mixamo FBX ok)
+- `animations/` — extra Mixamo moves (FBX, Without Skin)
+- `references/` — images or videos to learn a style from
 
 ## Render on your device
 Scenes open in Chrome with a **Render on this device** panel: pick Good, High or Epic,

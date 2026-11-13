@@ -1,6 +1,6 @@
 ---
 name: reference-learning
-description: Study reference images (screenshots, concept art, renders, film stills, UI shots) and distill them into a reusable "style bible" that drives later 3D, animation and motion work. Use whenever the user shares reference images, says "make it look like this", "match this style", "learn from these", or asks to analyze art direction.
+description: Study reference images AND videos (screenshots, concept art, renders, film stills, clips, other creators' shorts) and distill them into a reusable "style bible" that drives later 3D, animation and motion work. Use whenever the user shares reference images, says "make it look like this", "match this style", "learn from these", or asks to analyze art direction.
 ---
 
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need (playwright-core, ffmpeg) on first run — don't install these by hand. **Do NOT install or run Blender or Python** (no `pip`, no `bpy`, no `blender`) unless the user has explicitly said "Blender/Python allowed" in this conversation.
@@ -18,8 +18,23 @@ description: Study reference images (screenshots, concept art, renders, film sti
 Goal: don't copy the reference. **Extract the rules that produced it**, then extrapolate
 further than the reference shows (other angles, motion, states, lighting conditions).
 
+Where references live: images attached in chat, or files in the repo's `references/` folder
+(images or videos). Always check `references/` and `.motion-forge/styles/` first.
+
 ## 1. Measure (objective)
-Run the palette/value analyzer on every image:
+**Videos** — run the video analyzer first:
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/analyze_video.js references/clip.mp4
+```
+It returns: cuts and every shot's start/length, average shot length, cuts per minute, cuts
+in the first 3s (hook speed), per-second motion-energy curve, audio hit times + estimated
+BPM, per-shot palette/key/temperature, and a **contact sheet** (one frame per shot) — view
+it with Read, then view 3–6 individual `shot_NN.jpg` frames that matter (hook, climax, twist).
+From a video, learn the **edit rhythm** (shot lengths, where cuts land vs audio hits), the
+**camera language** (push-ins, whips, static, handheld), **pacing curve** (motion energy
+over time), **caption style**, and **story beats** (when hook/escalation/twist happen).
+
+**Images** — run the palette/value analyzer on every image:
 ```bash
 node ${CLAUDE_PLUGIN_ROOT}/scripts/analyze_reference.js path/to/img1.png path/to/img2.jpg
 ```
@@ -57,6 +72,8 @@ Sources: <files>
 ## Form rules     (bevels, proportions, silhouette)
 ## Camera         (fov, height, DoF, moves allowed)
 ## Motion personality (easing curves, durations, overshoot, stagger)
+## Edit rhythm    (from videos: ASL, cuts/min, hook cuts, cut-on-beat?, pacing curve)
+## Engine mapping (CONFIG.look closest preset + overrides, sets, fx habits, gestures, caption style)
 ## Do / Don't     (anti-rules)
 ## Three.js preset (paste-ready code constants)
 ```

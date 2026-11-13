@@ -1,7 +1,19 @@
 {
   "name": "motion-video",
-  "version": "0.4.0",
-  "description": "3D visuals, ultra-realistic humans and sets (Blender), viral 3D story shorts with twist-driven scripts, reference style learning, animation and motion graphics. Builds Three.js scenes, learns reusable style bibles from reference images, and renders frame-perfect MP4s.",
-  "keywords": ["3d", "threejs", "animation", "motion-graphics", "gsap", "reference", "style"],
+  "version": "0.5.0",
+  "description": "Turns any idea into a finished 3D animated short or long video: twist scripts, living semi-real characters, cinema-grade VFX, film looks, real sets, reference image/video study, QA, on-device rendering and growth packs.",
+  "keywords": [
+    "3d",
+    "threejs",
+    "animation",
+    "motion-graphics",
+    "gsap",
+    "reference",
+    "style",
+    "vfx",
+    "explosions",
+    "shorts",
+    "storytelling"
+  ],
   "license": "MIT"
 }

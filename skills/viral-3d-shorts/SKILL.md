@@ -41,6 +41,7 @@ copy a creator's logo, name, intro, or recurring characters onto shirts or title
 
 ## Production
 - Scene format: `${CLAUDE_PLUGIN_ROOT}/templates/SCENE_API.md` (CAST / SHOTS / CAPTIONS, auto life layer). pipeline
+Always apply `art-direction` (look brief, per-shot `look`/`set`) and `vfx` for any action beat; study `references/` (images + videos) with `reference-learning` first if present.
 1. Script with the `story-writing` skill (hook → escalation → climax → twist).
 2. Turn the script into a **shot list** (shot #, duration, framing, camera move, action,
    expression, VO line, SFX).

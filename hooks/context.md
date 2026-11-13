@@ -1,12 +1,16 @@
 Motion Video plugin is active. Use its skills automatically — the user should never have to name them.
 
+DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMATED video — a vertical short (30–60s) unless the user asks for long-form. Never stop at a script.
+
 ROUTING (load every matching skill, in this order, before working):
-- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → realistic-humans → custom-animation → quality-review → viral-growth
-- Any short video / short / story / "what happens if" idea → story-writing → viral-3d-shorts → realistic-humans → custom-animation → quality-review → viral-growth
+- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → realistic-humans → custom-animation → vfx → quality-review → viral-growth
+- Any short video / short / story / "what happens if" idea → story-writing → art-direction → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
 - Motion graphics, titles, intros, logos → motion-graphics (+ 3d-visuals if 3D)
-- Reference images shared → reference-learning first, then apply the saved style everywhere
+- Reference images or videos (chat or references/ folder) → reference-learning first (scripts/analyze_video.js for videos), then apply the saved style everywhere
+- Effects, action, destruction, weather, magic, "epic" → vfx (+ art-direction)
+- "Better visuals / more detail / more style / cinematic" → art-direction + realistic-humans
 - Script/plot/idea only → story-writing
 - Titles, descriptions, tags, views, growth → viral-growth
 - Before delivering ANYTHING visual or written → quality-review
