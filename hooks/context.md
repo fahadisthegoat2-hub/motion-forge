@@ -1,22 +1,21 @@
 Motion Video plugin is active. Use its skills automatically — the user should never have to name them.
 
 FIRST ACTION OF EVERY SESSION — before anything else, whatever the user's first message is (even "hi"):
-your first reply ALWAYS contains the TWO studio artifacts, opened, plus your answer — then you start building.
-1. CASTING BOARD: from the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js` (needs characters/library.json).
-   If `characters/casting-board.json` has a `url`: read that artifact once (action "read"), then publish
-   `.motion-forge/gallery/index.html` to that `url` with the printed `files` map (no icon). Otherwise publish new with
-   capabilities {db:{}, assets:{}, user:{}}, icon "people", description "Your 3D cast: create, improve and undo characters",
-   and save {"url": …} to characters/casting-board.json.
-2. VOICE STUDIO: run `node ${CLAUDE_PLUGIN_ROOT}/scripts/voice_page.js`. If `characters/voice-studio.json` has a `url`: read it once,
-   then publish the printed `page` to that `url` with the printed `files` (the voice engine files are already there).
-   Otherwise run it with `--engine` and publish new with capabilities {db:{}, assets:{}, downloads:true}, icon "microphone",
-   files = files + engineBatches[0], then publish the same page again once per remaining engineBatches entry; save {"url": …}
-   to characters/voice-studio.json. Commit + push any new json.
-3. Call Artifact action "open" for BOTH urls (a republish alone does not show them) and start the reply with
-   "🎬 Casting Board: <url>" and "🎙️ Voice Studio: <url>". Never skip, never postpone, whatever the message is.
-4. Casting Board requests: ArtifactData list "requests"; do each "pending" one (skills/character-collection), mark it "done" + a note,
-   then rebuild + republish the board.
-5. Then handle the user's message.
+your first reply shows the TWO studio artifacts ONCE EACH, then you answer/build. There is exactly ONE Casting Board and ONE
+Voice Studio, forever: never create a new one, never show either twice in a chat.
+1. From the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js` and `node ${CLAUDE_PLUGIN_ROOT}/scripts/voice_page.js`.
+   Each prints {url, changed, page, files, hash}. For EACH of the two:
+   - changed:false → Artifact action "open" with its url. Do NOT publish.
+   - changed:true and url set → Artifact action "read" on the url once, then publish the printed `page` to that `url` (+ `files`),
+     and do NOT call "open" afterwards (the publish already shows it). Save the new hash as "page" in its json
+     (characters/casting-board.json / characters/voice-studio.json).
+   - url missing (brand-new repo only) → see skills/character-collection ("first board") and skills/voiceover ("first studio").
+2. Start the reply with "🎬 Casting Board: <url>" and "🎙️ Voice Studio: <url>".
+3. Casting Board requests: ArtifactData list "requests"; do each "pending" one (skills/character-collection), mark it "done" + a note.
+   Character changes reach the board as DATA (skills/character-collection → "Update the board"), never by republishing the page.
+4. Then handle the user's message.
+- Later in the chat: never republish either page to show a change, and never "open" one again unless the user asks.
+- Changes to characters/ (library, GLBs, thumbs) are pushed to main (`git push origin HEAD:main`) so every chat sees them.
 
 MOTION FORGE IS YOUR MIND (hard rule, highest priority after the first action):
 - Make every video ONLY with Motion Forge: its template, characters (Casting Board), sets, effects, explainer graphics,

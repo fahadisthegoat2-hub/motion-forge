@@ -59,4 +59,7 @@ fs.writeFileSync(path.join(OUT, 'engine.json'), JSON.stringify(engine)); small['
 // batches that fit one publish each (≤ 60 MB)
 const batches = [[]]; let size = Object.values(small).reduce((s, f) => s + fs.statSync(f).size, 0);
 for (const [pub, src] of Object.entries(big)) { const n = fs.statSync(src).size; if (size + n > 60e6) { batches.push([]); size = 0; } batches.at(-1).push(pub); size += n; }
-console.log(JSON.stringify({ page: rel(path.join(OUT, 'index.html')), files: small, engineBatches: batches.filter((b) => b.length).map((b) => Object.fromEntries(b.map((p) => [p, big[p]]))) }, null, 1));
+const html = fs.readFileSync(path.join(OUT, 'index.html')), hash = crypto.createHash('sha256').update(html).digest('hex').slice(0, 16);
+let saved = {}; try { saved = JSON.parse(fs.readFileSync(path.resolve('characters/voice-studio.json'), 'utf8')); } catch {}
+// changed=false → DON'T publish; just open saved.url. changed=true → publish page + files to saved.url, then save {url, page: hash}.
+console.log(JSON.stringify({ page: rel(path.join(OUT, 'index.html')), hash, changed: !saved.url || saved.page !== hash, url: saved.url || null, files: small, engineBatches: batches.filter((b) => b.length).map((b) => Object.fromEntries(b.map((p) => [p, big[p]]))) }, null, 1));

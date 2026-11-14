@@ -2,17 +2,10 @@
 // Build the interactive Casting Board artifact page from characters/library.json.
 // Writes .motion-forge/gallery/index.html + thumbs/, and prints the `files` map to publish with the Artifact tool.
 // Run from the project root: node gallery_page.js
-const fs = require('fs'), path = require('path');
-const ROOT = process.cwd(), lib = JSON.parse(fs.readFileSync(path.join(ROOT, 'characters', 'library.json'), 'utf8'));
-const OUT = path.join(ROOT, '.motion-forge', 'gallery'); fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(path.join(OUT, 'thumbs'), { recursive: true });
-const files = {}, cast = [];
-for (const [id, c] of Object.entries(lib.characters || {})) {
-  const v = c.version || 1, src = path.join(ROOT, 'characters', 'thumbs', id + '.jpg'), rel = `thumbs/${id}-v${v}.jpg`;
-  if (fs.existsSync(src)) { fs.copyFileSync(src, path.join(OUT, rel)); files[rel] = path.relative(ROOT, path.join(OUT, rel)); }
-  const hist = (lib.history || {})[id] || [];
-  cast.push({ id, name: c.name || id, about: c.about || '', height: c.height || null, version: v, photo: fs.existsSync(src) ? rel : null, undoTo: hist.length ? hist[hist.length - 1].version : null });
-}
-const DATA = JSON.stringify({ cast, updated: new Date().toISOString().slice(0, 16).replace('T', ' ') }).replace(/</g, '\\u003c');
+const fs = require('fs'), path = require('path'), crypto = require('crypto');
+// The page is STATIC: the cast lives in the board's database (collection "cast"), written by scripts/board_data.js + ArtifactData,
+// so improvements show up live without republishing (no new artifact cards). Republish only when this page's code changes.
+const ROOT = process.cwd(), OUT = path.join(ROOT, '.motion-forge', 'gallery'); fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
 const html = `<title>Casting Board</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
@@ -68,11 +61,12 @@ button:disabled { opacity: .55; cursor: default; }
   <section aria-labelledby="logh" style="display:grid;gap:10px"><h2 id="logh">Requests</h2><div class="log" id="log"><p class="sub">Requests you send appear here, with Claude's progress.</p></div></section>
 </div>
 <script>
-const DATA = ${DATA};
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-$('#meta').textContent = DATA.cast.length + ' characters · updated ' + DATA.updated;
-$('#grid').innerHTML = DATA.cast.map((c) => \`
+const renderCast = (cast) => {
+$('#meta').textContent = cast.length + ' characters';
+if (!cast.length) { $('#grid').innerHTML = '<p class="sub">No characters yet. Describe one above and Claude builds it.</p>'; return; }
+$('#grid').innerHTML = cast.map((c) => \`
   <article class="card" id="c-\${esc(c.id)}">
     \${c.photo ? \`<img class="photo" src="\${esc(c.photo)}" alt="\${esc(c.name)}, portrait and full body">\` : '<div class="noph">Photo coming</div>'}
     <div class="body">
@@ -86,6 +80,8 @@ $('#grid').innerHTML = DATA.cast.map((c) => \`
       <div class="toast" id="msg-\${esc(c.id)}" role="status"></div>
     </div>
   </article>\`).join('');
+};
+$('#grid').innerHTML = '<p class="sub">Loading the cast…</p>';
 let db = null, assets = null, ready = false;
 const say = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
 const uploadRef = async (file, msgId) => {   // optional reference photo → the board's own asset store
@@ -125,7 +121,9 @@ const renderLog = (rows) => {
 (async () => {
   if (!window.claude?.use) return;
   [db, assets] = await Promise.all([window.claude.use('db'), window.claude.use('assets')]);
-  if (!db) return;
+  if (!db) { $('#grid').innerHTML = '<p class="sub">Open this page on claude.ai (signed in) to see the cast.</p>'; return; }
+  db.collection('cast').orderBy('order').limit(200).onSnapshot((snap) => renderCast(snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) })).filter((c) => !c.hidden)),
+    () => { $('#grid').innerHTML = '<p class="sub">Could not load the cast. Reload the page to try again.</p>'; });
   const timer = setTimeout(() => { if (!ready) $('#log').innerHTML = '<p class="sub">Requests are taking a while to load. They will appear when the connection settles.</p>'; }, 10000);
   db.collection('requests').orderBy('at', 'desc').limit(30).onSnapshot((snap) => { ready = true; clearTimeout(timer); renderLog(snap.docs.map((d) => d.data() || {})); },
     (e) => { clearTimeout(timer); $('#log').innerHTML = '<p class="sub">Could not load requests (' + esc(e?.code || 'error') + '). Reload the page to try again.</p>'; });
@@ -133,5 +131,7 @@ const renderLog = (rows) => {
 </script>
 `;
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
-fs.writeFileSync(path.join(OUT, 'files.json'), JSON.stringify(files, null, 2));
-console.log(JSON.stringify({ page: path.relative(ROOT, path.join(OUT, 'index.html')), files }, null, 1));
+const hash = crypto.createHash('sha256').update(html).digest('hex').slice(0, 16);
+let saved = {}; try { saved = JSON.parse(fs.readFileSync(path.join(ROOT, 'characters', 'casting-board.json'), 'utf8')); } catch {}
+// changed=false → DON'T publish; just open saved.url. changed=true → publish to saved.url, then save {url, page: hash}.
+console.log(JSON.stringify({ page: path.relative(ROOT, path.join(OUT, 'index.html')), files: {}, hash, changed: !saved.url || saved.page !== hash, url: saved.url || null }, null, 1));

@@ -17,11 +17,11 @@ Lives in the project repo (persists across sessions):
 
 Scripts (run from the project root; `S=${CLAUDE_PLUGIN_ROOT}/scripts`):
 `node $S/build_character.js <id>` · `node $S/character_card.js <id> --fast` · `node $S/character_version.js archive|undo|list <id>` ·
-`node $S/gallery_page.js` (then publish the board — see the session-start steps in the hook).
+then update the board (below).
 
 ## Processing Casting Board requests (ArtifactData collection `requests`)
 Each pending doc: `{ type: create|improve|undo, character?, text, ref?: {id,url} }`. After finishing one, `update` it with
-`status: "done", note: "<one line>"`. Then rebuild + republish the board once at the end, and commit + push `characters/` (+ `references/`).
+`status: "done", note: "<one line>"`. Then update the board (below) and commit + push `characters/` (+ `references/`) to main: `git push origin HEAD:main`.
 
 ### create
 1. Read `text`. If `ref` exists, fetch the photo from the board's assets (Artifact `read` with `path: ref.id`), save it as
@@ -52,3 +52,17 @@ Ask who stars (names from the board) unless the user already named them. Use `{ 
 - Never build people, clothes, hair or faces from primitives — only MakeHuman builds or uploaded models.
 - Keep ids unique; improve instead of making near-duplicates.
 - Be honest in notes about anything that couldn't be matched exactly.
+
+## Update the board (live data — never republish the page)
+The Casting Board page is static; its cards come from the board database (collection `cast`).
+1. ArtifactData `list` collection `cast` with `out_dir: .motion-forge/castdb`.
+2. `node $S/board_data.js --db .motion-forge/castdb/cast` → one entry per character (`changed`, `needsPhoto`, `thumb`, `doc`, or `remove`).
+3. Entries with `needsPhoto`: upload all their `thumb` files in ONE Artifact call { url, asset: true, file_paths: [...] } and set each
+   `doc.photo` to the returned url ("/_blob/<id>").
+4. One ArtifactData `batch`: `set` cast/<id> with `doc` for every changed entry (`delete` for `remove`; pin `if_version` from step 1 for existing docs).
+The open board updates by itself. No publish, no open.
+
+## First board / first studio (only when characters/casting-board.json or voice-studio.json has no url)
+Board: publish `.motion-forge/gallery/index.html` new with capabilities {db:{}, assets:{}, user:{}}, icon "people", then "Update the board".
+Studio: `node $S/voice_page.js --engine` → publish `page` new with capabilities {db:{}, assets:{}, downloads:true}, icon "microphone",
+files = files + engineBatches[0]; publish the same page again per remaining engineBatches entry. Save {url, page: hash} to the json.
