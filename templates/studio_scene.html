@@ -275,7 +275,7 @@ const ENV = {
     const leafMat = windify(new THREE.MeshStandardMaterial({ map: leafAtlas(), alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.62, alphaToCoverage: true }), 0.06);
     const scatter = (geo, count, rMin, rMax, sMin, sMax, seed) => { const m = new THREE.InstancedMesh(geo, leafMat, count), M = new THREE.Matrix4();
       for (let i = 0; i < count; i++) { const a = hash(i + seed) * 6.283, r = rMin + Math.sqrt(hash(i * 3 + seed)) * (rMax - rMin), z = Math.sin(a) * r - (hash(i * 7 + seed) < .6 ? 2 : 0), x = Math.cos(a) * r;
-        if (Math.hypot(x, z) < 2.6 || (Math.abs(z) < 1.3 && Math.abs(x) < 4.5) || (Math.abs(x) < 1.6 && z > 0 && z < 6)) continue;   // keep acting area + camera lane clear const sc = sMin + hash(i * 5 + seed) * (sMax - sMin);
+        if (Math.hypot(x, z) < 2.6 || (Math.abs(z) < 1.3 && Math.abs(x) < 4.5) || (Math.abs(x) < 1.6 && z > 0 && z < 6)) continue;   /* keep acting area + camera lane clear */ const sc = sMin + hash(i * 5 + seed) * (sMax - sMin);
         m.setMatrixAt(i, M.compose(new THREE.Vector3(x, 0, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, hash(i * 9 + seed) * 6.28, 0)), new THREE.Vector3(sc, sc, sc))); }
       m.castShadow = true; m.receiveShadow = true; g.add(m); };
     scatter(plantGeo(3, 9, 0.35, 0.9, 0.9, 0.4, 2), 140, 1.2, 14, 0.6, 1.4, 11);    // ferns
