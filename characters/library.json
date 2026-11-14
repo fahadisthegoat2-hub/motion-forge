@@ -172,6 +172,36 @@
     "brows": "eyebrow008",
     "irisColour": "#2b1c12"
    }
+  },
+  "kofi": {
+   "name": "Kofi",
+   "file": "characters/kofi.glb",
+   "version": 1,
+   "about": "Kwame's little brother · teen · slim · short crop · tee",
+   "height": 1.62,
+   "make": {
+    "gender": 1,
+    "age": 0.27,
+    "african": 1,
+    "asian": 0,
+    "caucasian": 0,
+    "tone": 0.85,
+    "weight": 0.35,
+    "muscle": 0.3,
+    "height": 0.3,
+    "outfit": "none",
+    "top": "elvs_crude_t-shirt_male",
+    "bottom": "cortu_cargo_pants",
+    "shoes": "shoes02",
+    "hair": "short04",
+    "brows": "eyebrow001",
+    "irisColour": "#24160e"
+   },
+   "wardrobe": {
+    "top": "#c9a24a",
+    "bottom": "#3a3f2c"
+   },
+   "hair": "#120c08"
   }
  },
  "history": {
