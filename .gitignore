@@ -2,3 +2,5 @@
 .motion-forge/gallery.html
 .motion-forge/gallery/
 motion-video-plugin*.zip
+scenes/**/*.glb
+scenes/**/*.glb.txt
