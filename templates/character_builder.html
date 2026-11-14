@@ -1,0 +1,19 @@
+<!doctype html>
+<!-- Motion Video character builder: MakeHuman (CC0) characters → rigged, dressed GLB, fully offline.
+     Driven by scripts/build_character.js (headless) — window.buildGlb(character) returns base64 GLB. -->
+<meta charset="utf-8"><title>Character Builder</title>
+<script type="module">
+import { exportCharacterGlb, loadHumanPack } from '../vendor/dramatis-builder.mjs';
+const base = new URL('../assets/makehuman/', import.meta.url).href;
+const local = (url) => { const u = String(url), m = u.match(/makehuman\/hm08\/([^?#]+)/), e = u.match(/tonio\/eyes\/([^?#]+)/);
+  return m ? base + 'hm08/' + m[1] : e ? base + 'eyes/' + e[1] : u; };
+const fetcher = async (url) => { const r = await fetch(local(url)); if (!r.ok) throw new Error(r.status + ' ' + url); return r.arrayBuffer(); };
+let packP = null;
+window.buildGlb = async (character, opts = {}) => {
+  packP ??= loadHumanPack(base + 'hm08/hm08.json', fetcher);
+  const bytes = await exportCharacterGlb(character, await packP, { naming: 'ue', fetch: fetcher, ...opts });
+  let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+window.__builderReady = true;
+</script>

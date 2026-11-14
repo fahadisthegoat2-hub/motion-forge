@@ -1,11 +1,158 @@
 {
   "characters": {
-    "jake":   { "name": "Jake",   "actor": "jake",   "about": "everyday guy · short brown hair", "height": 1.80, "wardrobe": { "top": "#2e6bd6", "bottom": "#23262d" } },
-    "marcus": { "name": "Marcus", "actor": "marcus", "about": "big build · work overalls", "height": 1.86, "wardrobe": { "top": "#c8692b", "bottom": "#c8692b" } },
-    "leo":    { "name": "Leo",    "actor": "jake",   "about": "tall · dark skin · black hair · red top", "height": 1.84, "skin": "dark", "hair": "#0d0a08", "wardrobe": { "top": "#c8352b", "bottom": "#1d2a3a" } },
-    "omar":   { "name": "Omar",   "actor": "jake",   "about": "brown skin · black hair · cream top", "height": 1.76, "skin": "brown", "hair": "#120d0a", "wardrobe": { "top": "#e9e4d8", "bottom": "#3b4a5c" } },
-    "kenji":  { "name": "Kenji",  "actor": "jake",   "about": "slim · light skin · black hair · all black", "height": 1.72, "skin": "light", "hair": "#090909", "build": { "width": 0.95 }, "wardrobe": { "top": "#262a31", "bottom": "#262a31" } },
-    "sam":    { "name": "Sam",    "actor": "marcus", "about": "big · pale · ginger hair · blue overalls", "height": 1.88, "skin": "pale", "hair": "#8a4a22", "wardrobe": { "top": "#2f5d8a", "bottom": "#2f5d8a" } },
-    "tony":   { "name": "Tony",   "actor": "marcus", "about": "stocky · tan skin · brown work suit", "height": 1.79, "skin": "tan", "hair": "#2a1b12", "build": { "width": 1.05 }, "wardrobe": { "top": "#5b4636", "bottom": "#5b4636" } }
-  }
+    "jake": {
+      "name": "Jake",
+      "actor": "jake",
+      "version": 1,
+      "about": "everyday guy · short brown hair · casual top",
+      "height": 1.8,
+      "wardrobe": {
+        "top": "#2e6bd6",
+        "bottom": "#23262d"
+      }
+    },
+    "marcus": {
+      "name": "Marcus",
+      "actor": "marcus",
+      "version": 1,
+      "about": "big build · work overalls",
+      "height": 1.86
+    },
+    "dev": {
+      "name": "Dev",
+      "file": "characters/dev.glb",
+      "version": 1,
+      "about": "East-Asian · lean · short black hair · tee + jeans",
+      "height": 1.74,
+      "make": {
+        "gender": 1,
+        "age": 0.42,
+        "asian": 0.85,
+        "caucasian": 0.15,
+        "african": 0,
+        "tone": 0.28,
+        "weight": 0.42,
+        "muscle": 0.55,
+        "outfit": "male_casualsuit04",
+        "shoes": "shoes02",
+        "hair": "short04",
+        "brows": "eyebrow006",
+        "irisColour": "#2e1f14"
+      }
+    },
+    "kwame": {
+      "name": "Kwame",
+      "file": "characters/kwame.glb",
+      "version": 1,
+      "about": "African · athletic · afro · field jacket",
+      "height": 1.86,
+      "make": {
+        "gender": 1,
+        "age": 0.4,
+        "african": 1,
+        "asian": 0,
+        "caucasian": 0,
+        "tone": 0.85,
+        "weight": 0.55,
+        "muscle": 0.75,
+        "outfit": "male_casualsuit05",
+        "shoes": "shoes03",
+        "hair": "afro01",
+        "brows": "eyebrow003",
+        "irisColour": "#24160e"
+      }
+    },
+    "marco": {
+      "name": "Marco",
+      "file": "characters/marco.glb",
+      "version": 1,
+      "about": "middle-aged · heavier · slick hair · black suit + tie",
+      "height": 1.78,
+      "make": {
+        "gender": 1,
+        "age": 0.66,
+        "caucasian": 0.9,
+        "african": 0.1,
+        "asian": 0,
+        "tone": 0.3,
+        "weight": 0.72,
+        "muscle": 0.4,
+        "outfit": "male_elegantsuit01",
+        "shoes": "shoes05",
+        "hair": "short01",
+        "brows": "eyebrow010",
+        "irisColour": "#4a6b8a"
+      }
+    },
+    "walt": {
+      "name": "Walt",
+      "file": "characters/walt.glb",
+      "version": 1,
+      "about": "older man · grey fringe · denim shirt + jeans",
+      "height": 1.72,
+      "make": {
+        "gender": 1,
+        "age": 0.88,
+        "caucasian": 1,
+        "african": 0,
+        "asian": 0,
+        "tone": 0.2,
+        "weight": 0.6,
+        "muscle": 0.3,
+        "outfit": "male_casualsuit01",
+        "shoes": "shoes01",
+        "hair": "short03",
+        "brows": "eyebrow002",
+        "irisColour": "#5f7a5a"
+      },
+      "hair": "#a8a49e"
+    },
+    "ryan": {
+      "name": "Ryan",
+      "file": "characters/ryan.glb",
+      "version": 1,
+      "about": "young · muscular · fisherman sweater + cargo pants",
+      "height": 1.83,
+      "make": {
+        "gender": 1,
+        "age": 0.36,
+        "caucasian": 1,
+        "african": 0,
+        "asian": 0,
+        "tone": 0.25,
+        "weight": 0.5,
+        "muscle": 0.85,
+        "top": "toigo_fisherman_sweater",
+        "bottom": "cortu_cargo_pants",
+        "shoes": "toigo_mj_cloth_shoes",
+        "hair": "short02",
+        "brows": "eyebrow004",
+        "irisColour": "#3d6fa0",
+        "outfit": "none"
+      }
+    },
+    "luis": {
+      "name": "Luis",
+      "file": "characters/luis.glb",
+      "version": 1,
+      "about": "Latino · stocky · dinner suit",
+      "height": 1.73,
+      "make": {
+        "gender": 1,
+        "age": 0.5,
+        "caucasian": 0.55,
+        "african": 0.15,
+        "asian": 0.3,
+        "tone": 0.55,
+        "weight": 0.65,
+        "muscle": 0.55,
+        "outfit": "toigo_suit_with_dinner_jacket",
+        "shoes": "shoes04",
+        "hair": "short02",
+        "brows": "eyebrow008",
+        "irisColour": "#2b1c12"
+      }
+    }
+  },
+  "history": {}
 }

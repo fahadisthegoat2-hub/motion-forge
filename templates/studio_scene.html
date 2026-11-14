@@ -43,7 +43,7 @@ const CONFIG = {
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   // Clip libraries (Mixamo-style rigs). Any clip auto-retargets onto any humanoid in CAST.
   // Add your own Mixamo FBX files here, e.g. 'animations/Waving.fbx' → clip name 'waving'.
-  animations: [kit('animations/ual-starter.glb'), LIB + 'Xbot.glb', LIB + 'Soldier.glb', LIB + 'Michelle.glb'],
+  animations: [LIB + 'Xbot.glb', kit('animations/ual-starter.glb'), LIB + 'Soldier.glb', LIB + 'Michelle.glb'],   // first library wins a name: relaxed Xbot idle/walk/run; UAL adds jog/sprint/dance/crouch
 };
 
 // Characters: first URL that loads wins. Best: your own models in the repo's characters/ folder

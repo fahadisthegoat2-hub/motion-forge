@@ -1,40 +1,53 @@
 ---
 name: character-collection
-description: The user's cast of reusable 3D characters — show the collection as a photo gallery before every video so the user picks who stars, and create new characters from a reference photo and add them to the collection. Use at the start of any video/short request (unless the user already named the cast), when the user asks to see characters/models/cast, or asks for a new character, person, actor or model.
+description: The user's cast of reusable 3D characters, managed on the Casting Board artifact — create genuinely new characters (MakeHuman CC0, different faces/bodies/hair/outfits) from a description and/or reference photo, improve existing ones (head shape, eyes, looks, clothes — all in one prompt), and undo improvements forever. Use at the start of every session (Casting Board), before any video (who stars), and whenever the user mentions characters, cast, models, actors, "new character", "improve", "undo" or "check the casting board".
 ---
 
 > **Tool policy:** Three.js in Chrome, Node, ffmpeg only. Never Blender/Python unless the user said "Blender/Python allowed".
-> **Efficiency:** one gallery image, one short question, no essays.
+> **Efficiency:** batch tool calls, short messages; the Casting Board shows the results.
 
-# Character collection
+# Character collection (Casting Board)
 
-The collection lives in the project repo so it persists across sessions:
-- `characters/library.json` — every character: `name, actor | file, about, height, skin, hair, wardrobe {top,bottom,shoes}, build {width, head}, ref`
-- `characters/thumbs/<id>.jpg` — photo card (portrait + full body)
-- `characters/gallery.jpg` — the whole cast on one sheet
-- `references/characters/<id>.jpg` — the reference photo a character was made from
+Lives in the project repo (persists across sessions):
+- `characters/library.json` — `characters.<id>` = current version: `name, about, height, version, file | actor, make (recipe), wardrobe, hair, skin, build, ref`;
+  `history.<id>` = every older version (entry + glb + photo), kept forever for undo.
+- `characters/<id>.glb` (built characters) · `characters/thumbs/<id>.jpg` (photo card) · `characters/history/<id>/…` · `references/characters/<id>.*`
+- `characters/KIT.md` — every recipe option (body, face, hair, brows, outfits).
+- `characters/casting-board.json` — the Casting Board artifact URL.
 
-## Before every video (unless the user already chose)
-1. If any character lacks a card, render it: `node ${CLAUDE_PLUGIN_ROOT}/scripts/character_card.js <id> --fast`
-2. Build the sheet: `node ${CLAUDE_PLUGIN_ROOT}/scripts/character_gallery.js`
-3. Show `characters/gallery.jpg` to the user (send the file / view it) and ask in ONE line:
-   "Who's in this video? Reply with names — or say **new character** and send a reference photo."
-4. Use the picks in CAST as `{ character: '<id>' }` (cast entries can still override wardrobe etc.).
-   If the user doesn't answer and the request must proceed, pick the best fit and say who you chose.
+Scripts (run from the project root; `S=${CLAUDE_PLUGIN_ROOT}/scripts`):
+`node $S/build_character.js <id>` · `node $S/character_card.js <id> --fast` · `node $S/character_version.js archive|undo|list <id>` ·
+`node $S/gallery_page.js` (then publish the board — see the session-start steps in the hook).
 
-## New character from a reference image
-1. Ask for exactly one thing: "Send a clear photo of the person (face + outfit)." Then wait.
-2. When it arrives: save it to `references/characters/<id>.jpg`, view it, and measure colors:
-   crop the face/hair/top/bottom regions with ffmpeg and run `node ${CLAUDE_PLUGIN_ROOT}/scripts/analyze_reference.js crop.jpg --colors 3`.
-3. Decide the closest match and write a new entry in `characters/library.json`:
-   - `actor`: `jake` (slim/average man) or `marcus` (big/heavy man) — or `file` if the user uploaded a GLB/FBX of the person
-   - `skin` (sampled hex), `hair` (sampled hex), `wardrobe.top/bottom/shoes` (sampled from their outfit), `height` (estimate),
-     `build.width` (0.92 slim … 1.15 broad), `about` (5–8 words), `name` (user's or a fitting one), `ref`.
-4. Render its card, rebuild the gallery, show the new card, then commit + push `characters/` and `references/characters/`
-   so it's saved for every future video.
-5. Be honest in one line: built characters match skin, hair color, clothes, height and build; the face and hairstyle come
-   from the base actor. For an exact face, the user can upload a 3D model of the person (`characters/<id>.glb`, e.g. from Avaturn) and the entry uses `file`.
+## Processing Casting Board requests (ArtifactData collection `requests`)
+Each pending doc: `{ type: create|improve|undo, character?, text, ref?: {id,url} }`. After finishing one, `update` it with
+`status: "done", note: "<one line>"`. Then rebuild + republish the board once at the end, and commit + push `characters/` (+ `references/`).
+
+### create
+1. Read `text`. If `ref` exists, fetch the photo from the board's assets (Artifact `read` with `path: ref.id`), save it as
+   `references/characters/<id>.<ext>`, view it, and sample colors (crop face/hair/clothes with ffmpeg → `scripts/analyze_reference.js crop.jpg --colors 3`).
+2. Write a recipe from KIT.md that matches: gender, age, weight, muscle, ancestry mix (face shape), tone (skin), iris color,
+   hair + brows, outfit or separates, shoes. Pick a short lowercase `id` and a name. Fully clothed outfits only.
+3. Add `characters.<id>` = `{ name, about (6–9 words), height (m), version: 1, file: "characters/<id>.glb", make, wardrobe?, hair?, ref? }`.
+4. `build_character.js <id>` → `character_card.js <id> --fast` → mark done ("Created Nadia: …").
+
+### improve (e.g. "rounder face, bigger green eyes, older, black jacket")
+1. `character_version.js archive <id>` (old version leaves the board but stays in history forever).
+2. Apply ALL requested changes in one pass: edit `make` (face/body sliders, ancestry mix, irisColour, hair, brows, outfit),
+   and/or `wardrobe`/`hair`/`build` (`build.head` for head size). Update `about`.
+   Characters with `actor:` (jake, marcus) have no recipe: for face/body changes, convert them to a built character
+   (write a `make` close to their look, set `file`, drop `actor`).
+3. Rebuild (`build_character.js`) if `make` changed, then `character_card.js <id> --fast`, mark done with what changed.
+4. If something can't be done (e.g. beards aren't in the licence-checked kit), do the rest and say so in the note.
+
+### undo
+`character_version.js undo <id>` → `character_card.js` not needed (the old photo is restored) → mark done. The replaced
+version goes into history too, so an undo can itself be undone.
+
+## Before every video
+Ask who stars (names from the board) unless the user already named them. Use `{ character: '<id>' }` in CAST.
 
 ## Rules
-- Only fully clothed outfits. Never build people, clothes or hair from primitives.
-- Keep the collection tidy: lowercase ids, no duplicates; update a character instead of making near-copies.
+- Never build people, clothes, hair or faces from primitives — only MakeHuman builds or uploaded models.
+- Keep ids unique; improve instead of making near-duplicates.
+- Be honest in notes about anything that couldn't be matched exactly.

@@ -1,9 +1,20 @@
 Motion Video plugin is active. Use its skills automatically — the user should never have to name them.
 
+FIRST ACTION OF EVERY SESSION — before anything else, whatever the user's first message is:
+1. From the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js` (needs characters/library.json; skip silently if absent).
+2. Publish `.motion-forge/gallery/index.html` with the Artifact tool, passing the printed `files` map and
+   capabilities {db:{}, assets:{}, user:{}}. If `characters/casting-board.json` has a `url`: read that artifact once
+   (action "read"), then publish to that `url` (no icon). Otherwise publish new (icon "people", description
+   "Your 3D cast: create, improve and undo characters") and save {"url": …} to characters/casting-board.json, then commit + push it.
+   Open it for the user. This is the Casting Board — always first, always the same artifact.
+3. Load ArtifactData and list collection "requests" on it. For each with status "pending", do it (skills/character-collection),
+   then update that doc: status "done" + a one-line note. Then rebuild + republish the board.
+4. Then handle the user's message.
+
 DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMATED video — a vertical short (30–60s) unless the user asks for long-form. Never stop at a script.
 
 ROUTING (load every matching skill, in this order, before working):
-- Any video/short/long video → FIRST character-collection: show the cast gallery (characters/gallery.jpg) and ask who stars, unless the user already named them. "new character" / a reference photo of a person → character-collection (create + save).
+- Any video/short/long video → FIRST character-collection: the cast is on the Casting Board; ask who stars (unless already named). "new character", "improve <name>", "undo <name>", "check the casting board" → character-collection.
 - Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - Any short video / short / story / "what happens if" idea → story-writing → art-direction → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
@@ -17,12 +28,10 @@ ROUTING (load every matching skill, in this order, before working):
 - Before delivering ANYTHING visual or written → quality-review
 
 ALWAYS:
-- COMPOSE, DON'T INVENT: build every video from templates/studio_scene.html + templates/SCENE_API.md. People = built-in actors (jake, marcus) or the user's characters/ files, restyled with wardrobe/skin/hair. NEVER model people, clothes, t-shirts, hair, faces or foliage from primitives or curves. Sets = built-in kits (jungle, lab, city-day, space, street-night, interior, outdoor, studio, void).
+- COMPOSE, DON'T INVENT: build every video from templates/studio_scene.html + templates/SCENE_API.md. People = Casting Board characters ({ character: '<id>' }). NEVER model people, clothes, t-shirts, hair, faces or foliage from primitives or curves. New people are built with scripts/build_character.js (MakeHuman CC0, offline). Sets = built-in kits.
 - Every shot moves: named camera move, clips + talk (auto gestures) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
-- QA previews in the cloud use --fast; final renders happen on the user's device.
-- 3D people/scenes: copy templates/studio_scene.html and follow templates/SCENE_API.md. Use the user's characters/ folder first. Never stiff: layer clips + look + face + talk, cross-fade everything, feet locked, camera always alive.
-- Reference images are for studying the style ONLY — never paste them onto shirts, textures or props, never copy their logos/text. Rebuild the look with materials, colors and lighting.
-- Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU (~3 min per video-second at 1080p); use cloud renders only for 540p QA previews or if the user asks.
+- Reference images are for studying the style ONLY — never paste them onto shirts, textures or props.
+- Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
-- Tools: Three.js in Chrome, Node, ffmpeg (auto-installed by the scripts). Never install or run Blender or Python unless the user says "Blender/Python allowed".
-- Be credit-efficient: work silently, batch tool calls, one final message.
+- Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
+- Be credit-efficient: work silently, batch tool calls, short messages.
