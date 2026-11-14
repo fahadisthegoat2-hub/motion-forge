@@ -33,9 +33,6 @@ const kit = (p) => KIT.map((b) => b + p);
 const ACTORS = {
   jake:   { file: 'characters/jake.glb',   height: 1.80, about: 'man · button shirt + trousers · short hair' },
   marcus: { file: 'characters/marcus.glb', height: 1.84, about: 'big heavy-set man · work overalls · short hair' },
-  maya:   { file: 'characters/maya.glb',   height: 1.68, about: 'woman · sport top + leggings · long hair' },
-  zoe:    { file: 'characters/zoe.glb',    height: 1.66, about: 'woman · casual jacket + trousers · short hair' },
-  ava:    { file: 'characters/ava.glb',    height: 1.70, about: 'woman · casual suit · ponytail · full ARKit face (best for close-ups/talking)' },
 };
 const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a8714f', brown: '#7c4f35', dark: '#4e3022' };
 
@@ -53,7 +50,7 @@ const CONFIG = {
 // (Avaturn GLB = face + blink/expressions; Mixamo FBX = body). Fallback: sample semi-real man.
 const CAST = {
   hero: {
-    actor: 'jake',                                 // jake · marcus · maya · zoe · ava   (or urls: ['characters/my.glb'])
+    actor: 'jake',                                 // jake · marcus   (or urls: ['characters/my.glb'] for your own)
     height: 1.80,                                  // metres
     wardrobe: { top: '#2e6bd6', bottom: '#20242c', shoes: null },   // recolors keep fabric folds & texture
     skin: null,                                    // pale · light · medium · tan · brown · dark · '#hex'
@@ -278,7 +275,7 @@ const ENV = {
     const leafMat = windify(new THREE.MeshStandardMaterial({ map: leafAtlas(), alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.62, alphaToCoverage: true }), 0.06);
     const scatter = (geo, count, rMin, rMax, sMin, sMax, seed) => { const m = new THREE.InstancedMesh(geo, leafMat, count), M = new THREE.Matrix4();
       for (let i = 0; i < count; i++) { const a = hash(i + seed) * 6.283, r = rMin + Math.sqrt(hash(i * 3 + seed)) * (rMax - rMin), z = Math.sin(a) * r - (hash(i * 7 + seed) < .6 ? 2 : 0), x = Math.cos(a) * r;
-        if (Math.abs(x) < 1.1 && z > -1.2 && z < 3.5) continue; const sc = sMin + hash(i * 5 + seed) * (sMax - sMin);
+        if (Math.hypot(x, z) < 2.6 || (Math.abs(z) < 1.3 && Math.abs(x) < 4.5) || (Math.abs(x) < 1.6 && z > 0 && z < 6)) continue;   // keep acting area + camera lane clear const sc = sMin + hash(i * 5 + seed) * (sMax - sMin);
         m.setMatrixAt(i, M.compose(new THREE.Vector3(x, 0, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, hash(i * 9 + seed) * 6.28, 0)), new THREE.Vector3(sc, sc, sc))); }
       m.castShadow = true; m.receiveShadow = true; g.add(m); };
     scatter(plantGeo(3, 9, 0.35, 0.9, 0.9, 0.4, 2), 140, 1.2, 14, 0.6, 1.4, 11);    // ferns
@@ -302,14 +299,14 @@ const ENV = {
       { type: 'beam', pos: [3, 9, -7], to: [2.2, 0, -3], radius: 1.1, color: '#fff3c4', intensity: 0.22, always: true }, { type: 'dust', always: true, color: '#f4ffd8' }];
   },
   lab(g, set) {
-    set.skyCols = ['#dfe6ea', '#f3f6f7'];
-    const tile = canvasTex(512, (c, s) => { c.fillStyle = '#d9dfe2'; c.fillRect(0, 0, s, s); c.strokeStyle = '#b8c0c4'; c.lineWidth = 3; for (let i = 0; i <= 4; i++) { c.beginPath(); c.moveTo(i * s / 4, 0); c.lineTo(i * s / 4, s); c.moveTo(0, i * s / 4); c.lineTo(s, i * s / 4); c.stroke(); } }, 6);
+    set.skyCols = ['#7d8b93', '#b9c4ca'];
+    const tile = canvasTex(512, (c, s) => { c.fillStyle = '#9aa5ab'; c.fillRect(0, 0, s, s); c.strokeStyle = '#b8c0c4'; c.lineWidth = 3; for (let i = 0; i <= 4; i++) { c.beginPath(); c.moveTo(i * s / 4, 0); c.lineTo(i * s / 4, s); c.moveTo(0, i * s / 4); c.lineTo(s, i * s / 4); c.stroke(); } }, 6);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshStandardMaterial({ map: tile, roughness: 0.25, metalness: 0 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
-    const wallM = new THREE.MeshStandardMaterial({ color: '#eef2f4', roughness: 0.6 }), trimM = new THREE.MeshStandardMaterial({ color: '#9aa7ae', roughness: 0.4, metalness: 0.6 });
+    set.fog = null; const wallM = new THREE.MeshStandardMaterial({ color: '#aebbc2', roughness: 0.7 }), trimM = new THREE.MeshStandardMaterial({ color: '#9aa7ae', roughness: 0.4, metalness: 0.6 });
     const back = new THREE.Mesh(new THREE.PlaneGeometry(14, 4), wallM); back.position.set(0, 2, -4); back.receiveShadow = true; g.add(back);
     for (const sx of [-1, 1]) { const w = new THREE.Mesh(new THREE.PlaneGeometry(14, 4), wallM); w.rotation.y = -sx * Math.PI / 2; w.position.set(sx * 6, 2, 0); w.receiveShadow = true; g.add(w); }
     for (let i = -3; i <= 3; i++) { const pnl = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3.4, 0.04), trimM); pnl.position.set(i * 1.8, 1.9, -3.98); g.add(pnl); }
-    for (let i = 0; i < 3; i++) { const lp = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.04, 0.5), new THREE.MeshBasicMaterial({ color: new THREE.Color('#f2fbff').multiplyScalar(3) })); lp.position.set(-2.6 + i * 2.6, 3.6, -1.2); g.add(lp); }
+    for (let i = 0; i < 3; i++) { const lp = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.04, 0.5), new THREE.MeshBasicMaterial({ color: new THREE.Color('#f2fbff').multiplyScalar(1.4) })); lp.position.set(-2.6 + i * 2.6, 3.6, -1.2); g.add(lp); }
     const benchM = new THREE.MeshStandardMaterial({ color: '#f7f9fa', roughness: 0.35 }), topM = new THREE.MeshStandardMaterial({ color: '#2b3236', roughness: 0.3 });
     const glassM = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.05, transmission: 0.9, thickness: 0.05, ior: 1.45, transparent: true, opacity: 0.6 });
     const liquid = ['#39ff9a', '#4ad8ff', '#ff4fa3', '#ffd34a'];
@@ -495,7 +492,7 @@ function drawCaptions(t, w, h) {
       // wrap into lines that fit 86% width
       const lines = [[]]; let lw = 0;
       words.forEach((wd, i) => { if (lw + widths[i] > w * 0.86 && lines.at(-1).length) { lines.push([]); lw = 0; } lines.at(-1).push(i); lw += widths[i] + space; });
-      const y0 = h * (h > w ? 0.68 : 0.82) - (lines.length - 1) * size * 0.6;
+      const y0 = h * (h > w ? (CONFIG.captionY ?? 0.74) : 0.84) - (lines.length - 1) * size * 0.6;
       const outA = clamp((end - t) / 0.12);
       lines.forEach((ln, li) => {
         const total = ln.reduce((s, i) => s + widths[i], 0) + space * (ln.length - 1); let x = (w - total) / 2;
@@ -673,14 +670,14 @@ function retargetClip(src, clip, tgt) {
 const avgLum = (tex) => {   // average luminance of a texture's painted texels (for recolor gain)
   try { const im = tex?.image; if (!im) return 0.5; const c = document.createElement('canvas'); c.width = c.height = 48; const g = c.getContext('2d'); g.drawImage(im, 0, 0, 48, 48);
     const d = g.getImageData(0, 0, 48, 48).data; let s = 0, n = 0; for (let i = 0; i < d.length; i += 4) { const l = (d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114) / 255; if (d[i + 3] > 20 && l > 0.03) { s += l; n++; } } return n ? s / n : 0.5; } catch { return 0.5; } };
-function recolor(p, top, bottom, waist) {   // keeps fabric shading: color × normalized texture luminance; split at the waist for one-piece outfits
+function recolor(p, top, bottom, waist, detail = 0.45) {   // keeps fabric shading: color × normalized texture luminance; split at the waist for one-piece outfits
   const gain = 1 / Math.max(0.12, avgLum(p.map)), T = top ? new THREE.Color(top) : null, B = bottom ? new THREE.Color(bottom) : null;
   p.userData.recolor = { T, B };
   p.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, { uTop: { value: T || new THREE.Color(1, 1, 1) }, uBot: { value: B || new THREE.Color(1, 1, 1) }, uUseTop: { value: T ? 1 : 0 }, uUseBot: { value: B ? 1 : 0 }, uWaist: { value: waist }, uGain: { value: p.map ? gain : 1 } });
+    Object.assign(sh.uniforms, { uDetail: { value: detail }, uTop: { value: T || new THREE.Color(1, 1, 1) }, uBot: { value: B || new THREE.Color(1, 1, 1) }, uUseTop: { value: T ? 1 : 0 }, uUseBot: { value: B ? 1 : 0 }, uWaist: { value: waist }, uGain: { value: p.map ? gain : 1 } });
     sh.vertexShader = 'varying float vBindY;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vBindY = position.y;');
-    sh.fragmentShader = 'varying float vBindY; uniform vec3 uTop, uBot; uniform float uUseTop, uUseBot, uWaist, uGain;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
-      { float l = min(dot(diffuseColor.rgb, vec3(.299, .587, .114)) * uGain, 1.35); float k = smoothstep(uWaist - .015, uWaist + .015, vBindY);
+    sh.fragmentShader = 'varying float vBindY; uniform vec3 uTop, uBot; uniform float uUseTop, uUseBot, uWaist, uGain, uDetail;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+      { float l = mix(1., min(dot(diffuseColor.rgb, vec3(.299, .587, .114)) * uGain, 1.35), uDetail); float k = smoothstep(uWaist - .015, uWaist + .015, vBindY);
         vec3 tgt = mix(uBot, uTop, k); float use = mix(uUseBot, uUseTop, k); diffuseColor.rgb = mix(diffuseColor.rgb, tgt * l, use); }`);
   };
   p.customProgramCacheKey = () => 'recolor';   // one shared program; colors/waist are per-material uniforms
@@ -736,7 +733,8 @@ function upgradeMaterials(root, def = {}) {
           else if (isHat && wardrobe.hat) recolor(p, wardrobe.hat, wardrobe.hat, -1e9);
           else if (!isShoe && !isHat && (wardrobe.top || wardrobe.bottom)) {
             const top = wardrobe.top || null, bot = wardrobe.bottom || null;
-            if (bb.min.y > waist) recolor(p, top, top, -1e9); else if (bb.max.y < waist) recolor(p, bot, bot, -1e9); else recolor(p, top, bot, waist);
+            const det = wardrobe.print ? 1 : 0.45;
+            if (bb.min.y > waist) recolor(p, top, top, -1e9, det); else if (bb.max.y < waist) recolor(p, bot, bot, -1e9, det); else recolor(p, top, bot, waist, det);
           }
         }
       }
@@ -1293,7 +1291,7 @@ const setIdOf = (shot) => { const sp = shot.set ?? CONFIG.set ?? 'studio'; retur
 
 /* ---------- camera language: named moves auto-framed on a character (or a point) ---------- */
 // shot.camera = { move, target, size, az, height, span, at, fov, ease, handheld, roll }   (pos/look keys still work when no move)
-const SIZES = { ecu: 0.24, cu: 0.42, mcu: 0.62, ms: 0.95, mls: 1.35, ws: 2.15, ews: 6 };
+const SIZES = { ecu: 0.24, cu: 0.42, mcu: 0.62, ms: 0.95, mls: 1.4, ws: 2.5, ews: 6 };
 const MOVE_SIZE = { 'dolly-in': 'mcu', push: 'cu', 'dolly-out': 'mcu', orbit: 'ms', 'crane-up': 'ws', 'crane-down': 'ws', 'crash-zoom': 'ms', follow: 'ws', track: 'ws',
   'low-hero': 'ms', overhead: 'ws', reveal: 'ms', static: 'ms', handheld: 'mcu', 'over-shoulder': 'mcu', 'dutch': 'mcu' };
 function targetAt(shot, id, lt) {
@@ -1306,11 +1304,15 @@ function targetAt(shot, id, lt) {
 function cameraMove(shot, lt, c) {
   const m = c.move, d = shot.dur, e = (EASE[c.ease] || EASE.inOutSine)(clamp(lt / d));
   const T = targetAt(shot, c.target, lt), fov0 = typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 30;
+  const tid = Array.isArray(c.target) ? null : (c.target || Object.keys(shot.cast || {})[0]), tc = tid ? shot.cast?.[tid] : null;
+  let face = tc ? key(tc.rotY, lt) || 0 : 0;   // az is measured from the character's facing (0 = in front of their face)
+  if ((c.move === 'track' || c.move === 'follow') && tc?.pos) { const a0 = key(tc.pos, Math.max(0, lt - 0.1)), a1 = key(tc.pos, lt + 0.1); if (Math.hypot(a1[0] - a0[0], a1[2] - a0[2]) > 1e-3) face = Math.atan2(a1[0] - a0[0], a1[2] - a0[2]); }
+
   const size = typeof c.size === 'number' ? c.size : SIZES[c.size || MOVE_SIZE[m] || 'ms'];
   let dist = (size / 2) / Math.tan(THREE.MathUtils.degToRad(fov0) / 2) / Math.min(1, camera.aspect * 1.78) ** 0;
   if (camera.aspect > 1) dist = (size / 2) / Math.tan(THREE.MathUtils.degToRad(fov0) / 2);
   const lookY = T.y - size * (size < 1 ? 0.24 : Math.min(0.4, 0.24 + (size - 1) * 0.14));   // eyes on the upper third
-  let a = THREE.MathUtils.degToRad(c.az ?? 0), h = T.y + (c.height ?? 0), fov = fov0, lx = 0, roll = c.roll ?? 0;
+  let a = face + THREE.MathUtils.degToRad(c.az ?? 0), h = (size >= 1.3 ? lookY + 0.3 : T.y) + (c.height ?? 0), fov = fov0, lx = 0, roll = c.roll ?? 0;   // wide shots: chest-height camera
   switch (m) {
     case 'dolly-in': dist *= 1.5 - 0.5 * e; break;
     case 'push': dist *= 1.18 - 0.18 * e; break;
@@ -1320,13 +1322,17 @@ function cameraMove(shot, lt, c) {
     case 'crane-down': h = lookY + 1.4 - 1.5 * e; break;
     case 'low-hero': h = 0.3 + 0.12 * e; dist *= 1.15 - 0.15 * e; break;
     case 'overhead': h = T.y + dist * 1.15; dist *= 0.22; a += 0.5 * e; break;
-    case 'crash-zoom': { const k = EASE.outExpo(clamp((lt - (c.at ?? 0.3 * d)) / 0.2)); fov = fov0 * (1 - 0.5 * k); break; }
+    case 'crash-zoom': { const k = EASE.outExpo(clamp((lt - (c.at ?? 0.3 * d)) / 0.2)); fov = fov0 * (1 - 0.38 * k); break; }
     case 'reveal': lx = (1 - e) * 1.4; break;
-    case 'track': case 'follow': a += THREE.MathUtils.degToRad(c.span ?? 70); break;   // side-on tracking (target pos keys move it)
+    case 'static': break;
+    case 'track': case 'follow': a += THREE.MathUtils.degToRad(c.side === 'right' ? -90 : 90); dist *= c.move === 'follow' ? 1 : 1.1; break;   // rides beside the walking path
     case 'over-shoulder': a += THREE.MathUtils.degToRad(c.span ?? 155); h -= 0.05; dist *= 1.1; break;
     case 'dutch': roll = roll || 0.18; dist *= 1.08 - 0.08 * e; break;
   }
-  return { pos: [T.x + Math.sin(a) * dist, h, T.z + Math.cos(a) * dist], look: [T.x + lx, lookY, T.z], fov, roll };
+  const LX = Math.cos(face) * lx, LZ = -Math.sin(face) * lx;
+  let look = [T.x + LX, lookY, T.z + LZ];
+  if (c.with) { const W = c.with; look = [look[0] + (W[0] - look[0]) * 0.3, look[1] + (W[1] - look[1]) * 0.15, look[2] + (W[2] - look[2]) * 0.3]; }   // pan toward a second subject, camera stays on the first
+  return { pos: [T.x + Math.sin(a) * dist, h, T.z + Math.cos(a) * dist], look, fov, roll };
 }
 
 /* ---------- transitions between shots: shot.cut = whip · zoom · spin · glitch · flash · dip · smash · blur ---------- */
