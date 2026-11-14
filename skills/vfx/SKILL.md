@@ -65,6 +65,10 @@ Flat untextured spheres/cubes as effects · uniform particle sizes · everything
 linear fades · effects that don't light anything · no smoke after fire · effects without a
 reaction from character/camera.
 
+## Volumetric effects (real 3D smoke/fire)
+explosion, fire and smoke are raymarched 3D volumes (billows, self-shadowing, emissive flames) — never flat sprites. In library
+effects add a layer `{ mode: 'volume', kind: 'plume'|'blast', size: [x,y,z] m, y, heat 0..1.3, rise, opacity, turb, colA, colB, fire1, fire2 }`.
+
 ## VFX library (fx/library.json) — reuse, invent, save
 `node ${CLAUDE_PLUGIN_ROOT}/scripts/vfx_library.js list` → ready effects: muzzle-flash · portal · fireworks · confetti · electric-arc · blood-splash ·
 ice-shatter · poison-gas · heal-glow · black-hole · meteor · bubbles · falling-leaves · sandstorm · dust-burst · energy-charge (+ the built-ins).

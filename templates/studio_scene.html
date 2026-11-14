@@ -1624,10 +1624,12 @@ const FXP = {
   },
   explosion(f) {
     const s = f.scale ?? 1, t = f.t ?? 0, parts = [], sd = f.seed ?? 1;
+    parts.push(volumeFX({ kind: 'blast', size: [4.4 * s, 5.2 * s, 4.4 * s], y: 2.5 * s, t0: t, tail: 0, seed: sd, rise: 1, emit: 1.3, density: 1.15, turb: 1.4, colA: '#7a6e62', colB: '#120f0c', fire1: '#ffd08a', fire2: '#ff4a08',
+      anim: (a) => ({ expand: 0.2 + 0.5 * (1 - Math.exp(-a * 3.2)) + 0.04 * a, heat: Math.exp(-a * 1.8), rise: -1.75 + Math.min(a, 2.5) * 0.9, density: a < 3.5 ? 1 : Math.max(0, 1 - (a - 3.5) / 1.5) }) }));
     parts.push(emitter({ mode: 'glow', count: 6, t0: t, burst: 0.03, life: [0.1, 0.22], speed: [0, 0.2], size: [1.4, 2.4], scale: s, colA: '#fff4d6', colB: '#ffb050', hdr: 2.5, seed: sd }));
-    parts.push(emitter({ mode: 'fire', count: 220, t0: t, burst: 0.1, life: [0.55, 1.2], speed: [2.5, 6], drag: 3.2, buoy: 1.4, spread: 1, turb: 0.25, size: [0.55, 1.5], shape: [0.3, 0.3, 0.3], scale: s,
+    parts.push(emitter({ mode: 'fire', count: 60, t0: t, burst: 0.1, life: [0.35, 0.8], speed: [2.5, 6], drag: 3.2, buoy: 1.4, spread: 1, turb: 0.25, size: [0.55, 1.5], shape: [0.3, 0.3, 0.3], scale: s,
       colA: '#fff2c8', colB: '#ff7a1a', colC: '#5a0e00', hdr: 1.3, intensity: 0.9, seed: sd + 1 }));
-    parts.push(emitter({ mode: 'smoke', count: 170, t0: t + 0.06, t1: t + 0.5, life: [2.6, 4.8], speed: [1.2, 3.4], drag: 1.5, buoy: 0.85, spread: 1, turb: 0.15, size: [0.9, 3.4], shape: [0.4, 0.3, 0.4], scale: s,
+    parts.push(emitter({ mode: 'smoke', count: 40, t0: t + 0.06, t1: t + 0.5, life: [2.6, 4.8], speed: [1.2, 3.4], drag: 1.5, buoy: 0.85, spread: 1, turb: 0.15, size: [0.9, 3.4], shape: [0.4, 0.3, 0.4], scale: s,
       colA: '#77706a', colB: '#16130f', colC: '#ff6a1a', opacity: 0.85, seed: sd + 2 }));
     parts.push(emitter({ mode: 'spark', count: 240, t0: t, burst: 0.06, life: [0.6, 1.7], speed: [4, 12], drag: 0.7, gravity: 9.8, spread: 1, bounce: 0.35, size: [0.09, 0.05], scale: s,
       colA: '#fff1c0', colB: '#ff5a10', hdr: 3, stretch: 6, seed: sd + 3 }));
@@ -1663,7 +1665,10 @@ const FXP = {
   },
   fire(f, dur) {
     const s = f.scale ?? 1, t0 = f.start ?? 0, t1 = f.end ?? dur, parts = [], sd = f.seed ?? 2, pre = 1.2;
-    parts.push(emitter({ mode: 'fire', count: 420, t0: t0 - pre, t1, life: [0.55, 1.05], speed: [0.25, 0.8], dir: [0, 1, 0], spread: 0.22, buoy: 2.4, drag: 1.2, turb: 0.35, turbF: 4,
+    parts.push(volumeFX({ kind: 'plume', size: [1.2 * s, 1.9 * s, 1.2 * s], y: 0.9 * s, t0, t1, tail: 0.6, seed: sd, heat: 1.3, rise: 2.8, emit: 0.9, turb: 2.0, expandC: 0.85, density: 1.0, fire1: '#ffb44a', fire2: '#ff4a06',
+      colA: '#8a8078', colB: '#2a221c' }));
+    parts.push(volumeFX({ kind: 'plume', size: [2.8 * s, 3.4 * s, 2.8 * s], y: 2.4 * s, t0, t1, tail: 1.5, seed: sd + 3, heat: 0, rise: 0.8, opacity: 0.28, density: 0.7, expandC: 0.9, turb: 1.8 }));
+    parts.push(emitter({ mode: 'fire', count: 120, t0: t0 - pre, t1, life: [0.55, 1.05], speed: [0.25, 0.8], dir: [0, 1, 0], spread: 0.22, buoy: 2.4, drag: 1.2, turb: 0.35, turbF: 4,
       size: [0.5, 0.14], shape: [0.28, 0.05, 0.28], scale: s, colA: '#fff3d0', colB: '#ff8a20', colC: '#6a1200', hdr: 1.4, intensity: 1.0, seed: sd }));
     parts.push(emitter({ mode: 'fire', count: 140, t0: t0 - pre, t1, life: [0.3, 0.55], speed: [0.2, 0.5], spread: 0.15, buoy: 1.8, turb: 0.2, size: [0.32, 0.1], shape: [0.15, 0.02, 0.15], scale: s,
       colA: '#ffffff', colB: '#ffd27a', colC: '#ff6a10', hdr: 1.7, intensity: 1.0, seed: sd + 1 }));
@@ -1677,7 +1682,8 @@ const FXP = {
   },
   smoke(f, dur) {
     const s = f.scale ?? 1, t0 = f.start ?? 0, t1 = f.end ?? dur;
-    return { parts: [emitter({ mode: 'smoke', count: f.count ?? 130, t0: t0 - 3, t1, life: [3, 5.5], speed: [0.3, 0.8], dir: f.dir || [0, 1, 0], spread: 0.35, buoy: 0.5, drag: 0.5, turb: 0.3,
+    return { parts: [volumeFX({ kind: 'plume', size: [2.4 * s, 3.4 * s, 2.4 * s], y: 1.6 * s, t0, t1, tail: 1.5, seed: f.seed ?? 3, rise: 0.7, opacity: f.opacity ? f.opacity * 2 : 0.7, expandC: 0.85,
+      colA: f.color || '#a39c94', colB: '#2e2a26' }), emitter({ mode: 'smoke', count: f.count ?? 40, t0: t0 - 3, t1, life: [3, 5.5], speed: [0.3, 0.8], dir: f.dir || [0, 1, 0], spread: 0.35, buoy: 0.5, drag: 0.5, turb: 0.3,
       wind: f.wind || [0.2, 0, 0], size: [0.4, 1.9], shape: [0.4, 0.1, 0.4], scale: s, colA: f.color || '#9a948c', colB: '#2a2622', opacity: f.opacity ?? 0.34, seed: f.seed ?? 3 })] };
   },
   sparks(f) {
@@ -1778,6 +1784,62 @@ const FXP = {
 };
 // Build FX per shot at boot: SHOTS[i].fx = [{ type, t|start/end, pos, scale, ... }]
 const FX = [];
+/* ---------- VOLUMETRIC FX: raymarched 3D fire / smoke / fireballs (real billows, self-shadowing, emissive cores) ---------- */
+const VOL_VS = `varying vec3 vOrigin; varying vec3 vDir;
+void main(){ vOrigin = (inverse(modelMatrix) * vec4(cameraPosition, 1.)).xyz; vDir = position - vOrigin; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
+const VOL_FS = `precision highp float;
+uniform float uTime, uSeed, uDensity, uHeat, uRise, uExpand, uOpacity, uEmit, uTurb; uniform int uKind, uSteps;
+uniform vec3 uColA, uColB, uFire1, uFire2, uLightDir; varying vec3 vOrigin; varying vec3 vDir;
+float h3(vec3 p){ p = fract(p * .3183099 + .1); p *= 17.; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float n3(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3. - 2. * f);
+  return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h3(i + vec3(0,0,1)), h3(i + vec3(1,0,1)), f.x), mix(h3(i + vec3(0,1,1)), h3(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float fbm(vec3 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++) { s += a * n3(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= .5; } return s; }
+vec2 box(vec3 o, vec3 d){ vec3 iv = 1. / d, a = (vec3(-1.) - o) * iv, b = (vec3(1.) - o) * iv, mn = min(a, b), mx = max(a, b);
+  return vec2(max(max(mn.x, mn.y), mn.z), min(min(mx.x, mx.y), mx.z)); }
+float dens(vec3 p, out float heat){
+  if (uKind == 0) {   // fireball / blast: expanding billowing sphere that rises and cools into smoke
+    vec3 w = p * 2.3 + vec3(0., -uTime * .5, 0.) + uSeed;
+    float n = fbm(w + fbm(w * 1.4 + uTime * .15) * uTurb);
+    float r = uExpand, l = length(p * vec3(1., 1.12, 1.) - vec3(0., uRise * .35, 0.));
+    float d = r - l + (n - .5) * .95 * r + (fbm(p * 5. + uSeed) - .5) * .18;
+    heat = clamp(uHeat * (1.25 - l / max(r, .01)) * 1.5 + (n - .55) * .6, 0., 1.);
+    return clamp(d * 5., 0., 1.) * uDensity;
+  }
+  float y = p.y * .5 + .5, rad = mix(.28, .85, pow(y, .8)) * uExpand;   // plume: rising column (fire / smoke / gas)
+  vec3 w = vec3(p.x * 2.2, p.y * 1.5 - uTime * uRise, p.z * 2.2) + uSeed;
+  float n = fbm(w + fbm(w * 1.6 + uTime * .25) * uTurb);
+  float d = (rad - length(p.xz)) + (n - .5) * .7 * uExpand;
+  d *= smoothstep(1., .55, y) * smoothstep(0., .06, y);
+  heat = clamp(uHeat * (1. - y * 1.5) * 1.3 + (n - .5) * .6, 0., 1.) * step(0., d);
+  return clamp(d * 3.5, 0., 1.) * uDensity;
+}
+vec3 fireC(float h){ return mix(mix(vec3(.15, .015, 0.), uFire2, smoothstep(0., .45, h)), uFire1 * 1.8, smoothstep(.45, 1., h)); }
+void main(){
+  vec3 d = normalize(vDir), o = vOrigin; vec2 b = box(o, d); if (b.x > b.y) discard; b.x = max(b.x, 0.);
+  float stp = (b.y - b.x) / float(uSteps), t = b.x + stp * h3(vec3(gl_FragCoord.xy, uTime * 7.)); vec3 col = vec3(0.); float T = 1.;
+  for (int i = 0; i < 64; i++) { if (i >= uSteps || T < .02 || t > b.y) break; vec3 p = o + d * t; float h; float den = dens(p, h);
+    if (den > .002) { float sh = 0., hh; vec3 lp = p; for (int k = 0; k < 4; k++) { lp += uLightDir * .14; sh += dens(lp, hh); }
+      float lit = exp(-sh * 1.4); vec3 c = mix(uColB, uColA, lit) * (.3 + .7 * lit) + fireC(h) * h * h * uEmit * 1.6;
+      float a = 1. - exp(-den * stp * 14. * uOpacity); col += T * a * c; T *= 1. - a; }
+    t += stp; }
+  float al = 1. - T; if (al < .004) discard; gl_FragColor = vec4(col, al); }`;
+function volumeFX(o) {   // o: { kind: 'blast'|'plume', size: [x,y,z] m, y, t0, t1, heat, rise, expand: keys|fn, density, opacity, emit, turb, colA, colB, fire1, fire2 }
+  const u = { uTime: { value: 0 }, uSeed: { value: (o.seed ?? 1) * 7.31 }, uDensity: { value: o.density ?? 1 }, uHeat: { value: o.heat ?? 0 }, uRise: { value: o.rise ?? 0.6 },
+    uExpand: { value: 0.8 }, uOpacity: { value: o.opacity ?? 1 }, uEmit: { value: o.emit ?? 1 }, uTurb: { value: o.turb ?? 1.2 }, uKind: { value: o.kind === 'blast' ? 0 : 1 },
+    uSteps: { value: FAST ? 22 : 48 }, uColA: { value: new THREE.Color(o.colA || '#b9b1a8') }, uColB: { value: new THREE.Color(o.colB || '#1c1916') },
+    uFire1: { value: new THREE.Color(o.fire1 || '#fff0c8') }, uFire2: { value: new THREE.Color(o.fire2 || '#ff6a12') }, uLightDir: { value: new THREE.Vector3(0.4, 0.8, 0.3).normalize() } };
+  const m = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.ShaderMaterial({ uniforms: u, vertexShader: VOL_VS, fragmentShader: VOL_FS, transparent: true, premultipliedAlpha: true,
+    depthWrite: false, side: THREE.BackSide }));
+  const [sx, sy, sz] = o.size || [1, 1, 1]; m.scale.set(sx / 2, sy / 2, sz / 2); m.position.y = o.y ?? sy / 2; m.renderOrder = 7; m.frustumCulled = false;
+  const iw = new THREE.Matrix4();
+  return { obj: m, update(lt) {
+    const age = lt - (o.t0 ?? 0); m.visible = age >= 0 && lt <= (o.t1 ?? 1e9) + (o.tail ?? 0); if (!m.visible) return;
+    u.uTime.value = lt; const e = o.anim ? o.anim(age) : {}; u.uExpand.value = e.expand ?? o.expandC ?? 0.8; u.uRise.value = e.rise ?? o.rise ?? 0.6; u.uHeat.value = e.heat ?? o.heat ?? 0;
+    u.uDensity.value = (e.density ?? 1) * (o.density ?? 1) * (o.t1 !== undefined && lt > o.t1 ? Math.max(0, 1 - (lt - o.t1) / (o.tail || 0.5)) : 1);
+    m.updateMatrixWorld(); iw.copy(m.matrixWorld).invert(); u.uLightDir.value.copy(key1.position).normalize().transformDirection(iw).normalize();
+  } };
+}
 let FXLIB = {};   // Claude's VFX library (fx/library.json) — fx: [{ type: '<name>', t | start/end, pos, scale, color, color2 }]
 function customFX(def, f, dur) {
   const sc = f.scale ?? 1, t = f.t ?? f.start ?? 0, t1 = f.end ?? dur, parts = [];
@@ -1786,7 +1848,8 @@ function customFX(def, f, dur) {
     if (f.color && L.tint !== false) o.colA = i === 0 || L.tint === 'A' ? f.color : o.colA; if (f.color2 && L.tint !== false) o.colB = f.color2;
     if (cont) { o.t0 = t - (L.pre ?? 0); o.t1 = t1; } else { o.t0 = t + (L.at ?? 0); if (L.until !== undefined) o.t1 = t + L.until; }
     delete o.continuous; delete o.at; delete o.until; delete o.pre; delete o.tint;
-    parts.push(emitter(o));
+    if (L.mode === 'volume') { const v = { ...o }; v.seed = o.seed; if (!cont) v.t1 = v.t1 ?? (t + (L.dur ?? 2)); if (L.kind === 'blast') v.anim = (a) => ({ expand: 0.22 + 0.62 * (1 - Math.exp(-a * 3.2)), heat: Math.exp(-a * 1.6) }); v.size = (L.size || [1, 1, 1]).map((x) => x * sc); parts.push(volumeFX(v)); }
+    else parts.push(emitter(o));
   });
   if (def.light) { const D = def.light, L = new THREE.PointLight(f.color || D.color || '#ffffff', 0, 0, 2); L.position.y = (D.y ?? 0.5) * sc;
     parts.push({ obj: L, update(lt) { const a = lt - t; L.intensity = a < 0 || lt > t1 + 0.3 ? 0 : (D.intensity ?? 20) * sc * sc * (D.decay ? Math.exp(-a * D.decay) : 1) * (D.flicker ? 0.8 + 0.2 * noise(lt * 20, 5) : 1); } }); }

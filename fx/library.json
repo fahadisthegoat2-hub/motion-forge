@@ -596,8 +596,24 @@
    "continuous": true,
    "layers": [
     {
+     "mode": "volume",
+     "kind": "plume",
+     "size": [
+      3.2,
+      1.6,
+      3.2
+     ],
+     "y": 0.8,
+     "rise": 0.35,
+     "opacity": 0.55,
+     "expandC": 0.95,
+     "turb": 1.8,
+     "colA": "#a6e05a",
+     "colB": "#1c330c"
+    },
+    {
      "mode": "smoke",
-     "count": 90,
+     "count": 40,
      "pre": 3,
      "life": [
       3,
@@ -998,8 +1014,24 @@
    "continuous": true,
    "layers": [
     {
+     "mode": "volume",
+     "kind": "plume",
+     "size": [
+      8,
+      3,
+      8
+     ],
+     "y": 1.5,
+     "rise": -0.2,
+     "opacity": 0.45,
+     "expandC": 1.1,
+     "turb": 2.2,
+     "colA": "#d9b98a",
+     "colB": "#5a4226"
+    },
+    {
      "mode": "smoke",
-     "count": 260,
+     "count": 80,
      "pre": 4,
      "life": [
       3,
