@@ -88,6 +88,24 @@ beat · explain · present · count`.
 Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and saved-motion events; sets add ambience.
 Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
+## Explainer graphics (see skills/visual-clarity) — TITLES that explain
+Any title can follow a body part or 3D point: `at: 'hero.heart'` (+ `offset: [dx, dy]`). Parts: head brain face eyes mouth throat chest heart lungs stomach liver belly fat gut hips lefthand righthand leftarm rightarm leftknee rightknee skin feet.
+```js
+{ t, t1, style: 'callout', at: 'hero.heart', text: 'HEART', sub: '-10 BPM', icon: 'heart', side?: 1|-1 }   // leader line + label
+{ t, t1, style: 'pulse',   at: 'hero.belly', beat?: 70, text?, radius? }                         // glowing organ highlight
+{ t, t1, style: 'inset',   at: 'hero.belly', kind: 'fat|blood|neurons|artery|cells', level: [[0,1],[2,0.3]], text, sub } // magnified inside view (auto-placed beside the part, away from the face)
+{ t, t1, style: 'chart',   pos, text, points: [90,180,70], labels, marks: [{ i: 1, text: 'SPIKE' }], limit, limitText, box: [w,h] }
+{ t, t1, style: 'bars',    pos, text, items: [{ label, value, color }], suffix }
+{ t, t1, style: 'list',    pos, text, items: ['Clearer skin', { text: 'Cravings', icon: 'cross', strike: true }], gap }
+{ t, t1, style: 'card',    pos, text, sub, icon, enter: 'left|right|up' }
+{ t: 0, t1: TOTAL, style: 'timeline', pos: [0.5, 0.06], marks: [{ t: 0, text: 'DAY 1' }, { t: 9, text: 'WEEK 1' }] }
+{ t, t1, style: 'arrow',   path: ['hero.mouth', 'hero.stomach'], text }  ·  { style: 'arrow', dir: 'up|down', text: 'ENERGY' }
+{ t, t1, style: 'icon',    icon: 'heart|brain|bolt|flame|drop|sugar|warning|check|cross|clock|battery|star|eye|moon|up|down|plus|minus', beat?, text }
+{ t, t1, style: 'bubble',  at: 'hero.head', text: 'just one more...', thought?: true }
+{ t, t1, style: 'scan' }                                                                   // x-ray scan sweep
+```
+All get automatic sounds. Panels go where the face isn't (frame the hero `mls`/`ws` low in frame for data panels).
+
 ## CAPTIONS & TITLES (drawn into the video)
 `CAPTIONS = [{ t, t1?, text, hi: ['WORD'] }]` — word-by-word pop, highlighted words yellow, at `captionY`.
 `TITLES = [{ t, t1, style, text, pos:[x,y], size, color, accent, sub, from, to, prefix, suffix, value, radius }]`
@@ -97,4 +115,5 @@ Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 
 ## Rendering
 - QA in the cloud (no GPU): `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 405 --height 720 --fps 4 --frames-only`
+- Artifact page: `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` → publish scene.html with the printed JSON as `files` (artifacts can't load .glb or the GitHub CDN otherwise — no characters).
 - Finals: on the user's device (open the page → Render panel), or cloud `--quality good|high|epic` only if asked (slow).

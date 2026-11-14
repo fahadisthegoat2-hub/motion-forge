@@ -43,20 +43,21 @@ copy a creator's logo, name, intro, or recurring characters onto shirts or title
 - Scene format: `${CLAUDE_PLUGIN_ROOT}/templates/SCENE_API.md` (CAST / SHOTS / CAPTIONS, auto life layer). pipeline
 Always apply `art-direction` (look brief, per-shot `look`/`set`) and `vfx` for any action beat; study `references/` (images + videos) with `reference-learning` first if present.
 1. Script with the `story-writing` skill (hook → escalation → climax → twist).
-2. Turn the script into a **shot list** (shot #, duration, framing, camera move, action,
-   expression, VO line, SFX).
+2. Turn the script into a **visual plan table** with `visual-clarity` (line → what the viewer must understand →
+   literal visual + explainer graphic → camera by meaning → duration, expression, SFX).
 3. Build sets + characters with `realistic-humans` from `templates/studio_scene.html`
    (Three.js) — reuse one base rig; one HTML file per shot, each exposing `window.__mf`.
 4. Animate: Mixamo body clips + keyed facial expressions + `custom-animation` principles.
 5. Render each shot with `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js shotN.html shotN.mp4`,
    then assemble with ffmpeg (concat + VO + music). Captions: draw them in the HTML scene
    (word-by-word, timed to `t`) so no extra tools are needed.
-6. Run `quality-review` (contact sheet of frames, fix everything, max 3 rounds).
+6. Run `quality-review` (contact sheet of every shot, fix everything, at least 2 full rounds).
 7. **Device render (default for final quality):** build the whole short as ONE HTML with a
    shot timeline (`shots=[{start,end,setup(),update(t)}]`, one `window.__mf` for the full
    duration, captions drawn in-scene), include `templates/device_render_panel.html` before
-   </body>, and publish it with the Artifact tool if available, else open it with
+   </body>, and pack it (`node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js short.html` → pass the printed JSON as `files`) and
+   publish it with the Artifact tool if available, else open it with
    `node ${CLAUDE_PLUGIN_ROOT}/scripts/open_in_chrome.js short.html`. The user clicks **Render MP4** and it renders on their own GPU at the tier their
    specs support. Custom GLB models must be fetchable URLs or base64-embedded.
 8. Run `viral-growth` → write `publish.md` (titles, description, tags, hashtags, pinned
-   comment, cover frame). Final message: artifact link/MP4 path + publish pack, nothing else.
+   comment, cover frame). Final message: artifact link/MP4 path + publish pack, nothing else (no review text, no feature lists).

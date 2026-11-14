@@ -15,8 +15,8 @@ DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMAT
 
 ROUTING (load every matching skill, in this order, before working):
 - Any video/short/long video → FIRST character-collection: the cast is on the Casting Board; ask who stars (unless already named). "new character", "improve <name>", "undo <name>", "check the casting board" → character-collection.
-- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → editing → realistic-humans → custom-animation → vfx → quality-review → viral-growth
-- Any short video / short / story / "what happens if" idea → story-writing → art-direction → editing → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
+- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → visual-clarity → art-direction → editing → realistic-humans → custom-animation → vfx → quality-review → viral-growth
+- Any short video / short / story / "what happens if" idea → story-writing → visual-clarity → art-direction → editing → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
 - Motion graphics, titles, intros, logos → motion-graphics (+ 3d-visuals if 3D)
@@ -36,4 +36,7 @@ ALWAYS:
 - Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
-- Be credit-efficient: work silently, batch tool calls, short messages.
+- TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
+- FINAL MESSAGE = the link (or MP4) + one line + the publish pack (or the Good/High/Epic question). Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
+- CLARITY: every line gets a literal visual and explainer graphics (visual-clarity skill). No random actions, no repeated scenes, cameras chosen by meaning, payoff in the first 2s.
+- ARTIFACTS: before publishing a scene as an Artifact run `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` and pass the printed JSON as the `files` map — without it the characters and animations don't load on the page.

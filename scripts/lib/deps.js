@@ -88,4 +88,22 @@ function startStaticServer() {
   return new Promise((ok) => srv.listen(0, '127.0.0.1', () => ok({ origin: 'http://127.0.0.1:' + srv.address().port, close: () => srv.close() })));
 }
 
-module.exports = { launchBrowser, ffmpeg, threeDir, threeRepoFile, startStaticServer, DEPS };
+// Route CDN asset URLs to local copies (cloud sessions often block CDNs): three.js modules, three.js sample models, plugin repo files.
+async function routeAssets(page) {
+  const path = require("path"), localThree = threeDir();
+  if (localThree) await page.route(/cdn\.jsdelivr\.net\/npm\/three@[^/]+\/(.*)/, (route) => {
+    const f = path.join(localThree, route.request().url().match(/three@[^/]+\/(.*)/)[1]);
+    fs.existsSync(f) ? route.fulfill({ path: f, contentType: "application/javascript" }) : route.continue();
+  });
+  await page.route(/cdn\.jsdelivr\.net\/gh\/mrdoob\/three\.js@([^/]+)\/(.+)$/, async (route) => {
+    const [, tag, rel] = route.request().url().match(/three\.js@([^/]+)\/(.+)$/);
+    try { const resp = await route.fetch({ timeout: 8000 }); if (resp.ok()) return route.fulfill({ response: resp }); } catch {}
+    const f = threeRepoFile(tag, rel); return f ? route.fulfill({ path: f }) : route.abort();
+  });
+  await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/motion-forge@[^/]+\/(.+)$/, (route) => {
+    const f = path.join(__dirname, "..", "..", decodeURIComponent(route.request().url().match(/motion-forge@[^/]+\/(.+)$/)[1]).split("?")[0]);
+    return fs.existsSync(f) ? route.fulfill({ path: f }) : route.continue();
+  });
+}
+
+module.exports = { launchBrowser, ffmpeg, threeDir, threeRepoFile, startStaticServer, routeAssets, DEPS };

@@ -8,6 +8,8 @@ description: Mandatory deep quality pass before delivering any 3D scene, animati
 # Quality Review — take your time, find everything, fix it
 
 Be your own harshest critic. Do not tell the user it's done until it passes.
+Never deliver a first draft. Speed is not a goal: minimum **2 full rounds** (render → view → fix → re-render) covering
+at least one frame from EVERY shot plus motion strips of the key actions. A video made in 2 minutes was not reviewed.
 
 ## 1. Gather evidence (cheap first)
 - Re-read every file you wrote; check console errors (`page.on('pageerror')`).
@@ -33,13 +35,14 @@ smoke dissipates slowly, never pops off.
 **Taste**: look matches mood · motivated light + rim on hero · ≤2 saturated colors · framing
 varies shot to shot · at least one signature touch · would pass as a studio short.
 **Sound & edit**: soundtrack present (~-14 LUFS) · a sound on frame 1 · every transition/impact/title has its sound · music drop lands on the twist · no dead air · shots vary in length, pattern interrupt every 2–3s.
-**Story** (shorts): hook in ≤2s · re-hook every 5–8s · climax lands · twist is fair
+**Clarity** (visual-clarity skill): sound-off test passes · each shot passes the 5-word test (matches its line) · explainer graphics on ≥70% of shots for explainer topics · no random/unmotivated actions · no repeated set+framing+action · info shots held long enough to read · body part being discussed is in frame · panels never over the face.
+**Story** (shorts): payoff/answer shown in the first 2s · hook in ≤2s · re-hook every 5–8s · climax lands · twist is fair
 (clue planted) · ending loops to opening · captions match VO timing.
 **Publish**: title/desc/tags present and honest (no misleading claims).
 
 ## 3. Fix → re-verify
 Fix every FAIL, worst first. Re-render only the affected frames/shots. Repeat until all
-PASS — max 3 rounds; if something still fails, tell the user exactly what and why.
+PASS — at least 2 rounds, max 4; if something still fails, tell the user in one line what and why.
 
 ## 4. Report (short)
-One line: "QA passed — fixed N issues (x, y, z)." Nothing more unless asked.
+Nothing in chat. The review is internal — never paste the checklist, the fixes or a "what's new" list into the final message.

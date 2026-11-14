@@ -4,7 +4,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 ---
 
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need on first run. **Do NOT install or run Blender or Python** unless the user said "Blender/Python allowed".
-> **Efficiency:** Work silently, batch tool calls, one final message. Ask Good / High / Epic before the final render. Run `quality-review` before delivering.
+> **Efficiency:** Work silently, batch tool calls, one final message. Ask Good / High / Epic before the final render. Run `quality-review` (≥2 full rounds on every shot) before delivering. No review text in chat.
 
 
 > **Reference images are for STUDY ONLY.** Never use a reference image (or a crop of it) as a texture,
@@ -53,6 +53,8 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 ## Deliver
 1. Script doc: logline, chapter outline with timestamps, full narration, shot list per chapter,
    where each twist's clue is planted.
-2. The scene file(s) / artifact with the render panel.
+2. The scene file(s) / artifact with the render panel (run `scripts/pack_scene.js` first and publish with its files map).
+
+Apply `visual-clarity` to every chapter: literal visual + explainer graphics per narration line, cameras by meaning, a `timeline` per chapter.
 3. `viral-growth` long-form publish pack (title, description **with chapter timestamps**,
    tags, thumbnail concept, pinned comment, end-screen plan).

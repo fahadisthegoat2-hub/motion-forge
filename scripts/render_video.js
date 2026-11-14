@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
 // Usage: node render_video.js scene.html out.mp4 [--fast (QA preview shaders)] [--quality good|high|epic] [--chapter N | --start S --end E] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
-const { launchBrowser, ffmpeg, threeDir, threeRepoFile, startStaticServer } = require('./lib/deps');
+const { launchBrowser, ffmpeg, startStaticServer, routeAssets } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
@@ -15,25 +15,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   const browser = await launchBrowser();
   const page = await browser.newPage();
   page.on('pageerror', (e) => console.error('page error:', e.message));
-  // Offline fallback: serve three.js CDN URLs from a local node_modules/three if one exists
-  const localThree = threeDir();
-  if (localThree) await page.route(/cdn\.jsdelivr\.net\/npm\/three@[^/]+\/(.*)/, (route) => {
-    const rel = route.request().url().match(/three@[^/]+\/(.*)/)[1];
-    const f = path.join(localThree, rel);
-    fs.existsSync(f) ? route.fulfill({ path: f, contentType: 'application/javascript' }) : route.continue();
-  });
-  // three.js sample models: CDN first, git cache fallback (cloud sessions often block the CDN)
-  await page.route(/cdn\.jsdelivr\.net\/gh\/mrdoob\/three\.js@([^/]+)\/(.+)$/, async (route) => {
-    const [, tag, rel] = route.request().url().match(/three\.js@([^/]+)\/(.+)$/);
-    try { const resp = await route.fetch({ timeout: 8000 }); if (resp.ok()) return route.fulfill({ response: resp }); } catch {}
-    const f = threeRepoFile(tag, rel); return f ? route.fulfill({ path: f }) : route.abort();
-  });
-  // plugin asset kit (characters/animations) → local copy
-  const KIT_DIR = path.join(__dirname, '..', 'assets');
-  await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/motion-forge@[^/]+\/(.+)$/, (route) => {   // plugin repo files (assets, motion library) → local copy
-    const f = path.join(KIT_DIR, '..', decodeURIComponent(route.request().url().match(/motion-forge@[^/]+\/(.+)$/)[1]).split('?')[0]);
-    return fs.existsSync(f) ? route.fulfill({ path: f }) : route.continue();
-  });
+  await routeAssets(page);
   const server = await startStaticServer();
   await page.goto(server.origin + path.resolve(input) + (flag('--fast') ? '?fast=1' : ''));
   await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });

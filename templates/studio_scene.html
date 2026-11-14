@@ -7,6 +7,13 @@
 <title>Motion Video Scene</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <style>html,body{margin:0;height:100%;overflow:hidden;background:#0b78d0}canvas{display:block;width:100%;height:100%;object-fit:contain}</style>
+<script>/* Artifact hosting: model/data files ship as base64 .txt listed in mf-pack.json (scripts/pack_scene.js) */
+(() => { const of = window.fetch.bind(window); let pack;
+  const load = () => (pack ??= of('mf-pack.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({})));
+  window.fetch = async (u, o) => { const s = String(u?.url ?? u).split('?')[0], P = await load();
+    for (const k in P) if (s === k || s.endsWith('/' + k)) { const r = await of(P[k]); if (!r.ok) break;
+      const b = atob((await r.text()).trim()), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return new Response(a.buffer, { status: 200 }); }
+    return of(u, o); }; })();</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head><body>
 <script type="module">
@@ -517,6 +524,7 @@ function drawCaptions(t, w, h) {
 /* ---------- motion graphics: kinetic titles drawn into the video (TITLES in DIRECTION) ---------- */
 // { t, t1, text, style, pos:[x,y] (0..1), size (0..1 of short side), color, accent, sub, from, to, prefix, suffix, value, angle }
 // styles: slam · stack · typewriter · counter · glitch · lower-third · stamp · meter · ring · tag
+// explainer: callout · pulse · inset · chart · bars · list · card · timeline · arrow · icon · bubble · scan   (at: 'hero.heart' tracks a body part)
 const FONT = '"Montserrat", "Inter", "Arial Black", "Helvetica Neue", Arial, sans-serif';
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function outlinedText(g, txt, x, y, size, fill, stroke = 'rgba(0,0,0,.85)', glow = null) {
@@ -524,12 +532,111 @@ function outlinedText(g, txt, x, y, size, fill, stroke = 'rgba(0,0,0,.85)', glow
   if (glow) { g.save(); g.shadowColor = glow; g.shadowBlur = size * 0.5; g.fillStyle = fill; g.fillText(txt, x, y); g.restore(); }
   g.fillStyle = fill; g.fillText(txt, x, y);
 }
+/* ---------- explainer graphics: body anchors, icons, panels, micro-view insets ---------- */
+// at: 'hero.heart' | 'hero.head' | [x,y,z] (world) → follows the body/camera every frame
+const BODY = { head: ['head', 0, 0.08, 0.03], brain: ['head', 0, 0.13, 0.01], face: ['head', 0, 0.08, 0.1], eyes: ['head', 0, 0.09, 0.1], mouth: ['head', 0, 0.02, 0.1],
+  throat: ['neck', 0, 0, 0.06], chest: ['spine2', 0, 0.05, 0.13], heart: ['spine2', 0.065, 0.03, 0.11], lungs: ['spine2', -0.06, 0.06, 0.1], stomach: ['spine1', 0.03, 0.06, 0.14],
+  liver: ['spine1', -0.07, 0.08, 0.12], belly: ['spine1', 0, -0.02, 0.16], fat: ['spine1', 0, -0.02, 0.17], gut: ['spine', 0, 0.03, 0.14], hips: ['hips', 0, 0, 0.1],
+  lefthand: ['lefthand', 0, 0, 0], righthand: ['righthand', 0, 0, 0], leftarm: ['leftarm', 0, 0, 0.04], rightarm: ['rightarm', 0, 0, 0.04], leftknee: ['leftleg', 0, 0, 0.06],
+  rightknee: ['rightleg', 0, 0, 0.06], skin: ['leftforearm', 0, 0, 0.04], feet: ['hips', 0, -0.85, 0.1] };
+const BODY_Y = { head: 0.97, brain: 1.0, face: 0.96, eyes: 0.96, mouth: 0.92, throat: 0.86, chest: 0.78, heart: 0.77, lungs: 0.78, stomach: 0.68, liver: 0.7, belly: 0.62, fat: 0.62, gut: 0.57, hips: 0.52, feet: 0.03 };
+const _av = new THREE.Vector3(), _aq = new THREE.Quaternion();
+function anchorWorld(at) {
+  if (Array.isArray(at)) return _av.set(at[0], at[1], at[2]);
+  const [id, part0 = 'head'] = String(at).split('.'), ch = characters[id]; if (!ch || !ch.root.visible) return null;
+  const part = part0.toLowerCase().replace(/[^a-z]/g, ''), B = BODY[part] || BODY.chest, s = (ch.def.height || 1.8) / 1.8, b = ch.bones[B[0]];
+  ch.root.getWorldQuaternion(_aq);
+  if (b) b.getWorldPosition(_av); else { ch.root.getWorldPosition(_av); _av.y += (BODY_Y[part] ?? 0.75) * (ch.def.height || 1.8); }
+  return _av.add(new THREE.Vector3(B[1] * s, b ? B[2] * s : 0, B[3] * s).applyQuaternion(_aq));
+}
+function anchorScreen(at, w, h) {   // → [x, y] pixels, or null when off-camera
+  if (at && !Array.isArray(at) && typeof at === 'object') return [at.x * w, at.y * h];
+  if (Array.isArray(at) && at.length === 2) return [at[0] * w, at[1] * h];
+  const p = anchorWorld(at); if (!p) return null; p.project(camera); if (p.z > 1 || p.z < -1) return null;
+  return [(p.x * 0.5 + 0.5) * w, (-p.y * 0.5 + 0.5) * h];
+}
+const ICON_PATHS = {
+  heart: 'M12 21.3l-1.4-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5L12 21.3z',
+  bolt: 'M7 2v11h3v9l7-12h-4l4-8z', drop: 'M12 2.7c-.3.4-7 7.9-7 12.3a7 7 0 0 0 14 0c0-4.4-6.7-11.9-7-12.3z',
+  flame: 'M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z',
+  warning: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z', star: 'M12 17.3l6.2 3.7-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z',
+  eye: 'M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+  moon: 'M12.3 2.5a9.5 9.5 0 1 0 9.2 11.8A7.5 7.5 0 0 1 12.3 2.5z',
+};
+const ICON_COLOR = { check: '#3ddc84', cross: '#ff4d4d', heart: '#ff4d6d', warning: '#ffb020', flame: '#ff7a1a', bolt: '#ffe14d', drop: '#4db8ff', brain: '#ff8fb3', sugar: '#ffffff', up: '#3ddc84', down: '#ff4d4d' };
+function drawIcon(g, name, x, y, s, color) {   // s = icon size in px, centered on x,y
+  const col = color || ICON_COLOR[name] || '#ffffff'; g.save(); g.translate(x, y); g.lineCap = 'round'; g.lineJoin = 'round';
+  const st = (f) => { g.strokeStyle = col; g.lineWidth = s * 0.14; g.beginPath(); f(); g.stroke(); };
+  switch (name) {
+    case 'check': st(() => { g.moveTo(-s * .32, 0); g.lineTo(-s * .08, s * .24); g.lineTo(s * .34, -s * .26); }); break;
+    case 'cross': st(() => { g.moveTo(-s * .26, -s * .26); g.lineTo(s * .26, s * .26); g.moveTo(s * .26, -s * .26); g.lineTo(-s * .26, s * .26); }); break;
+    case 'plus': st(() => { g.moveTo(-s * .3, 0); g.lineTo(s * .3, 0); g.moveTo(0, -s * .3); g.lineTo(0, s * .3); }); break;
+    case 'minus': st(() => { g.moveTo(-s * .3, 0); g.lineTo(s * .3, 0); }); break;
+    case 'up': case 'down': { const d = name === 'up' ? -1 : 1; st(() => { g.moveTo(0, -d * s * .34); g.lineTo(0, d * s * .34); g.moveTo(-s * .26, d * s * .08); g.lineTo(0, d * s * .34); g.lineTo(s * .26, d * s * .08); }); break; }
+    case 'clock': st(() => { g.arc(0, 0, s * .38, 0, 7); g.moveTo(0, 0); g.lineTo(0, -s * .22); g.moveTo(0, 0); g.lineTo(s * .16, s * .08); }); break;
+    case 'battery': { g.strokeStyle = col; g.lineWidth = s * .08; roundRect(g, -s * .4, -s * .2, s * .72, s * .4, s * .06); g.stroke(); g.fillStyle = col; g.fillRect(s * .34, -s * .08, s * .07, s * .16); break; }
+    case 'sugar': { const a = s * .3; g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(0, -a); g.lineTo(a, -a / 2); g.lineTo(0, 0); g.lineTo(-a, -a / 2); g.fill();
+      g.fillStyle = '#d9dde6'; g.beginPath(); g.moveTo(-a, -a / 2); g.lineTo(0, 0); g.lineTo(0, a); g.lineTo(-a, a / 2); g.fill();
+      g.fillStyle = '#b3b9c6'; g.beginPath(); g.moveTo(a, -a / 2); g.lineTo(0, 0); g.lineTo(0, a); g.lineTo(a, a / 2); g.fill(); break; }
+    case 'brain': { g.fillStyle = col; for (const [cx, cy, r] of [[-.17, -.1, .2], [.17, -.1, .2], [-.24, .1, .16], [.24, .1, .16], [-.05, -.24, .14], [.08, -.24, .14], [0, .14, .16]]) { g.beginPath(); g.arc(cx * s, cy * s, r * s, 0, 7); g.fill(); }
+      g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = s * .04; g.beginPath(); g.moveTo(0, -s * .34); g.bezierCurveTo(-s * .06, -s * .1, s * .06, 0, 0, s * .26); g.stroke(); break; }
+    default: { const p = ICON_PATHS[name]; if (!p) break; g.scale(s / 24, s / 24); g.translate(-12, -12); g.fillStyle = col; g.fill(new Path2D(p)); }
+  }
+  g.restore();
+}
+function glassPanel(g, x, y, w, h, acc, r) {
+  g.save(); g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = h * 0.12; g.fillStyle = 'rgba(12,14,22,.8)'; roundRect(g, x, y, w, h, r ?? Math.min(w, h) * 0.08); g.fill(); g.restore();
+  g.save(); g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = Math.max(1, h * 0.006); roundRect(g, x, y, w, h, r ?? Math.min(w, h) * 0.08); g.stroke();
+  if (acc) { g.beginPath(); roundRect(g, x, y, w, h, r ?? Math.min(w, h) * 0.08); g.clip(); g.fillStyle = acc; g.fillRect(x, y, w, Math.max(3, h * 0.025)); } g.restore();
+}
+function wrapLines(g, text, maxW) { const out = []; for (const para of String(text).split('\n')) { let ln = ''; for (const wd of para.split(' ')) { const tr = ln ? ln + ' ' + wd : wd; if (g.measureText(tr).width > maxW && ln) { out.push(ln); ln = wd; } else ln = tr; } out.push(ln); } return out; }
+// micro-view inset content (magnified "inside the body" circle): fat · blood · neurons · artery · cells
+function drawMicro(g, kind, R, t, level, acc) {
+  const L = clamp(level ?? 1), rnd = (i, k) => hash(i * 13.7 + k * 3.1);
+  switch (kind) {
+    case 'fat': {
+      let gr = g.createRadialGradient(0, 0, 0, 0, 0, R); gr.addColorStop(0, '#f7c6b4'); gr.addColorStop(1, '#c97d72'); g.fillStyle = gr; g.fillRect(-R, -R, 2 * R, 2 * R);
+      for (let i = 0; i < 19; i++) { const a = i * 2.39996, d = Math.sqrt(i / 19) * R * 0.86, cx = Math.cos(a) * d, cy = Math.sin(a) * d, r = R * (0.12 + 0.12 * L) * (0.85 + 0.3 * rnd(i, 1)) * (1 + 0.03 * Math.sin(t * 3 + i));
+        const cg = g.createRadialGradient(cx - r * .3, cy - r * .35, r * .1, cx, cy, r); cg.addColorStop(0, '#fff3c4'); cg.addColorStop(0.6, '#f5c84c'); cg.addColorStop(1, '#d99a2b');
+        g.fillStyle = cg; g.beginPath(); g.ellipse(cx, cy, r, r * (0.88 + 0.1 * rnd(i, 2)), a, 0, 7); g.fill(); g.strokeStyle = 'rgba(150,80,40,.55)'; g.lineWidth = R * 0.012; g.stroke(); }
+      break; }
+    case 'blood': case 'artery': {
+      const art = kind === 'artery'; g.fillStyle = '#3a0910'; g.fillRect(-R, -R, 2 * R, 2 * R);
+      const wall = R * 0.62, plaque = art ? L * wall * 0.62 : 0, open = wall - plaque;
+      g.fillStyle = '#d8606a'; g.fillRect(-R, -wall - R * 0.16, 2 * R, R * 0.16); g.fillRect(-R, wall, 2 * R, R * 0.16);
+      if (art) { g.fillStyle = '#f2c94c'; g.beginPath(); g.moveTo(-R, -wall); for (let x = -R; x <= R; x += R / 12) g.lineTo(x, -wall + plaque * (0.75 + 0.25 * Math.sin(x / R * 3))); g.lineTo(R, -wall); g.fill();
+        g.beginPath(); g.moveTo(-R, wall); for (let x = -R; x <= R; x += R / 12) g.lineTo(x, wall - plaque * 0.6 * (0.75 + 0.25 * Math.cos(x / R * 2.5))); g.lineTo(R, wall); g.fill(); }
+      g.fillStyle = '#7a1420'; g.fillRect(-R, -open, 2 * R, open * 2 * (art ? 0.85 : 1));
+      const n = art ? 16 : 22, sp = art ? 0.35 + (1 - L) * 0.6 : 0.6;
+      for (let i = 0; i < n; i++) { const x = ((rnd(i, 1) * 2 * R + t * R * sp * (0.8 + 0.4 * rnd(i, 2))) % (2.4 * R)) - 1.2 * R, y = (rnd(i, 3) - 0.5) * open * 1.4, r = R * 0.1;
+        const cg = g.createRadialGradient(x, y, r * .2, x, y, r); cg.addColorStop(0, '#9e1b28'); cg.addColorStop(0.55, '#d63445'); cg.addColorStop(1, '#8a1220'); g.fillStyle = cg; g.beginPath(); g.ellipse(x, y, r, r * 0.62, rnd(i, 4) * 3, 0, 7); g.fill(); }
+      if (!art) for (let i = 0; i < Math.round(L * 26); i++) { const x = ((rnd(i, 7) * 2 * R + t * R * 0.5) % (2.4 * R)) - 1.2 * R, y = (rnd(i, 8) - 0.5) * open * 1.5, a = R * 0.05;
+        g.save(); g.translate(x, y); g.rotate(t * 2 + i); g.fillStyle = '#ffffff'; g.shadowColor = '#fff'; g.shadowBlur = a; g.fillRect(-a, -a, 2 * a, 2 * a); g.restore(); }
+      break; }
+    case 'neurons': {
+      g.fillStyle = '#0a1230'; g.fillRect(-R, -R, 2 * R, 2 * R); const P = [...Array(7)].map((_, i) => [(rnd(i, 1) - 0.5) * 1.5 * R, (rnd(i, 2) - 0.5) * 1.5 * R]);
+      g.strokeStyle = 'rgba(140,170,255,.55)'; g.lineWidth = R * 0.03;
+      for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) { if (rnd(i * 7 + j, 5) > 0.45) continue; g.beginPath(); g.moveTo(...P[i]); g.quadraticCurveTo(0, 0, ...P[j]); g.stroke();
+        const k = ((t * (0.4 + 1.6 * L) + rnd(i, j)) % 1); const x = (1 - k) ** 2 * P[i][0] + 2 * (1 - k) * k * 0 + k * k * P[j][0], y = (1 - k) ** 2 * P[i][1] + k * k * P[j][1];
+        g.save(); g.fillStyle = acc || '#ffe14d'; g.shadowColor = acc || '#ffe14d'; g.shadowBlur = R * 0.12 * (0.3 + L); g.beginPath(); g.arc(x, y, R * 0.035 * (0.6 + L), 0, 7); g.fill(); g.restore(); }
+      for (const [x, y] of P) { const cg = g.createRadialGradient(x, y, 0, x, y, R * 0.11); cg.addColorStop(0, '#e6ecff'); cg.addColorStop(1, '#5a74d6'); g.fillStyle = cg; g.beginPath(); g.arc(x, y, R * 0.09, 0, 7); g.fill(); }
+      break; }
+    default: {   // generic cells (muscle / skin / gut): tinted cells that pulse with level
+      g.fillStyle = '#2a0e1c'; g.fillRect(-R, -R, 2 * R, 2 * R);
+      for (let i = 0; i < 26; i++) { const a = i * 2.39996, d = Math.sqrt(i / 26) * R * 0.9, cx = Math.cos(a) * d, cy = Math.sin(a) * d, r = R * 0.15 * (0.7 + 0.5 * L);
+        const cg = g.createRadialGradient(cx, cy, r * .1, cx, cy, r); cg.addColorStop(0, '#ffd1e0'); cg.addColorStop(1, acc || '#d9487a'); const ga = g.globalAlpha; g.globalAlpha = ga * 0.85; g.fillStyle = cg; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); g.globalAlpha = ga; }
+    }
+  }
+}
+const rgba = (c, a) => { let m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(c)); if (!m) return c; let x = m[1]; if (x.length === 3) x = [...x].map((q) => q + q).join(""); const n = parseInt(x, 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const ANCHORED = new Set(['callout', 'pulse', 'inset', 'arrow', 'bubble']);
 function drawTitles(t, w, h) {
   const g = capCtx, S = Math.min(w, h);
   for (const T of (typeof TITLES !== 'undefined' ? TITLES : [])) {
     const t0 = T.t, t1 = T.t1 ?? t0 + 2; if (t < t0 - 0.2 || t > t1 + 0.4) continue;
     const p = clamp((t - t0) / 0.22), out = 1 - clamp((t - t1) / 0.25), lt = t - t0;
-    const size = (T.size ?? 0.1) * S, [px, py] = T.pos || [0.5, 0.3], X = px * w, Y = py * h;
+    const size = (T.size ?? 0.1) * S, [px, py] = T.pos || [0.5, 0.3]; let X = px * w, Y = py * h;
+    if (T.at && !ANCHORED.has(T.style)) { const A = anchorScreen(T.at, w, h); if (!A) continue; X = A[0] + (T.offset?.[0] ?? 0) * w; Y = A[1] + (T.offset?.[1] ?? 0) * h; }
     const col = T.color || '#ffffff', acc = T.accent || '#ffe14d';
     g.save(); g.globalAlpha = out; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${size}px ${FONT}`;
     switch (T.style || 'slam') {
@@ -591,6 +698,135 @@ function drawTitles(t, w, h) {
         if (t < t0) break; const e = EASE.outBack(clamp(lt / 0.25)); g.font = `800 ${size * 0.42}px ${FONT}`; const tw = g.measureText(T.text).width + size * 0.9, th = size * 0.8;
         g.translate(X, Y); g.scale(e, e); g.fillStyle = T.bg || 'rgba(10,12,18,.78)'; roundRect(g, -tw / 2, -th / 2, tw, th, th / 2); g.fill();
         g.fillStyle = acc; g.beginPath(); g.arc(-tw / 2 + th * 0.45, 0, th * 0.13, 0, 7); g.fill(); g.fillStyle = col; g.fillText(T.text, th * 0.12, size * 0.02); break; }
+      case 'callout': {   // label with a leader line that tracks a body part / 3D point: { at: 'hero.heart', text, sub, icon, side }
+        const A = T.at ? anchorScreen(T.at, w, h) : [X, Y]; if (!A) break;
+        const side = T.side ?? (A[0] < w / 2 ? 1 : -1), L = T.pos ? [X, Y] : [A[0] + side * w * 0.22, A[1] - h * 0.07];
+        const e1 = EASE.outCubic(clamp(lt / 0.3)), e2 = EASE.outCubic(clamp((lt - 0.22) / 0.3)), pulse = 1 + 0.25 * Math.sin(t * 7);
+        g.fillStyle = acc; g.beginPath(); g.arc(A[0], A[1], S * 0.012 * EASE.outBack(clamp(lt / 0.2)), 0, 7); g.fill();
+        g.strokeStyle = acc; g.globalAlpha = out * 0.5; g.lineWidth = S * 0.004; g.beginPath(); g.arc(A[0], A[1], S * 0.026 * pulse, 0, 7); g.stroke(); g.globalAlpha = out;
+        const E = [L[0] - side * size * 0.3, clamp(L[1], h * 0.05, h * 0.95)], mx = A[0] + (E[0] - A[0]) * Math.min(1, e1 * 1.6), my = A[1] + (E[1] - A[1]) * Math.min(1, e1 * 1.6);
+        g.lineWidth = S * 0.006; g.lineCap = 'round'; g.beginPath(); g.moveTo(A[0], A[1]); g.lineTo(mx, my); g.stroke();
+        if (e2 > 0) { g.font = `900 ${size * 0.62}px ${FONT}`; g.textAlign = side > 0 ? 'left' : 'right'; const ic = T.icon ? size * 0.75 : 0, tw = Math.max(g.measureText(T.text || '').width, (g.font = `700 ${size * 0.36}px ${FONT}`, g.measureText(T.sub || '').width));
+          const ext = tw + ic + size * 0.35; if (side > 0 && E[0] + ext > w * 0.96) E[0] = w * 0.96 - ext; if (side < 0 && E[0] - ext < w * 0.04) E[0] = w * 0.04 + ext;
+          g.beginPath(); g.moveTo(E[0], E[1]); g.lineTo(E[0] + side * (tw + ic + size * 0.3) * e2, E[1]); g.stroke();
+          g.save(); g.globalAlpha = out * e2; const tx = E[0] + side * (size * 0.2 + ic);
+          if (T.icon) drawIcon(g, T.icon, E[0] + side * size * 0.5, E[1] - size * 0.42, size * 0.62, T.iconColor);
+          g.font = `900 ${size * 0.62}px ${FONT}`; outlinedText(g, T.text || '', tx, E[1] - size * 0.42, size * 0.62, col);
+          if (T.sub) { g.font = `700 ${size * 0.36}px ${FONT}`; outlinedText(g, T.sub, tx, E[1] + size * 0.32, size * 0.36, acc); }
+          g.restore(); }
+        break; }
+      case 'pulse': {   // glowing highlight on a body part / object (organ scan): { at: 'hero.heart', text?, beat?: bpm }
+        const A = T.at ? anchorScreen(T.at, w, h) : [X, Y]; if (!A) break; const r = (T.radius ?? 0.07) * S, bpm = T.beat ?? 0;
+        const beat = bpm ? Math.exp(-((lt * bpm / 60) % 1) * 6) : 0.5 + 0.5 * Math.sin(t * 4), e = EASE.outBack(clamp(lt / 0.3));
+        g.save(); g.globalCompositeOperation = 'lighter'; const gr = g.createRadialGradient(A[0], A[1], 0, A[0], A[1], r * 1.6 * e * (1 + 0.15 * beat));
+        gr.addColorStop(0, acc); gr.addColorStop(0.35, rgba(acc, 0.53)); gr.addColorStop(1, rgba(acc, 0)); g.fillStyle = gr; g.globalAlpha = out * (0.55 + 0.35 * beat); g.beginPath(); g.arc(A[0], A[1], r * 1.6 * e * 1.15, 0, 7); g.fill(); g.restore();
+        for (let k = 0; k < 3; k++) { const ph = ((lt * 0.9 + k / 3) % 1); g.strokeStyle = acc; g.globalAlpha = out * (1 - ph) * 0.8; g.lineWidth = S * 0.005; g.beginPath(); g.arc(A[0], A[1], r * (0.6 + ph * 1.4), 0, 7); g.stroke(); }
+        g.globalAlpha = out; if (T.text) { g.font = `900 ${size * 0.55}px ${FONT}`; outlinedText(g, T.text, A[0], A[1] - r * 2.1, size * 0.55, acc); }
+        break; }
+      case 'inset': {   // magnified "inside the body" view linked to a body part: { at, kind: fat|blood|neurons|artery|cells, level: keys 0..1, text, sub }
+        const A = T.at ? anchorScreen(T.at, w, h) : null, R = (T.radius ?? 0.2) * S, e = EASE.outBack(clamp(lt / 0.4)); let C = [X, Y];
+        if (!T.pos && A) { const F = anchorScreen((String(T.at).split('.')[0] || 'hero') + '.face', w, h) || [w / 2, 0]; C = [F[0] < w / 2 ? w - R - w * 0.05 : R + w * 0.05, clamp(A[1], F[1] + R + h * 0.06, h - R - h * 0.12)]; }
+        if (A) { const dx = C[0] - A[0], dy = C[1] - A[1], d = Math.hypot(dx, dy), a = Math.atan2(dy, dx), sp = Math.asin(Math.min(1, R * e / Math.max(d, 1)));
+          g.fillStyle = 'rgba(255,255,255,.10)'; g.beginPath(); g.moveTo(A[0], A[1]); g.lineTo(A[0] + Math.cos(a - sp) * d, A[1] + Math.sin(a - sp) * d); g.lineTo(A[0] + Math.cos(a + sp) * d, A[1] + Math.sin(a + sp) * d); g.closePath(); g.fill();
+          g.fillStyle = acc; g.beginPath(); g.arc(A[0], A[1], S * 0.012, 0, 7); g.fill(); g.strokeStyle = acc; g.lineWidth = S * 0.004; g.beginPath(); g.arc(A[0], A[1], S * 0.03, 0, 7); g.stroke(); }
+        if (e > 0.01) { g.save(); g.translate(C[0], C[1]); g.scale(e, e); g.beginPath(); g.arc(0, 0, R, 0, 7); g.save(); g.clip(); drawMicro(g, T.kind || 'cells', R, t, key(T.level, lt) ?? 1, acc);
+          const sh = g.createRadialGradient(0, 0, R * 0.6, 0, 0, R); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = sh; g.fillRect(-R, -R, 2 * R, 2 * R); g.restore();
+          g.lineWidth = S * 0.012; g.strokeStyle = '#ffffff'; g.beginPath(); g.arc(0, 0, R, 0, 7); g.stroke(); g.lineWidth = S * 0.005; g.strokeStyle = acc; g.beginPath(); g.arc(0, 0, R + S * 0.012, 0, 7); g.stroke(); g.restore();
+          if (T.text) { g.font = `900 ${size * 0.55}px ${FONT}`; outlinedText(g, T.text, C[0], C[1] + R + size * 0.5, size * 0.55, col); }
+          if (T.sub) { g.font = `800 ${size * 0.38}px ${FONT}`; outlinedText(g, T.sub, C[0], C[1] + R + size * 1.05, size * 0.38, acc); } }
+        break; }
+      case 'chart': {   // line graph that draws on: { points: [n...], text, labels:[...], marks:[{i, text}], limit, box:[w,h] }
+        const [bwF, bhF] = T.box || [0.84, 0.24], BW = bwF * w, BH = bhF * h, x0 = X - BW / 2, y0 = Y - BH / 2, e0 = EASE.outCubic(clamp(lt / 0.25));
+        g.save(); g.translate(0, (1 - e0) * BH * 0.15); g.globalAlpha = out * e0; glassPanel(g, x0, y0, BW, BH, acc);
+        const pad = BH * 0.14, top = y0 + pad + size * 1.05, gx0 = x0 + pad, gx1 = x0 + BW - pad, gy1 = y0 + BH - pad - (T.labels ? size * 0.4 : 0);
+        g.textAlign = 'left'; g.font = `900 ${size * 0.45}px ${FONT}`; g.fillStyle = col; g.fillText(T.text || '', gx0, y0 + pad + size * 0.12);
+        const P = T.points || [0, 1], lo = T.min ?? Math.min(...P, T.limit ?? Infinity), hi = T.max ?? Math.max(...P, T.limit ?? -Infinity), sx = (i) => gx0 + (gx1 - gx0) * i / (P.length - 1), sy = (v) => gy1 - (gy1 - top) * (v - lo) / ((hi - lo) || 1);
+        g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 1; for (let k = 0; k <= 3; k++) { const yy = top + (gy1 - top) * k / 3; g.beginPath(); g.moveTo(gx0, yy); g.lineTo(gx1, yy); g.stroke(); }
+        if (T.limit !== undefined) { g.setLineDash([S * 0.015, S * 0.012]); g.strokeStyle = '#ff4d4d'; g.lineWidth = S * 0.004; g.beginPath(); g.moveTo(gx0, sy(T.limit)); g.lineTo(gx1, sy(T.limit)); g.stroke(); g.setLineDash([]);
+          if (T.limitText) { g.textAlign = 'right'; g.font = `800 ${size * 0.3}px ${FONT}`; g.fillStyle = '#ff4d4d'; g.fillText(T.limitText, gx1, sy(T.limit) - size * 0.22); g.textAlign = 'left'; } }
+        if (T.labels) { g.font = `700 ${size * 0.28}px ${FONT}`; g.fillStyle = 'rgba(255,255,255,.65)'; g.textAlign = 'center'; T.labels.forEach((lb, i) => g.fillText(lb, gx0 + (gx1 - gx0) * i / Math.max(1, T.labels.length - 1), gy1 + size * 0.42)); }
+        const prog = clamp((lt - 0.2) / (T.dur ?? 1.4)) * (P.length - 1), n = Math.floor(prog), fr = prog - n, pts = P.slice(0, n + 1).map((v, i) => [sx(i), sy(v)]);
+        if (n < P.length - 1) pts.push([sx(n + fr), sy(P[n] + (P[n + 1] - P[n]) * fr)]);
+        if (pts.length > 1) { const fg = g.createLinearGradient(0, top, 0, gy1); fg.addColorStop(0, rgba(acc, 0.4)); fg.addColorStop(1, rgba(acc, 0)); g.fillStyle = fg; g.beginPath(); g.moveTo(pts[0][0], gy1); pts.forEach((p) => g.lineTo(...p)); g.lineTo(pts.at(-1)[0], gy1); g.fill();
+          g.strokeStyle = acc; g.lineWidth = S * 0.008; g.lineJoin = 'round'; g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(...p) : g.moveTo(...p))); g.stroke();
+          g.save(); g.shadowColor = acc; g.shadowBlur = S * 0.03; g.fillStyle = '#fff'; g.beginPath(); g.arc(...pts.at(-1), S * 0.011, 0, 7); g.fill(); g.restore(); }
+        for (const m of T.marks || []) { if (prog < m.i) continue; const k = EASE.outBack(clamp((prog - m.i) / 0.6)), mxp = sx(m.i), myp = sy(P[m.i]); g.save(); g.translate(mxp, myp - size * 0.55 < top ? myp + size * 0.55 : myp - size * 0.55); g.scale(k, k);
+          g.font = `900 ${size * 0.36}px ${FONT}`; g.textAlign = 'center'; const tw = g.measureText(m.text).width + size * 0.4; g.fillStyle = m.color || acc; roundRect(g, -tw / 2, -size * 0.28, tw, size * 0.56, size * 0.14); g.fill();
+          g.fillStyle = '#0b0d14'; g.fillText(m.text, 0, size * 0.02); g.restore(); }
+        g.restore(); break; }
+      case 'bars': {   // comparison bars: { items: [{ label, value, color?, suffix? }], text, max }
+        const items = T.items || [], BW = (T.box?.[0] ?? 0.84) * w, rowH = size * 0.95, BH = rowH * items.length + size * (T.text ? 1.1 : 0.5), x0 = X - BW / 2, y0 = Y - BH / 2;
+        const e0 = EASE.outCubic(clamp(lt / 0.25)), mx = T.max ?? Math.max(...items.map((it) => it.value), 1); g.globalAlpha = out * e0; glassPanel(g, x0, y0, BW, BH, acc);
+        g.textAlign = 'left'; if (T.text) { g.font = `900 ${size * 0.45}px ${FONT}`; g.fillStyle = col; g.fillText(T.text, x0 + size * 0.35, y0 + size * 0.55); }
+        items.forEach((it, i) => { const e = EASE.outCubic(clamp((lt - 0.2 - i * 0.18) / 0.7)), yy = y0 + size * (T.text ? 1.05 : 0.3) + i * rowH, lw = BW * 0.3, bx = x0 + size * 0.35 + lw, bw = (BW - lw - size * 1.6) * it.value / mx * e;
+          g.font = `800 ${size * 0.36}px ${FONT}`; g.fillStyle = col; g.textAlign = 'left'; g.fillText(it.label, x0 + size * 0.35, yy + rowH * 0.4);
+          g.fillStyle = 'rgba(255,255,255,.08)'; roundRect(g, bx, yy + rowH * 0.12, BW - lw - size * 1.6, rowH * 0.56, rowH * 0.16); g.fill();
+          g.fillStyle = it.color || acc; roundRect(g, bx, yy + rowH * 0.12, Math.max(rowH * 0.3, bw), rowH * 0.56, rowH * 0.16); g.fill();
+          g.font = `900 ${size * 0.36}px ${FONT}`; g.fillStyle = '#fff'; g.fillText(Math.round(it.value * e) + (it.suffix ?? T.suffix ?? ''), bx + Math.max(rowH * 0.3, bw) + size * 0.15, yy + rowH * 0.42); });
+        break; }
+      case 'list': {   // checklist that pops in line by line: { items: ['text' | { text, icon }], text?, gap? }
+        const items = (T.items || []).map((it) => (typeof it === 'string' ? { text: it, icon: T.icon || 'check' } : it)), rowH = size * 0.95, gap = T.gap ?? 0.4;
+        g.font = `800 ${size * 0.48}px ${FONT}`; const tw = Math.max(...items.map((it) => g.measureText(it.text).width), T.text ? (g.font = `900 ${size * 0.5}px ${FONT}`, g.measureText(T.text).width) : 0);
+        const BW = Math.min(w * 0.9, tw + size * 1.9), BH = rowH * items.length + size * (T.text ? 1.15 : 0.45), x0 = X - BW / 2, y0 = Y - BH / 2, e0 = EASE.outCubic(clamp(lt / 0.2));
+        g.globalAlpha = out * e0; if (T.panel !== false) glassPanel(g, x0, y0, BW, BH, acc); g.textAlign = 'left';
+        if (T.text) { g.font = `900 ${size * 0.5}px ${FONT}`; outlinedText(g, T.text, x0 + size * 0.4, y0 + size * 0.6, size * 0.5, acc); }
+        items.forEach((it, i) => { const e = clamp((lt - 0.15 - i * gap) / 0.25); if (e <= 0) return; const yy = y0 + size * (T.text ? 1.15 : 0.45) + i * rowH + rowH * 0.4, k = EASE.outBack(e);
+          g.save(); g.globalAlpha = out * Math.min(1, e * 2); g.translate((1 - EASE.outCubic(e)) * -size, 0);
+          g.save(); g.translate(x0 + size * 0.75, yy); g.scale(k, k); g.fillStyle = 'rgba(255,255,255,.1)'; g.beginPath(); g.arc(0, 0, size * 0.34, 0, 7); g.fill(); drawIcon(g, it.icon || 'check', 0, 0, size * 0.62, it.color); g.restore();
+          g.font = `800 ${size * 0.48}px ${FONT}`; outlinedText(g, it.text, x0 + size * 1.3, yy, size * 0.48, it.strike ? 'rgba(255,255,255,.55)' : col);
+          if (it.strike) { const sw = g.measureText(it.text).width * EASE.outCubic(clamp((lt - 0.45 - i * gap) / 0.3)); g.strokeStyle = '#ff4d4d'; g.lineWidth = size * 0.07; g.beginPath(); g.moveTo(x0 + size * 1.3, yy); g.lineTo(x0 + size * 1.3 + sw, yy); g.stroke(); }
+          g.restore(); });
+        break; }
+      case 'card': {   // info card that slides in: { text (title), sub (body, \n ok), icon, enter: 'left'|'right'|'up' }
+        g.font = `700 ${size * 0.4}px ${FONT}`; const BW = (T.box?.[0] ?? 0.78) * w, ic = T.icon ? size * 1.3 : 0, body = T.sub ? wrapLines(g, T.sub, BW - ic - size * 0.9) : [];
+        const BH = size * 0.9 + body.length * size * 0.52 + size * 0.35, e = EASE.outCubic(clamp(lt / 0.35)), dir = T.enter || 'up';
+        const dx = dir === 'left' ? -(1 - e) * w * 0.6 : dir === 'right' ? (1 - e) * w * 0.6 : 0, dy = dir === 'up' ? (1 - e) * h * 0.06 : 0, x0 = X - BW / 2 + dx, y0 = Y - BH / 2 + dy;
+        g.globalAlpha = out * Math.min(1, e * 1.5); glassPanel(g, x0, y0, BW, BH, null); g.fillStyle = acc; roundRect(g, x0, y0, size * 0.12, BH, size * 0.06); g.fill();
+        if (T.icon) { g.save(); g.translate(x0 + size * 0.85, y0 + BH / 2); const k = EASE.outBack(clamp((lt - 0.15) / 0.3)); g.scale(k, k); drawIcon(g, T.icon, 0, 0, size * 0.95, T.iconColor); g.restore(); }
+        g.textAlign = 'left'; g.font = `900 ${size * 0.55}px ${FONT}`; g.fillStyle = col; g.fillText(T.text || '', x0 + size * 0.45 + ic, y0 + size * 0.62);
+        g.font = `700 ${size * 0.4}px ${FONT}`; g.fillStyle = 'rgba(255,255,255,.8)'; body.forEach((ln, i) => g.fillText(ln, x0 + size * 0.45 + ic, y0 + size * 1.2 + i * size * 0.52));
+        break; }
+      case 'timeline': {   // story progress bar across the video: { t, t1, marks: [{ t, text }] } (global times)
+        const M = T.marks || [], BW = w * 0.84, x0 = (w - BW) / 2, yy = Y, e0 = EASE.outCubic(clamp(lt / 0.3)); if (!M.length) break;
+        let cur = -1; M.forEach((m, i) => { if (t >= m.t) cur = i; });
+        const xi = (i) => x0 + BW * i / Math.max(1, M.length - 1), nx = cur < 0 ? x0 : cur >= M.length - 1 ? xi(M.length - 1) : xi(cur) + (xi(cur + 1) - xi(cur)) * EASE.inOutSine(clamp((t - M[cur].t) / Math.max(0.01, M[cur + 1].t - M[cur].t)));
+        g.globalAlpha = out * e0; g.fillStyle = 'rgba(0,0,0,.45)'; roundRect(g, x0, yy - S * 0.006, BW, S * 0.012, S * 0.006); g.fill();
+        const fg = g.createLinearGradient(x0, 0, x0 + BW, 0); fg.addColorStop(0, T.color2 || acc); fg.addColorStop(1, acc); g.fillStyle = fg; roundRect(g, x0, yy - S * 0.006, Math.max(S * 0.012, nx - x0), S * 0.012, S * 0.006); g.fill();
+        M.forEach((m, i) => { const on = i <= cur, big = i === cur, k = big ? 1 + 0.25 * Math.exp(-(t - m.t) * 6) : 1; g.fillStyle = on ? acc : 'rgba(255,255,255,.5)'; g.beginPath(); g.arc(xi(i), yy, S * (big ? 0.018 : 0.011) * k, 0, 7); g.fill();
+          g.textAlign = 'center'; g.font = `${big ? 900 : 700} ${size * (big ? 0.42 : 0.26) * k}px ${FONT}`; const lx = clamp(xi(i), w * 0.04 + g.measureText(m.text).width / 2, w * 0.96 - g.measureText(m.text).width / 2); if (big || T.allLabels) outlinedText(g, m.text, lx, yy + (big ? -size * 0.55 : size * 0.45), size * (big ? 0.42 : 0.26), big ? acc : col); });
+        break; }
+      case 'arrow': {   // { path: [from, to] (each [x,y] 0..1 or an anchor like 'hero.heart'), bend, text }  ·  trend arrow: { dir: 'up'|'down', text }
+        if (T.dir) { const up = T.dir === 'up', c2 = T.accent || (up ? '#3ddc84' : '#ff4d4d'), e = EASE.outBack(clamp(lt / 0.3)), bob = Math.sin(lt * 9) * size * 0.06 * (up ? -1 : 1);
+          g.font = `900 ${size}px ${FONT}`; const tw = T.text ? g.measureText(T.text).width : 0; if (T.text) outlinedText(g, T.text, X - size * 0.45, Y, size, col);
+          g.save(); g.translate(X + tw / 2 + size * 0.2, Y + bob); g.scale(e, e); drawIcon(g, T.dir, 0, 0, size * 1.3, c2); g.restore(); break; }
+        const [P0, P1] = (T.path || [[0.3, 0.3], [0.6, 0.5]]).map((p) => anchorScreen(p, w, h)); if (!P0 || !P1) break;
+        const mxp = (P0[0] + P1[0]) / 2 - (P1[1] - P0[1]) * (T.bend ?? 0.25), myp = (P0[1] + P1[1]) / 2 + (P1[0] - P0[0]) * (T.bend ?? 0.25), e = EASE.inOutCubic(clamp(lt / (T.dur ?? 0.45)));
+        const bz = (k) => [(1 - k) ** 2 * P0[0] + 2 * (1 - k) * k * mxp + k * k * P1[0], (1 - k) ** 2 * P0[1] + 2 * (1 - k) * k * myp + k * k * P1[1]];
+        g.strokeStyle = acc; g.lineWidth = S * 0.012; g.lineCap = 'round'; g.beginPath(); for (let k = 0; k <= e + 1e-6; k += 0.02) g.lineTo(...bz(Math.min(k, e))); g.stroke();
+        if (e > 0.05) { const [ax, ay] = bz(e), [bx2, by2] = bz(Math.max(0, e - 0.04)), a = Math.atan2(ay - by2, ax - bx2), hs = S * 0.04; g.fillStyle = acc; g.beginPath(); g.moveTo(ax + Math.cos(a) * hs * 0.4, ay + Math.sin(a) * hs * 0.4); g.lineTo(ax + Math.cos(a + 2.5) * hs, ay + Math.sin(a + 2.5) * hs); g.lineTo(ax + Math.cos(a - 2.5) * hs, ay + Math.sin(a - 2.5) * hs); g.fill(); }
+        if (T.text) { g.font = `900 ${size * 0.5}px ${FONT}`; outlinedText(g, T.text, P0[0], P0[1] - size * 0.5, size * 0.5, col); }
+        break; }
+      case 'icon': {   // big icon pop: { icon: heart|brain|bolt|flame|drop|sugar|warning|check|cross|clock|battery|star|eye|moon|up|down|plus|minus, text, beat }
+        const e = EASE.outBack(clamp(lt / 0.3)), bpm = T.beat ?? 0, b = bpm ? 1 + 0.12 * Math.exp(-((lt * bpm / 60) % 1) * 7) : 1 + 0.03 * Math.sin(t * 3);
+        g.save(); g.translate(X, Y + Math.sin(t * 2.2) * size * 0.05); g.scale(e * b, e * b); g.shadowColor = T.iconColor || ICON_COLOR[T.icon] || acc; g.shadowBlur = size * 0.5; drawIcon(g, T.icon || 'star', 0, 0, size * 1.6, T.iconColor); g.restore();
+        if (T.text) { g.font = `900 ${size * 0.5}px ${FONT}`; outlinedText(g, T.text, X, Y + size * 1.15, size * 0.5, col); }
+        break; }
+      case 'bubble': {   // speech / thought bubble on a character: { at: 'hero.head', text, thought? }
+        const A = T.at ? anchorScreen(T.at, w, h) : [X, Y + h * 0.1]; if (!A) break; const e = EASE.outBack(clamp(lt / 0.28));
+        g.font = `800 ${size * 0.5}px ${FONT}`; const lines = wrapLines(g, T.text || '', w * 0.5), bw2 = Math.max(...lines.map((l) => g.measureText(l).width)) + size * 0.9, bh2 = lines.length * size * 0.62 + size * 0.6;
+        const side = T.side ?? (A[0] < w / 2 ? 1 : -1), C = T.pos ? [X, Y] : [clamp(A[0] + side * bw2 * 0.45, bw2 / 2 + w * 0.04, w - bw2 / 2 - w * 0.04), A[1] - h * 0.11];
+        g.save(); g.translate(C[0], C[1]); g.scale(e, e); g.fillStyle = '#ffffff'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = size * 0.4; roundRect(g, -bw2 / 2, -bh2 / 2, bw2, bh2, size * 0.4); g.fill(); g.shadowBlur = 0;
+        const tx = (A[0] - C[0]) / e, ty = (A[1] - C[1]) / e;
+        if (T.thought) [0.35, 0.6, 0.8].forEach((k, i) => { g.beginPath(); g.arc(tx * k * 0.9, bh2 / 2 * (1 - k) + ty * k * 0.9, size * (0.16 - i * 0.04), 0, 7); g.fill(); });
+        else { g.beginPath(); g.moveTo(-size * 0.25 * side, bh2 / 2 - 2); g.lineTo(tx * 0.55, bh2 / 2 + (ty - bh2 / 2) * 0.55); g.lineTo(size * 0.25 * side, bh2 / 2 - 2); g.fill(); }
+        g.fillStyle = '#10131c'; lines.forEach((ln, i) => g.fillText(ln, 0, (i - (lines.length - 1) / 2) * size * 0.62)); g.restore();
+        break; }
+      case 'scan': {   // x-ray scan sweep over the frame: { t, t1, color? }
+        const k = clamp(lt / Math.max(0.3, t1 - t0)), yy = k * h, c2 = T.color || '#4dd8ff'; g.save(); g.globalCompositeOperation = 'lighter';
+        const gr = g.createLinearGradient(0, yy - h * 0.12, 0, yy); gr.addColorStop(0, rgba(c2, 0)); gr.addColorStop(1, rgba(c2, 0.33)); g.fillStyle = gr; g.fillRect(0, yy - h * 0.12, w, h * 0.12);
+        g.fillStyle = c2; g.fillRect(0, yy - 2, w, 4); g.globalAlpha = out * 0.12; g.strokeStyle = c2; g.lineWidth = 1;
+        for (let x = 0; x < w; x += w / 18) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, yy); g.stroke(); } for (let y = 0; y < yy; y += w / 18) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+        g.restore(); break; }
     }
     g.restore();
   }
@@ -737,7 +973,7 @@ function upgradeMaterials(root, def = {}) {
           else if (isHat && wardrobe.hat) recolor(p, wardrobe.hat, wardrobe.hat, -1e9);
           else if (!isShoe && !isHat && (wardrobe.top || wardrobe.bottom)) {
             const top = wardrobe.top || null, bot = wardrobe.bottom || null;
-            const det = wardrobe.print ? 1 : 0.3;
+            const det = wardrobe.print ? 1 : 0;
             if (bb.min.y > waist) recolor(p, top, top, -1e9, det); else if (bb.max.y < waist) recolor(p, bot, bot, -1e9, det); else recolor(p, top, bot, waist, det);
           }
         }
@@ -1553,6 +1789,10 @@ function collectSound() {
   });
   if (auto) for (const T of (typeof TITLES !== 'undefined' ? TITLES : [])) ({ slam: () => add(T.t, 'hit', 0.9), tag: () => add(T.t, 'pop'), stamp: () => add(T.t, 'stamp'), glitch: () => add(T.t, 'glitch', 0.7), 'lower-third': () => add(T.t, 'swoosh', 0.6), ring: () => add(T.t, 'pop', 0.6),
     typewriter: () => add(T.t, 'typing', 0.6, Math.min((T.text || '').length / (T.rate ?? 22), (T.t1 ?? T.t + 2) - T.t)), meter: () => add(T.t + 0.15, 'swell', 0.6),
+    callout: () => add(T.t, 'pop', 0.5), pulse: () => (T.beat ? [0, 1, 2].forEach((k) => add(T.t + k * 60 / T.beat, 'heartbeat', 0.7)) : add(T.t, 'shimmer', 0.4)), inset: () => { add(T.t, 'swoosh', 0.6); add(T.t + 0.25, 'shimmer', 0.4); },
+    chart: () => { add(T.t, 'swoosh', 0.5); add(T.t + 0.2, 'swell', 0.5); }, bars: () => { add(T.t, 'swoosh', 0.5); (T.items || []).forEach((_, i) => add(T.t + 0.2 + i * 0.18, 'tick', 0.6)); },
+    list: () => (T.items || []).forEach((_, i) => add(T.t + 0.15 + i * (T.gap ?? 0.4), 'pop', 0.6)), card: () => add(T.t, 'swoosh', 0.6), arrow: () => add(T.t, 'swoosh', 0.45), icon: () => add(T.t, 'pop', 0.8),
+    bubble: () => add(T.t, 'pop', 0.6), scan: () => add(T.t, 'zap', 0.4), timeline: () => (T.marks || []).forEach((m) => add(m.t, 'tick', 0.6)),
     counter: () => { const d = T.dur ?? 0.9; for (let x = 0; x < d; x += 0.06 + x * 0.08) add(T.t + x, 'tick', 0.5); add(T.t + d, 'ding', 0.8); } }[T.style || 'slam'] || (() => {}))();
   SND.events = ev.sort((a, b) => a.t - b.t); SND.beds = beds; return SND;
 }
