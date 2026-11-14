@@ -76,4 +76,16 @@ function threeRepoFile(tag, rel) {
   } catch { return null; }
 }
 
-module.exports = { launchBrowser, ffmpeg, threeDir, threeRepoFile, DEPS };
+// Tiny local static server (127.0.0.1 only) so scenes can load relative assets (characters/, assets/, …).
+function startStaticServer() {
+  const http = require('http'), TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.mjs': 'application/javascript', '.json': 'application/json', '.glb': 'model/gltf-binary',
+    '.gltf': 'model/gltf+json', '.fbx': 'application/octet-stream', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.bin': 'application/octet-stream' };
+  const srv = http.createServer((req, res) => {
+    const p = decodeURIComponent(req.url.split('?')[0]);
+    fs.stat(p, (err, st) => { if (err || !st.isFile()) { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { 'Content-Type': TYPES[path.extname(p).toLowerCase()] || 'application/octet-stream', 'Access-Control-Allow-Origin': '*' }); fs.createReadStream(p).pipe(res); });
+  });
+  return new Promise((ok) => srv.listen(0, '127.0.0.1', () => ok({ origin: 'http://127.0.0.1:' + srv.address().port, close: () => srv.close() })));
+}
+
+module.exports = { launchBrowser, ffmpeg, threeDir, threeRepoFile, startStaticServer, DEPS };

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Frame-perfect renderer for pages exposing window.__mf = {duration, fps, width?, height?, render(t)}
-// Usage: node render_video.js scene.html out.mp4 [--quality good|high|epic] [--chapter N | --start S --end E] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
-const { launchBrowser, ffmpeg, threeDir, threeRepoFile } = require('./lib/deps');
+// Usage: node render_video.js scene.html out.mp4 [--fast (QA preview shaders)] [--quality good|high|epic] [--chapter N | --start S --end E] [--fps 60] [--width 1920] [--height 1080] [--gif] [--frames-only]
+const { launchBrowser, ffmpeg, threeDir, threeRepoFile, startStaticServer } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 
@@ -28,8 +28,15 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
     try { const resp = await route.fetch({ timeout: 8000 }); if (resp.ok()) return route.fulfill({ response: resp }); } catch {}
     const f = threeRepoFile(tag, rel); return f ? route.fulfill({ path: f }) : route.abort();
   });
-  await page.goto('file://' + path.resolve(input));
-  await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 60000 });
+  // plugin asset kit (characters/animations) → local copy
+  const KIT_DIR = path.join(__dirname, '..', 'assets');
+  await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/motion-forge@[^/]+\/assets\/(.+)$/, (route) => {
+    const f = path.join(KIT_DIR, decodeURIComponent(route.request().url().match(/\/assets\/(.+)$/)[1]));
+    return fs.existsSync(f) ? route.fulfill({ path: f }) : route.continue();
+  });
+  const server = await startStaticServer();
+  await page.goto(server.origin + path.resolve(input) + (flag('--fast') ? '?fast=1' : ''));
+  await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });
   const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height, chapters: __mf.chapters }));
   const ch = opt('--chapter') && mf.chapters ? mf.chapters[+opt('--chapter') - 1] : null;
   const T0 = ch ? ch.start : +opt('--start', 0), T1 = ch ? ch.end : +opt('--end', mf.duration);
@@ -48,7 +55,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
     await page.screenshot({ path: path.join(dir, `f${String(f).padStart(5, '0')}.png`) });
     if (f % fps === 0) process.stdout.write(`\rframe ${f}/${total}`);
   }
-  await browser.close();
+  await browser.close(); server.close();
   console.log(`\nframes -> ${dir}`);
   if (flag('--frames-only')) return;
 
