@@ -23,9 +23,9 @@ the winner, at full quality. Never show drafts, comparisons, "here are 3 options
 - **Inside view**: face + a big 3D lens (`titles: [{ style: 'inset', world: 'blood', pos, radius: 0.24 }]`) or an x-ray body with a red `pulse`.
 - **Danger / scale**: the subject next to the threat (explosion, giant object) with a red circle.
 
-**Background is never empty**: thumbnails default to the `thumb` studio — saturated gradient, hot glow + light rays behind the head,
-colored rim lights. Pick colors per story: `set: { type: 'thumb', id: 'unique', bg, glow, rimA, rimB }` (complementary to the text color;
-warm glow for good, sick green/red for bad). Or use the story's own world (`set: 'street-night'`, a micro world) if it reads at phone size.
+**Background = the story's real place** (neighborhood, school, kitchen, hospital, gym, city…), the same world the video is set in,
+blurred slightly behind the subject, with strong subject lighting. Never cartoon rays or spirals. The `thumb` glow studio is only a
+last resort for abstract topics.
 
 ## 2. CTR rules (score each variant 1–10 on each, keep the best total)
 1. **One focal point**, huge: a face with an extreme emotion (shock, disgust, fear, joy) ≥ 35% of the height, or one striking 3D image (x-ray body, inside-the-body world, explosion).
