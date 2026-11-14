@@ -553,7 +553,7 @@ function buildSet(spec) {
     const lamp = new THREE.PointLight('#ffb35c', 30, 12, 1.8); lamp.position.set(1.8, 4.2, -1.2); g.add(lamp);
     set.extraFx = [{ type: 'beam', pos: [1.8, 4.2, -1.2], to: [1.2, 0, -0.6], radius: 1.4, color: '#ffbf75', intensity: 0.28, always: true }, { type: 'dust', pos: [0, 1.5, 0], always: true }];
   } else if (type === 'place') { buildPlace(g, set, typeof spec === 'string' ? { id: spec.slice(6) } : spec);
-  } else if (ENV[type]) { ENV[type](g, set, spec);
+  } else if (ENV[type]) { ENV[type](g, set, spec); if (typeof spec === "object") { if ("fog" in spec) set.fog = spec.fog; if (spec.exposure) set.exposure = spec.exposure; if (spec.sky) set.skyCols = spec.sky; }
     (set.lightsExtra || []).forEach(([c, i, p]) => { const l = new THREE.PointLight(c, i, 0, 1.6); l.position.set(...p); g.add(l); });
   } else if (type === 'glb') {
     gltfLoader.loadAsync(spec.url).then((r) => { const m = r.scene; m.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
