@@ -1,0 +1,80 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Model Forge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root { --bg: #0f1114; --panel: #171a1f; --line: #2a2f37; --fg: #e9edf2; --muted: #8f99a6; --accent: #ff8a3d; color-scheme: dark; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 Inter, system-ui, sans-serif; }
+header { display: flex; gap: 12px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+h1 { margin: 0; font: 700 22px "Space Grotesk", Inter, sans-serif; } .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
+main { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; padding: 16px 18px; }
+@media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+textarea, input, select { font: inherit; color: var(--fg); background: #0b0d10; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+textarea { min-height: 90px; resize: vertical; } .row { display: flex; gap: 8px; flex-wrap: wrap; } .row > * { flex: 1; }
+button { font: 600 14px Inter, sans-serif; border-radius: 9px; padding: 10px 14px; border: 1px solid var(--line); background: #222831; color: var(--fg); cursor: pointer; }
+button.go { background: var(--accent); color: #1a0e05; border-color: var(--accent); } button:disabled { opacity: .5; }
+#view { width: 100%; aspect-ratio: 16 / 10; border-radius: 10px; background: radial-gradient(#2a2f37, #0b0d10); display: block; }
+#log { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); white-space: pre-wrap; max-height: 120px; overflow: auto; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.tile { background: #0b0d10; border: 1px solid var(--line); border-radius: 10px; padding: 6px; cursor: pointer; display: grid; gap: 4px; min-width: 0; }
+.tile img { width: 100%; aspect-ratio: 1; object-fit: contain; } .tile span { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile[aria-current="true"] { border-color: var(--accent); }
+</style></head>
+<body>
+<header><h1>Model Forge</h1><span class="pill">AI 3D models · runs on your GPU · unlimited</span></header>
+<main>
+  <section class="card" aria-label="Create">
+    <label for="prompt">Describe the object</label>
+    <textarea id="prompt" placeholder="a greasy double cheeseburger with melted cheese"></textarea>
+    <label>Or a reference image (optional) <input id="image" type="file" accept="image/*"></label>
+    <div class="row">
+      <label>Name (id) <input id="mid" placeholder="cheeseburger"></label>
+      <label>Height (m) <input id="height" type="number" step="0.01" value="0.3"></label>
+    </div>
+    <div class="row">
+      <label>Quality <select id="quality"><option value="fast">Fast (6 GB GPU)</option><option value="high">High (12 GB+)</option></select></label>
+      <label>Texture <select id="texture"><option value="1">Painted</option><option value="0">Shape only</option></select></label>
+      <label>Seed <input id="seed" type="number" value="1234"></label>
+    </div>
+    <button class="go" id="go">Generate 3D model</button>
+    <div id="log" role="status">Ready.</div>
+    <button id="pub">Send all to Motion Forge (git push)</button>
+  </section>
+  <section class="card" aria-label="Models">
+    <canvas id="view"></canvas>
+    <div class="gallery" id="gallery"></div>
+  </section>
+</main>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const $ = (id) => document.getElementById(id), cv = $('view');
+const R = new THREE.WebGLRenderer({ canvas: cv, antialias: true }); R.setPixelRatio(devicePixelRatio); R.toneMapping = THREE.ACESFilmicToneMapping;
+const S = new THREE.Scene(), C = new THREE.PerspectiveCamera(35, 1.6, 0.01, 100), O = new OrbitControls(C, cv); O.autoRotate = true; O.enableDamping = true;
+S.environment = new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(), 0.04).texture; S.add(new THREE.DirectionalLight('#fff', 2).translateX(2).translateY(3));
+let cur = null; const L = new GLTFLoader();
+function show(id) { L.load('/models/' + id + '.glb?' + Date.now(), (g) => { if (cur) S.remove(cur); cur = g.scene; S.add(cur); const b = new THREE.Box3().setFromObject(cur), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+  const d = Math.max(s.x, s.y, s.z) * 1.8; C.position.set(c.x + d * .6, c.y + d * .35, c.z + d); O.target.copy(c); O.update(); });
+  document.querySelectorAll('.tile').forEach((t) => t.setAttribute('aria-current', String(t.dataset.id === id))); }
+function loop() { const w = cv.clientWidth, h = cv.clientHeight; if (cv.width !== w * devicePixelRatio) { R.setSize(w, h, false); C.aspect = w / h; C.updateProjectionMatrix(); } O.update(); R.render(S, C); requestAnimationFrame(loop); } loop();
+async function gallery(sel) { const cat = await (await fetch('/catalog')).json(), G = $('gallery'); G.textContent = '';
+  const ids = Object.keys(cat.models || {}).reverse(); if (!ids.length) { G.textContent = 'No models yet. Describe one on the left.'; return; }
+  for (const id of ids) { const t = document.createElement('button'); t.className = 'tile'; t.dataset.id = id; const im = document.createElement('img'); im.src = '/models/thumbs/' + id + '.png'; im.alt = '';
+    const sp = document.createElement('span'); sp.textContent = id; t.append(im, sp); t.onclick = () => show(id); G.append(t); }
+  show(sel || ids[0]); }
+const b64 = (f) => new Promise((r) => { if (!f) return r(null); const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); });
+$('go').onclick = async () => {
+  const body = { prompt: $('prompt').value.trim(), image: await b64($('image').files[0]), id: $('mid').value.trim() || undefined, height: +$('height').value, quality: $('quality').value, texture: $('texture').value === '1', seed: +$('seed').value };
+  if (!body.prompt && !body.image) { $('log').textContent = 'Describe the object or add a reference image.'; return; }
+  $('go').disabled = true; const { job } = await (await fetch('/generate', { method: 'POST', body: JSON.stringify(body) })).json();
+  const poll = async () => { const j = await (await fetch('/job/' + job)).json(); $('log').textContent = j.log.join('\n') || 'Starting…';
+    if (j.status === 'running') return setTimeout(poll, 1500); $('go').disabled = false; if (j.status === 'done') gallery(j.result.id); }; poll(); };
+$('pub').onclick = async () => { $('pub').disabled = true; const r = await (await fetch('/publish', { method: 'POST', body: '{}' })).json(); $('log').textContent = r.ok ? 'Sent to Motion Forge.' : 'Push failed. Check git on this PC.'; $('pub').disabled = false; };
+gallery();
+</script>
+</body></html>

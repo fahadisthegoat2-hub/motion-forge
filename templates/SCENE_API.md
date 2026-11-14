@@ -88,6 +88,9 @@ beat · explain · present · count`.
 Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and saved-motion events; sets add ambience.
 Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
+## 3D models (Model Forge, see skills/model-forge)
+`fx: [{ type: 'model', id, pos, height, rotY, spin, bob, pulse, p: keys, scale: keys, start, end, color }]` — any model in assets/models (models.json).
+
 ## Real places (photographed, Poly Haven CC0) — the default for any real-world scene
 `set: 'place:<id>'` (or `{ type: 'place', id, rotY, height, exposure, shadow }`) → a real 360° photo of the place, projected onto the ground
 (feet stand on it, shadows land on it) and its real light on the characters. Use `rotY` to turn the view. Places:

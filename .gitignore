@@ -6,3 +6,6 @@ motion-video-plugin*.zip
 .motion-forge/voice/
 .motion-forge/castdb/
 scenes/_*
+modelforge/.venv/
+modelforge/Hunyuan3D-2/
+modelforge/cache/

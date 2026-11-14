@@ -22,3 +22,6 @@
 
 ## Places
 - 30 HDRI environments from Poly Haven (polyhaven.com), CC0. Authors listed per place in assets/places/places.json.
+
+## Model Forge
+- Tencent Hunyuan3D-2 / 2mini / Paint / HunyuanDiT (Tencent Hunyuan 3D Community License), downloaded on the user's PC by the setup script.

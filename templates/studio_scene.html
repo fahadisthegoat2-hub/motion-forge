@@ -1588,6 +1588,21 @@ function rockGeo(seed) {
 }
 // Each preset returns parts: { obj, update(lt, cam) } — everything driven by shot-local time.
 const FXP = {
+  model(f, dur) {   // Model Forge / library 3D model: { type: 'model', id, pos, height, rotY, start, end, p: keys [x,y,z] offset, spin (rad/s), bob, pulse (bpm), scale: keys }
+    const holder = new THREE.Group(), t0 = f.start ?? 0, t1 = f.end ?? dur;
+    ASSET_LOADS.push(loadFirst(f.url ? [f.url] : kit('models/' + f.id + '.glb')).then((r) => {
+      if (!r) { console.warn('model missing', f.id); return; }
+      const m = r.scene, b = new THREE.Box3().setFromObject(m), h = (b.max.y - b.min.y) || 1, k = (f.height ?? h) / h;
+      m.scale.setScalar(k); m.position.set(-(b.min.x + b.max.x) / 2 * k, -b.min.y * k, -(b.min.z + b.max.z) / 2 * k);
+      m.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (f.color && o.material) { o.material = o.material.clone(); o.material.color = new THREE.Color(f.color); } } });
+      holder.add(m);
+    }));
+    return { parts: [{ obj: holder, update(lt) {
+      holder.visible = lt >= t0 && lt <= t1; if (!holder.visible) return;
+      const o = key(f.p, lt) || [0, 0, 0], sc = key(f.scale, lt) ?? 1, pl = f.pulse ? 1 + 0.06 * Math.exp(-((lt * f.pulse / 60) % 1) * 6) : 1;
+      holder.position.set(o[0], o[1] + (f.bob ? Math.sin(lt * 2.2) * f.bob : 0), o[2]); holder.rotation.y = (f.rotY ?? 0) + (f.spin ?? 0) * lt; holder.scale.setScalar(sc * pl);
+    } }] };
+  },
   explosion(f) {
     const s = f.scale ?? 1, t = f.t ?? 0, parts = [], sd = f.seed ?? 1;
     parts.push(emitter({ mode: 'glow', count: 6, t0: t, burst: 0.03, life: [0.1, 0.22], speed: [0, 0.2], size: [1.4, 2.4], scale: s, colA: '#fff4d6', colB: '#ffb050', hdr: 2.5, seed: sd }));
