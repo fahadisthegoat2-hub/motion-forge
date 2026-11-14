@@ -1778,12 +1778,27 @@ const FXP = {
 };
 // Build FX per shot at boot: SHOTS[i].fx = [{ type, t|start/end, pos, scale, ... }]
 const FX = [];
+let FXLIB = {};   // Claude's VFX library (fx/library.json) — fx: [{ type: '<name>', t | start/end, pos, scale, color, color2 }]
+function customFX(def, f, dur) {
+  const sc = f.scale ?? 1, t = f.t ?? f.start ?? 0, t1 = f.end ?? dur, parts = [];
+  (def.layers || []).forEach((L, i) => {
+    const cont = L.continuous ?? def.continuous ?? false, o = { ...L, scale: sc * (L.scale ?? 1), seed: (f.seed ?? 1) * 31 + i };
+    if (f.color && L.tint !== false) o.colA = i === 0 || L.tint === 'A' ? f.color : o.colA; if (f.color2 && L.tint !== false) o.colB = f.color2;
+    if (cont) { o.t0 = t - (L.pre ?? 0); o.t1 = t1; } else { o.t0 = t + (L.at ?? 0); if (L.until !== undefined) o.t1 = t + L.until; }
+    delete o.continuous; delete o.at; delete o.until; delete o.pre; delete o.tint;
+    parts.push(emitter(o));
+  });
+  if (def.light) { const D = def.light, L = new THREE.PointLight(f.color || D.color || '#ffffff', 0, 0, 2); L.position.y = (D.y ?? 0.5) * sc;
+    parts.push({ obj: L, update(lt) { const a = lt - t; L.intensity = a < 0 || lt > t1 + 0.3 ? 0 : (D.intensity ?? 20) * sc * sc * (D.decay ? Math.exp(-a * D.decay) : 1) * (D.flicker ? 0.8 + 0.2 * noise(lt * 20, 5) : 1); } }); }
+  return { parts, shakes: def.shake ? [{ t: t + (def.shake.at ?? 0), amp: def.shake.amp * Math.min(2, sc), decay: def.shake.decay ?? 0.35 }] : [],
+    flashes: def.flash ? [{ t: t + (def.flash.at ?? 0), amp: def.flash.amp ?? 0.4 }] : [] };
+}
 function buildFX() {
   SHOTS.forEach((shot, si) => {
     const list = [...(shot.fx || [])], set = SETS[setIdOf(shot)]; if (set?.extraFx) list.push(...set.extraFx);
     shot._shakes = [...(shot.camera?.shakes || [])]; shot._impulses = []; shot._flashes = [];
     for (const f of list) {
-      const P = FXP[f.type]; if (!P) { console.warn('unknown fx', f.type); continue; }
+      const P = FXP[f.type] || (FXLIB[f.type] && ((ff, d) => customFX(FXLIB[f.type], ff, d))); if (!P) { console.warn('unknown fx', f.type); continue; }
       const r = P(f, shot.dur), g = new THREE.Group(); g.visible = false;
       if (!r.absolute) { g.position.set(...(f.pos || [0, 0, 0])); if (r.offsetY) g.position.y += r.offsetY; }
       r.parts.forEach((p) => { const o = p.obj ?? p; if (o.isLight) { o.userData.fxShot = si; if (r.absolute) LIGHTS.add(o); else { const h = new THREE.Group(); h.position.copy(g.position); h.add(o); LIGHTS.add(h); } } else g.add(o); }); scene.add(g);
@@ -2036,7 +2051,7 @@ function collectSound() {
       const t = ot(f.t ?? f.start ?? 0);
       ({ explosion: () => { add(t, 'boom', 1); add(Math.max(st, t - 1.2), 'riser', 0.5, 1.2); }, lightning: () => add(t + 0.04, 'thunder', 0.9), shockwave: () => { add(t, 'impact'); add(t, 'subdrop', 0.7); },
         sparks: () => add(t, 'zap', 0.7), splash: () => add(t, 'splash'), magic: () => add(t, 'shimmer', 0.8), fire: () => beds.push(['fire', Math.max(st, t), ot(f.end ?? shot.dur), 0.8]),
-        rain: () => beds.push(['rain', st, end, 1]), snow: () => beds.push(['wind', st, end, 0.6]) }[f.type] || (() => {}))();
+        rain: () => beds.push(['rain', st, end, 1]), snow: () => beds.push(['wind', st, end, 0.6]) }[f.type] || (() => { for (const e of FXLIB[f.type]?.sfx || []) add(t + (e.at ?? 0), e.type, e.gain ?? 0.8); }))();
     }
     if (S.ambience !== false) { const set = typeof shot.set === 'string' ? shot.set : (shot.set ? null : CONFIG.set); const b = SET_BED[set || CONFIG.set]; if (b) beds.push([b, st, end, 0.8]); }
     for (const p of shot.punch || []) add(ot(p), 'punch', 0.8);
@@ -2194,7 +2209,6 @@ scene.add(key1.target);
 (typeof THUMBS !== 'undefined' ? THUMBS : []).forEach((T) => { if (T.set) buildSet(T.set); (T.split || []).forEach((x) => x.set && buildSet(x.set)); });
 SHOTS.forEach((s) => { const st = buildSet(s.set ?? CONFIG.set ?? 'studio');
   if (st.micro && !s.camera) s.camera = { pos: [[0, [0.15, 0.1, 3.2]], [s.dur, [-0.1, -0.05, 0.6], 'inOutSine']], look: [[0, [0, 0, -12]], [s.dur, [0.3, 0.1, -12], 'inOutSine']], fov: 48, handheld: 0.5 }; });
-buildFX();
 (async () => {
   const T0 = performance.now(), status = (m) => { const el = document.getElementById('mf-msg'); if (el && !window.__mfReady) el.textContent = m; if (m) console.log('[mf] ' + m + ' @' + ((performance.now() - T0) / 1000).toFixed(1) + 's'); };
   let LIBRARY = {};
@@ -2204,6 +2218,10 @@ buildFX();
       try { const r = await fetch(u); if (r.ok) { LIBRARY = (await r.json()).characters || {}; break; } } catch {}
     }
   }
+  { const base = KIT[KIT.length - 1].replace(/assets\/$/, '');   // VFX library, then build every shot's effects
+    if (SHOTS.some((sh) => (sh.fx || []).some((f) => !FXP[f.type])))
+      for (const u of ['fx/library.json', '../fx/library.json', '../../fx/library.json', base + 'fx/library.json']) { try { const r = await fetch(u); if (r.ok) { FXLIB = (await r.json()).effects || {}; break; } } catch {} }
+    buildFX(); }
   if (SHOTS.some((sh) => Object.values(sh.cast || {}).some((c) => c?.motions?.length))) {
     const base = KIT[KIT.length - 1].replace(/assets\/$/, '');
     for (const u of ['animations/custom/motions.json', '../animations/custom/motions.json', '../../animations/custom/motions.json', base + 'animations/custom/motions.json']) {

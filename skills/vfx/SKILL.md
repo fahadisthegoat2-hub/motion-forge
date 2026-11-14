@@ -64,3 +64,12 @@ plus meshes with custom shaders. Keep it deterministic (function of time, `hash(
 Flat untextured spheres/cubes as effects · uniform particle sizes · everything additive white ·
 linear fades · effects that don't light anything · no smoke after fire · effects without a
 reaction from character/camera.
+
+## VFX library (fx/library.json) — reuse, invent, save
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/vfx_library.js list` → ready effects: muzzle-flash · portal · fireworks · confetti · electric-arc · blood-splash ·
+ice-shatter · poison-gas · heal-glow · black-hole · meteor · bubbles · falling-leaves · sandstorm · dust-burst · energy-charge (+ the built-ins).
+Use like any effect: `fx: [{ type: 'portal', start, end, pos, scale, color, color2 }]` (bursts use `t`).
+**Need something new?** Design it as layers (each layer = one particle emitter: mode fire|smoke|spark|glow|mote|rain|liquid, count, life, speed, dir,
+spread, gravity, drag, buoy, turb, swirl, radial, shape, size [start,end], colA/colB/colC, hdr, opacity, stretch; `at`/`until` for timing inside a
+burst, `continuous` + `pre` for running effects) + optional `light`, `shake`, `flash`, `sfx`. Render a test strip, fix it until it looks
+premium, then save it with `vfx_library.js add <name> file.json` silently — it becomes reusable in every future video.

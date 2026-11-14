@@ -1,0 +1,1196 @@
+{
+ "about": "Claude's VFX library. fx: [{ type: '<name>', t (bursts) | start/end (continuous), pos, scale, color, color2 }]. Layers are particle emitters (modes: fire smoke spark glow mote rain liquid). Add new ones with scripts/vfx_library.js.",
+ "effects": {
+  "muzzle-flash": {
+   "about": "gun / blaster muzzle flash",
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 4,
+     "burst": 0.02,
+     "life": [
+      0.04,
+      0.08
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "size": [
+      0.35,
+      0.6
+     ],
+     "colA": "#fff3c0",
+     "colB": "#ff9a30",
+     "hdr": 3
+    },
+    {
+     "mode": "spark",
+     "count": 40,
+     "burst": 0.03,
+     "life": [
+      0.08,
+      0.25
+     ],
+     "speed": [
+      4,
+      9
+     ],
+     "dir": [
+      0,
+      0,
+      1
+     ],
+     "spread": 0.25,
+     "size": [
+      0.04,
+      0.02
+     ],
+     "colA": "#ffe08a",
+     "colB": "#ff5a10",
+     "hdr": 4,
+     "stretch": 6
+    },
+    {
+     "mode": "smoke",
+     "count": 20,
+     "at": 0.03,
+     "burst": 0.05,
+     "life": [
+      0.6,
+      1.2
+     ],
+     "speed": [
+      0.5,
+      1.2
+     ],
+     "dir": [
+      0,
+      0.3,
+      1
+     ],
+     "spread": 0.4,
+     "drag": 2,
+     "size": [
+      0.08,
+      0.5
+     ],
+     "colA": "#8a847c",
+     "colB": "#2a2622",
+     "opacity": 0.3
+    }
+   ],
+   "light": {
+    "color": "#ffb060",
+    "intensity": 30,
+    "decay": 25
+   },
+   "shake": {
+    "amp": 0.3,
+    "decay": 0.12
+   },
+   "sfx": [
+    {
+     "type": "punch",
+     "gain": 0.9
+    }
+   ]
+  },
+  "portal": {
+   "about": "swirling energy portal (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 420,
+     "pre": 1.5,
+     "life": [
+      0.8,
+      1.6
+     ],
+     "speed": [
+      0.2,
+      0.5
+     ],
+     "swirl": 5,
+     "spread": 1,
+     "shape": [
+      0.9,
+      0.9,
+      0.05
+     ],
+     "size": [
+      0.09,
+      0.02
+     ],
+     "colA": "#7ad8ff",
+     "colB": "#b07aff",
+     "hdr": 3
+    },
+    {
+     "mode": "glow",
+     "count": 10,
+     "pre": 1,
+     "life": [
+      0.6,
+      1
+     ],
+     "speed": [
+      0,
+      0.05
+     ],
+     "size": [
+      1,
+      1.5
+     ],
+     "colA": "#5ab8ff",
+     "colB": "#8a5aff",
+     "hdr": 1,
+     "intensity": 0.35
+    },
+    {
+     "mode": "spark",
+     "count": 60,
+     "pre": 1,
+     "life": [
+      0.4,
+      0.9
+     ],
+     "speed": [
+      0.5,
+      1.5
+     ],
+     "swirl": 6,
+     "spread": 1,
+     "shape": [
+      0.85,
+      0.85,
+      0.05
+     ],
+     "size": [
+      0.03,
+      0.015
+     ],
+     "colA": "#e0f6ff",
+     "colB": "#7a9aff",
+     "hdr": 4
+    }
+   ],
+   "light": {
+    "color": "#7aa8ff",
+    "intensity": 18,
+    "flicker": true
+   },
+   "sfx": [
+    {
+     "type": "shimmer",
+     "gain": 0.7
+    },
+    {
+     "type": "swell",
+     "gain": 0.5
+    }
+   ]
+  },
+  "fireworks": {
+   "about": "firework burst in the sky",
+   "layers": [
+    {
+     "mode": "spark",
+     "count": 260,
+     "burst": 0.05,
+     "life": [
+      1,
+      1.8
+     ],
+     "speed": [
+      4,
+      7
+     ],
+     "spread": 1,
+     "gravity": 2.5,
+     "drag": 1.2,
+     "size": [
+      0.06,
+      0.03
+     ],
+     "colA": "#ffd35a",
+     "colB": "#ff3a7a",
+     "hdr": 5,
+     "stretch": 3
+    },
+    {
+     "mode": "glow",
+     "count": 3,
+     "burst": 0.02,
+     "life": [
+      0.1,
+      0.2
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "size": [
+      1.6,
+      2.4
+     ],
+     "colA": "#fff0c0",
+     "colB": "#ff8a5a",
+     "hdr": 2
+    },
+    {
+     "mode": "spark",
+     "count": 120,
+     "at": 0.5,
+     "burst": 0.6,
+     "life": [
+      0.3,
+      0.7
+     ],
+     "speed": [
+      0.3,
+      1
+     ],
+     "spread": 1,
+     "gravity": 1,
+     "size": [
+      0.04,
+      0.02
+     ],
+     "colA": "#ffffff",
+     "colB": "#ffd35a",
+     "hdr": 4,
+     "shape": [
+      2.5,
+      2.5,
+      2.5
+     ]
+    }
+   ],
+   "light": {
+    "color": "#ffb070",
+    "intensity": 60,
+    "decay": 3,
+    "y": 0
+   },
+   "sfx": [
+    {
+     "type": "boom",
+     "gain": 0.6
+    },
+    {
+     "at": 0.4,
+     "type": "shimmer",
+     "gain": 0.5
+    }
+   ]
+  },
+  "confetti": {
+   "about": "celebration confetti burst",
+   "layers": [
+    {
+     "mode": "liquid",
+     "count": 220,
+     "burst": 0.08,
+     "life": [
+      1.6,
+      2.6
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.5,
+     "gravity": 3,
+     "drag": 1.8,
+     "turb": 0.6,
+     "size": [
+      0.05,
+      0.05
+     ],
+     "colA": "#ff4fa0",
+     "opacity": 1
+    },
+    {
+     "mode": "liquid",
+     "count": 220,
+     "burst": 0.08,
+     "life": [
+      1.6,
+      2.6
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.5,
+     "gravity": 3,
+     "drag": 1.8,
+     "turb": 0.6,
+     "size": [
+      0.05,
+      0.05
+     ],
+     "colA": "#ffd35a",
+     "opacity": 1,
+     "tint": false
+    },
+    {
+     "mode": "liquid",
+     "count": 220,
+     "burst": 0.08,
+     "life": [
+      1.6,
+      2.6
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.5,
+     "gravity": 3,
+     "drag": 1.8,
+     "turb": 0.6,
+     "size": [
+      0.05,
+      0.05
+     ],
+     "colA": "#3fd0ff",
+     "opacity": 1,
+     "tint": false
+    }
+   ],
+   "sfx": [
+    {
+     "type": "pop",
+     "gain": 0.9
+    },
+    {
+     "at": 0.05,
+     "type": "ding",
+     "gain": 0.5
+    }
+   ]
+  },
+  "electric-arc": {
+   "about": "crackling electricity / short circuit (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "spark",
+     "count": 160,
+     "life": [
+      0.05,
+      0.18
+     ],
+     "speed": [
+      2,
+      6
+     ],
+     "spread": 1,
+     "size": [
+      0.05,
+      0.02
+     ],
+     "colA": "#e8f6ff",
+     "colB": "#5ab0ff",
+     "hdr": 6,
+     "stretch": 9,
+     "turb": 1.5
+    },
+    {
+     "mode": "glow",
+     "count": 14,
+     "life": [
+      0.05,
+      0.15
+     ],
+     "speed": [
+      0,
+      0.3
+     ],
+     "size": [
+      0.12,
+      0.25
+     ],
+     "colA": "#bfe6ff",
+     "colB": "#4a8aff",
+     "hdr": 2,
+     "intensity": 0.5
+    }
+   ],
+   "light": {
+    "color": "#8ac8ff",
+    "intensity": 12,
+    "flicker": true
+   },
+   "sfx": [
+    {
+     "type": "zap",
+     "gain": 0.9
+    },
+    {
+     "at": 0.3,
+     "type": "zap",
+     "gain": 0.6
+    }
+   ]
+  },
+  "blood-splash": {
+   "about": "dark red splash (keep it brief, not gory)",
+   "layers": [
+    {
+     "mode": "liquid",
+     "count": 120,
+     "burst": 0.05,
+     "life": [
+      0.4,
+      0.9
+     ],
+     "speed": [
+      2,
+      4.5
+     ],
+     "spread": 0.6,
+     "gravity": 9.8,
+     "drag": 0.4,
+     "size": [
+      0.06,
+      0.025
+     ],
+     "colA": "#7a0610",
+     "opacity": 0.95
+    },
+    {
+     "mode": "smoke",
+     "count": 14,
+     "burst": 0.1,
+     "life": [
+      0.4,
+      0.8
+     ],
+     "speed": [
+      0.5,
+      1
+     ],
+     "spread": 0.8,
+     "size": [
+      0.1,
+      0.4
+     ],
+     "colA": "#5a0a10",
+     "colB": "#2a0306",
+     "opacity": 0.25
+    }
+   ],
+   "sfx": [
+    {
+     "type": "splash",
+     "gain": 0.6
+    }
+   ]
+  },
+  "ice-shatter": {
+   "about": "ice / glass shattering",
+   "layers": [
+    {
+     "mode": "liquid",
+     "count": 180,
+     "burst": 0.04,
+     "life": [
+      0.5,
+      1.2
+     ],
+     "speed": [
+      3,
+      7
+     ],
+     "spread": 1,
+     "gravity": 9.8,
+     "bounce": 0.3,
+     "size": [
+      0.06,
+      0.03
+     ],
+     "colA": "#dff6ff",
+     "opacity": 0.95
+    },
+    {
+     "mode": "spark",
+     "count": 80,
+     "burst": 0.03,
+     "life": [
+      0.2,
+      0.5
+     ],
+     "speed": [
+      3,
+      8
+     ],
+     "spread": 1,
+     "size": [
+      0.04,
+      0.02
+     ],
+     "colA": "#ffffff",
+     "colB": "#9adfff",
+     "hdr": 4,
+     "stretch": 4
+    },
+    {
+     "mode": "smoke",
+     "count": 30,
+     "at": 0.03,
+     "burst": 0.1,
+     "life": [
+      0.8,
+      1.6
+     ],
+     "speed": [
+      1,
+      2.5
+     ],
+     "spread": 1,
+     "drag": 2,
+     "size": [
+      0.2,
+      1
+     ],
+     "colA": "#eaf8ff",
+     "colB": "#9ab8c8",
+     "opacity": 0.3
+    }
+   ],
+   "shake": {
+    "amp": 0.4
+   },
+   "sfx": [
+    {
+     "type": "glitch",
+     "gain": 0.5
+    },
+    {
+     "type": "impact",
+     "gain": 0.6
+    }
+   ]
+  },
+  "poison-gas": {
+   "about": "toxic green gas cloud (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "smoke",
+     "count": 90,
+     "pre": 3,
+     "life": [
+      3,
+      5
+     ],
+     "speed": [
+      0.2,
+      0.6
+     ],
+     "spread": 1,
+     "buoy": 0.15,
+     "drag": 0.8,
+     "turb": 0.4,
+     "size": [
+      0.4,
+      1.6
+     ],
+     "shape": [
+      0.6,
+      0.1,
+      0.6
+     ],
+     "colA": "#9adf4a",
+     "colB": "#2a4a12",
+     "opacity": 0.18,
+     "wind": [
+      0.1,
+      0,
+      0
+     ]
+    },
+    {
+     "mode": "mote",
+     "count": 120,
+     "pre": 3,
+     "life": [
+      3,
+      5
+     ],
+     "speed": [
+      0.05,
+      0.2
+     ],
+     "spread": 1,
+     "turb": 0.2,
+     "size": [
+      0.015,
+      0.02
+     ],
+     "shape": [
+      1.2,
+      0.8,
+      1.2
+     ],
+     "colA": "#c8ff7a",
+     "opacity": 0.7
+    }
+   ],
+   "sfx": [
+    {
+     "type": "swell",
+     "gain": 0.4
+    }
+   ]
+  },
+  "heal-glow": {
+   "about": "healing / recovery aura rising around someone (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 220,
+     "pre": 1,
+     "life": [
+      1.2,
+      2.2
+     ],
+     "speed": [
+      0.4,
+      0.9
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.15,
+     "buoy": 0.4,
+     "shape": [
+      0.35,
+      0.05,
+      0.35
+     ],
+     "size": [
+      0.06,
+      0.02
+     ],
+     "colA": "#a8ffcf",
+     "colB": "#4adfa0",
+     "hdr": 2.5
+    },
+    {
+     "mode": "glow",
+     "count": 8,
+     "pre": 1,
+     "life": [
+      0.8,
+      1.4
+     ],
+     "speed": [
+      0,
+      0.05
+     ],
+     "size": [
+      0.8,
+      1.2
+     ],
+     "colA": "#7affc0",
+     "colB": "#2adf8a",
+     "hdr": 1,
+     "intensity": 0.12
+    }
+   ],
+   "light": {
+    "color": "#7affb0",
+    "intensity": 4,
+    "y": 1
+   },
+   "sfx": [
+    {
+     "type": "shimmer",
+     "gain": 0.6
+    }
+   ]
+  },
+  "black-hole": {
+   "about": "swirling dark vortex with a hot ring (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 500,
+     "pre": 2,
+     "life": [
+      1.5,
+      3
+     ],
+     "speed": [
+      0.1,
+      0.3
+     ],
+     "swirl": 7,
+     "spread": 1,
+     "shape": [
+      1.6,
+      0.08,
+      1.6
+     ],
+     "size": [
+      0.07,
+      0.02
+     ],
+     "colA": "#ffcf8a",
+     "colB": "#ff5a1a",
+     "hdr": 3
+    },
+    {
+     "mode": "smoke",
+     "count": 40,
+     "pre": 2,
+     "life": [
+      1.5,
+      3
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "swirl": 3,
+     "shape": [
+      0.4,
+      0.4,
+      0.4
+     ],
+     "size": [
+      0.6,
+      1.2
+     ],
+     "colA": "#050505",
+     "colB": "#000000",
+     "opacity": 0.9
+    }
+   ],
+   "light": {
+    "color": "#ff9a4a",
+    "intensity": 15
+   },
+   "sfx": [
+    {
+     "type": "subdrop",
+     "gain": 0.8
+    },
+    {
+     "type": "swell",
+     "gain": 0.6
+    }
+   ]
+  },
+  "meteor": {
+   "about": "burning meteor streaking down (pos = start; flies along dir)",
+   "layers": [
+    {
+     "mode": "fire",
+     "count": 300,
+     "until": 1.2,
+     "life": [
+      0.3,
+      0.6
+     ],
+     "speed": [
+      0.2,
+      0.6
+     ],
+     "dir": [
+      -0.6,
+      -1,
+      0
+     ],
+     "spread": 0.2,
+     "size": [
+      0.6,
+      0.2
+     ],
+     "colA": "#fff3d0",
+     "colB": "#ff7a1a",
+     "colC": "#5a0e00",
+     "hdr": 1.5
+    },
+    {
+     "mode": "smoke",
+     "count": 200,
+     "until": 1.2,
+     "life": [
+      1.5,
+      3
+     ],
+     "speed": [
+      0.1,
+      0.3
+     ],
+     "spread": 0.3,
+     "size": [
+      0.4,
+      1.6
+     ],
+     "colA": "#6a645e",
+     "colB": "#1a1714",
+     "opacity": 0.45
+    }
+   ],
+   "light": {
+    "color": "#ff9a4a",
+    "intensity": 40
+   },
+   "sfx": [
+    {
+     "type": "riser",
+     "gain": 0.6
+    },
+    {
+     "at": 1.1,
+     "type": "boom",
+     "gain": 0.9
+    }
+   ]
+  },
+  "bubbles": {
+   "about": "underwater bubbles rising (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "mote",
+     "count": 160,
+     "pre": 3,
+     "life": [
+      2,
+      4
+     ],
+     "speed": [
+      0.3,
+      0.8
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.15,
+     "buoy": 0.3,
+     "turb": 0.25,
+     "shape": [
+      0.8,
+      0.1,
+      0.8
+     ],
+     "size": [
+      0.025,
+      0.045
+     ],
+     "colA": "#cfeeff",
+     "opacity": 0.6
+    }
+   ]
+  },
+  "falling-leaves": {
+   "about": "autumn leaves drifting down (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "liquid",
+     "count": 140,
+     "pre": 6,
+     "life": [
+      5,
+      8
+     ],
+     "speed": [
+      0.1,
+      0.3
+     ],
+     "dir": [
+      0,
+      -1,
+      0
+     ],
+     "spread": 0.4,
+     "gravity": 0.3,
+     "turb": 0.8,
+     "wind": [
+      0.3,
+      0,
+      0
+     ],
+     "shape": [
+      4,
+      3,
+      4
+     ],
+     "size": [
+      0.06,
+      0.06
+     ],
+     "colA": "#d8792a",
+     "opacity": 1
+    },
+    {
+     "mode": "liquid",
+     "count": 100,
+     "pre": 6,
+     "life": [
+      5,
+      8
+     ],
+     "speed": [
+      0.1,
+      0.3
+     ],
+     "dir": [
+      0,
+      -1,
+      0
+     ],
+     "spread": 0.4,
+     "gravity": 0.3,
+     "turb": 0.8,
+     "wind": [
+      0.3,
+      0,
+      0
+     ],
+     "shape": [
+      4,
+      3,
+      4
+     ],
+     "size": [
+      0.05,
+      0.05
+     ],
+     "colA": "#b8452a",
+     "opacity": 1,
+     "tint": false
+    }
+   ]
+  },
+  "sandstorm": {
+   "about": "wall of blowing sand (continuous)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "smoke",
+     "count": 260,
+     "pre": 4,
+     "life": [
+      3,
+      5
+     ],
+     "speed": [
+      2,
+      4
+     ],
+     "dir": [
+      1,
+      0.05,
+      0
+     ],
+     "spread": 0.2,
+     "turb": 0.5,
+     "shape": [
+      6,
+      2,
+      6
+     ],
+     "size": [
+      1,
+      3
+     ],
+     "colA": "#d8b77a",
+     "colB": "#7a5a2a",
+     "opacity": 0.35
+    },
+    {
+     "mode": "mote",
+     "count": 400,
+     "pre": 4,
+     "life": [
+      1,
+      2
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "dir": [
+      1,
+      0,
+      0
+     ],
+     "spread": 0.2,
+     "shape": [
+      5,
+      2,
+      5
+     ],
+     "size": [
+      0.01,
+      0.015
+     ],
+     "colA": "#ffe0a0",
+     "opacity": 0.8
+    }
+   ],
+   "sfx": [
+    {
+     "type": "swell",
+     "gain": 0.5
+    }
+   ]
+  },
+  "dust-burst": {
+   "about": "dust puff from a landing / impact on the ground",
+   "layers": [
+    {
+     "mode": "smoke",
+     "count": 60,
+     "burst": 0.1,
+     "life": [
+      1,
+      2
+     ],
+     "speed": [
+      1.5,
+      3.5
+     ],
+     "radial": true,
+     "drag": 2.4,
+     "shape": [
+      0.3,
+      0,
+      0.3
+     ],
+     "size": [
+      0.2,
+      1
+     ],
+     "colA": "#c8b8a0",
+     "colB": "#6a5a4a",
+     "opacity": 0.45
+    },
+    {
+     "mode": "mote",
+     "count": 80,
+     "burst": 0.1,
+     "life": [
+      1,
+      2
+     ],
+     "speed": [
+      0.5,
+      1.5
+     ],
+     "spread": 1,
+     "gravity": 1,
+     "size": [
+      0.01,
+      0.015
+     ],
+     "colA": "#e0d0b8",
+     "opacity": 0.8
+    }
+   ],
+   "shake": {
+    "amp": 0.3
+   },
+   "sfx": [
+    {
+     "type": "land",
+     "gain": 0.8
+    }
+   ]
+  },
+  "energy-charge": {
+   "about": "glowing power charging in a hand (continuous, put pos at the hand or use attach)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 160,
+     "pre": 0.5,
+     "life": [
+      0.4,
+      0.8
+     ],
+     "speed": [
+      0.05,
+      0.2
+     ],
+     "swirl": 6,
+     "spread": 1,
+     "shape": [
+      0.2,
+      0.2,
+      0.2
+     ],
+     "size": [
+      0.05,
+      0.015
+     ],
+     "colA": "#9fe8ff",
+     "colB": "#5a7aff",
+     "hdr": 4
+    },
+    {
+     "mode": "glow",
+     "count": 6,
+     "life": [
+      0.3,
+      0.6
+     ],
+     "speed": [
+      0,
+      0.02
+     ],
+     "size": [
+      0.25,
+      0.4
+     ],
+     "colA": "#dff6ff",
+     "colB": "#6ab8ff",
+     "hdr": 2
+    }
+   ],
+   "light": {
+    "color": "#8ac8ff",
+    "intensity": 10,
+    "flicker": true
+   },
+   "sfx": [
+    {
+     "type": "riser",
+     "gain": 0.5
+    }
+   ]
+  }
+ }
+}
