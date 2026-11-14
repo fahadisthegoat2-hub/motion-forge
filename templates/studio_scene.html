@@ -52,7 +52,7 @@ const CONFIG = {
   // Add your own Mixamo FBX files here, e.g. 'animations/Waving.fbx' → clip name 'waving'.
   sound: { music: { mood: 'tension', drops: [] }, sfx: true, ambience: true },   // moods: tension epic mystery upbeat sad horror action lofi · track: { url } (own music) · voice: { url } (voiceover)
   letterbox: 0,          // cinema bars: 2.39 (ratio, long-form) or 0.06 (bar size, shorts) · per shot: shot.letterbox
-  animations: [LIB + 'Xbot.glb', kit('animations/ual-starter.glb'), LIB + 'Soldier.glb', LIB + 'Michelle.glb'],   // first library wins a name: relaxed Xbot idle/walk/run; UAL adds jog/sprint/dance/crouch
+  animations: [LIB + 'Xbot.glb', kit('animations/ual-starter.glb'), kit('animations/ual1.glb'), kit('animations/ual2.glb'), LIB + 'Soldier.glb', LIB + 'Michelle.glb'],   // first library wins a name: relaxed Xbot idle/walk/run; UAL adds jog/sprint/dance/crouch
 };
 
 // Characters: first URL that loads wins. Best: your own models in the repo's characters/ folder
@@ -1013,7 +1013,10 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
 const gltfLoader = new GLTFLoader(), fbxLoader = new FBXLoader();
 const loadAny = (url) => (/\.fbx$/i.test(url) ? fbxLoader : gltfLoader).loadAsync(url).then((r) => ({ scene: r.scene || r, animations: r.animations || [] }));
 async function loadFirst(urls) { for (const u of urls) { try { return { ...(await loadAny(u)), url: u }; } catch {} } return null; }
-const UE_ALIAS = { pelvis: 'hips', spine01: 'spine', spine02: 'spine1', spine03: 'spine2', neck01: 'neck', claviclel: 'leftshoulder', clavicler: 'rightshoulder',
+const UE_ALIAS = { defhips: 'hips', defspine001: 'spine', defspine002: 'spine1', defspine003: 'spine2', defneck: 'neck', defhead: 'head',   // Rigify (UAL 1)
+  defshoulderl: 'leftshoulder', defupperarml: 'leftarm', defforearml: 'leftforearm', defhandl: 'lefthand', defthighl: 'leftupleg', defshinl: 'leftleg', deffootl: 'leftfoot', deftoel: 'lefttoebase',
+  defshoulderr: 'rightshoulder', defupperarmr: 'rightarm', defforearmr: 'rightforearm', defhandr: 'righthand', defthighr: 'rightupleg', defshinr: 'rightleg', deffootr: 'rightfoot', deftoer: 'righttoebase',
+  pelvis: 'hips', spine01: 'spine', spine02: 'spine1', spine03: 'spine2', neck01: 'neck', claviclel: 'leftshoulder', clavicler: 'rightshoulder',
   upperarml: 'leftarm', upperarmr: 'rightarm', lowerarml: 'leftforearm', lowerarmr: 'rightforearm', handl: 'lefthand', handr: 'righthand', thighl: 'leftupleg', thighr: 'rightupleg',
   calfl: 'leftleg', calfr: 'rightleg', footl: 'leftfoot', footr: 'rightfoot', balll: 'lefttoebase', ballr: 'righttoebase', eyel: 'lefteye', eyer: 'righteye' };
 const normName = (n) => { const k = n.replace(/^mixamorig\d*[:_]?/i, '').replace(/^.*[:|]/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
@@ -1257,8 +1260,18 @@ function setXray(ch, x) {   // hologram x-ray: fresnel glow shell + scanlines (p
   if (on === ch.xray.on) return; ch.xray.on = on;
   ch.model.traverse((o) => { if (!o.isMesh) return; if (on) { o.userData.mat0 = o.material; o.userData.cs0 = o.castShadow; o.material = ch.xray.mat; o.castShadow = false; } else if (o.userData.mat0) { o.material = o.userData.mat0; o.castShadow = o.userData.cs0; } });
 }
+const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
+  sit: 'sittingidleloop', sitdown: 'sittingenter', standup: 'sittingexit', sittalk: 'sittingtalkingloop', kneel: 'fixingkneeling', fix: 'fixingkneeling',
+  crouchidle: 'crouchidleloop', crouchwalk: 'crouchfwdloop', pickup: 'pickuptable', push: 'pushloop', interact: 'interact', opendoor: 'interact', open: 'chestopen',
+  talk: 'idletalkingloop', talking: 'idletalkingloop', phone: 'idletalkingphoneloop', foldarms: 'idlefoldarmsloop', crossarms: 'idlefoldarmsloop', no: 'idlenoloop', yes: 'yes', nod: 'yes',
+  eat: 'consume', drink: 'consume', consume: 'consume', carry: 'walkcarryloop', lie: 'laytoidle', getup: 'laytoidle', wakeup: 'laytoidle',
+  jump: 'jumpstart', jumploop: 'jumploop', land: 'jumpland', roll: 'roll', climb: 'climbup1mrm', slide: 'slideloop', throw: 'overhandthrow',
+  punch: 'punchjab', jab: 'punchjab', cross: 'punchcross', hook: 'meleehook', hit: 'hitchest', hithead: 'hithead', knockback: 'hitknockback', die: 'death01', death: 'death01',
+  swim: 'swimfwdloop', drive: 'drivingloop', chop: 'treechoppingloop', plant: 'farmplantseed', water: 'farmwatering', harvest: 'farmharvest',
+  zombie: 'zombiewalkfwdloop', zombieidle: 'zombieidleloop', formalwalk: 'walkformalloop', torch: 'idletorchloop', lantern: 'idlelanternloop', spell: 'spellsimpleshoot',
+  crouch: 'crouchidleloop' };
 function clipFor(ch, name) {
-  const k = normName(name); ch.actions[k] ??= (() => {
+  let k = normName(name); if (!clipLib[k] && CLIP_ALIAS[k]) k = CLIP_ALIAS[k]; ch.actions[k] ??= (() => {
     const lib = clipLib[k]; if (!lib) { console.warn('missing clip', name); return null; }
     let clip = lib.clip;
     if (lib.src.root !== ch.model) {   // bake with the character at the origin so its current placement isn't baked in
@@ -1365,6 +1378,50 @@ function applyImpulses(ch, shot, t) {
 
 /* ---------- life layer: breathing, look-at with springs, saccades, blinks, talk, faces, sway ---------- */
 const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _q3 = new THREE.Quaternion(), _e = new THREE.Euler(0, 0, 0, 'YXZ'), _v = new THREE.Vector3();
+/* ---------- hand IK: cast.<id>.reach = [{ hand: 'right'|'left'|'both', to: [x,y,z] | 'castId.part', start, end, ease?, offset?: [x,y,z] }] ---------- */
+// Parts: head brain face eyes mouth throat chest heart lungs stomach liver belly fat gut hips lefthand righthand leftarm rightarm leftknee rightknee feet.
+// Aim/point at something far away: give a far 'to' (the arm straightens toward it). Hands blend in/out over 0.25 s around start/end.
+const _ik = { a: new THREE.Vector3(), b: new THREE.Vector3(), c: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), v: new THREE.Vector3(), q: new THREE.Quaternion(), pq: new THREE.Quaternion(), wq: new THREE.Quaternion(), id: new THREE.Quaternion() };
+function rotateBoneWorld(bone, qWorld) {   // apply a world-space rotation to a bone
+  bone.getWorldQuaternion(_ik.wq); bone.parent.getWorldQuaternion(_ik.pq);
+  bone.quaternion.copy(_ik.pq.invert().multiply(qWorld).multiply(_ik.wq)); bone.updateMatrixWorld(true);
+}
+function reachTarget(ch, to, off) {
+  let p; if (Array.isArray(to)) p = new THREE.Vector3(to[0], to[1], to[2]);
+  else { const w = anchorWorld(to); if (!w) return null; p = w.clone(); }
+  if (off) p.add(new THREE.Vector3(off[0], off[1], off[2]));
+  return p;
+}
+function solveArm(ch, side, T, w) {
+  const up = ch.bones[side + 'arm'], fo = ch.bones[side + 'forearm'], ha = ch.bones[side + 'hand']; if (!up || !fo || !ha) return;
+  ch.root.updateMatrixWorld(true);
+  up.getWorldPosition(_ik.a); fo.getWorldPosition(_ik.b); ha.getWorldPosition(_ik.c);
+  const l1 = _ik.a.distanceTo(_ik.b), l2 = _ik.b.distanceTo(_ik.c), dir = _ik.t.copy(T).sub(_ik.a), d = Math.min(dir.length(), (l1 + l2) * 0.995);
+  const goal = _ik.a.clone().addScaledVector(dir.normalize(), Math.max(d, Math.abs(l1 - l2) + 1e-3));
+  for (let it = 0; it < 8; it++) for (const bone of [fo, up]) {   // CCD
+    bone.getWorldPosition(_ik.u); ha.getWorldPosition(_ik.c);
+    const from = _ik.v.copy(_ik.c).sub(_ik.u).normalize(), toV = goal.clone().sub(_ik.u).normalize();
+    _ik.q.setFromUnitVectors(from, toV); rotateBoneWorld(bone, _ik.id.clone().slerp(_ik.q, w));
+  }
+  // elbow points down/out/back (natural), not up or into the body
+  up.getWorldPosition(_ik.a); fo.getWorldPosition(_ik.b); ha.getWorldPosition(_ik.c);
+  const axis = _ik.c.clone().sub(_ik.a).normalize(), rq = ch.root.getWorldQuaternion(new THREE.Quaternion());
+  const pole = new THREE.Vector3(side === 'right' ? -0.55 : 0.55, -1, -0.35).applyQuaternion(rq);
+  const e = _ik.b.clone().sub(_ik.a), eP = e.sub(axis.clone().multiplyScalar(e.dot(axis))), pP = pole.sub(axis.clone().multiplyScalar(pole.dot(axis)));
+  if (eP.lengthSq() > 1e-8 && pP.lengthSq() > 1e-8) { eP.normalize(); pP.normalize(); let ang = Math.acos(clamp(eP.dot(pP), -1, 1)); if (axis.dot(eP.clone().cross(pP)) < 0) ang = -ang;
+    rotateBoneWorld(up, new THREE.Quaternion().setFromAxisAngle(axis, ang * w)); }
+}
+function applyReach(ch, cast, t) {
+  for (const R of cast?.reach || []) {
+    const s0 = R.start ?? 0, s1 = R.end ?? 1e9, bl = R.blend ?? 0.25; if (t < s0 - 1e-6 || t > s1 + bl) continue;
+    const w = Math.min(smooth((t - s0) / bl), 1 - smooth((t - s1) / bl)); if (w <= 0.001) continue;
+    const T = reachTarget(ch, R.to, R.offset); if (!T) continue;
+    for (const side of R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']) {
+      const Ts = R.hand === 'both' ? T.clone().add(new THREE.Vector3(side === 'left' ? 0.09 : -0.09, 0, 0).applyQuaternion(ch.root.quaternion)) : T;
+      solveArm(ch, side, Ts, w);
+    }
+  }
+}
 function rotateInRootSpace(ch, bone, pitch, yaw, roll = 0) {
   if (!bone) return;
   const rootQ = ch.root.getWorldQuaternion(_q3);
@@ -1398,6 +1455,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
   for (const [M, lt, k] of activeMotions(cast, t)) for (const [bn, keys] of Object.entries(M.bones || {})) { const b = ch.bones[normName(bn)], e = b ? key(keys, lt) : null; if (e) rotateInRootSpace(ch, b, (e[0] || 0) * k, (e[1] || 0) * k, (e[2] || 0) * k); }
+  applyReach(ch, cast, t);   // hand IK: hands land exactly on their targets
   // breathing (4s cycle, slight chest + shoulder lift)
   const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
   rotateInRootSpace(ch, B.spine1, -0.012 * br, 0);
@@ -1582,7 +1640,8 @@ const FXP = {
     return { parts: [{ obj: holder, update(lt) {
       holder.visible = lt >= t0 && lt <= t1; if (!holder.visible) return;
       const o = key(f.p, lt) || [0, 0, 0], sc = key(f.scale, lt) ?? 1, pl = f.pulse ? 1 + 0.06 * Math.exp(-((lt * f.pulse / 60) % 1) * 6) : 1;
-      holder.position.set(o[0], o[1] + (f.bob ? Math.sin(lt * 2.2) * f.bob : 0), o[2]); holder.rotation.y = (f.rotY ?? 0) + (f.spin ?? 0) * lt; holder.scale.setScalar(sc * pl);
+      if (f.attach) { const w = anchorWorld(f.attach); if (w) { holder.parent.updateMatrixWorld(true); holder.position.copy(holder.parent.worldToLocal(w.clone())).add(new THREE.Vector3(o[0], o[1], o[2])); } }
+      else holder.position.set(o[0], o[1] + (f.bob ? Math.sin(lt * 2.2) * f.bob : 0), o[2]); holder.rotation.y = (f.rotY ?? 0) + (f.spin ?? 0) * lt; holder.scale.setScalar(sc * pl);
     } }] };
   },
   explosion(f) {
@@ -1993,8 +2052,8 @@ function collectSound() {
     const st = acc, end = acc + shot.dur; acc = end; const ot = (ct) => outTimeOf(shot, st, ct);
     for (const e of shot.sfx || []) add(ot(e.t), e.type, e.gain ?? 1);
     if (!auto) return;
-    const cut = { whip: ['whoosh'], zoom: ['swoosh', 'subdrop'], spin: ['whoosh'], glitch: ['glitch'], flash: ['impact'], dip: ['subdrop'], smash: ['boom'], blur: ['swoosh'] }[shot.cut];
-    if (cut && i > 0) cut.forEach((tp, k) => add(st + (k ? 0.02 : 0), tp, tp === 'boom' ? 0.6 : 0.8));
+    const cut = { whip: ['whoosh'], zoom: ['swoosh'], spin: ['whoosh'], glitch: ['glitch'], smash: ['impact'] }[shot.cut];   // only motion cuts make noise
+    if (cut && i > 0) cut.forEach((tp) => add(st, tp, 0.55));
     for (const f of shot.fx || []) {
       const t = ot(f.t ?? f.start ?? 0);
       ({ explosion: () => { add(t, 'boom', 1); add(Math.max(st, t - 1.2), 'riser', 0.5, 1.2); }, lightning: () => add(t + 0.04, 'thunder', 0.9), shockwave: () => { add(t, 'impact'); add(t, 'subdrop', 0.7); },
@@ -2005,19 +2064,19 @@ function collectSound() {
     for (const p of shot.punch || []) add(ot(p), 'punch', 0.8);
     for (const [a] of shot.freeze || []) add(st + a, 'scratch', 0.7);
     if (shot.camera?.move === 'crash-zoom') add(ot(shot.camera.at ?? 0.3 * shot.dur), 'punch', 1);
-    for (const sh of shot._shakes || []) if (!sh._fromFx) add(ot(sh.t), 'subdrop', Math.min(1, 0.4 * (sh.amp || 1)));
+
     for (const [cid, c] of Object.entries(shot.cast || {})) {
       const steps = { walk: 1.9, walkloop: 1.9, jog: 2.6, jogfwdloop: 2.6, run: 2.9, sprint: 3.3, sprintloop: 3.3, crouch: 1.5, crouchfwdloop: 1.5 };
-      for (const cl of c.clips || []) { const rate = steps[normName(cl.clip)]; if (!rate) continue; for (let x = Math.max(0, cl.start); x < Math.min(cl.end, shot.dur); x += 1 / rate) add(ot(x), 'footstep', 0.7); }
+      for (const cl of S.footsteps ? c.clips || [] : []) { const rate = steps[normName(cl.clip)]; if (!rate) continue; for (let x = Math.max(0, cl.start); x < Math.min(cl.end, shot.dur); x += 1 / rate) add(ot(x), 'footstep', 0.7); }
       for (const m of c.motions || []) { const M = MOTIONS[m.name] || m.inline; for (const e of M?.sfx || []) add(ot((m.start ?? 0) + e.t / (m.speed ?? 1)), e.type, (e.gain ?? 1) * (m.amount ?? 1)); }
     }
   });
-  if (auto) for (const T of (typeof TITLES !== 'undefined' ? TITLES : [])) ({ slam: () => add(T.t, 'hit', 0.9), tag: () => add(T.t, 'pop'), stamp: () => add(T.t, 'stamp'), glitch: () => add(T.t, 'glitch', 0.7), 'lower-third': () => add(T.t, 'swoosh', 0.6), ring: () => add(T.t, 'pop', 0.6),
+  if (auto) for (const T of (typeof TITLES !== 'undefined' ? TITLES : [])) ({ slam: () => add(T.t, 'hit', 0.9), tag: () => {}, stamp: () => add(T.t, 'stamp'), glitch: () => add(T.t, 'glitch', 0.7), 'lower-third': () => add(T.t, 'swoosh', 0.6), ring: () => {},
     typewriter: () => add(T.t, 'typing', 0.6, Math.min((T.text || '').length / (T.rate ?? 22), (T.t1 ?? T.t + 2) - T.t)), meter: () => add(T.t + 0.15, 'swell', 0.6),
-    callout: () => add(T.t, 'pop', 0.5), pulse: () => (T.beat ? [0, 1, 2].forEach((k) => add(T.t + k * 60 / T.beat, 'heartbeat', 0.7)) : add(T.t, 'shimmer', 0.4)), inset: () => { add(T.t, 'swoosh', 0.6); add(T.t + 0.25, 'shimmer', 0.4); },
-    chart: () => { add(T.t, 'swoosh', 0.5); add(T.t + 0.2, 'swell', 0.5); }, bars: () => { add(T.t, 'swoosh', 0.5); (T.items || []).forEach((_, i) => add(T.t + 0.2 + i * 0.18, 'tick', 0.6)); },
-    list: () => (T.items || []).forEach((_, i) => add(T.t + 0.15 + i * (T.gap ?? 0.4), 'pop', 0.6)), card: () => add(T.t, 'swoosh', 0.6), arrow: () => add(T.t, 'swoosh', 0.45), icon: () => add(T.t, 'pop', 0.8),
-    bubble: () => add(T.t, 'pop', 0.6), scan: () => add(T.t, 'zap', 0.4), timeline: () => (T.marks || []).forEach((m) => add(m.t, 'tick', 0.6)),
+    callout: () => {}, pulse: () => (T.beat ? [0, 1, 2].forEach((k) => add(T.t + k * 60 / T.beat, 'heartbeat', 0.7)) : add(T.t, 'shimmer', 0.4)), inset: () => add(T.t, 'swoosh', 0.4),
+    chart: () => add(T.t, 'swoosh', 0.4), bars: () => add(T.t, 'swoosh', 0.4),
+    list: () => {}, card: () => add(T.t, 'swoosh', 0.4), arrow: () => {}, icon: () => {},
+    bubble: () => {}, scan: () => add(T.t, 'zap', 0.3), timeline: () => {},
     counter: () => { const d = T.dur ?? 0.9; for (let x = 0; x < d; x += 0.06 + x * 0.08) add(T.t + x, 'tick', 0.5); add(T.t + d, 'ding', 0.8); } }[T.style || 'slam'] || (() => {}))();
   SND.events = ev.sort((a, b) => a.t - b.t); SND.beds = beds; return SND;
 }
@@ -2237,9 +2296,32 @@ window.__mf = {
       THUMB_SNAP = snap; THUMB = { ...T, ...B, shift: B.shift ?? 0.22 }; render(0); return; }
     THUMB = T || null; if (T) render(0); },   // render one thumbnail (scripts/thumbnail.js)
 };
-window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1 };
+window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
+  shots: () => { let acc = 0; return SHOTS.map((sh, i) => { const r = { i, name: sh.name || 'shot ' + (i + 1), start: acc, dur: sh.dur, set: setIdOf(sh), cast: Object.keys(sh.cast || {}) }; acc += sh.dur; return r; }); },
+  probe(tg) {   // automatic QA: feet on the ground, hands on their targets, clips that exist
+    render(tg); const { shot, local } = shotAt(clamp(tg, 0, TOTAL - 1e-4)), out = [], V = () => new THREE.Vector3();
+    for (const ch of Object.values(characters)) {
+      if (!ch.root.visible) continue; const cast = shot.cast?.[ch.id] || {};
+      const feet = ['leftfoot', 'rightfoot', 'lefttoebase', 'righttoebase'].map((b) => ch.bones[b]?.getWorldPosition(V()).y).filter((v) => v !== undefined);
+      const airborne = !!cast.pos && Array.isArray(cast.pos[0]) && cast.pos.some((k) => Array.isArray(k[1]) && k[1][1] > 0.05);
+      const reach = (cast.reach || []).filter((R) => local >= (R.start ?? 0) + (R.blend ?? 0.25) && local <= (R.end ?? 1e9)).map((R) => { const T = reachTarget(ch, R.to, R.offset); if (!T) return null;
+        return { to: R.to, err: Math.max(...(R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']).map((h) => ch.bones[h + 'hand'] ? ch.bones[h + 'hand'].getWorldPosition(V()).distanceTo(T) : 0)) }; }).filter(Boolean);
+      const missing = (cast.clips || []).map((c) => c.clip).filter((c) => { const k = normName(c); return !clipLib[k] && !clipLib[CLIP_ALIAS[k]]; });
+      out.push({ id: ch.id, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+    }
+    return { shot: shot.name, t: tg, local, chars: out };
+  } };
 const clock = new THREE.Clock();
-renderer.setAnimationLoop(() => { if (window.__mfReady && !window.__mfManual) render(clock.getElapsedTime() % TOTAL); });
+let _pv = { last: 0, avg: 33, scale: 1, n: 0 };
+renderer.setAnimationLoop((now) => {
+  if (!window.__mfReady || window.__mfManual) return;
+  const dt = _pv.last ? now - _pv.last : 33; _pv.last = now; _pv.avg = _pv.avg * 0.9 + dt * 0.1;
+  if (++_pv.n % 30 === 0) {   // live preview only: drop / restore internal resolution to stay smooth
+    const want = _pv.avg > 45 ? Math.max(0.45, _pv.scale * 0.8) : _pv.avg < 28 ? Math.min(1, _pv.scale * 1.1) : _pv.scale;
+    if (Math.abs(want - _pv.scale) > 0.02) { _pv.scale = want; renderer.setPixelRatio(Math.min(devicePixelRatio, 2) * want); composer.setPixelRatio?.(Math.min(devicePixelRatio, 2) * want); }
+  }
+  render(clock.getElapsedTime() % TOTAL);
+});
 </script>
 <!-- motion-forge DEVICE RENDER PANEL — paste before </body> of any scene exposing window.__mf.
      Renders frame-perfect on the viewer's own GPU (WebCodecs) and downloads MP4s. No server, no Python.

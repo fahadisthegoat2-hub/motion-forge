@@ -8,8 +8,23 @@ description: Mandatory deep quality pass before delivering any 3D scene, animati
 # Quality Review — take your time, find everything, fix it
 
 Be your own harshest critic. Do not tell the user it's done until it passes.
-Never deliver a first draft. Speed is not a goal: minimum **2 full rounds** (render → view → fix → re-render) covering
+Never deliver a first draft. Rounds follow the user's effort level (Standard 2 · High 4 · Maximum 6+); always run
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/qa_check.js scene.html [--target <requested seconds>]` first and fix EVERY failure it lists (clips, feet,
+hands, length, assets, errors), then look at its sheet.jpg. Speed is not a goal: minimum **2 full rounds** (render → view → fix → re-render) covering
 at least one frame from EVERY shot plus motion strips of the key actions. A video made in 2 minutes was not reviewed.
+
+## THE 10 CHECKS — all must PASS before the user gets the video (no exceptions)
+1. **Auto check**: `scripts/qa_check.js scene.html --target <requested seconds>` exits PASS (no errors, missing assets or clips).
+2. **Length**: exactly what the user asked (±5%). A "13-minute video" is 13 minutes, never a short.
+3. **Feet**: on the ground in every shot (no floating, no sinking, no sliding).
+4. **Hands & arms**: every touch/hold/point lands on its target (`reach` IK); no arms through bodies or props.
+5. **Right action**: every clip fits its moment (sit when sitting, kneel when kneeling, talk when talking); no random moves.
+6. **Framing**: subject and the thing discussed in frame; faces never cropped or covered.
+7. **Lighting**: faces lit and readable, nothing too dark or blown out (auto LIGHT check + your eyes), matches the mood.
+8. **Sound**: every effect lines up with a visible event on that exact frame; music under voice; no dead air; nothing random.
+9. **Smoothness**: no stutter, pops, snaps or frozen frames; camera moves ease; cuts on action.
+10. **Story & rules**: hook in 2 s, clear story, twist lands; Motion Forge only, no photos, no logos; publish pack ready.
+Record PASS/FAIL for all 10 internally each round. Any FAIL → fix → re-run all 10. Never show the user a video with a FAIL.
 
 ## 1. Gather evidence (cheap first)
 - Re-read every file you wrote; check console errors (`page.on('pageerror')`).

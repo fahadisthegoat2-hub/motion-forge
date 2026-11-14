@@ -49,9 +49,17 @@ ALWAYS:
 - Every video has SOUND (music mood + drops, auto SFX, ambience; voiceover if given) and an edit plan (editing skill): hook hit at frame 1, pattern interrupt every 2–3s, speed ramp / freeze / punch on the big moments.
 - Every shot moves: named camera move, clips + talk (auto gestures) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props.
-- Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
+- START OF EVERY VIDEO/ANIMATION (and the first video of every session): BEFORE any work, ask with ONE AskUserQuestion call, two questions:
+  1) "Video quality?" → Good (1080p 30fps) · High (1080p 60fps) · Epic (1440p 60fps).
+  2) "Effort level?" → Standard (2 review rounds) · High (4 rounds, every shot checked twice) · Maximum (6+ rounds, frame-by-frame motion, sound and hands checks, multiple takes of key shots).
+  Use the answers for the whole video; do not ask again before the final render. Save them in the scene (CONFIG.quality, CONFIG.effort).
+- Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
+- 10 CHECKS: no video reaches the user until all 10 checks in skills/quality-review PASS (auto checker + eyes + ears).
+- ORDERS: every message, re-read the user's previous 3 messages (the hook shows them) and make sure every request is handled. If the user asks
+  to check more/fewer, write {"count": N} to .motion-forge/recall.json.
+- REPLIES: absolute respect. Short, direct. NO summaries, no recaps, no "what I did" lists. Only what the user must know or decide + links.
 - TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
 - FINAL MESSAGE = the link (or MP4) + one line + the publish pack (or the Good/High/Epic question). Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
 - 3D MODELS: any object/prop/food/creature/vehicle/building a video needs → assets/models (reuse) or Model Forge (skills/model-forge:

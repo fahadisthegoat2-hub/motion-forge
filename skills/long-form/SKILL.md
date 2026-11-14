@@ -4,7 +4,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 ---
 
 > **Tool policy:** Use only built-in tools — Three.js/HTML/JS in the user's Chrome, Node, ffmpeg. The scripts auto-download what they need on first run. **Do NOT install or run Blender or Python** unless the user said "Blender/Python allowed".
-> **Efficiency:** Work silently, batch tool calls, one final message. Ask Good / High / Epic before the final render. Run `quality-review` (≥2 full rounds on every shot) before delivering. No review text in chat.
+> **Efficiency:** Work silently, batch tool calls, one final message. Quality + effort level are asked at the start of the video. Run `quality-review` (≥2 full rounds on every shot) before delivering. No review text in chat.
 
 
 > **Reference images are for STUDY ONLY.** Never use a reference image (or a crop of it) as a texture,
