@@ -23,7 +23,7 @@ the winner, at full quality. Never show drafts, comparisons, "here are 3 options
 - **Inside view**: face + a big 3D lens (`titles: [{ style: 'inset', world: 'blood', pos, radius: 0.24 }]`) or an x-ray body with a red `pulse`.
 - **Danger / scale**: the subject next to the threat (explosion, giant object) with a red circle.
 
-**Background = the story's real place**: a photographed `place:<id>` (neighborhood, school, cafe, hospital, gym, city…), the same world the video is set in,
+**Background = the story's own 3D world** (the same 3D set the video uses — never a photo),
 blurred slightly behind the subject, with strong subject lighting. Never cartoon rays or spirals. The `thumb` glow studio is only a
 last resort for abstract topics.
 

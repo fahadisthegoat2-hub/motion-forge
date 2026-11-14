@@ -29,8 +29,6 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { GroundedSkybox } from 'three/addons/objects/GroundedSkybox.js';
 
 /* ================================ DIRECTION ================================ */
 const LIB = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/';
@@ -492,26 +490,11 @@ function microVessel(g, set, plaque) {
 }
 
 const ASSET_LOADS = [];   // async set assets the boot waits for
-const RGBE = new RGBELoader(), TEXL = new THREE.TextureLoader();
-async function loadFirstOf(urls, loader) { for (const u of urls) { try { return await loader.loadAsync(u); } catch {} } return null; }
-function buildPlace(g, set, spec) {   // real photographed location: ground-projected photo background + its real light
-  set.place = spec.id; set.noFloor = true; set.fog = null; set.skyCols = ['#808080', '#808080']; set.sky.visible = false; set.envScale = spec.env ?? 1; set.exposure = spec.exposure ?? 1;
-  const shadow = new THREE.Mesh(new THREE.CircleGeometry(12, 64), new THREE.ShadowMaterial({ opacity: spec.shadow ?? 0.38 })); shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.002; shadow.receiveShadow = true; g.add(shadow);
-  ASSET_LOADS.push((async () => {
-    const [hdr, jpg] = await Promise.all([loadFirstOf(kit('places/' + spec.id + '.hdr'), RGBE), loadFirstOf(kit('places/' + spec.id + '.jpg'), TEXL)]);
-    if (!hdr && !jpg) { console.warn('place missing', spec.id); return; }
-    if (hdr) { hdr.mapping = THREE.EquirectangularReflectionMapping; set.envTex = pmrem.fromEquirectangular(hdr).texture; }
-    const tex = jpg || hdr; tex.mapping = THREE.EquirectangularReflectionMapping; if (jpg) jpg.colorSpace = THREE.SRGBColorSpace;
-    const sky = new GroundedSkybox(tex, spec.height ?? 1.7, spec.radius ?? 60, 96); sky.position.y = (spec.height ?? 1.7) - 0.01; sky.rotation.y = spec.rotY ?? 0;
-    sky.material.toneMapped = !jpg; sky.material.fog = false; sky.material.depthWrite = false; sky.renderOrder = -10; g.add(sky);
-    if (set.envTex) set.envRotY = spec.rotY ?? 0;
-  })());
-}
 const SETS = {};
 const LIGHTS = new THREE.Group(); scene.add(LIGHTS);   // every effect/set light stays in the scene (intensity 0 when idle) → no shader recompiles at cuts
 function buildSet(spec) {
   const id = typeof spec === 'string' ? spec : (spec.id || spec.url || spec.type); if (SETS[id]) return SETS[id];
-  const type = typeof spec === 'string' ? (spec.startsWith('place:') ? 'place' : spec) : (spec.type || (spec.url ? 'glb' : 'studio'));
+  const type = typeof spec === 'string' ? spec : (spec.type || (spec.url ? 'glb' : 'studio'));
   const g = new THREE.Group(); g.visible = false; scene.add(g);
   const sky = new THREE.Mesh(new THREE.SphereGeometry(60, 48, 24), gradMat()); g.add(sky);
   const set = { id, type, group: g, sky, onLook: null };
@@ -552,7 +535,6 @@ function buildSet(spec) {
     }
     const lamp = new THREE.PointLight('#ffb35c', 30, 12, 1.8); lamp.position.set(1.8, 4.2, -1.2); g.add(lamp);
     set.extraFx = [{ type: 'beam', pos: [1.8, 4.2, -1.2], to: [1.2, 0, -0.6], radius: 1.4, color: '#ffbf75', intensity: 0.28, always: true }, { type: 'dust', pos: [0, 1.5, 0], always: true }];
-  } else if (type === 'place') { buildPlace(g, set, typeof spec === 'string' ? { id: spec.slice(6) } : spec);
   } else if (ENV[type]) { ENV[type](g, set, spec);
     (set.lightsExtra || []).forEach(([c, i, p]) => { const l = new THREE.PointLight(c, i, 0, 1.6); l.position.set(...p); g.add(l); });
   } else if (type === 'glb') {

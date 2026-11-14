@@ -34,4 +34,4 @@ Everything else still follows the Motion Forge rules.
 
 ## Use it in a scene
 `fx: [{ type: 'model', id: 'cheeseburger', pos: [x, y, z], height: 0.12, rotY, spin, bob, pulse, p: keys, scale: keys, start, end, color }]`
-Props sit on the ground at `pos` (y = surface height, e.g. 0.75 for a table). Pair with real places (`set: 'place:…'`).
+Props sit on the ground at `pos` (y = surface height, e.g. 0.75 for a table). Pair with the 3D sets.
