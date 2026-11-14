@@ -302,7 +302,7 @@ const ENV = {
     set.skyCols = ['#7d8b93', '#b9c4ca'];
     const tile = canvasTex(512, (c, s) => { c.fillStyle = '#9aa5ab'; c.fillRect(0, 0, s, s); c.strokeStyle = '#b8c0c4'; c.lineWidth = 3; for (let i = 0; i <= 4; i++) { c.beginPath(); c.moveTo(i * s / 4, 0); c.lineTo(i * s / 4, s); c.moveTo(0, i * s / 4); c.lineTo(s, i * s / 4); c.stroke(); } }, 6);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshStandardMaterial({ map: tile, roughness: 0.25, metalness: 0 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; g.add(floor);
-    set.fog = null; const wallM = new THREE.MeshStandardMaterial({ color: '#aebbc2', roughness: 0.7 }), trimM = new THREE.MeshStandardMaterial({ color: '#9aa7ae', roughness: 0.4, metalness: 0.6 });
+    set.fog = null; set.envScale = 0.5; set.exposure = 0.88; const wallM = new THREE.MeshStandardMaterial({ color: '#8d9ca5', roughness: 0.7 }), trimM = new THREE.MeshStandardMaterial({ color: '#9aa7ae', roughness: 0.4, metalness: 0.6 });
     const back = new THREE.Mesh(new THREE.PlaneGeometry(14, 4), wallM); back.position.set(0, 2, -4); back.receiveShadow = true; g.add(back);
     for (const sx of [-1, 1]) { const w = new THREE.Mesh(new THREE.PlaneGeometry(14, 4), wallM); w.rotation.y = -sx * Math.PI / 2; w.position.set(sx * 6, 2, 0); w.receiveShadow = true; g.add(w); }
     for (let i = -3; i <= 3; i++) { const pnl = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3.4, 0.04), trimM); pnl.position.set(i * 1.8, 1.9, -3.98); g.add(pnl); }
@@ -459,7 +459,7 @@ function applyLook(name, set) {
   const L = LOOKS[name] || LOOKS['clean-cg']; if (currentLook === name + set.id) return; currentLook = name + set.id;
   key1.color.set(L.key[0]); key1.intensity = L.key[1]; fill.color.set(L.fill[0]); fill.groundColor.set(L.fill[1]); fill.intensity = L.fill[2];
   rim.color.set(L.rim[0]); rim.intensity = L.rim[1]; rim2.color.set(L.rim2[0]); rim2.intensity = L.rim2[1];
-  scene.environmentIntensity = L.env; renderer.toneMappingExposure = L.exposure;
+  scene.environmentIntensity = L.env * (set.envScale ?? 1); renderer.toneMappingExposure = L.exposure * (set.exposure ?? 1);
   scene.fog = set.fog ? new THREE.FogExp2(set.fog[0], set.fog[1]) : L.fog ? new THREE.FogExp2(L.fog[0], L.fog[1]) : (set.type === 'outdoor' ? new THREE.FogExp2('#c9d8e6', 0.012) : null);
   const tint = (sky, lk) => '#' + new THREE.Color(sky).lerp(new THREE.Color(lk), name === 'clean-cg' ? 0 : 0.6).getHexString();
   const SC = set.skyCols || (set.type === 'outdoor' ? ['#5f93d6', '#cfe0ef'] : null);
@@ -562,7 +562,8 @@ function drawTitles(t, w, h) {
         g.fillStyle = 'rgba(40,220,255,.9)'; g.fillText(T.text, X + j(3), Y + j(4) * .3); g.globalCompositeOperation = 'source-over';
         outlinedText(g, T.text, X, Y, size, col); break; }
       case 'lower-third': {
-        const e = EASE.outCubic(clamp(lt / 0.35)), e2 = EASE.outCubic(clamp((lt - 0.12) / 0.35)), bw = w * 0.62 * e, bh = size * 1.5, x0 = w * 0.06, y0 = Y - bh / 2;
+        g.font = `900 ${size * 0.62}px ${FONT}`; const tw = Math.max(g.measureText(T.text || '').width, (g.font = `700 ${size * 0.36}px ${FONT}`, g.measureText(T.sub || '').width));
+        const e = EASE.outCubic(clamp(lt / 0.35)), e2 = EASE.outCubic(clamp((lt - 0.12) / 0.35)), bw = (tw + size * 0.9) * e, bh = size * 1.5, x0 = w * 0.06, y0 = Y - bh / 2;
         g.fillStyle = acc; g.fillRect(x0, y0, size * 0.14, bh); g.fillStyle = 'rgba(10,12,18,.82)'; g.fillRect(x0 + size * 0.2, y0, bw, bh);
         g.textAlign = 'left'; g.globalAlpha = out * e2; g.font = `900 ${size * 0.62}px ${FONT}`; g.fillStyle = col; g.fillText(T.text, x0 + size * 0.5 + (1 - e2) * 30, Y - (T.sub ? size * 0.22 : 0));
         if (T.sub) { g.font = `700 ${size * 0.36}px ${FONT}`; g.fillStyle = acc; g.fillText(T.sub, x0 + size * 0.5 + (1 - e2) * 30, Y + size * 0.38); }
@@ -788,6 +789,7 @@ function setupCharacter(id, data, def) {
   const box = new THREE.Box3().setFromObject(model), h = box.max.y - box.min.y;
   const H = clamp(+def.height || 1.75, 0.3, 3.2);   // metres (guards against typos like 1080)
   model.scale.setScalar(H / h); model.position.y = -box.min.y * model.scale.y;
+  const BW = clamp(+(def.build?.width ?? 1), 0.85, 1.25); model.scale.x *= BW; model.scale.z *= BW;   // build: slimmer ↔ broader
   upgradeMaterials(model, def); scene.add(root);
   const bones = boneMap(model), morphMeshes = [];
   model.traverse((o) => { if (o.isMesh && o.morphTargetDictionary) morphMeshes.push(o); });
@@ -796,6 +798,7 @@ function setupCharacter(id, data, def) {
   let eyeY = rest.lefteye ? rest.lefteye.p.y : null;
   if (eyeY === null) model.traverse((o) => { if (eyeY === null && o.isMesh && /(^|[^a-z])eyes?($|[^a-z])|high-poly/i.test(o.name) && !/brow|lash/i.test(o.name)) { const b = new THREE.Box3().setFromObject(o); if (!b.isEmpty()) eyeY = (b.min.y + b.max.y) / 2; } });
   if (eyeY === null) eyeY = rest.head ? rest.head.p.y + 0.09 : H * 0.93;
+  if (def.build?.head && bones.head) bones.head.scale.setScalar(clamp(+def.build.head, 0.9, 1.1));
   const ch = { id, root, model, bones, rest, morphMeshes, mixer: new THREE.AnimationMixer(model), actions: {}, spring: null, def, eyeMorphs: !bones.lefteye, eyeY };
   ch.hasMorph = (name) => morphMeshes.some((m) => m.morphTargetDictionary[name] !== undefined);
   ch.setMorph = (name, v) => morphMeshes.forEach((m) => { const i = m.morphTargetDictionary[name]; if (i !== undefined) m.morphTargetInfluences[i] = Math.max(m.morphTargetInfluences[i], clamp(v)); });
@@ -822,7 +825,7 @@ const GESTURES = {
   point:    { R: { rightarm: [-1.45, 0.25, 0.1], rightforearm: [-0.08, 0, 0] }, spine2: [0, -0.1, 0] },
   handsup:  { R: { rightarm: [-0.35, 0, -2.3], rightforearm: [-0.25, 0, -0.75] }, L: true, spine2: [-0.08, 0, 0] },
   shrug:    { R: { rightshoulder: [0, 0, -0.18], rightarm: [-0.2, 0, -0.12], rightforearm: [-1.05, 0.15, 0] }, L: true, head: [0, 0, 0.12] },
-  armsout:  { R: { rightarm: [-0.35, 0, -1.05], rightforearm: [-0.35, 0, 0] }, L: true, spine2: [-0.06, 0, 0] },
+  armsout:  { R: { rightarm: [-0.55, 0.2, -0.72], rightforearm: [-0.55, 0.3, 0] }, L: true, spine2: [-0.06, 0, 0] },
   fistpump: { R: { rightarm: [-0.2, 0, -2.6], rightforearm: [0, 0, -0.9] }, spine2: [-0.05, 0, 0.08], anim: { rightarm: [0, 0, 0.12, 7] } },
   shield:   { R: { rightarm: [-1.25, 0, 0.25], rightforearm: [-1.35, 0, 0.3] }, L: true, spine2: [-0.18, 0, 0], head: [0.2, 0, 0] },
   think:    { R: { rightarm: [-0.55, 0, 0.35], rightforearm: [-2.1, 0.3, 0] }, head: [0.12, 0, -0.08] },
@@ -1311,7 +1314,7 @@ function cameraMove(shot, lt, c) {
   const size = typeof c.size === 'number' ? c.size : SIZES[c.size || MOVE_SIZE[m] || 'ms'];
   let dist = (size / 2) / Math.tan(THREE.MathUtils.degToRad(fov0) / 2) / Math.min(1, camera.aspect * 1.78) ** 0;
   if (camera.aspect > 1) dist = (size / 2) / Math.tan(THREE.MathUtils.degToRad(fov0) / 2);
-  const lookY = T.y - size * (size < 1 ? 0.24 : Math.min(0.4, 0.24 + (size - 1) * 0.14));   // eyes on the upper third
+  const lookY = T.y - size * (size < 1 ? 0.24 : Math.min(0.32, 0.24 + (size - 1) * 0.1));   // eyes on the upper third; headroom on wides
   let a = face + THREE.MathUtils.degToRad(c.az ?? 0), h = (size >= 1.3 ? lookY + 0.3 : T.y) + (c.height ?? 0), fov = fov0, lx = 0, roll = c.roll ?? 0;   // wide shots: chest-height camera
   switch (m) {
     case 'dolly-in': dist *= 1.5 - 0.5 * e; break;
@@ -1326,12 +1329,12 @@ function cameraMove(shot, lt, c) {
     case 'reveal': lx = (1 - e) * 1.4; break;
     case 'static': break;
     case 'track': case 'follow': a += THREE.MathUtils.degToRad(c.side === 'right' ? -90 : 90); dist *= c.move === 'follow' ? 1 : 1.1; break;   // rides beside the walking path
-    case 'over-shoulder': a += THREE.MathUtils.degToRad(c.span ?? 155); h -= 0.05; dist *= 1.1; break;
+    case 'over-shoulder': a += THREE.MathUtils.degToRad(c.side === 'left' ? -16 : 16); dist = Math.max(dist * 1.7, (c.over ?? 1.6) + 0.75); h -= 0.04; break;   // target = the face we see; the other person's shoulder fills the foreground
     case 'dutch': roll = roll || 0.18; dist *= 1.08 - 0.08 * e; break;
   }
   const LX = Math.cos(face) * lx, LZ = -Math.sin(face) * lx;
   let look = [T.x + LX, lookY, T.z + LZ];
-  if (c.with) { const W = c.with; look = [look[0] + (W[0] - look[0]) * 0.3, look[1] + (W[1] - look[1]) * 0.15, look[2] + (W[2] - look[2]) * 0.3]; }   // pan toward a second subject, camera stays on the first
+  if (c.with) { const W = c.with; look = [look[0] + (W[0] - look[0]) * 0.17, look[1] + (W[1] - look[1]) * 0.1, look[2] + (W[2] - look[2]) * 0.17]; }   // pan toward a second subject, camera stays on the first
   return { pos: [T.x + Math.sin(a) * dist, h, T.z + Math.cos(a) * dist], look, fov, roll };
 }
 
@@ -1445,7 +1448,17 @@ SHOTS.forEach((s) => buildSet(s.set ?? CONFIG.set ?? 'studio'));
 buildFX();
 (async () => {
   const T0 = performance.now(), status = (m) => { const el = document.getElementById('mf-msg'); if (el && !window.__mfReady) el.textContent = m; if (m) console.log('[mf] ' + m + ' @' + ((performance.now() - T0) / 1000).toFixed(1) + 's'); };
-  for (const [id, def] of Object.entries(CAST)) {
+  let LIBRARY = {};
+  if (Object.values(CAST).some((d) => d.character)) {
+    const base = KIT[KIT.length - 1].replace(/assets\/$/, '');
+    for (const u of ['characters/library.json', '../characters/library.json', '../../characters/library.json', base + 'characters/library.json']) {
+      try { const r = await fetch(u); if (r.ok) { LIBRARY = (await r.json()).characters || {}; break; } } catch {}
+    }
+  }
+  for (const [id, def0] of Object.entries(CAST)) {
+    const lib = def0.character ? LIBRARY[def0.character] : null;   // collection entry → defaults, cast entry overrides
+    const def = lib ? Object.assign({}, lib, def0, { wardrobe: { ...(lib.wardrobe || {}), ...(def0.wardrobe || {}) } }) : def0; CAST[id] = def;
+    if (lib?.file) def.urls = [...(def.urls || []), lib.file, '../' + lib.file, '../../' + lib.file];
     status('Loading ' + id + '…');
     const A = ACTORS[def.actor] || (def.urls ? null : ACTORS.jake);
     if (A && !def.height) def.height = A.height;

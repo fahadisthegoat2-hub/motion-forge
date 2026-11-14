@@ -1,0 +1,11 @@
+{
+  "characters": {
+    "jake":   { "name": "Jake",   "actor": "jake",   "about": "everyday guy · short brown hair", "height": 1.80, "wardrobe": { "top": "#2e6bd6", "bottom": "#23262d" } },
+    "marcus": { "name": "Marcus", "actor": "marcus", "about": "big build · work overalls", "height": 1.86, "wardrobe": { "top": "#c8692b", "bottom": "#c8692b" } },
+    "leo":    { "name": "Leo",    "actor": "jake",   "about": "tall · dark skin · black hair · red top", "height": 1.84, "skin": "dark", "hair": "#0d0a08", "wardrobe": { "top": "#c8352b", "bottom": "#1d2a3a" } },
+    "omar":   { "name": "Omar",   "actor": "jake",   "about": "brown skin · black hair · cream top", "height": 1.76, "skin": "brown", "hair": "#120d0a", "wardrobe": { "top": "#e9e4d8", "bottom": "#3b4a5c" } },
+    "kenji":  { "name": "Kenji",  "actor": "jake",   "about": "slim · light skin · black hair · all black", "height": 1.72, "skin": "light", "hair": "#090909", "build": { "width": 0.95 }, "wardrobe": { "top": "#262a31", "bottom": "#262a31" } },
+    "sam":    { "name": "Sam",    "actor": "marcus", "about": "big · pale · ginger hair · blue overalls", "height": 1.88, "skin": "pale", "hair": "#8a4a22", "wardrobe": { "top": "#2f5d8a", "bottom": "#2f5d8a" } },
+    "tony":   { "name": "Tony",   "actor": "marcus", "about": "stocky · tan skin · brown work suit", "height": 1.79, "skin": "tan", "hair": "#2a1b12", "build": { "width": 1.05 }, "wardrobe": { "top": "#5b4636", "bottom": "#5b4636" } }
+  }
+}
