@@ -79,7 +79,8 @@ $('#grid').innerHTML = DATA.cast.map((c) => \`
       <div class="name"><b>\${esc(c.name)}</b><span class="chips">\${c.height ? \`<span class="chip">\${Number(c.height).toFixed(2)} m</span>\` : ''}<span class="chip">v\${c.version}</span></span></div>
       <p class="about">\${esc(c.about)}</p>
       <label class="sub" for="imp-\${esc(c.id)}">Improve \${esc(c.name)}</label>
-      <textarea id="imp-\${esc(c.id)}" placeholder="e.g. rounder face, bigger green eyes, older, add a beard, swap to a black jacket"></textarea>
+      <textarea id="imp-\${esc(c.id)}" placeholder="e.g. rounder face, bigger green eyes, older, black jacket. Add a reference photo below if you have one."></textarea>
+      <div class="row"><input id="impref-\${esc(c.id)}" type="file" accept="image/*" class="file" aria-label="Reference photo for \${esc(c.name)} (optional)"></div>
       <div class="row"><button class="primary" data-improve="\${esc(c.id)}">Send improvement</button>
         \${c.undoTo ? \`<button data-undo="\${esc(c.id)}">Undo to v\${c.undoTo}</button>\` : ''}</div>
       <div class="toast" id="msg-\${esc(c.id)}" role="status"></div>
@@ -87,6 +88,12 @@ $('#grid').innerHTML = DATA.cast.map((c) => \`
   </article>\`).join('');
 let db = null, assets = null, ready = false;
 const say = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+const uploadRef = async (file, msgId) => {   // optional reference photo → the board's own asset store
+  if (!file) return null;
+  if (!assets) { say(msgId, 'Photo uploads need the page open on claude.ai; sending the text only.'); return null; }
+  try { say(msgId, 'Uploading photo…'); const up = await assets.upload(file); return { id: up.id, url: up.url }; }
+  catch (e) { say(msgId, 'Photo upload failed (' + (e?.code || 'error') + '); sending the text only.'); return null; }
+};
 const send = async (req, msgId) => {
   if (!db) { say(msgId, 'Open this page on claude.ai (signed in) to send requests. Or tell Claude in chat: ' + (req.text || req.type)); return false; }
   const rid = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -95,17 +102,18 @@ const send = async (req, msgId) => {
 };
 document.addEventListener('click', async (ev) => {
   const imp = ev.target.closest('[data-improve]'), und = ev.target.closest('[data-undo]');
-  if (imp) { const id = imp.dataset.improve, ta = document.getElementById('imp-' + id), text = ta.value.trim();
-    if (!text) { say('msg-' + id, 'Type what to change first.'); return; }
-    imp.disabled = true; if (await send({ type: 'improve', character: id, text }, 'msg-' + id)) ta.value = ''; imp.disabled = false; }
+  if (imp) { const id = imp.dataset.improve, ta = document.getElementById('imp-' + id), fi = document.getElementById('impref-' + id), text = ta.value.trim(), file = fi.files[0];
+    if (!text && !file) { say('msg-' + id, 'Type what to change or add a reference photo.'); return; }
+    imp.disabled = true; const ref = await uploadRef(file, 'msg-' + id);
+    if (await send({ type: 'improve', character: id, text: text || 'Match the reference photo', ref }, 'msg-' + id)) { ta.value = ''; fi.value = ''; }
+    imp.disabled = false; }
   if (und) { const id = und.dataset.undo; und.disabled = true; await send({ type: 'undo', character: id, text: 'Undo ' + id }, 'msg-' + id); und.disabled = false; }
 });
 $('#create').addEventListener('click', async () => {
   const btn = $('#create'), text = $('#newtext').value.trim(), file = $('#newphoto').files[0];
   if (!text && !file) { say('newmsg', 'Describe the character or add a reference photo.'); return; }
   btn.disabled = true; let ref = null;
-  if (file) { if (!assets) say('newmsg', 'Photo uploads need the page open on claude.ai; sending the description only.');
-    else { try { say('newmsg', 'Uploading photo…'); const up = await assets.upload(file); ref = { id: up.id, url: up.url }; } catch (e) { say('newmsg', 'Photo upload failed (' + (e?.code || 'error') + '); sending the description only.'); } } }
+  ref = await uploadRef(file, 'newmsg');
   if (await send({ type: 'create', text, ref }, 'newmsg')) { $('#newtext').value = ''; $('#newphoto').value = ''; }
   btn.disabled = false;
 });

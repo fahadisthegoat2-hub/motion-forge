@@ -31,7 +31,8 @@ Each pending doc: `{ type: create|improve|undo, character?, text, ref?: {id,url}
 3. Add `characters.<id>` = `{ name, about (6–9 words), height (m), version: 1, file: "characters/<id>.glb", make, wardrobe?, hair?, ref? }`.
 4. `build_character.js <id>` → `character_card.js <id> --fast` → mark done ("Created Nadia: …").
 
-### improve (e.g. "rounder face, bigger green eyes, older, black jacket")
+### improve (e.g. "rounder face, bigger green eyes, older, black jacket") — may include a reference photo
+0. If `ref` exists: fetch it (Artifact `read` with `path: ref.id`), save it as `references/characters/<id>-v<next>.<ext>`, view it and sample its colors. The photo shows the target look: combine it with the text (text wins where they disagree).
 1. `character_version.js archive <id>` (old version leaves the board but stays in history forever).
 2. Apply ALL requested changes in one pass: edit `make` (face/body sliders, ancestry mix, irisColour, hair, brows, outfit),
    and/or `wardrobe`/`hair`/`build` (`build.head` for head size). Update `about`.
