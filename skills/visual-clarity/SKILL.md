@@ -19,13 +19,19 @@ that don't show what the line says make the video confusing and boring.
 - If you can't name the literal visual for a line, rewrite the line.
 - Each shot must add NEW information. Never repeat a set + framing + action combo.
 
-## 2. Explainer graphics toolkit (TITLES — see SCENE_API.md)
+## 2. Realism first — show it in 3D
+The premium look is REAL 3D, not drawings: dive into the body with a micro-world shot (`set: 'blood' | 'fat' | 'neurons' | 'artery'`,
+`micro: { level }` animates fat shrinking, sugar rising, plaque growing, neurons firing), magnify with a 3D lens (`inset` + `world`),
+reveal organs with an x-ray body (`xray` + `scan` + `pulse`). Use 2D only as small labels on top (callout, counter, tag, timeline).
+Avoid flat 2D panels (chart, bars, list, card) unless the beat is pure data, and then keep them small and brief.
+
+## 3. Explainer graphics toolkit (TITLES — see SCENE_API.md)
 Body-anchored (they follow the character and camera): `callout` · `pulse` · `inset` (micro view: fat · blood · neurons · artery · cells) · `bubble` · `arrow` (path between anchors).
 Panels: `chart` (line graph that draws on) · `bars` (comparison) · `list` (checklist, ✓ / ✗ / strike) · `card` (icon + title + short text) · `timeline` (story progress) · `icon` · `counter` · `meter` · `arrow` with `dir: 'up' | 'down'` (trend).
 Anchors: `at: 'hero.heart'` — parts: head brain face eyes mouth throat chest heart lungs stomach liver belly fat gut hips lefthand righthand leftarm rightarm leftknee rightknee skin feet.
 Explainer topics need ≥1 explainer graphic in at least 70% of shots, and a graphic event (pop, draw-on, counter, mark) every 1–2s.
 
-## 3. Camera by meaning (never pick a move just for variety)
+## 4. Camera by meaning (never pick a move just for variety)
 | Beat | Camera |
 |---|---|
 | Body part / effect | `static` or slow `push`, `ms`/`mcu` with the part in frame; graphics need a steady frame to read |
@@ -36,13 +42,13 @@ Explainer topics need ≥1 explainer graphic in at least 70% of shots, and a gra
 | Hook / twist | `crash-zoom`, `smash` cut, punch-in |
 Never `overhead`, `dutch` or a fast `orbit` on an informational beat. The subject (and the body part being discussed) must always be in frame.
 
-## 4. Pacing that keeps viewers AND is understood
+## 5. Pacing that keeps viewers AND is understood
 - Payoff-first hook: the first 2s show the answer or result (end state, number, shocking visual), then explain how.
 - Hold info shots long enough to read: dur ≥ 0.6s + 0.3s per on-screen word (usually 1.5–3s). Cut faster only in the hook and montages.
 - Keep energy inside long shots with graphic beats (pop, draw-on, counter, push-in), not with extra cuts.
 - ≤ 6 words on screen at once besides captions. Captions match the VO exactly.
 
-## 5. Tests (before showing anything)
+## 6. Tests (before showing anything)
 - **Sound-off test**: muted, every shot is understandable from visuals + captions.
 - **5-word test**: describe each shot in ≤5 words that match its line. If you can't, fix the shot.
 - **Random-action test**: every movement is motivated by the line; delete anything that isn't.

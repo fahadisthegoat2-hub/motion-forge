@@ -88,6 +88,15 @@ beat · explain · present · count`.
 Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and saved-motion events; sets add ambience.
 Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
+## Inside the body — real 3D (prefer these over 2D)
+- Micro worlds: `set: 'blood' | 'fat' | 'neurons' | 'artery'` (camera flies forward automatically; characters hidden). `shot.micro = { level: keys 0..1, flow }`:
+  blood = sugar crystals, fat = cell size, neurons = firing rate, artery = plaque (narrows and slows the flow).
+- 3D lens: `{ style: 'inset', at: 'hero.belly', world: 'fat', level: [[0,1],[2,0.3]], text, sub }` → the real micro world inside a glass circle.
+- X-ray body: cast `xray: [[0.3, 0], [0.9, 1]]` (+ `xrayColor`) → hologram body; add `scan` and `pulse` on organs. Dark sets/looks (void, neon-night) read best.
+
+## Thumbnails (see skills/thumbnails)
+`const THUMBS = [{ shot, t, text, hi, accent, sub, face, cast, set, look, size, az, shift, side, arrow, circle }]` → `node scripts/thumbnail.js scene.html thumbs --fast` (drafts + preview.jpg), `--only N` (final), `--cover` (1080×1920).
+
 ## Explainer graphics (see skills/visual-clarity) — TITLES that explain
 Any title can follow a body part or 3D point: `at: 'hero.heart'` (+ `offset: [dx, dy]`). Parts: head brain face eyes mouth throat chest heart lungs stomach liver belly fat gut hips lefthand righthand leftarm rightarm leftknee rightknee skin feet.
 ```js
