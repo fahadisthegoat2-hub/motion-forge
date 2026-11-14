@@ -82,6 +82,12 @@ beat · explain · present · count`.
 ### Effects (`fx`) — see skills/vfx
 `explosion · fire · smoke · sparks · magic · lightning · shockwave · beam · dust · embers · rain · snow · splash`.
 
+## Editing & sound (see skills/editing)
+`CONFIG.sound = { music: { mood, bpm?, key?, volume?, drops: [t] }, sfx: true, ambience: true, voice: { url }, track: { url } }` ·
+`CONFIG.letterbox` · per shot: `time` (speed ramp keys), `freeze: [[at, hold]]`, `punch: [t]`, `letterbox`, `sfx: [{ t, type, gain }]`.
+Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and saved-motion events; sets add ambience.
+Renders (device panel and render_video.js) mux the soundtrack into the MP4.
+
 ## CAPTIONS & TITLES (drawn into the video)
 `CAPTIONS = [{ t, t1?, text, hi: ['WORD'] }]` — word-by-word pop, highlighted words yellow, at `captionY`.
 `TITLES = [{ t, t1, style, text, pos:[x,y], size, color, accent, sub, from, to, prefix, suffix, value, radius }]`

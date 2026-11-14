@@ -43,6 +43,8 @@ const CONFIG = {
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   // Clip libraries (Mixamo-style rigs). Any clip auto-retargets onto any humanoid in CAST.
   // Add your own Mixamo FBX files here, e.g. 'animations/Waving.fbx' → clip name 'waving'.
+  sound: { music: { mood: 'tension', drops: [] }, sfx: true, ambience: true },   // moods: tension epic mystery upbeat sad horror action lofi · track: { url } (own music) · voice: { url } (voiceover)
+  letterbox: 0,          // cinema bars: 2.39 (ratio, long-form) or 0.06 (bar size, shorts) · per shot: shot.letterbox
   animations: [LIB + 'Xbot.glb', kit('animations/ual-starter.glb'), LIB + 'Soldier.glb', LIB + 'Michelle.glb'],   // first library wins a name: relaxed Xbot idle/walk/run; UAL adds jog/sprint/dance/crouch
 };
 
@@ -435,11 +437,11 @@ if (FAST) renderer.shadowMap.type = THREE.PCFShadowMap;
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 const grade = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGrain: { value: 0.03 }, uVig: { value: 0.25 }, uFade: { value: 0 }, uFlash: { value: 0 }, uCA: { value: 0.5 },
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uGrain: { value: 0.03 }, uVig: { value: 0.25 }, uFade: { value: 0 }, uFlash: { value: 0 }, uCA: { value: 0.5 }, uMono: { value: 0 }, uBars: { value: 0 },
     uContrast: { value: 1 }, uSat: { value: 1 }, uLift: { value: new THREE.Vector3() }, uGain: { value: new THREE.Vector3(1, 1, 1) },
     uShadows: { value: new THREE.Vector3() }, uHigh: { value: new THREE.Vector3() }, uRes: { value: new THREE.Vector2(1080, 1920) } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime, uGrain, uVig, uFade, uFlash, uCA, uContrast, uSat; uniform vec3 uLift, uGain, uShadows, uHigh; uniform vec2 uRes; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime, uGrain, uVig, uFade, uFlash, uCA, uContrast, uSat, uMono, uBars; uniform vec3 uLift, uGain, uShadows, uHigh; uniform vec2 uRes; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime*61.7) * 43758.5453); }
     void main(){ vec2 d = vUv - .5; vec2 off = d * uCA * 2.5 / uRes.y;
       vec3 c = vec3(texture2D(tDiffuse, vUv - off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv + off).b);
@@ -450,7 +452,8 @@ const grade = new ShaderPass({
       c = (c - .5) * uContrast + .5;
       c *= 1. - uVig * smoothstep(.25, .85, length(d * vec2(1., 1.2)));
       c += (h(vUv * uRes) - .5) * uGrain * (1.2 - l);
-      c = mix(c, vec3(1.), uFlash); c *= 1. - uFade; gl_FragColor = vec4(clamp(c, 0., 1.), 1.); }`,
+      c = mix(c, vec3(l) * vec3(1.06, 1., .92), uMono);
+      c = mix(c, vec3(1.), uFlash); c *= 1. - uFade; if (vUv.y < uBars || vUv.y > 1. - uBars) c = vec3(0.); gl_FragColor = vec4(clamp(c, 0., 1.), 1.); }`,
 });
 composer.addPass(grade);
 
@@ -1287,7 +1290,7 @@ function buildFX() {
       if (!r.absolute) { g.position.set(...(f.pos || [0, 0, 0])); if (r.offsetY) g.position.y += r.offsetY; }
       r.parts.forEach((p) => { const o = p.obj ?? p; if (o.isLight) { o.userData.fxShot = si; if (r.absolute) LIGHTS.add(o); else { const h = new THREE.Group(); h.position.copy(g.position); h.add(o); LIGHTS.add(h); } } else g.add(o); }); scene.add(g);
       FX.push({ shot: si, group: g, parts: r.parts.map((p) => (p.isPoints ? { obj: p } : p)), follow: f.followCamera ?? (f.type === 'rain' || f.type === 'snow') });
-      (r.shakes || []).forEach((x) => shot._shakes.push(x)); (r.impulses || []).forEach((x) => shot._impulses.push(x)); (r.flashes || []).forEach((x) => shot._flashes.push(x));
+      (r.shakes || []).forEach((x) => shot._shakes.push({ ...x, _fromFx: true })); (r.impulses || []).forEach((x) => shot._impulses.push(x)); (r.flashes || []).forEach((x) => shot._flashes.push(x));
     }
   });
 }
@@ -1395,6 +1398,209 @@ function applyTransition(tr, cam, tGlobal) {   // mutates cam {pos, look, fov, r
 
 composer.insertPass(transPass, composer.passes.indexOf(grade));
 
+/* ---------- editing: freeze-frames, speed ramps (content time vs edit time) ---------- */
+// shot.freeze = [[at, hold]] (edit seconds) · shot.time = keys(content seconds) e.g. slow-mo [[0,0],[0.6,0.6],[1.8,0.9,'outCubic'],[2.4,1.5]]
+function contentTime(shot, local) {
+  let off = 0, t = local, frozen = false;
+  for (const [at, hold] of [...(shot.freeze || [])].sort((a, b) => a[0] - b[0])) { if (local >= at + hold) off += hold; else if (local >= at) { t = at - off; frozen = true; break; } }
+  if (!frozen) t = local - off;
+  return shot.time ? key(shot.time, t) : t;
+}
+const isFrozen = (shot, local) => (shot.freeze || []).some(([at, hold]) => local >= at && local < at + hold);
+/* ---------- SOUND: original music + synthesized SFX + ambience + voice, rendered deterministically with the picture ---------- */
+// CONFIG.sound = { music: { mood, bpm?, key?, volume?, drops: [t] } | null, sfx: true, ambience: true, volume, voice: { url, volume?, offset? } }
+// SHOTS[i].sfx = [{ t, type, gain? }] extra sounds (shot-local, content time). Motions may carry sfx too.
+const SR = 48000;
+const SND = { events: [], beds: [], voiceEnv: null, buffer: null };
+function srng(seed) { let s = (seed * 2654435761) >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+function noiseBuf(ctx, sec, seed = 1) { const n = Math.max(1, Math.ceil(sec * ctx.sampleRate)), b = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) { const r = srng(seed * 31 + c * 7), d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = r() * 2 - 1; } return b; }
+function env(g, t, a, peak, d, end = 0.0001) { g.gain.setValueAtTime(0.0001, Math.max(0, t)); g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + a); g.gain.exponentialRampToValueAtTime(end, t + a + d); }
+// one-shot synthesized sound effects — fx(ctx, out, reverbSend, t, gain, seed)
+const SFX = {
+  whoosh(c, o, rv, t, g, s, dur = 0.5) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, dur + 0.1, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.4;
+    f.frequency.setValueAtTime(250, t - dur * 0.6); f.frequency.exponentialRampToValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(500, t + dur * 0.4);
+    const v = c.createGain(); v.gain.setValueAtTime(0.0001, t - dur * 0.6); v.gain.exponentialRampToValueAtTime(0.9 * g, t - 0.02); v.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.4);
+    const p = c.createStereoPanner(); p.pan.setValueAtTime(-0.7, t - dur * 0.6); p.pan.linearRampToValueAtTime(0.7, t + dur * 0.4);
+    n.connect(f).connect(v).connect(p); p.connect(o); p.connect(rv); n.start(Math.max(0, t - dur * 0.6)); n.stop(t + dur * 0.5); },
+  swoosh(c, o, rv, t, g, s) { SFX.whoosh(c, o, rv, t, g * 0.7, s, 0.26); },
+  impact(c, o, rv, t, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.35, s); const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2400; const v = c.createGain(); env(v, t, 0.003, 0.9 * g, 0.25);
+    n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 0.4);
+    const os = c.createOscillator(); os.type = 'sine'; os.frequency.setValueAtTime(140, t); os.frequency.exponentialRampToValueAtTime(42, t + 0.35); const vg = c.createGain(); env(vg, t, 0.004, 1.0 * g, 0.45); os.connect(vg).connect(o); os.start(t); os.stop(t + 0.6); },
+  hit(c, o, rv, t, g, s) { SFX.impact(c, o, rv, t, g * 0.75, s); },
+  boom(c, o, rv, t, g, s) { const os = c.createOscillator(); os.frequency.setValueAtTime(72, t); os.frequency.exponentialRampToValueAtTime(26, t + 1.6); const vg = c.createGain(); env(vg, t, 0.01, 1.2 * g, 1.9); os.connect(vg).connect(o); os.start(t); os.stop(t + 2.2);
+    const n = c.createBufferSource(); n.buffer = noiseBuf(c, 3, s); const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(1800, t); f.frequency.exponentialRampToValueAtTime(180, t + 2.4);
+    const v = c.createGain(); env(v, t, 0.008, 1.0 * g, 2.6); n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 3);
+    for (let i = 0; i < 9; i++) SFX.tick(c, o, rv, t + 0.25 + srng(s + i)() * 1.6, g * 0.25, s + i, 900 + srng(s * 3 + i)() * 2500); },
+  subdrop(c, o, rv, t, g) { const os = c.createOscillator(); os.frequency.setValueAtTime(95, t); os.frequency.exponentialRampToValueAtTime(30, t + 0.9); const v = c.createGain(); env(v, t, 0.01, 1.1 * g, 1.0); os.connect(v).connect(o); os.start(t); os.stop(t + 1.2); },
+  riser(c, o, rv, t, g, s, dur = 1.4) { const t0 = Math.max(0, t - dur), n = c.createBufferSource(); n.buffer = noiseBuf(c, dur + 0.05, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2;
+    f.frequency.setValueAtTime(300, t0); f.frequency.exponentialRampToValueAtTime(7000, t); const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.exponentialRampToValueAtTime(0.55 * g, t - 0.01); v.gain.linearRampToValueAtTime(0, t + 0.02);
+    n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t0); n.stop(t + 0.05);
+    const os = c.createOscillator(); os.type = 'sawtooth'; os.frequency.setValueAtTime(180, t0); os.frequency.exponentialRampToValueAtTime(900, t); const lp = c.createBiquadFilter(); lp.frequency.value = 2500;
+    const vo = c.createGain(); vo.gain.setValueAtTime(0.0001, t0); vo.gain.exponentialRampToValueAtTime(0.12 * g, t - 0.01); vo.gain.linearRampToValueAtTime(0, t + 0.02); os.connect(lp).connect(vo).connect(o); os.start(t0); os.stop(t + 0.05); },
+  glitch(c, o, rv, t, g, s) { const r = srng(s); for (let i = 0; i < 8; i++) { const st = t + i * 0.032 + r() * 0.01, os = c.createOscillator(); os.type = 'square'; os.frequency.value = 120 + r() * 1800; const v = c.createGain(); env(v, st, 0.002, 0.18 * g, 0.03); os.connect(v).connect(o); os.start(st); os.stop(st + 0.05); }
+    const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.3, s); const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 3000; const v = c.createGain(); env(v, t, 0.002, 0.3 * g, 0.22); n.connect(f).connect(v).connect(o); n.start(t); n.stop(t + 0.3); },
+  pop(c, o, rv, t, g) { const os = c.createOscillator(); os.frequency.setValueAtTime(520, t); os.frequency.exponentialRampToValueAtTime(1350, t + 0.06); const v = c.createGain(); env(v, t, 0.003, 0.35 * g, 0.09); os.connect(v); v.connect(o); v.connect(rv); os.start(t); os.stop(t + 0.15); },
+  tick(c, o, rv, t, g, s, f0 = 2200) { const os = c.createOscillator(); os.type = 'triangle'; os.frequency.value = f0; const v = c.createGain(); env(v, t, 0.001, 0.25 * g, 0.03); os.connect(v).connect(o); os.start(t); os.stop(t + 0.06); },
+  ding(c, o, rv, t, g) { for (const [f, a] of [[1320, 0.3], [1980, 0.16], [2640, 0.08]]) { const os = c.createOscillator(); os.frequency.value = f; const v = c.createGain(); env(v, t, 0.004, a * g, 1.4); os.connect(v); v.connect(o); v.connect(rv); os.start(t); os.stop(t + 1.6); } },
+  stamp(c, o, rv, t, g, s) { SFX.impact(c, o, rv, t, g * 0.6, s); const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.15, s + 3); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; const v = c.createGain(); env(v, t, 0.002, 0.5 * g, 0.1); n.connect(f).connect(v).connect(o); n.start(t); n.stop(t + 0.2); },
+  typing(c, o, rv, t, g, s, dur = 1) { const r = srng(s); for (let x = 0; x < dur; x += 0.045 + r() * 0.05) SFX.tick(c, o, rv, t + x, g * 0.6, s + x * 100, 1400 + r() * 1800); },
+  shimmer(c, o, rv, t, g, s, dur = 1.6) { const r = srng(s); for (let i = 0; i < 14; i++) { const st = t + r() * dur * 0.6, os = c.createOscillator(); os.frequency.value = 1800 + r() * 4200; const v = c.createGain(); env(v, st, 0.05, 0.05 * g, 0.6 + r());
+    os.connect(v); v.connect(rv); v.connect(o); os.start(st); os.stop(st + 2); } },
+  thunder(c, o, rv, t, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 4, s); const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(2200, t); f.frequency.exponentialRampToValueAtTime(140, t + 3.5);
+    const v = c.createGain(); v.gain.setValueAtTime(0.0001, t); v.gain.exponentialRampToValueAtTime(1.0 * g, t + 0.02); v.gain.exponentialRampToValueAtTime(0.4 * g, t + 0.25); v.gain.exponentialRampToValueAtTime(0.7 * g, t + 0.5); v.gain.exponentialRampToValueAtTime(0.0001, t + 3.8);
+    n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 4); SFX.subdrop(c, o, rv, t + 0.05, g * 0.6); },
+  footstep(c, o, rv, t, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.12, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 260 + srng(s)() * 200; f.Q.value = 0.8; const v = c.createGain(); env(v, t, 0.002, 0.45 * g, 0.08);
+    n.connect(f).connect(v).connect(o); n.start(t); n.stop(t + 0.15); },
+  land(c, o, rv, t, g, s) { SFX.footstep(c, o, rv, t, g * 1.6, s); SFX.subdrop(c, o, rv, t, g * 0.35); },
+  bodyfall(c, o, rv, t, g, s) { SFX.impact(c, o, rv, t, g * 0.7, s); SFX.footstep(c, o, rv, t + 0.08, g * 1.2, s + 1); },
+  zap(c, o, rv, t, g, s) { const r = srng(s); for (let i = 0; i < 5; i++) { const st = t + i * 0.03, os = c.createOscillator(); os.type = 'sawtooth'; os.frequency.setValueAtTime(2400 + r() * 2000, st); os.frequency.exponentialRampToValueAtTime(300, st + 0.05); const v = c.createGain(); env(v, st, 0.001, 0.12 * g, 0.05); os.connect(v).connect(o); os.start(st); os.stop(st + 0.08); } },
+  splash(c, o, rv, t, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.8, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(3500, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.6); const v = c.createGain(); env(v, t, 0.005, 0.6 * g, 0.6);
+    n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 0.8); },
+  scratch(c, o, rv, t, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.4, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 6;
+    for (let i = 0; i < 6; i++) f.frequency.setValueAtTime(i % 2 ? 1800 : 600, t + i * 0.05); const v = c.createGain(); env(v, t, 0.005, 0.6 * g, 0.3); n.connect(f).connect(v).connect(o); n.start(t); n.stop(t + 0.4); },
+  punch(c, o, rv, t, g, s) { SFX.whoosh(c, o, rv, t, g * 0.45, s, 0.16); SFX.subdrop(c, o, rv, t, g * 0.4); },
+  heartbeat(c, o, rv, t, g) { for (const [d, a] of [[0, 1], [0.24, 0.7]]) { const os = c.createOscillator(); os.frequency.setValueAtTime(70, t + d); os.frequency.exponentialRampToValueAtTime(40, t + d + 0.15); const v = c.createGain(); env(v, t + d, 0.008, a * g, 0.18); os.connect(v).connect(o); os.start(t + d); os.stop(t + d + 0.3); } },
+  swell(c, o, rv, t, g, s) { SFX.riser(c, o, rv, t, g * 0.5, s, 0.8); },
+};
+// ambience beds (continuous) — bed(ctx, out, t0, t1, gain, seed)
+const BEDS = {
+  rain(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900; const lp = c.createBiquadFilter(); lp.frequency.value = 9000;
+    const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.16 * g, t0 + 0.4); v.gain.setValueAtTime(0.16 * g, Math.max(t0 + 0.4, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1); n.connect(hp).connect(lp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
+  jungle(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = 0.6;
+    const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.05 * g, t0 + 0.5); v.gain.setValueAtTime(0.05 * g, Math.max(t0 + 0.5, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1); n.connect(bp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05);
+    const r = srng(s + 5); for (let x = t0 + 0.3; x < t1 - 0.3; x += 0.6 + r() * 1.4) { const os = c.createOscillator(), lfo = c.createOscillator(), lg = c.createGain(); const f0 = 2200 + r() * 2500; os.frequency.value = f0; lfo.frequency.value = 18 + r() * 25; lg.gain.value = f0 * 0.15;
+      lfo.connect(lg).connect(os.frequency); const vv = c.createGain(); env(vv, x, 0.02, 0.05 * g, 0.18 + r() * 0.2); os.connect(vv).connect(o); os.start(x); lfo.start(x); os.stop(x + 0.5); lfo.stop(x + 0.5); } },
+  city(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const lp = c.createBiquadFilter(); lp.frequency.value = 420; const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.22 * g, t0 + 0.5);
+    v.gain.setValueAtTime(0.22 * g, Math.max(t0 + 0.5, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1); n.connect(lp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
+  hum(c, o, t0, t1, g) { const os = c.createOscillator(); os.frequency.value = 60; const os2 = c.createOscillator(); os2.frequency.value = 120; const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.03 * g, t0 + 0.4);
+    v.gain.setValueAtTime(0.03 * g, Math.max(t0 + 0.4, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1); os.connect(v); os2.connect(v); v.connect(o); os.start(t0); os2.start(t0); os.stop(t1); os2.stop(t1); },
+  fire(c, o, t0, t1, g, s) { BEDS.city(c, o, t0, t1, g * 0.5, s); const r = srng(s + 9); for (let x = t0; x < t1; x += 0.03 + r() * 0.12) SFX.tick(c, o, o, x, g * 0.35 * r(), s + x * 50, 600 + r() * 2400); },
+  wind(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; const r = srng(s);
+    for (let x = t0; x < t1; x += 0.8) bp.frequency.linearRampToValueAtTime(300 + r() * 500, x); const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.18 * g, t0 + 0.6); v.gain.setValueAtTime(0.18 * g, Math.max(t0 + 0.6, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1);
+    n.connect(bp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
+};
+const SET_BED = { jungle: 'jungle', 'street-night': 'city', 'city-day': 'city', lab: 'hum', outdoor: 'wind', space: null, interior: 'hum', studio: null, void: null };
+// original music by mood (generated, royalty-free)
+const MOODS = {
+  tension: { bpm: 100, minor: true, kick: [0], hat: 16, bass: 8, pad: true, arp: false, snare: [] },
+  epic:    { bpm: 90, minor: true, kick: [0, 2.5], snare: [2], hat: 8, bass: 4, pad: true, brass: true },
+  mystery: { bpm: 84, minor: true, kick: [], snare: [], hat: 0, bass: 2, pad: true, arp: true },
+  upbeat:  { bpm: 120, minor: false, kick: [0, 1, 2, 3], snare: [1, 3], hat: 8, bass: 8, pad: true, arp: true },
+  sad:     { bpm: 70, minor: true, kick: [], snare: [], hat: 0, bass: 1, pad: true, keys: true },
+  horror:  { bpm: 60, minor: true, kick: [], snare: [], hat: 0, bass: 0, drone: true },
+  action:  { bpm: 140, minor: true, kick: [0, 1.5, 2, 3.5], snare: [1, 3], hat: 16, bass: 16, pad: false, brass: true },
+  lofi:    { bpm: 80, minor: false, kick: [0, 2.5], snare: [1, 3], hat: 8, bass: 2, pad: true, keys: true, swing: 0.12, vinyl: true },
+};
+function music(c, o, rv, spec, total) {
+  const M = MOODS[spec.mood] || MOODS.tension, bpm = spec.bpm || M.bpm, beat = 60 / bpm, bar = beat * 4, root = 220 * Math.pow(2, ((spec.key ?? -3)) / 12);
+  const prog = M.minor ? [0, 8, 3, 10] : [0, 7, 9, 5], third = M.minor ? 3 : 4, vol = spec.volume ?? 0.7, drops = spec.drops || [];
+  const bus = c.createGain(); bus.gain.value = vol; bus.connect(o); const send = c.createGain(); send.gain.value = 0.35; bus.connect(send).connect(rv);
+  // energy: build until the first drop (or 40%), full after; 0.25s silence right before each drop
+  const firstDrop = drops[0] ?? total * 0.4, energy = (t) => (t < firstDrop ? 0.55 + 0.25 * (t / firstDrop) : 1);
+  bus.gain.setValueAtTime(0.0001, 0); bus.gain.linearRampToValueAtTime(vol, 0.25);
+  for (const d of drops) { bus.gain.setValueAtTime(vol, Math.max(0, d - 0.3)); bus.gain.linearRampToValueAtTime(0.0001, d - 0.22); bus.gain.setValueAtTime(0.0001, d - 0.02); bus.gain.linearRampToValueAtTime(vol, d); }
+  bus.gain.setValueAtTime(vol, Math.max(0.3, total - 0.6)); bus.gain.linearRampToValueAtTime(0.0001, total);
+  const hz = (semi) => root * Math.pow(2, semi / 12), r = srng(7);
+  for (let b0 = 0, bi = 0; b0 < total; b0 += bar, bi++) {
+    const ch = prog[bi % 4], E = energy(b0), sw = (k) => (M.swing && k % 2 ? M.swing * beat : 0);
+    const note = (f, t, dur, type, a, cut = 2400) => { const os = c.createOscillator(); os.type = type; os.frequency.value = f; const lp = c.createBiquadFilter(); lp.frequency.value = cut; const v = c.createGain(); env(v, t, 0.008, a, dur); os.connect(lp).connect(v).connect(bus); os.start(t); os.stop(t + dur + 0.1); };
+    if (M.pad) for (const iv of [0, third, 7]) for (const det of [-6, 6]) { const os = c.createOscillator(); os.type = 'sawtooth'; os.frequency.value = hz(ch + iv - 12); os.detune.value = det; const lp = c.createBiquadFilter(); lp.frequency.value = 900 + 900 * E;
+      const v = c.createGain(); v.gain.setValueAtTime(0.0001, b0); v.gain.linearRampToValueAtTime(0.05 * E, b0 + bar * 0.3); v.gain.linearRampToValueAtTime(0.0001, b0 + bar + 0.05); os.connect(lp).connect(v).connect(bus); os.start(b0); os.stop(b0 + bar + 0.1); }
+    if (M.drone) { const os = c.createOscillator(); os.type = 'sawtooth'; os.frequency.value = hz(-24) * (1 + 0.003 * Math.sin(bi)); const lp = c.createBiquadFilter(); lp.frequency.value = 260; const v = c.createGain(); v.gain.setValueAtTime(0.14, b0); os.connect(lp).connect(v).connect(bus); os.start(b0); os.stop(b0 + bar + 0.05);
+      if (bi % 2) note(hz(ch + 13 + 12), b0 + beat * 2, bar * 0.6, 'sine', 0.025, 6000); }
+    if (M.brass) { note(hz(ch - 12), b0, bar * 0.9, 'sawtooth', 0.13 * E, 700 + 600 * E); note(hz(ch - 12 + 7), b0, bar * 0.9, 'sawtooth', 0.08 * E, 700 + 600 * E); }
+    if (M.keys) for (const [k, iv] of [[0, 0], [1, third], [2, 7], [3, 12]]) note(hz(ch + iv), b0 + k * beat + sw(k), beat * 1.8, 'triangle', 0.1, 3000);
+    if (M.arp) for (let k = 0; k < 8; k++) note(hz(ch + [0, third, 7, 12, 7, third, 0, 12][k] + 12), b0 + k * beat / 2 + sw(k), beat * 0.4, 'square', 0.05 * E, 1800);
+    if (M.bass) for (let k = 0; k < M.bass; k++) { const tt = b0 + k * bar / M.bass; note(hz(ch - 24 + (k % 4 === 3 ? 7 : 0)), tt, bar / M.bass * 0.85, 'sawtooth', 0.24 * E, 320 + 380 * E); }
+    for (const k of M.kick || []) { const tt = b0 + k * beat; if (E < 0.7 && k % 1) continue; const os = c.createOscillator(); os.frequency.setValueAtTime(150, tt); os.frequency.exponentialRampToValueAtTime(45, tt + 0.18); const v = c.createGain(); env(v, tt, 0.002, 1.0 * E, 0.3); os.connect(v).connect(bus); os.start(tt); os.stop(tt + 0.38); }
+    for (const k of M.snare || []) { const tt = b0 + k * beat + sw(k); const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.25, bi * 9 + k); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; const v = c.createGain(); env(v, tt, 0.002, 0.35 * E, 0.17);
+      n.connect(bp).connect(v); v.connect(bus); n.start(tt); n.stop(tt + 0.25); }
+    if (M.hat && E > 0.6) for (let k = 0; k < M.hat; k++) { const tt = b0 + k * bar / M.hat + sw(k); const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.06, bi * 31 + k); const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7500; const v = c.createGain();
+      env(v, tt, 0.001, (k % 2 ? 0.05 : 0.09) * E, 0.04); n.connect(hp).connect(v).connect(bus); n.start(tt); n.stop(tt + 0.08); }
+  }
+  if (M.vinyl) BEDS.fire(c, bus, 0, total, 0.25, 77);
+  return { beat, bar };
+}
+// map a content time inside a shot to output (edit) time, accounting for time remaps/freezes
+function outTimeOf(shot, start, ct) { if (!shot.time && !shot.freeze) return start + ct; let lo = 0, hi = shot.dur; for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (contentTime(shot, m) < ct) lo = m; else hi = m; } return start + (lo + hi) / 2; }
+// gather every sound the edit implies (auto sound design)
+function collectSound() {
+  const S = CONFIG.sound || {}, ev = [], beds = [], auto = S.sfx !== false; let acc = 0;
+  const add = (t, type, gain = 1, extra) => { if (SFX[type] && t >= 0 && t < TOTAL + 0.5) ev.push({ t, type, gain, extra }); };
+  SHOTS.forEach((shot, i) => {
+    const st = acc, end = acc + shot.dur; acc = end; const ot = (ct) => outTimeOf(shot, st, ct);
+    for (const e of shot.sfx || []) add(ot(e.t), e.type, e.gain ?? 1);
+    if (!auto) return;
+    const cut = { whip: ['whoosh'], zoom: ['swoosh', 'subdrop'], spin: ['whoosh'], glitch: ['glitch'], flash: ['impact'], dip: ['subdrop'], smash: ['boom'], blur: ['swoosh'] }[shot.cut];
+    if (cut && i > 0) cut.forEach((tp, k) => add(st + (k ? 0.02 : 0), tp, tp === 'boom' ? 0.6 : 0.8));
+    for (const f of shot.fx || []) {
+      const t = ot(f.t ?? f.start ?? 0);
+      ({ explosion: () => { add(t, 'boom', 1); add(Math.max(st, t - 1.2), 'riser', 0.5, 1.2); }, lightning: () => add(t + 0.04, 'thunder', 0.9), shockwave: () => { add(t, 'impact'); add(t, 'subdrop', 0.7); },
+        sparks: () => add(t, 'zap', 0.7), splash: () => add(t, 'splash'), magic: () => add(t, 'shimmer', 0.8), fire: () => beds.push(['fire', Math.max(st, t), ot(f.end ?? shot.dur), 0.8]),
+        rain: () => beds.push(['rain', st, end, 1]), snow: () => beds.push(['wind', st, end, 0.6]) }[f.type] || (() => {}))();
+    }
+    if (S.ambience !== false) { const set = typeof shot.set === 'string' ? shot.set : (shot.set ? null : CONFIG.set); const b = SET_BED[set || CONFIG.set]; if (b) beds.push([b, st, end, 0.8]); }
+    for (const p of shot.punch || []) add(ot(p), 'punch', 0.8);
+    for (const [a] of shot.freeze || []) add(st + a, 'scratch', 0.7);
+    if (shot.camera?.move === 'crash-zoom') add(ot(shot.camera.at ?? 0.3 * shot.dur), 'punch', 1);
+    for (const sh of shot._shakes || []) if (!sh._fromFx) add(ot(sh.t), 'subdrop', Math.min(1, 0.4 * (sh.amp || 1)));
+    for (const [cid, c] of Object.entries(shot.cast || {})) {
+      const steps = { walk: 1.9, walkloop: 1.9, jog: 2.6, jogfwdloop: 2.6, run: 2.9, sprint: 3.3, sprintloop: 3.3, crouch: 1.5, crouchfwdloop: 1.5 };
+      for (const cl of c.clips || []) { const rate = steps[normName(cl.clip)]; if (!rate) continue; for (let x = Math.max(0, cl.start); x < Math.min(cl.end, shot.dur); x += 1 / rate) add(ot(x), 'footstep', 0.7); }
+      for (const m of c.motions || []) { const M = MOTIONS[m.name] || m.inline; for (const e of M?.sfx || []) add(ot((m.start ?? 0) + e.t / (m.speed ?? 1)), e.type, (e.gain ?? 1) * (m.amount ?? 1)); }
+    }
+  });
+  if (auto) for (const T of (typeof TITLES !== 'undefined' ? TITLES : [])) ({ slam: () => add(T.t, 'hit', 0.9), tag: () => add(T.t, 'pop'), stamp: () => add(T.t, 'stamp'), glitch: () => add(T.t, 'glitch', 0.7), 'lower-third': () => add(T.t, 'swoosh', 0.6), ring: () => add(T.t, 'pop', 0.6),
+    typewriter: () => add(T.t, 'typing', 0.6, Math.min((T.text || '').length / (T.rate ?? 22), (T.t1 ?? T.t + 2) - T.t)), meter: () => add(T.t + 0.15, 'swell', 0.6),
+    counter: () => { const d = T.dur ?? 0.9; for (let x = 0; x < d; x += 0.06 + x * 0.08) add(T.t + x, 'tick', 0.5); add(T.t + d, 'ding', 0.8); } }[T.style || 'slam'] || (() => {}))();
+  SND.events = ev.sort((a, b) => a.t - b.t); SND.beds = beds; return SND;
+}
+// render the full soundtrack (music + sfx + beds + voice) offline → AudioBuffer (cached)
+async function renderSoundtrack() {
+  if (SND.buffer) return SND.buffer;
+  const S = CONFIG.sound || {}; collectSound();
+  const c = new OfflineAudioContext(2, Math.ceil((TOTAL + 0.05) * SR), SR);
+  const master = c.createGain(); master.gain.value = S.volume ?? 1;
+  const comp = c.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3.5; comp.attack.value = 0.005; comp.release.value = 0.18;
+  const lim = c.createDynamicsCompressor(); lim.threshold.value = -3; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.08;
+  master.connect(comp).connect(lim).connect(c.destination);
+  const ir = c.createBuffer(2, SR * 2.2, SR); for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = srng(91 + ch); for (let i = 0; i < d.length; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / d.length, 3.2); }
+  const verb = c.createConvolver(); verb.buffer = ir; const verbOut = c.createGain(); verbOut.gain.value = 0.32; verb.connect(verbOut).connect(master);
+  const sfxBus = c.createGain(); sfxBus.gain.value = S.sfxVolume ?? 0.9; sfxBus.connect(master);
+  const musicBus = c.createGain(); musicBus.connect(master);
+  if (S.track?.url) {   // the user's own licensed music track (replaces generated music)
+    try { const tb = await c.decodeAudioData(await (await fetch(S.track.url)).arrayBuffer()), src = c.createBufferSource(); src.buffer = tb; src.loop = !!S.track.loop;
+      const tg = c.createGain(); tg.gain.setValueAtTime(0.0001, 0); tg.gain.linearRampToValueAtTime(S.track.volume ?? 0.8, 0.3); tg.gain.setValueAtTime(S.track.volume ?? 0.8, Math.max(0.3, TOTAL - 0.8)); tg.gain.linearRampToValueAtTime(0.0001, TOTAL);
+      src.connect(tg).connect(musicBus); src.start(0, S.track.offset ?? 0); } catch (e) { console.warn('music track failed', e); }
+  } else if (S.music) music(c, musicBus, verb, S.music, TOTAL);
+  for (const [b, t0, t1, g] of SND.beds) if (BEDS[b] && t1 > t0) BEDS[b](c, sfxBus, t0, t1, g * (S.ambienceVolume ?? 1), Math.round(t0 * 100) + 3);
+  SND.events.forEach((e, i) => SFX[e.type](c, sfxBus, verb, e.t, e.gain, i * 13 + 5, e.extra));
+  if (S.voice?.url) {   // voiceover: duck music under it, drive lip-sync from its loudness
+    try { const ab = await (await fetch(S.voice.url)).arrayBuffer(), vb = await c.decodeAudioData(ab), src = c.createBufferSource(); src.buffer = vb;
+      const vg = c.createGain(); vg.gain.value = S.voice.volume ?? 1; src.connect(vg).connect(master); src.start(S.voice.offset ?? 0);
+      const d0 = vb.getChannelData(0), hop = Math.round(vb.sampleRate / 60), envv = new Float32Array(Math.ceil(TOTAL * 60) + 1);
+      for (let f = 0; f < envv.length; f++) { const st = Math.round((f / 60 - (S.voice.offset ?? 0)) * vb.sampleRate); let s2 = 0; for (let k = 0; k < hop; k++) { const x = d0[st + k] || 0; s2 += x * x; } envv[f] = Math.sqrt(s2 / hop); }
+      const mx = envv.reduce((a, b) => Math.max(a, b), 1e-6); for (let f = 0; f < envv.length; f++) envv[f] = Math.min(1, envv[f] / mx * 1.6); SND.voiceEnv = envv;
+      musicBus.gain.setValueAtTime(1, 0); for (let f = 0; f < envv.length; f += 6) musicBus.gain.setTargetAtTime(envv[f] > 0.08 ? 0.35 : 1, f / 60, 0.12);
+    } catch (e) { console.warn('voice failed', e); }
+  }
+  const buf = await c.startRendering();
+  // master to short-form loudness (~-14 LUFS ≈ -15 dBFS RMS of active audio) with a soft limiter, ceiling -1 dBFS
+  let sum = 0, cnt = 0; for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i += 4) { const x = d[i]; if (Math.abs(x) > 1e-4) { sum += x * x; cnt++; } } }
+  const rms = Math.sqrt(sum / Math.max(1, cnt)), gainK = rms > 0 ? Math.min(12, Math.pow(10, (-15 - 20 * Math.log10(rms)) / 20)) : 1, ceil = 0.89;
+  for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) { const x = d[i] * gainK; d[i] = Math.abs(x) < 0.6 ? x : Math.sign(x) * (0.6 + (ceil - 0.6) * Math.tanh((Math.abs(x) - 0.6) / (ceil - 0.6))); } }
+  return (SND.buffer = buf);
+}
+function wavBase64(buf, t0 = 0, t1 = buf.duration) {   // 16-bit stereo WAV of a range (for cloud muxing)
+  const a = Math.floor(t0 * buf.sampleRate), b = Math.min(buf.length, Math.ceil(t1 * buf.sampleRate)), n = Math.max(0, b - a), out = new DataView(new ArrayBuffer(44 + n * 4));
+  const w = (o, s) => [...s].forEach((ch, i) => out.setUint8(o + i, ch.charCodeAt(0)));
+  w(0, 'RIFF'); out.setUint32(4, 36 + n * 4, true); w(8, 'WAVE'); w(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true); out.setUint32(24, buf.sampleRate, true);
+  out.setUint32(28, buf.sampleRate * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); w(36, 'data'); out.setUint32(40, n * 4, true);
+  const L = buf.getChannelData(0), R = buf.getChannelData(1); for (let i = 0; i < n; i++) { out.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[a + i])) * 32767, true); out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[a + i])) * 32767, true); }
+  const u8 = new Uint8Array(out.buffer); let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s);
+}
+
 /* ---------- per-frame evaluation ---------- */
 function pathLen(keys, t0, t1) { let L = 0, p = key(keys, t0); for (let x = t0 + 1 / 60; x <= t1 + 1e-9; x += 1 / 60) { const q = key(keys, Math.min(x, t1)); L += Math.hypot(q[0] - p[0], q[2] - p[2]); p = q; } return L; }
 function applyClips(ch, cast, t) {
@@ -1427,13 +1633,15 @@ function cameraAt(shot, lt, tGlobal) {
   return { pos, look: [l[0] + sx, l[1] + sy, l[2]], fov: mv ? mv.fov : (typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 32), roll: mv ? mv.roll : (c.roll || 0) };
 }
 function render(tGlobal) {
-  const { shot, local } = shotAt(clamp(tGlobal, 0, TOTAL - 1e-4)), shotStart = tGlobal - local;
+  const { shot, local } = shotAt(clamp(tGlobal, 0, TOTAL - 1e-4)), shotStart = tGlobal - local, ct = contentTime(shot, local), frozen = isFrozen(shot, local);
   const si = SHOTS.indexOf(shot), set = SETS[setIdOf(shot)];
   for (const st of Object.values(SETS)) { st.group.visible = st === set; (st.lights || []).forEach((l) => (l.intensity = st === set ? l.userData.base : 0)); }
   applyLook(shot.look || CONFIG.look, set);
-  const cam = cameraAt(shot, local, tGlobal), te = applyTransition(transitionAt(si, local), cam, tGlobal);
+  const cam = cameraAt(shot, ct, shotStart + ct), te = applyTransition(transitionAt(si, local), cam, tGlobal);
+  for (const p of shot.punch || []) cam.fov *= 1 - 0.13 * smooth((local - p) / 0.06);   // punch-in zooms (edit time, hold until the cut)
   camera.position.set(...cam.pos); camera.lookAt(...cam.look); if (cam.roll) camera.rotateZ(cam.roll); camera.fov = cam.fov; camera.updateProjectionMatrix();
   const camPosAt = (lt) => cameraAt(shot, lt, shotStart + lt).pos;
+  const local0 = local; { const local = ct;   // animation runs on content time
   for (const ch of Object.values(characters)) {
     const cast = shot.cast?.[ch.id];
     ch.root.visible = !!cast || shot.cast === undefined;
@@ -1444,15 +1652,19 @@ function render(tGlobal) {
       ch.root.rotation.x += (key(M.rotX, lt) || 0) * k; ch.root.rotation.y += (key(M.rotY, lt) || 0) * k; ch.root.rotation.z += (key(M.rotZ, lt) || 0) * k;
     }
     applyClips(ch, cast, local); ch.root.updateMatrixWorld(true);
-    life(ch, cast, local, tGlobal, camPosAt);
+    life(ch, cast, local, shotStart + local, camPosAt);
   }
-  camera.updateMatrixWorld(); updateFX(si, local);
+  camera.updateMatrixWorld(); updateFX(si, local); }
+  const local1 = local0;
   const hero = Object.values(characters)[0];
   if (hero) { key1.target.position.copy(hero.root.position); key1.position.copy(hero.root.position).add(new THREE.Vector3(2.6, 3.8, 2.9)); key1.target.updateMatrixWorld(); }
   if (hero?.bones.head) bokeh.uniforms.focus.value = camera.position.distanceTo(hero.bones.head.getWorldPosition(_v));
   grade.uniforms.uTime.value = tGlobal; WIND.value = tGlobal;
   grade.uniforms.uFade.value = Math.max(te.fade, shot.fadeIn ? 1 - smooth(local / shot.fadeIn) : 0, shot.fadeOut ? smooth((local - (shot.dur - shot.fadeOut)) / shot.fadeOut) : 0);
-  grade.uniforms.uFlash.value = Math.max(te.flash, shot.flash ? Math.max(0, 1 - local / 0.15) : 0, ...(shot._flashes || []).map((f) => local >= f.t ? f.amp * Math.exp(-(local - f.t) * 10) : 0), 0);
+  grade.uniforms.uMono.value = frozen ? 0.85 : 0;
+  { const lb = shot.letterbox ?? CONFIG.letterbox ?? 0, A = CONFIG.width / CONFIG.height; grade.uniforms.uBars.value = !lb ? 0 : lb < 1 ? lb : Math.max(0, (1 - A / lb) / 2); }
+  const fr0 = (shot.freeze || []).find(([at]) => local >= at && local < at + 0.2);
+  grade.uniforms.uFlash.value = Math.max(fr0 ? 0.35 * (1 - (local - fr0[0]) / 0.2) : 0, te.flash, shot.flash ? Math.max(0, 1 - local / 0.15) : 0, ...(shot._flashes || []).map((f) => local >= f.t ? f.amp * Math.exp(-(local - f.t) * 10) : 0), 0);
   grade.uniforms.uRes.value.copy(renderer.getDrawingBufferSize(new THREE.Vector2()));
   composer.render();
   const size = renderer.getDrawingBufferSize(new THREE.Vector2());
@@ -1532,6 +1744,9 @@ window.__mf = {
   duration: TOTAL, fps: CONFIG.fps, width: CONFIG.width, height: CONFIG.height, canvas: renderer.domElement, chapters: CHAPTERS,
   setSize(w, h) { bokeh.enabled = true; renderer.setSize(w, h, false); composer.setSize(w, h); bloom.resolution.set(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%'; },
   render,
+  soundtrack: () => renderSoundtrack(),
+  soundtrackWav: async (a, b) => wavBase64(await renderSoundtrack(), a, b),
+  restart: () => clock.start(),
 };
 window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1 };
 const clock = new THREE.Clock();
@@ -1545,6 +1760,7 @@ renderer.setAnimationLoop(() => { if (window.__mfReady && !window.__mfManual) re
   <div id="mf-specs" style="opacity:.8;margin:6px 0 8px;font-size:12px"></div>
   <label>Quality <select id="mf-q" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
   <label id="mf-chl" style="display:none">Part <select id="mf-ch" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
+  <button id="mf-play" style="width:100%;padding:7px;border:1px solid #ffffff33;border-radius:8px;background:transparent;color:#fff;font-weight:600;cursor:pointer;margin-bottom:6px">▶ Preview with sound</button>
   <button id="mf-go" style="width:100%;padding:8px;border:0;border-radius:8px;background:#22d3ee;color:#04202a;font-weight:700;cursor:pointer">Render MP4</button>
   <div id="mf-bar" style="height:6px;background:#ffffff22;border-radius:3px;margin-top:8px;overflow:hidden"><div style="height:100%;width:0;background:#22d3ee"></div></div>
   <div id="mf-msg" style="font-size:12px;margin-top:6px;opacity:.85"></div>
@@ -1590,9 +1806,18 @@ async function pickEncoder(w, h, fps, br) {
   }
 }
 
+let audioPick = null, soundtrack = null;
+async function pickAudio() {   // AAC preferred (plays everywhere), Opus fallback
+  if (!('AudioEncoder' in window)) return null;
+  for (const [codec, m] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
+    const cfg = { codec, sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 };
+    try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) return { cfg, m }; } catch {}
+  }
+  return null;
+}
 async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayBufferTarget) {
   const target = new ArrayBufferTarget();
-  const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, fastStart: 'in-memory' });
+  const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
   let failed;
   const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
   enc.configure(encoderPick.cfg);
@@ -1610,7 +1835,16 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
       await new Promise((r) => requestAnimationFrame(r));
     }
   }
-  await enc.flush(); enc.close(); muxer.finalize();
+  await enc.flush(); enc.close();
+  if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
+    msg(label + ' · mixing sound…');
+    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
+    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
+    for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
+      const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
+    await ae.flush(); ae.close(); if (failed) throw failed;
+  }
+  muxer.finalize();
   const url = URL.createObjectURL(new Blob([target.buffer], { type: 'video/mp4' }));
   const file = `${(document.title || 'render').replace(/\W+/g, '-')}${label === 'Video' ? '' : '-' + label.replace(/\W+/g, '-')}.mp4`;
   const a = Object.assign(document.createElement('a'), { href: url, download: file });
@@ -1618,6 +1852,14 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   setTimeout(() => URL.revokeObjectURL(url), 60000);   // free memory before next part
 }
 
+let liveAudio = null;
+$('mf-play').onclick = async () => {
+  const mf = window.__mf; if (!mf?.soundtrack) return;
+  if (liveAudio) { liveAudio.ctx.close(); liveAudio = null; $('mf-play').textContent = '▶ Preview with sound'; return; }
+  $('mf-play').textContent = 'Preparing sound…';
+  try { const buf = await mf.soundtrack(), ctx = new AudioContext(), src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
+    mf.restart?.(); src.start(); liveAudio = { ctx }; $('mf-play').textContent = '■ Stop preview'; } catch (e) { $('mf-play').textContent = '▶ Preview with sound'; msg('Sound preview failed: ' + (e.message || e)); }
+};
 $('mf-go').onclick = async () => {
   const mf = window.__mf; if (!mf) return msg('Scene not ready yet.');
   if ($('mf-q').value === '') return msg('Pick Good, High or Epic first.');
@@ -1627,6 +1869,8 @@ $('mf-go').onclick = async () => {
   encoderPick = await pickEncoder(w, h, p.fps, br);
   if (!encoderPick) return msg('No supported video encoder for this size — try a lower quality.');
   const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm');
+  soundtrack = mf.soundtrack ? await mf.soundtrack().catch(() => null) : null; audioPick = soundtrack ? await pickAudio() : null;
+  if (soundtrack && !audioPick) msg('This browser cannot encode audio — the MP4 will be silent. Use Chrome/Edge or Safari 17.4+.');
 
   const sel = chapters ? $('mf-ch').value : null;
   const jobs = !chapters ? [{ start: 0, end: mf.duration, label: 'Video' }]

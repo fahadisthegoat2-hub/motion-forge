@@ -32,6 +32,7 @@ white-out frames (bloom not washing the screen) · no plain shapes · effects li
 smoke dissipates slowly, never pops off.
 **Taste**: look matches mood · motivated light + rim on hero · ≤2 saturated colors · framing
 varies shot to shot · at least one signature touch · would pass as a studio short.
+**Sound & edit**: soundtrack present (~-14 LUFS) · a sound on frame 1 · every transition/impact/title has its sound · music drop lands on the twist · no dead air · shots vary in length, pattern interrupt every 2–3s.
 **Story** (shorts): hook in ≤2s · re-hook every 5–8s · climax lands · twist is fair
 (clue planted) · ending loops to opening · captions match VO timing.
 **Publish**: title/desc/tags present and honest (no misleading claims).

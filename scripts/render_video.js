@@ -55,18 +55,25 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
     await page.screenshot({ path: path.join(dir, `f${String(f).padStart(5, '0')}.png`) });
     if (f % fps === 0) process.stdout.write(`\rframe ${f}/${total}`);
   }
+  let wav = null;   // the edit's soundtrack (music + sfx + ambience + voice), exactly this range
+  if (!flag('--no-audio') && !flag('--gif') && !flag('--frames-only')) {
+    const b64 = await page.evaluate(([a, b]) => window.__mf.soundtrackWav ? window.__mf.soundtrackWav(a, b) : null, [T0, T1]).catch((e) => { console.error('soundtrack failed:', e.message); return null; });
+    if (b64) { wav = output.replace(/\.[^.]+$/, '') + '_sound.wav'; fs.writeFileSync(wav, Buffer.from(b64, 'base64')); }
+  }
   await browser.close(); server.close();
   console.log(`\nframes -> ${dir}`);
   if (flag('--frames-only')) return;
 
   const pattern = path.join(dir, 'f%05d.png');
+
   if (flag('--gif')) {
     const gif = output.replace(/\.[^.]+$/, '.gif');
     execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, '-vf',
       `fps=${Math.min(fps, 30)},scale=${Math.min(w, 720)}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse`, gif], { stdio: 'inherit' });
     console.log('gif ->', gif);
   } else {
-    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
+    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, ...(wav ? ['-i', wav, '-c:a', 'aac', '-b:a', '192k', '-shortest'] : []), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
+    if (wav) fs.rmSync(wav, { force: true });
     console.log('video ->', output);
   }
   fs.rmSync(dir, { recursive: true, force: true });

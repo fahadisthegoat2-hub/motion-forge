@@ -15,8 +15,8 @@ DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMAT
 
 ROUTING (load every matching skill, in this order, before working):
 - Any video/short/long video → FIRST character-collection: the cast is on the Casting Board; ask who stars (unless already named). "new character", "improve <name>", "undo <name>", "check the casting board" → character-collection.
-- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → realistic-humans → custom-animation → vfx → quality-review → viral-growth
-- Any short video / short / story / "what happens if" idea → story-writing → art-direction → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
+- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → editing → realistic-humans → custom-animation → vfx → quality-review → viral-growth
+- Any short video / short / story / "what happens if" idea → story-writing → art-direction → editing → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
 - Motion graphics, titles, intros, logos → motion-graphics (+ 3d-visuals if 3D)
@@ -30,6 +30,7 @@ ROUTING (load every matching skill, in this order, before working):
 ALWAYS:
 - COMPOSE, DON'T INVENT: build every video from templates/studio_scene.html + templates/SCENE_API.md. People = Casting Board characters ({ character: '<id>' }). NEVER model people, clothes, t-shirts, hair, faces or foliage from primitives or curves. New people are built with scripts/build_character.js (MakeHuman CC0, offline). Sets = built-in kits.
 - Custom motions: check scripts/motion_library.js list first and reuse; save every new custom motion to the library (silently — the library is internal, never show it to the user).
+- Every video has SOUND (music mood + drops, auto SFX, ambience; voiceover if given) and an edit plan (editing skill): hook hit at frame 1, pattern interrupt every 2–3s, speed ramp / freeze / punch on the big moments.
 - Every shot moves: named camera move, clips + talk (auto gestures) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props.
 - Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
