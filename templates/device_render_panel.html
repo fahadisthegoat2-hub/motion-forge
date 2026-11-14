@@ -4,7 +4,7 @@
 <div id="mf-panel" style="position:fixed;right:12px;bottom:12px;z-index:9999;font:13px/1.4 system-ui,sans-serif;color:#fff;background:rgba(10,20,35,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:12px 14px;width:min(300px,calc(100vw - 48px));box-shadow:0 8px 30px rgba(0,0,0,.35)">
   <b style="font-size:14px">Render on this device</b>
   <div id="mf-specs" style="opacity:.8;margin:6px 0 8px;font-size:12px"></div>
-  <label>Quality <select id="mf-q" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
+  <div style="margin-top:4px">Quality</div><div id="mf-qb" style="display:flex;gap:6px;margin:4px 0 8px"></div><select id="mf-q" style="display:none"></select>
   <label id="mf-chl" style="display:none">Part <select id="mf-ch" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
   <button id="mf-play" style="width:100%;padding:7px;border:1px solid #ffffff33;border-radius:8px;background:transparent;color:#fff;font-weight:600;cursor:pointer;margin-bottom:6px">▶ Preview with sound</button>
   <button id="mf-go" style="width:100%;padding:8px;border:0;border-radius:8px;background:#22d3ee;color:#04202a;font-weight:700;cursor:pointer">Render MP4</button>
@@ -33,7 +33,12 @@ const presets = [
 const dims = (p) => [Math.round(W * p.s / 2) * 2, Math.round(H * p.s / 2) * 2];
 $('mf-q').add(new Option('Choose quality…', ''));
 presets.forEach((p, i) => { const [w, h] = dims(p); $('mf-q').add(new Option(`${p.name} — ${w}×${h} @ ${p.fps}fps` + (i === tier ? '  ★ best for your device' : ''), i)); });
-$('mf-q').value = '';
+$('mf-q').value = String(tier);
+presets.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p.name; b.dataset.i = i;
+  b.style.cssText = 'flex:1;padding:7px 4px;border-radius:8px;border:1px solid #ffffff44;background:transparent;color:#fff;font-weight:700;cursor:pointer';
+  b.onclick = () => { $('mf-q').value = String(i); paint(); }; $('mf-qb').appendChild(b); });
+function paint() { [...$('mf-qb').children].forEach((b) => { const on = b.dataset.i === $('mf-q').value; b.style.background = on ? '#22d3ee' : 'transparent'; b.style.color = on ? '#04202a' : '#fff'; }); }
+paint();
 
 // Parts (chapters) for long-form
 const chapters = Array.isArray(base.chapters) && base.chapters.length ? base.chapters : null;
@@ -103,7 +108,10 @@ $('mf-play').onclick = async () => {
   const mf = window.__mf; if (!mf?.soundtrack) return;
   if (liveAudio) { liveAudio.ctx.close(); liveAudio = null; $('mf-play').textContent = '▶ Preview with sound'; return; }
   $('mf-play').textContent = 'Preparing sound…';
-  try { const buf = await mf.soundtrack(), ctx = new AudioContext(), src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
+  const ctx = new AudioContext(); ctx.resume?.();   // created inside the click so the browser allows sound
+  try { const buf = await mf.soundtrack(); await ctx.resume(); const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
+    let pk = 0; const d = buf.getChannelData(0); for (let i = 0; i < d.length; i += 7) pk = Math.max(pk, Math.abs(d[i]));
+    msg('Sound: peak ' + (pk > 0 ? (20 * Math.log10(pk)).toFixed(1) : '-∞') + ' dBFS · ' + buf.duration.toFixed(1) + 's' + (ctx.state !== 'running' ? ' · audio blocked by browser (' + ctx.state + ')' : ''));
     mf.restart?.(); src.start(); liveAudio = { ctx }; $('mf-play').textContent = '■ Stop preview'; } catch (e) { $('mf-play').textContent = '▶ Preview with sound'; msg('Sound preview failed: ' + (e.message || e)); }
 };
 $('mf-go').onclick = async () => {
