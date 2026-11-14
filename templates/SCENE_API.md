@@ -8,7 +8,7 @@ time `t`, so previews, cloud renders and on-device renders are frame-identical.
 Never model people, clothes, hair, faces or foliage from primitives — that is what looks cheap.
 
 ## CONFIG
-`width/height` (1080×1920 shorts · 1920×1080 long-form) · `fps` · `look` · `set` · `captionY`
+`targetDuration` (the length the user asked for, seconds) · `width/height` (1080×1920 shorts · 1920×1080 long-form) · `fps` · `look` · `set` · `captionY`
 (0..1, default 0.74) · `animations` (clip libraries; any Mixamo/Unreal/MakeHuman clip is
 auto-retargeted onto every actor).
 
@@ -29,7 +29,10 @@ From the collection: `{ character: 'leo' }` (characters/library.json — see ski
 Your own characters: `urls: ['characters/name.glb']` (Avaturn GLB / Mixamo FBX) or a file named
 `characters/<castId>.glb`. Several people = several cast entries (vary height, skin, hair, wardrobe).
 
-## Clips
+## Clips (plain names: sit sitdown standup kneel crouchidle pickup push carry eat phone talk foldarms yes no jump roll climb punch hit die swim drive chop… — 89 real animations)
+Hand IK: `reach: [{ hand: 'right'|'left'|'both', to: 'castId.part' | [x,y,z], offset, start, end }]` — hands land exactly on targets (within arm reach; qa_check measures it). Held models: fx model `attach: 'hero.righthand'`.
+
+### Original clip list
 `idle · walk · jog · sprint · dance · crouch` (Quaternius CC0) · `run · agree · headshake · sad_pose ·
 sneak_pose` (Xbot) · `sambadance` (Michelle) + anything in `animations/*.fbx`.
 Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.

@@ -56,6 +56,8 @@ ALWAYS:
 - Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
+- LENGTH IS LAW: if the user names a length ("13 minute video", "30s short"), that is the length — set CONFIG.targetDuration (seconds);
+  qa_check fails anything off by more than 5%. Never turn a long video into a short or the reverse.
 - 10 CHECKS: no video reaches the user until all 10 checks in skills/quality-review PASS (auto checker + eyes + ears).
 - SAVE USAGE: keep .motion-forge/state.md short and current (video in progress, files, decisions, the user's standing orders). A new chat
   reads it first and continues from there, so the user can start fresh chats often (old chats re-send their whole history every message).
