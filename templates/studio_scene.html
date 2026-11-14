@@ -29,6 +29,8 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { GroundedSkybox } from 'three/addons/objects/GroundedSkybox.js';
 
 /* ================================ DIRECTION ================================ */
 const LIB = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/';
@@ -183,7 +185,7 @@ document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const DEFAULT_ENV = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environment = DEFAULT_ENV;
 
 const key1 = new THREE.DirectionalLight('#fff1e2', 3.3); key1.position.set(2.6, 3.8, 2.9);
 key1.castShadow = true; key1.shadow.mapSize.set(2048, 2048); key1.shadow.bias = -0.0004; key1.shadow.normalBias = 0.02;
@@ -489,11 +491,27 @@ function microVessel(g, set, plaque) {
   };
 }
 
+const ASSET_LOADS = [];   // async set assets the boot waits for
+const RGBE = new RGBELoader(), TEXL = new THREE.TextureLoader();
+async function loadFirstOf(urls, loader) { for (const u of urls) { try { return await loader.loadAsync(u); } catch {} } return null; }
+function buildPlace(g, set, spec) {   // real photographed location: ground-projected photo background + its real light
+  set.place = spec.id; set.noFloor = true; set.fog = null; set.skyCols = ['#808080', '#808080']; set.sky.visible = false; set.envScale = spec.env ?? 1; set.exposure = spec.exposure ?? 1;
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(12, 64), new THREE.ShadowMaterial({ opacity: spec.shadow ?? 0.38 })); shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.002; shadow.receiveShadow = true; g.add(shadow);
+  ASSET_LOADS.push((async () => {
+    const [hdr, jpg] = await Promise.all([loadFirstOf(kit('places/' + spec.id + '.hdr'), RGBE), loadFirstOf(kit('places/' + spec.id + '.jpg'), TEXL)]);
+    if (!hdr && !jpg) { console.warn('place missing', spec.id); return; }
+    if (hdr) { hdr.mapping = THREE.EquirectangularReflectionMapping; set.envTex = pmrem.fromEquirectangular(hdr).texture; }
+    const tex = jpg || hdr; tex.mapping = THREE.EquirectangularReflectionMapping; if (jpg) jpg.colorSpace = THREE.SRGBColorSpace;
+    const sky = new GroundedSkybox(tex, spec.height ?? 1.7, spec.radius ?? 60, 96); sky.position.y = (spec.height ?? 1.7) - 0.01; sky.rotation.y = spec.rotY ?? 0;
+    sky.material.toneMapped = !jpg; sky.material.fog = false; sky.material.depthWrite = false; sky.renderOrder = -10; g.add(sky);
+    if (set.envTex) set.envRotY = spec.rotY ?? 0;
+  })());
+}
 const SETS = {};
 const LIGHTS = new THREE.Group(); scene.add(LIGHTS);   // every effect/set light stays in the scene (intensity 0 when idle) → no shader recompiles at cuts
 function buildSet(spec) {
   const id = typeof spec === 'string' ? spec : (spec.id || spec.url || spec.type); if (SETS[id]) return SETS[id];
-  const type = typeof spec === 'string' ? spec : (spec.type || (spec.url ? 'glb' : 'studio'));
+  const type = typeof spec === 'string' ? (spec.startsWith('place:') ? 'place' : spec) : (spec.type || (spec.url ? 'glb' : 'studio'));
   const g = new THREE.Group(); g.visible = false; scene.add(g);
   const sky = new THREE.Mesh(new THREE.SphereGeometry(60, 48, 24), gradMat()); g.add(sky);
   const set = { id, type, group: g, sky, onLook: null };
@@ -534,6 +552,7 @@ function buildSet(spec) {
     }
     const lamp = new THREE.PointLight('#ffb35c', 30, 12, 1.8); lamp.position.set(1.8, 4.2, -1.2); g.add(lamp);
     set.extraFx = [{ type: 'beam', pos: [1.8, 4.2, -1.2], to: [1.2, 0, -0.6], radius: 1.4, color: '#ffbf75', intensity: 0.28, always: true }, { type: 'dust', pos: [0, 1.5, 0], always: true }];
+  } else if (type === 'place') { buildPlace(g, set, typeof spec === 'string' ? { id: spec.slice(6) } : spec);
   } else if (ENV[type]) { ENV[type](g, set, spec);
     (set.lightsExtra || []).forEach(([c, i, p]) => { const l = new THREE.PointLight(c, i, 0, 1.6); l.position.set(...p); g.add(l); });
   } else if (type === 'glb') {
@@ -584,6 +603,7 @@ function applyLook(name, set) {
   const L = LOOKS[name] || LOOKS['clean-cg']; if (currentLook === name + set.id) return; currentLook = name + set.id;
   key1.color.set(L.key[0]); key1.intensity = L.key[1]; fill.color.set(L.fill[0]); fill.groundColor.set(L.fill[1]); fill.intensity = L.fill[2];
   rim.color.set(L.rim[0]); rim.intensity = L.rim[1]; rim2.color.set(L.rim2[0]); rim2.intensity = L.rim2[1];
+  scene.environment = set.envTex || DEFAULT_ENV; if (set.envTex) scene.environmentRotation.y = set.envRotY || 0; else scene.environmentRotation.y = 0;
   scene.environmentIntensity = L.env * (set.envScale ?? 1); renderer.toneMappingExposure = L.exposure * (set.exposure ?? 1);
   scene.fog = set.fog ? new THREE.FogExp2(set.fog[0], set.fog[1]) : L.fog ? new THREE.FogExp2(L.fog[0], L.fog[1]) : (set.type === 'outdoor' ? new THREE.FogExp2('#c9d8e6', 0.012) : null);
   const tint = (sky, lk) => '#' + new THREE.Color(sky).lerp(new THREE.Color(lk), name === 'clean-cg' ? 0 : 0.6).getHexString();
@@ -1085,6 +1105,17 @@ function retargetClip(src, clip, tgt) {
 const avgLum = (tex) => {   // average luminance of a texture's painted texels (for recolor gain)
   try { const im = tex?.image; if (!im) return 0.5; const c = document.createElement('canvas'); c.width = c.height = 48; const g = c.getContext('2d'); g.drawImage(im, 0, 0, 48, 48);
     const d = g.getImageData(0, 0, 48, 48).data; let s = 0, n = 0; for (let i = 0; i < d.length; i += 4) { const l = (d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114) / 255; if (d[i + 3] > 20 && l > 0.03) { s += l; n++; } } return n ? s / n : 0.5; } catch { return 0.5; } };
+const domColor = (tex) => {   // dominant fabric color of a texture (median-ish of painted texels) → '#hex'
+  try { const im = tex?.image; if (!im) return null; const c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d'); g.drawImage(im, 0, 0, 32, 32);
+    const d = g.getImageData(0, 0, 32, 32).data, px = []; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 20) px.push([d[i], d[i + 1], d[i + 2]]); if (!px.length) return null;
+    const med = (k) => px.map((p) => p[k]).sort((a, b) => a - b)[px.length >> 1]; return '#' + [med(0), med(1), med(2)].map((v) => v.toString(16).padStart(2, '0')).join(''); } catch { return null; } };
+function garmentColors(geo, tex, waist) {   // median fabric color above / below the waist, sampled at the garment's own UVs
+  try { const im = tex?.image, uv = geo.attributes.uv, pos = geo.attributes.position; if (!im || !uv) return null; const N = 64, c = document.createElement('canvas'); c.width = c.height = N;
+    const g = c.getContext('2d'); g.drawImage(im, 0, 0, N, N); const d = g.getImageData(0, 0, N, N).data, A = [[], []];
+    for (let i = 0; i < uv.count; i += 3) { let u = uv.getX(i) % 1, v = uv.getY(i) % 1; if (u < 0) u += 1; if (v < 0) v += 1; const x = Math.min(N - 1, Math.floor(u * N)), y = Math.min(N - 1, Math.floor((tex.flipY ? 1 - v : v) * N)), k = (y * N + x) * 4;
+      if (d[k + 3] > 20) A[pos.getY(i) > waist ? 0 : 1].push([d[k], d[k + 1], d[k + 2]]); }
+    const med = (L) => { if (!L.length) return null; const m = (j) => L.map((p) => p[j]).sort((a, b) => a - b)[L.length >> 1]; return '#' + [m(0), m(1), m(2)].map((v) => v.toString(16).padStart(2, '0')).join(''); };
+    const t = med(A[0]), b = med(A[1]); return t || b ? [t || b, b || t] : null; } catch { return null; } }
 function recolor(p, top, bottom, waist, detail = 0.45) {   // keeps fabric shading: color × normalized texture luminance; split at the waist for one-piece outfits
   const gain = 1 / Math.max(0.12, avgLum(p.map)), T = top ? new THREE.Color(top) : null, B = bottom ? new THREE.Color(bottom) : null;
   p.userData.recolor = { T, B };
@@ -1146,6 +1177,9 @@ function upgradeMaterials(root, def = {}) {
           const bb = g.boundingBox, isShoe = /shoe|boot|sneaker|foot/.test(n), isHat = /hat|fedora|cap|hood/.test(n);
           if (isShoe && wardrobe.shoes) recolor(p, wardrobe.shoes, wardrobe.shoes, -1e9);
           else if (isHat && wardrobe.hat) recolor(p, wardrobe.hat, wardrobe.hat, -1e9);
+          else if (!isShoe && !isHat && !wardrobe.top && !wardrobe.bottom && !wardrobe.print && /t-?shirt|tee|sweat|hoodie|casualsuit|longsleeve/.test(n) && p.map) {
+            const cols = garmentColors(o.geometry, p.map, waist); if (cols) recolor(p, cols[0], null, waist, 0.04);   // removes printed logos, keeps top/bottom colors
+          }
           else if (!isShoe && !isHat && (wardrobe.top || wardrobe.bottom)) {
             const top = wardrobe.top || null, bot = wardrobe.bottom || null;
             const det = wardrobe.print ? 1 : 0;
@@ -2171,6 +2205,7 @@ buildFX();
   }
   // precompile every shader (sets + fx + characters) so the first frame of each shot doesn't stall
   try { await Promise.race([document.fonts.load('900 64px Montserrat'), new Promise((r) => setTimeout(r, 2500))]); } catch {}
+  await Promise.all(ASSET_LOADS).catch(() => {});
   status('Compiling shaders…');
   const hidden = []; scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
   if (!FAST) { try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); } }

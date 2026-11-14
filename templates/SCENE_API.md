@@ -88,6 +88,12 @@ beat · explain · present · count`.
 Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and saved-motion events; sets add ambience.
 Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
+## Real places (photographed, Poly Haven CC0) — the default for any real-world scene
+`set: 'place:<id>'` (or `{ type: 'place', id, rotY, height, exposure, shadow }`) → a real 360° photo of the place, projected onto the ground
+(feet stand on it, shadows land on it) and its real light on the characters. Use `rotY` to turn the view. Places:
+autumn_forest_01 (forest) · autumn_park (park) · bathroom (bathroom) · cobblestone_street_night (street at night) · comfy_cafe (cafe) · garage (garage) · gym_01 (gym) · hospital_room (hospital room) · hotel_room (bedroom / hotel room) · lythwood_lounge (living room) · mall_parking_lot (parking lot) · modern_buildings_night (city at night) · modern_evening_street (city street evening) · old_tree_in_city_park (city park) · pretville_street (neighborhood street) · residential_garden (house garden) · rooftop_day (rooftop) · school_hall (school hall) · school_quad (school courtyard) · small_empty_house (empty house interior) · snowy_park_01 (snowy park) · stadium_01 (stadium) · stuttgart_suburbs (neighborhood) · suburban_garden (neighborhood backyard) · suburban_soccer_park (soccer field) · unfinished_office (office) · urban_street_01 (city street) · vintage_measuring_lab (lab) · warm_restaurant (restaurant) · wide_street_01 (city street).
+Catalog: assets/places/places.json. Prefer a place over the built-in kits whenever the story happens somewhere real.
+
 ## Inside the body — real 3D (prefer these over 2D)
 - Micro worlds: `set: 'blood' | 'fat' | 'neurons' | 'artery'` (camera flies forward automatically; characters hidden). `shot.micro = { level: keys 0..1, flow }`:
   blood = sugar crystals, fat = cell size, neurons = firing rate, artery = plaque (narrows and slows the flow).

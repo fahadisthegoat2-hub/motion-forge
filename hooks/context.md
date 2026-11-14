@@ -53,6 +53,8 @@ ALWAYS:
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
 - TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
 - FINAL MESSAGE = the link (or MP4) + one line + the publish pack (or the Good/High/Epic question). Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
+- REAL PLACES: stories happen in real photographed places — `set: 'place:<id>'` (neighborhood, street, school, park, home, cafe, restaurant,
+  hospital, gym, office, city night, lab, forest, stadium… see assets/places/places.json). Thumbnails use the same place as background.
 - REALISM FIRST: explain with real 3D — inside-the-body micro worlds (set: blood · fat · neurons · artery), 3D lens insets (inset + world), x-ray bodies (xray), real VFX. 2D labels only support them; never flat cartoon diagrams.
 - CLARITY: every line gets a literal visual and explainer graphics (visual-clarity skill). No random actions, no repeated scenes, cameras chosen by meaning, payoff in the first 2s.
 - ARTIFACTS: before publishing a scene as an Artifact run `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` and pass the printed JSON as the `files` map — without it the characters and animations don't load on the page.

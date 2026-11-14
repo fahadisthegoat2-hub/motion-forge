@@ -1,0 +1,454 @@
+{
+ "source": "Poly Haven (CC0) — polyhaven.com",
+ "usage": "set: 'place:<id>'",
+ "places": {
+  "autumn_forest_01": {
+   "place": "forest",
+   "name": "Autumn Forest 01",
+   "tags": [
+    "tree",
+    "forest",
+    "leaves",
+    "autumn",
+    "rock"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Andreas Mischok"
+  },
+  "autumn_park": {
+   "place": "park",
+   "name": "Autumn Park",
+   "tags": [
+    "tree",
+    "sun",
+    "grass",
+    "field",
+    "backplates"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "bathroom": {
+   "place": "bathroom",
+   "name": "Bathroom",
+   "tags": [
+    "bath",
+    "basin",
+    "tiles",
+    "sink"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "cobblestone_street_night": {
+   "place": "street at night",
+   "name": "Cobblestone Street Night",
+   "tags": [
+    "city",
+    "street",
+    "cobblestone",
+    "dark",
+    "lamp",
+    "germany",
+    "europe",
+    "alley"
+   ],
+   "indoor": false,
+   "night": true,
+   "author": "Greg Zaal, Jenelle van Heerden"
+  },
+  "comfy_cafe": {
+   "place": "cafe",
+   "name": "Comfy Café",
+   "tags": [
+    "shop",
+    "coffee",
+    "cafe",
+    "couch",
+    "table",
+    "store",
+    "backplates"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "garage": {
+   "place": "garage",
+   "name": "Garage",
+   "tags": [
+    "garage",
+    "fluorescent",
+    "concrete",
+    "parking",
+    "shelves",
+    "orange",
+    "mess",
+    "tools"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "gym_01": {
+   "place": "gym",
+   "name": "Gym 01",
+   "tags": [
+    "fluorescent",
+    "gym",
+    "weights",
+    "fitness",
+    "exercise"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "hospital_room": {
+   "place": "hospital room",
+   "name": "Hospital Room",
+   "tags": [
+    "bed",
+    "table",
+    "hospital",
+    "lamp",
+    "medical",
+    "operation"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Oliksiy Yakovlyev"
+  },
+  "hotel_room": {
+   "place": "bedroom / hotel room",
+   "name": "Hotel Room",
+   "tags": [
+    "bed",
+    "tv",
+    "table",
+    "chair",
+    "mirror",
+    "window",
+    "curtain",
+    "lamp"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "lythwood_lounge": {
+   "place": "living room",
+   "name": "Lythwood Lounge",
+   "tags": [
+    "couch",
+    "warm",
+    "lounge",
+    "lamp",
+    "room"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "mall_parking_lot": {
+   "place": "parking lot",
+   "name": "Mall Parking Lot",
+   "tags": [
+    "asphalt",
+    "sun",
+    "parking"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "modern_buildings_night": {
+   "place": "city at night",
+   "name": "Modern Buildings Night",
+   "tags": [
+    "building",
+    "europe",
+    "river",
+    "architecture",
+    "lamp"
+   ],
+   "indoor": false,
+   "night": true,
+   "author": "Greg Zaal"
+  },
+  "modern_evening_street": {
+   "place": "city street evening",
+   "name": "Modern Evening Street",
+   "tags": [
+    "building",
+    "city",
+    "street",
+    "street light",
+    "europe",
+    "architecture",
+    "facade",
+    "evening"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Grzegorz Wronkowski"
+  },
+  "old_tree_in_city_park": {
+   "place": "city park",
+   "name": "Old Tree in City Park",
+   "tags": [
+    "tree",
+    "park",
+    "leaves",
+    "autumn"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Andreas Mischok"
+  },
+  "pretville_street": {
+   "place": "neighborhood street",
+   "name": "Pretville Street",
+   "tags": [
+    "sun",
+    "street",
+    "road",
+    "asphalt",
+    "car",
+    "film set",
+    "flag",
+    "50s"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Dimitrios Savva, Jarod Guest"
+  },
+  "residential_garden": {
+   "place": "house garden",
+   "name": "Residential Garden",
+   "tags": [
+    "building",
+    "grass",
+    "apartment",
+    "backplates"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Greg Zaal, Rico Cilliers"
+  },
+  "rooftop_day": {
+   "place": "rooftop",
+   "name": "Rooftop Day",
+   "tags": [
+    "parking",
+    "roof",
+    "car",
+    "backplates"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "school_hall": {
+   "place": "school hall",
+   "name": "School Hall",
+   "tags": [
+    "school",
+    "stage",
+    "hall",
+    "wood",
+    "wooden floor",
+    "curtain"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Dimitrios Savva, Jarod Guest"
+  },
+  "school_quad": {
+   "place": "school courtyard",
+   "name": "School Quad",
+   "tags": [
+    "concrete",
+    "pavers",
+    "covered",
+    "hall",
+    "square",
+    "campus",
+    "school",
+    "symmetrical"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Dimitrios Savva, Jarod Guest"
+  },
+  "small_empty_house": {
+   "place": "empty house interior",
+   "name": "Small Empty House",
+   "tags": [
+    "house",
+    "tile",
+    "lamp",
+    "door"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal"
+  },
+  "snowy_park_01": {
+   "place": "snowy park",
+   "name": "Snowy Park 01",
+   "tags": [
+    "snow",
+    "tree",
+    "winter"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Oliksiy Yakovlyev"
+  },
+  "stadium_01": {
+   "place": "stadium",
+   "name": "Stadium 01",
+   "tags": [
+    "stadium",
+    "field",
+    "grass",
+    "football",
+    "soccer"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "stuttgart_suburbs": {
+   "place": "neighborhood",
+   "name": "Stuttgart Suburbs",
+   "tags": [
+    "car",
+    "road",
+    "street",
+    "asphalt",
+    "pink",
+    "house",
+    "suburb",
+    "grass"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Andreas Mischok"
+  },
+  "suburban_garden": {
+   "place": "neighborhood backyard",
+   "name": "Suburban Garden",
+   "tags": [
+    "grass",
+    "sun",
+    "garden",
+    "bush",
+    "lapa",
+    "gazebo",
+    "pool",
+    "suburb"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Dimitrios Savva, Jarod Guest"
+  },
+  "suburban_soccer_park": {
+   "place": "soccer field",
+   "name": "Suburban Soccer Park",
+   "tags": [
+    "grass",
+    "field",
+    "park",
+    "suburb",
+    "football",
+    "soccer",
+    "lawn"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Dimitrios Savva, Jarod Guest"
+  },
+  "unfinished_office": {
+   "place": "office",
+   "name": "Unfinished Office",
+   "tags": [
+    "room",
+    "empty",
+    "construction",
+    "office",
+    "door",
+    "white"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Sergej Majboroda"
+  },
+  "urban_street_01": {
+   "place": "city street",
+   "name": "Urban Street 01",
+   "tags": [
+    "europe",
+    "london",
+    "tree",
+    "road",
+    "asphalt",
+    "car",
+    "street",
+    "building"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Andreas Mischok"
+  },
+  "vintage_measuring_lab": {
+   "place": "lab",
+   "name": "Vintage Measuring Lab",
+   "tags": [
+    "machine",
+    "industrial",
+    "workshop",
+    "laboratory"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Oliksiy Yakovlyev"
+  },
+  "warm_restaurant": {
+   "place": "restaurant",
+   "name": "Warm Restaurant",
+   "tags": [
+    "window",
+    "table",
+    "restaurant",
+    "chair",
+    "tiles",
+    "bench",
+    "animal skin",
+    "rafters"
+   ],
+   "indoor": true,
+   "night": false,
+   "author": "Greg Zaal, Jarod Guest"
+  },
+  "wide_street_01": {
+   "place": "city street",
+   "name": "Wide Street 01",
+   "tags": [
+    "sun",
+    "road",
+    "street",
+    "asphalt",
+    "city",
+    "backplates"
+   ],
+   "indoor": false,
+   "night": false,
+   "author": "Sergej Majboroda"
+  }
+ }
+}
