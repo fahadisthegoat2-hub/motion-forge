@@ -30,8 +30,8 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   });
   // plugin asset kit (characters/animations) → local copy
   const KIT_DIR = path.join(__dirname, '..', 'assets');
-  await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/motion-forge@[^/]+\/assets\/(.+)$/, (route) => {
-    const f = path.join(KIT_DIR, decodeURIComponent(route.request().url().match(/\/assets\/(.+)$/)[1]));
+  await page.route(/cdn\.jsdelivr\.net\/gh\/[^/]+\/motion-forge@[^/]+\/(.+)$/, (route) => {   // plugin repo files (assets, motion library) → local copy
+    const f = path.join(KIT_DIR, '..', decodeURIComponent(route.request().url().match(/motion-forge@[^/]+\/(.+)$/)[1]).split('?')[0]);
     return fs.existsSync(f) ? route.fulfill({ path: f }) : route.continue();
   });
   const server = await startStaticServer();

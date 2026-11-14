@@ -49,6 +49,7 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
     acting: 'auto' | 'calm' | 'big' | 'none',  // auto talk gestures + idle glances (default auto)
     bones: { <joint>: keys([pitch, yaw, roll]) }, // CUSTOM animation: any joint, layered on the clip (see below)
     rotX: keys, rotZ: keys,                    // whole-body flips, falls, tumbles (with rotY)
+    motions: [{ name, start, speed?, amount?, loop?, hold? }], // saved custom motions (animations/custom/motions.json)
   } },
   fx: [{ type, t | start/end, pos, scale, ... }] }
 ```

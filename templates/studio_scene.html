@@ -781,6 +781,17 @@ const VIS = [
 const EYE_MORPH = { left: ['LeftEyeturnLeft', 'RightEyeturnLeft', 'eyeLookOutLeft', 'eyeLookInRight'], right: ['LeftEyeturnRight', 'RightEyeturnRight', 'eyeLookInLeft', 'eyeLookOutRight'],
   up: ['LeftEyeUp', 'RightEyeUp', 'eyeLookUpLeft', 'eyeLookUpRight'], down: ['LeftEyeDown', 'RightEyeDown', 'eyeLookDownLeft', 'eyeLookDownRight'] };
 const characters = {};
+let MOTIONS = {};   // Claude's saved motion library (animations/custom/motions.json) — cast.<id>.motions = [{ name, start, speed?, amount?, loop?, hold? }]
+function activeMotions(cast, t) {
+  const out = [];
+  for (const m of cast?.motions || []) {
+    const M = MOTIONS[m.name] || m.inline; if (!M) continue;
+    let lt = (t - (m.start ?? 0)) * (m.speed ?? 1); if (lt < 0) continue;
+    if (m.loop ?? M.loop) lt %= M.dur; else if (lt > M.dur) { if (!m.hold) continue; lt = M.dur; }
+    out.push([M, lt, m.amount ?? 1]);
+  }
+  return out;
+}
 const clipLib = {};
 const sources = [];
 
@@ -945,6 +956,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   applyGestures(ch, cast, t);
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
+  for (const [M, lt, k] of activeMotions(cast, t)) for (const [bn, keys] of Object.entries(M.bones || {})) { const b = ch.bones[normName(bn)], e = b ? key(keys, lt) : null; if (e) rotateInRootSpace(ch, b, (e[0] || 0) * k, (e[1] || 0) * k, (e[2] || 0) * k); }
   // breathing (4s cycle, slight chest + shoulder lift)
   const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
   rotateInRootSpace(ch, B.spine1, -0.012 * br, 0);
@@ -968,6 +980,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   if (ch.eyeMorphs) { const set = (list, v) => list.forEach((n) => ch.setMorph(n, v));
     set(ey > 0 ? EYE_MORPH.left : EYE_MORPH.right, Math.abs(ey) / 0.45); set(ep > 0 ? EYE_MORPH.down : EYE_MORPH.up, Math.abs(ep) / 0.35); }
   if (ch._shock) { for (const [mn, mw] of Object.entries(FACE.shock)) ch.setMorph(mn, mw * ch._shock); ch._shock = 0; }
+  for (const [M, lt, k] of activeMotions(cast, t)) for (const [name, keys] of Object.entries(M.face || {})) { const wv = (key(keys, lt) || 0) * k; for (const [mn, mw] of Object.entries(FACE[name] || { [name]: 1 })) ch.setMorph(mn, mw * wv); }
   for (const [name, keys] of Object.entries(cast?.face || {})) { const wv = key(keys, t) || 0; for (const [mn, mw] of Object.entries(FACE[name] || { [name]: 1 })) ch.setMorph(mn, mw * wv); }
   if (talking) {   // syllable lip-sync: a mouth shape per syllable, word gaps, closures, small jaw energy variation
     const seg = (cast.talk || []).find(([a, b]) => t >= a && t <= b), u = t - seg[0], rate = cast.talkRate ?? 4.6;
@@ -1426,6 +1439,10 @@ function render(tGlobal) {
     ch.root.visible = !!cast || shot.cast === undefined;
     if (!ch.root.visible) continue;
     ch.root.position.set(...(key(cast?.pos, local) || [0, 0, 0])); ch.root.rotation.set(key(cast?.rotX, local) || 0, key(cast?.rotY, local) || 0, key(cast?.rotZ, local) || 0, 'YXZ');   // rotX/rotZ: flips, falls, tumbles
+    for (const [M, lt, k] of activeMotions(cast, local)) {   // saved motions: position/rotation offsets relative to the character
+      const p = key(M.pos, lt); if (p) ch.root.position.add(new THREE.Vector3(p[0] * k, p[1] * k, p[2] * k).applyEuler(new THREE.Euler(0, ch.root.rotation.y, 0)));
+      ch.root.rotation.x += (key(M.rotX, lt) || 0) * k; ch.root.rotation.y += (key(M.rotY, lt) || 0) * k; ch.root.rotation.z += (key(M.rotZ, lt) || 0) * k;
+    }
     applyClips(ch, cast, local); ch.root.updateMatrixWorld(true);
     life(ch, cast, local, tGlobal, camPosAt);
   }
@@ -1455,6 +1472,12 @@ buildFX();
     const base = KIT[KIT.length - 1].replace(/assets\/$/, '');
     for (const u of ['characters/library.json', '../characters/library.json', '../../characters/library.json', base + 'characters/library.json']) {
       try { const r = await fetch(u); if (r.ok) { LIBRARY = (await r.json()).characters || {}; break; } } catch {}
+    }
+  }
+  if (SHOTS.some((sh) => Object.values(sh.cast || {}).some((c) => c?.motions?.length))) {
+    const base = KIT[KIT.length - 1].replace(/assets\/$/, '');
+    for (const u of ['animations/custom/motions.json', '../animations/custom/motions.json', '../../animations/custom/motions.json', base + 'animations/custom/motions.json']) {
+      try { const r = await fetch(u); if (r.ok) { MOTIONS = (await r.json()).motions || {}; break; } } catch {}
     }
   }
   for (const [id, def0] of Object.entries(CAST)) {

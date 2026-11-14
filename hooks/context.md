@@ -29,6 +29,7 @@ ROUTING (load every matching skill, in this order, before working):
 
 ALWAYS:
 - COMPOSE, DON'T INVENT: build every video from templates/studio_scene.html + templates/SCENE_API.md. People = Casting Board characters ({ character: '<id>' }). NEVER model people, clothes, t-shirts, hair, faces or foliage from primitives or curves. New people are built with scripts/build_character.js (MakeHuman CC0, offline). Sets = built-in kits.
+- Custom motions: check scripts/motion_library.js list first and reuse; save every new custom motion to the library (silently — the library is internal, never show it to the user).
 - Every shot moves: named camera move, clips + talk (auto gestures) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props.
 - Before a final render, ask the user: Good, High or Epic. Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.

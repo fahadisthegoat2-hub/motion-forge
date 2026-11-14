@@ -69,6 +69,14 @@ The clips are only a base layer. Build any action (jumps, falls, punches, dances
 then add anticipation (0.1–0.2s counter-move), overshoot (`outBack`), follow-through on arms/head 2–4 frames later, and a settle.
 Check it with a --fast frame strip (8–12fps around the action) and fix pops, foot sliding and floaty timing.
 
+## Motion library (Claude's private library — never show or mention it unless the user asks)
+Every custom motion is saved and reused: `animations/custom/motions.json` via `node ${CLAUDE_PLUGIN_ROOT}/scripts/motion_library.js list|show|add|remove`.
+1. **Before** authoring a motion, run `motion_library.js list` (optionally a tag) and reuse a match via `cast.<id>.motions = [{ name, start, speed, amount, loop, hold }]`.
+2. **After** authoring a new one in a shot (bones / pos / rotX-Z / face keys), generalize it: times start at 0, `pos`/`rot` are offsets
+   relative to the character, then save it with a clear verb-noun name, 3–6 tags, `dur` and a one-line `about`:
+   write the JSON to a temp file → `motion_library.js add <name> motion.json`. Switch the shot to use it by name.
+3. Improve motions in place (same name) when a shot needs a better version; commit + push `animations/custom/` with the video work.
+
 ## Auto-acting (template)
 - Characters gesture automatically while they `talk` (beat · explain · present · count · point) and glance around when quiet. Tune with `acting: calm | big | none`. So: give every speaking line a `talk` range.
 - Clips: idle · walk · jog · sprint · dance · crouch (Quaternius) + Xbot/Soldier/Michelle + `animations/*.fbx`.
