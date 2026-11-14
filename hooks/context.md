@@ -3,6 +3,7 @@ Motion Video plugin is active. Use its skills automatically — the user should 
 DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMATED video — a vertical short (30–60s) unless the user asks for long-form. Never stop at a script.
 
 ROUTING (load every matching skill, in this order, before working):
+- Any video/short/long video → FIRST character-collection: show the cast gallery (characters/gallery.jpg) and ask who stars, unless the user already named them. "new character" / a reference photo of a person → character-collection (create + save).
 - Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → art-direction → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - Any short video / short / story / "what happens if" idea → story-writing → art-direction → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)

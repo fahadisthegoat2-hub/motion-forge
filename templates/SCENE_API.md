@@ -25,6 +25,7 @@ hero: { actor: 'jake',            // jake (casual top + trousers) · marcus (big
         skin: 'medium',           // pale · light · medium · tan · brown · dark · '#hex'
         hair: '#2a1b12' }         // hair color
 ```
+From the collection: `{ character: 'leo' }` (characters/library.json — see skills/character-collection).
 Your own characters: `urls: ['characters/name.glb']` (Avaturn GLB / Mixamo FBX) or a file named
 `characters/<castId>.glb`. Several people = several cast entries (vary height, skin, hair, wardrobe).
 
