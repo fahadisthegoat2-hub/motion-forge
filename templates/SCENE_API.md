@@ -95,7 +95,7 @@ Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 - X-ray body: cast `xray: [[0.3, 0], [0.9, 1]]` (+ `xrayColor`) → hologram body; add `scan` and `pulse` on organs. Dark sets/looks (void, neon-night) read best.
 
 ## Thumbnails (see skills/thumbnails)
-`const THUMBS = [{ shot, t, text, hi, accent, sub, face, cast, set, look, size, az, shift, side, arrow, circle }]` → `node scripts/thumbnail.js scene.html thumbs --fast` (drafts + preview.jpg), `--only N` (final), `--cover` (1080×1920).
+`const THUMBS = [{ shot, t, text, hi, accent, sub, face, cast, set, look, size, az, shift, side, arrow, circle, titles, split, labels, boost }]` (default background: `set: 'thumb'` colorful glow studio) → `node scripts/thumbnail.js scene.html thumbs --fast` (drafts + preview.jpg), `--only N` (final), `--cover` (1080×1920).
 
 ## Explainer graphics (see skills/visual-clarity) — TITLES that explain
 Any title can follow a body part or 3D point: `at: 'hero.heart'` (+ `offset: [dx, dy]`). Parts: head brain face eyes mouth throat chest heart lungs stomach liver belly fat gut hips lefthand righthand leftarm rightarm leftknee rightknee skin feet.

@@ -16,6 +16,17 @@ the winner, at full quality. Never show drafts, comparisons, "here are 3 options
 - `arrow` / `circle`: a body part (`'hero.heart'`) or 3D point. Red, one at most.
 - Vary the IDEA between variants (different moment, emotion, text angle, world), not just colors.
 
+## 1b. Proven layouts (use at least 3 different ones across your variants)
+- **Reaction face**: `cu` face with an EXTREME expression (face values are auto-boosted ×1.5), text on the other side. 
+- **Before / After split**: `split: [{ face, look, set }, { face, look, set }]` + `labels: [['DAY 1', 0.22, 0.88, '#d62b2b'], ['DAY 30', 0.78, 0.88, '#1fa84f']]`
+  (sick colors + `horror` look on the left, bright + `golden-hour` on the right). The strongest layout for change/transformation stories.
+- **Inside view**: face + a big 3D lens (`titles: [{ style: 'inset', world: 'blood', pos, radius: 0.24 }]`) or an x-ray body with a red `pulse`.
+- **Danger / scale**: the subject next to the threat (explosion, giant object) with a red circle.
+
+**Background is never empty**: thumbnails default to the `thumb` studio — saturated gradient, hot glow + light rays behind the head,
+colored rim lights. Pick colors per story: `set: { type: 'thumb', id: 'unique', bg, glow, rimA, rimB }` (complementary to the text color;
+warm glow for good, sick green/red for bad). Or use the story's own world (`set: 'street-night'`, a micro world) if it reads at phone size.
+
 ## 2. CTR rules (score each variant 1–10 on each, keep the best total)
 1. **One focal point**, huge: a face with an extreme emotion (shock, disgust, fear, joy) ≥ 35% of the height, or one striking 3D image (x-ray body, inside-the-body world, explosion).
 2. **2–4 words**, ≤ 2 lines, that ADD to the title (curiosity gap), never repeat it. One accent word (`hi`). Numbers and "you/your" work.
