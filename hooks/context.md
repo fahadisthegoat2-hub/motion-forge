@@ -1,19 +1,22 @@
 Motion Video plugin is active. Use its skills automatically — the user should never have to name them.
 
 FIRST ACTION OF EVERY SESSION — before anything else, whatever the user's first message is (even "hi"):
-your first reply shows the TWO studio artifacts ONCE EACH, then you answer/build. There is exactly ONE Casting Board and ONE
-Voice Studio, forever: never create a new one, never show either twice in a chat.
-1. From the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js` and `node ${CLAUDE_PLUGIN_ROOT}/scripts/voice_page.js`.
-   Each prints {url, changed, page, files, hash}. For EACH of the two:
+your first reply shows the THREE studio artifacts ONCE EACH, then you answer/build. There is exactly ONE Casting Board, ONE
+Voice Studio and ONE VFX Library, forever: never create a new one, never show one twice in a chat.
+1. From the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js`, `node ${CLAUDE_PLUGIN_ROOT}/scripts/voice_page.js` and
+   `node ${CLAUDE_PLUGIN_ROOT}/scripts/vfx_page.js`. Each prints {url, changed, page, files, hash}. For EACH of the three:
    - changed:false → Artifact action "open" with its url. Do NOT publish.
    - changed:true and url set → Artifact action "read" on the url once, then publish the printed `page` to that `url` (+ `files`),
      and do NOT call "open" afterwards (the publish already shows it). Save the new hash as "page" in its json
-     (characters/casting-board.json / characters/voice-studio.json).
+     (characters/casting-board.json / characters/voice-studio.json / characters/vfx-library.json).
    - url missing (brand-new repo only) → see skills/character-collection ("first board") and skills/voiceover ("first studio").
-2. Start the reply with "🎬 Casting Board: <url>" and "🎙️ Voice Studio: <url>".
-3. Casting Board requests: ArtifactData list "requests"; do each "pending" one (skills/character-collection), mark it "done" + a note.
+2. Start the reply with "🎬 Casting Board: <url>", "🎙️ Voice Studio: <url>" and "✨ VFX Library: <url>".
+3. VFX Library requests: ArtifactData list "requests" on it; build/improve each "pending" effect (skills/vfx → VFX library), render its
+   preview (`scripts/vfx_previews.js --only <name>`), upload the mp4 as an asset, set its doc in "effects" (`scripts/vfx_data.js`), mark the
+   request "done". Never republish the page for data.
+4. Casting Board requests: ArtifactData list "requests"; do each "pending" one (skills/character-collection), mark it "done" + a note.
    Character changes reach the board as DATA (skills/character-collection → "Update the board"), never by republishing the page.
-4. Then handle the user's message.
+5. Then handle the user's message.
 - Later in the chat: never republish either page to show a change, and never "open" one again unless the user asks.
 - Changes to characters/ (library, GLBs, thumbs) are pushed to main (`git push origin HEAD:main`) so every chat sees them.
 

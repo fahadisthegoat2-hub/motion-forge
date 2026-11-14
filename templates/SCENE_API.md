@@ -82,7 +82,13 @@ before and overshoot/settle after (see skills/custom-animation). New reusable po
 `point · handsup · shrug · armsout · fistpump · shield · think · facepalm · wave · lean · slump · scared ·
 beat · explain · present · count`.
 
-### Effects (`fx`) — see skills/vfx
+### Epic action (anime / superhero)
+`shot.afterimage: 0.85` (or keys) = speed trails · `shot.impact: [t]` = anime impact frames (flash + hard B/W frames) ·
+TITLES `{ style: 'speedlines', t, t1, mode: 'radial'|'horizontal', center, density, color }` · any fx `attach: 'hero.righthand'` rides on a body part.
+Combos: punch = `punch-impact` at the fist + `impact` + radial speedlines + punch-in; dash = `speed-dash` + `afterimage` + horizontal speedlines;
+power-up = `power-aura` (attach hips) + shake + rising music; landing = `ground-slam` + `impact`.
+
+### Effects (`fx`) — see skills/vfx (all of them, with previews, in the VFX Library artifact)
 `explosion · fire · smoke · sparks · magic · lightning · shockwave · beam · dust · embers · rain · snow · splash`.
 
 ## Editing & sound (see skills/editing)

@@ -1,0 +1,119 @@
+{
+ "explosion": {
+  "about": "big fireball explosion with debris and shockwave",
+  "builtin": true
+ },
+ "fire": {
+  "about": "volumetric fire with smoke column",
+  "builtin": true
+ },
+ "smoke": {
+  "about": "billowing smoke column",
+  "builtin": true
+ },
+ "sparks": {
+  "about": "spark shower",
+  "builtin": true
+ },
+ "magic": {
+  "about": "magic sparkles",
+  "builtin": true
+ },
+ "lightning": {
+  "about": "lightning strike",
+  "builtin": true
+ },
+ "shockwave": {
+  "about": "shockwave dome + ground ring",
+  "builtin": true
+ },
+ "splash": {
+  "about": "water splash",
+  "builtin": true
+ },
+ "embers": {
+  "about": "floating embers",
+  "builtin": true
+ },
+ "rain": {
+  "about": "rain",
+  "builtin": true
+ },
+ "snow": {
+  "about": "snow",
+  "builtin": true
+ },
+ "dust": {
+  "about": "floating dust motes",
+  "builtin": true
+ },
+ "muzzle-flash": {
+  "about": "gun / blaster muzzle flash"
+ },
+ "portal": {
+  "about": "swirling energy portal (continuous)"
+ },
+ "fireworks": {
+  "about": "firework burst in the sky"
+ },
+ "confetti": {
+  "about": "celebration confetti burst"
+ },
+ "electric-arc": {
+  "about": "crackling electricity / short circuit (continuous)"
+ },
+ "blood-splash": {
+  "about": "dark red splash (keep it brief, not gory)"
+ },
+ "ice-shatter": {
+  "about": "ice / glass shattering"
+ },
+ "poison-gas": {
+  "about": "toxic green gas cloud (continuous)"
+ },
+ "heal-glow": {
+  "about": "healing / recovery aura rising around someone (continuous)"
+ },
+ "black-hole": {
+  "about": "swirling dark vortex with a hot ring (continuous)"
+ },
+ "meteor": {
+  "about": "burning meteor streaking down (pos = start; flies along dir)"
+ },
+ "bubbles": {
+  "about": "underwater bubbles rising (continuous)"
+ },
+ "falling-leaves": {
+  "about": "autumn leaves drifting down (continuous)"
+ },
+ "sandstorm": {
+  "about": "wall of blowing sand (continuous)"
+ },
+ "dust-burst": {
+  "about": "dust puff from a landing / impact on the ground"
+ },
+ "energy-charge": {
+  "about": "glowing power charging in a hand (continuous, put pos at the hand or use attach)"
+ },
+ "punch-impact": {
+  "about": "hit landing on a body/object: spark ring, glow pop, dust, hard shake (pair with shot.impact + speedlines)"
+ },
+ "ground-slam": {
+  "about": "superhero landing / ground pound: crater dust blast, flying debris, shockwave ring, huge shake"
+ },
+ "speed-dash": {
+  "about": "super-speed dash: wind streaks + dust kicked up behind (pos = start point; pair with shot.afterimage + horizontal speedlines)"
+ },
+ "power-aura": {
+  "about": "power-up aura flaring around a character (continuous; use attach: 'hero.hips' or pos at the character)"
+ },
+ "energy-beam": {
+  "about": "energy blast fired along +x from pos (continuous between start/end; rotate the scene setup or pos to aim)"
+ },
+ "sonic-boom": {
+  "about": "sound-barrier boom ring + vapor cone"
+ },
+ "teleport": {
+  "about": "teleport in/out: flash, sparkle burst, ring"
+ }
+}

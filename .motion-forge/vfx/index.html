@@ -1,0 +1,123 @@
+<title>VFX Library</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a studio casting board — new-character slate on top, then the cast as call-sheet cards, then the request log. */
+:root { --bg: #f3f4f6; --panel: #ffffff; --line: #d9dde3; --fg: #15191f; --muted: #5b6573; --accent: #2b6cff; --accent-fg: #ffffff; --ok: #1a8a4a; --warn: #b26a00; --chip: #e8ecf2;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif; --body: "Inter", system-ui, -apple-system, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0f1216; --panel: #171b21; --line: #2a313b; --fg: #e9edf2; --muted: #9aa5b3; --accent: #5b8dff; --accent-fg: #0b0e12; --ok: #45c47b; --warn: #e2a33c; --chip: #222831; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #0f1216; --panel: #171b21; --line: #2a313b; --fg: #e9edf2; --muted: #9aa5b3; --accent: #5b8dff; --accent-fg: #0b0e12; --ok: #45c47b; --warn: #e2a33c; --chip: #222831; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: -0.01em; } h2 { font-size: 19px; }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.slate { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea:focus, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: 600 14px var(--body); border-radius: 10px; padding: 9px 14px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+button:disabled { opacity: .55; cursor: default; }
+.file { font-size: 13px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.photo { aspect-ratio: 3 / 2; max-width: 100%; width: 100%; object-fit: cover; display: block; background: var(--chip); }
+.noph { aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; color: var(--muted); background: var(--chip); }
+.body { padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.name { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.name b { font: 700 19px var(--display); }
+.chips { display: flex; gap: 6px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.chip { background: var(--chip); color: var(--muted); border-radius: 999px; padding: 2px 9px; letter-spacing: .02em; }
+.about { color: var(--muted); margin: 0; }
+.log { display: grid; gap: 8px; }
+.req { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.req span { min-width: 0; overflow-wrap: anywhere; }
+.st { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.st.pending { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.st.done { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.note { color: var(--muted); font-size: 13px; }
+.toast { min-height: 20px; font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s } .card:hover { transform: translateY(-2px) } }
+</style>
+<div class="wrap">
+  <header><h1>VFX Library</h1><p class="sub" id="meta"></p></header>
+  <section class="slate" aria-labelledby="newh">
+    <h2 id="newh">New effect</h2>
+    <label for="newtext" class="sub">Describe the effect you want (what it looks like, colors, how it moves). Add a reference picture or video if you have one.</label>
+    <textarea id="newtext" placeholder="e.g. a dragon-fire breath: thick orange flames shooting forward with black smoke rolling off the edges"></textarea>
+    <div class="row"><input id="newphoto" type="file" accept="image/*,video/*" class="file" aria-label="Reference"><button class="primary" id="create">Create effect</button></div>
+    <div class="toast" id="newmsg" role="status"></div>
+  </section>
+  <section aria-labelledby="casth" style="display:grid;gap:14px"><h2 id="casth">Effects</h2><div class="grid" id="grid"></div></section>
+  <section aria-labelledby="logh" style="display:grid;gap:10px"><h2 id="logh">Requests</h2><div class="log" id="log"><p class="sub">Requests you send appear here, with Claude's progress.</p></div></section>
+</div>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const renderCast = (cast) => {
+$('#meta').textContent = cast.length + ' effects';
+if (!cast.length) { $('#grid').innerHTML = '<p class="sub">No effects yet. Describe one above and Claude builds it.</p>'; return; }
+$('#grid').innerHTML = cast.map((c) => `
+  <article class="card" id="c-${esc(c.id)}">
+    ${c.video ? `<video class="photo" src="${esc(c.video)}" autoplay muted loop playsinline aria-label="${esc(c.name)} preview"></video>` : '<div class="noph">Preview coming</div>'}
+    <div class="body">
+      <div class="name"><b>${esc(c.name)}</b><span class="chips"><span class="chip">${esc(c.kind || 'effect')}</span></span></div>
+      <p class="about">${esc(c.about)}</p>
+      <label class="sub" for="imp-${esc(c.id)}">Improve ${esc(c.name)}</label>
+      <textarea id="imp-${esc(c.id)}" placeholder="e.g. bigger, more sparks, darker smoke, slower. Add a reference below if you have one."></textarea>
+      <div class="row"><input id="impref-${esc(c.id)}" type="file" accept="image/*,video/*" class="file" aria-label="Reference for ${esc(c.name)} (optional)"></div>
+      <div class="row"><button class="primary" data-improve="${esc(c.id)}">Send improvement</button>
+        </div>
+      <div class="toast" id="msg-${esc(c.id)}" role="status"></div>
+    </div>
+  </article>`).join('');
+};
+$('#grid').innerHTML = '<p class="sub">Loading effects…</p>';
+let db = null, assets = null, ready = false;
+const say = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+const uploadRef = async (file, msgId) => {   // optional reference photo → the board's own asset store
+  if (!file) return null;
+  if (!assets) { say(msgId, 'Photo uploads need the page open on claude.ai; sending the text only.'); return null; }
+  try { say(msgId, 'Uploading photo…'); const up = await assets.upload(file); return { id: up.id, url: up.url }; }
+  catch (e) { say(msgId, 'Photo upload failed (' + (e?.code || 'error') + '); sending the text only.'); return null; }
+};
+const send = async (req, msgId) => {
+  if (!db) { say(msgId, 'Open this page on claude.ai (signed in) to send requests. Or tell Claude in chat: ' + (req.text || req.type)); return false; }
+  const rid = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  try { await db.collection('requests').doc(rid).set({ ...req, status: 'pending', at: Date.now() }); say(msgId, 'Sent. Claude builds it the next time you chat.'); return true; }
+  catch (e) { say(msgId, 'Could not send: ' + (e?.message || e?.code || 'unknown error') + '. Try again.'); return false; }
+};
+document.addEventListener('click', async (ev) => {
+  const imp = ev.target.closest('[data-improve]'), und = ev.target.closest('[data-undo]');
+  if (imp) { const id = imp.dataset.improve, ta = document.getElementById('imp-' + id), fi = document.getElementById('impref-' + id), text = ta.value.trim(), file = fi.files[0];
+    if (!text && !file) { say('msg-' + id, 'Type what to change or add a reference photo.'); return; }
+    imp.disabled = true; const ref = await uploadRef(file, 'msg-' + id);
+    if (await send({ type: 'improve', character: id, text: text || 'Match the reference photo', ref }, 'msg-' + id)) { ta.value = ''; fi.value = ''; }
+    imp.disabled = false; }
+  if (und) { const id = und.dataset.undo; und.disabled = true; await send({ type: 'undo', character: id, text: 'Undo ' + id }, 'msg-' + id); und.disabled = false; }
+});
+$('#create').addEventListener('click', async () => {
+  const btn = $('#create'), text = $('#newtext').value.trim(), file = $('#newphoto').files[0];
+  if (!text && !file) { say('newmsg', 'Describe the character or add a reference photo.'); return; }
+  btn.disabled = true; let ref = null;
+  ref = await uploadRef(file, 'newmsg');
+  if (await send({ type: 'create', text, ref }, 'newmsg')) { $('#newtext').value = ''; $('#newphoto').value = ''; }
+  btn.disabled = false;
+});
+const renderLog = (rows) => {
+  if (!rows.length) { $('#log').innerHTML = '<p class="sub">No requests yet. Use the boxes above.</p>'; return; }
+  $('#log').innerHTML = rows.map((r) => `<div class="req"><span class="st ${r.status === 'done' ? 'done' : 'pending'}">${r.status === 'done' ? 'Done' : 'Pending'}</span>
+    <span><b>${esc(r.type === 'create' ? 'New effect' : r.type === 'undo' ? 'Undo ' + (r.character || '') : 'Improve ' + (r.character || ''))}</b> · ${esc(r.text || '')}${r.note ? `<br><span class="note">${esc(r.note)}</span>` : ''}</span></div>`).join('');
+};
+(async () => {
+  if (!window.claude?.use) return;
+  [db, assets] = await Promise.all([window.claude.use('db'), window.claude.use('assets')]);
+  if (!db) { $('#grid').innerHTML = '<p class="sub">Open this page on claude.ai (signed in) to see the effects.</p>'; return; }
+  db.collection('effects').orderBy('order').limit(200).onSnapshot((snap) => renderCast(snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) })).filter((c) => !c.hidden)),
+    () => { $('#grid').innerHTML = '<p class="sub">Could not load the cast. Reload the page to try again.</p>'; });
+  const timer = setTimeout(() => { if (!ready) $('#log').innerHTML = '<p class="sub">Requests are taking a while to load. They will appear when the connection settles.</p>'; }, 10000);
+  db.collection('requests').orderBy('at', 'desc').limit(30).onSnapshot((snap) => { ready = true; clearTimeout(timer); renderLog(snap.docs.map((d) => d.data() || {})); },
+    (e) => { clearTimeout(timer); $('#log').innerHTML = '<p class="sub">Could not load requests (' + esc(e?.code || 'error') + '). Reload the page to try again.</p>'; });
+})();
+</script>

@@ -1223,6 +1223,625 @@
      "gain": 0.5
     }
    ]
+  },
+  "punch-impact": {
+   "about": "hit landing on a body/object: spark ring, glow pop, dust, hard shake (pair with shot.impact + speedlines)",
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 5,
+     "burst": 0.02,
+     "life": [
+      0.05,
+      0.12
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "size": [
+      0.6,
+      1.1
+     ],
+     "colA": "#ffffff",
+     "colB": "#ffd58a",
+     "hdr": 3
+    },
+    {
+     "mode": "spark",
+     "count": 120,
+     "burst": 0.03,
+     "life": [
+      0.12,
+      0.35
+     ],
+     "speed": [
+      5,
+      11
+     ],
+     "spread": 1,
+     "drag": 2,
+     "size": [
+      0.05,
+      0.02
+     ],
+     "colA": "#ffffff",
+     "colB": "#ffb04a",
+     "hdr": 5,
+     "stretch": 8
+    },
+    {
+     "mode": "fx",
+     "type": "shockwave",
+     "scale": 0.35,
+     "color": "#ffffff"
+    },
+    {
+     "mode": "smoke",
+     "count": 24,
+     "at": 0.02,
+     "burst": 0.08,
+     "life": [
+      0.5,
+      1
+     ],
+     "speed": [
+      1.5,
+      3
+     ],
+     "radial": true,
+     "drag": 3,
+     "size": [
+      0.1,
+      0.6
+     ],
+     "colA": "#d8d0c4",
+     "colB": "#6a6058",
+     "opacity": 0.35
+    }
+   ],
+   "shake": {
+    "amp": 1.2,
+    "decay": 0.18
+   },
+   "flash": {
+    "amp": 0.35
+   },
+   "sfx": [
+    {
+     "type": "punch",
+     "gain": 1
+    },
+    {
+     "type": "impact",
+     "gain": 0.7
+    }
+   ]
+  },
+  "ground-slam": {
+   "about": "superhero landing / ground pound: crater dust blast, flying debris, shockwave ring, huge shake",
+   "layers": [
+    {
+     "mode": "volume",
+     "kind": "blast",
+     "size": [
+      5,
+      2.2,
+      5
+     ],
+     "y": 0.6,
+     "dur": 2.2,
+     "colA": "#a69a8a",
+     "colB": "#2a241e",
+     "heat": 0,
+     "opacity": 0.9
+    },
+    {
+     "mode": "fx",
+     "type": "shockwave",
+     "scale": 1.1,
+     "color": "#ffe2b0"
+    },
+    {
+     "mode": "spark",
+     "count": 160,
+     "burst": 0.05,
+     "life": [
+      0.6,
+      1.4
+     ],
+     "speed": [
+      4,
+      9
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.9,
+     "gravity": 9.8,
+     "bounce": 0.3,
+     "size": [
+      0.07,
+      0.04
+     ],
+     "colA": "#cfc4b4",
+     "colB": "#6a5a4a",
+     "hdr": 1,
+     "stretch": 2
+    },
+    {
+     "mode": "smoke",
+     "count": 70,
+     "burst": 0.12,
+     "life": [
+      1.2,
+      2.4
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "radial": true,
+     "drag": 2.4,
+     "shape": [
+      0.4,
+      0,
+      0.4
+     ],
+     "size": [
+      0.4,
+      1.8
+     ],
+     "colA": "#b8ab98",
+     "colB": "#5a4e40",
+     "opacity": 0.5
+    }
+   ],
+   "shake": {
+    "amp": 2,
+    "decay": 0.45
+   },
+   "flash": {
+    "amp": 0.25
+   },
+   "sfx": [
+    {
+     "type": "boom",
+     "gain": 1
+    },
+    {
+     "type": "land",
+     "gain": 0.9
+    },
+    {
+     "type": "subdrop",
+     "gain": 0.8
+    }
+   ]
+  },
+  "speed-dash": {
+   "about": "super-speed dash: wind streaks + dust kicked up behind (pos = start point; pair with shot.afterimage + horizontal speedlines)",
+   "layers": [
+    {
+     "mode": "spark",
+     "count": 140,
+     "until": 0.5,
+     "life": [
+      0.15,
+      0.4
+     ],
+     "speed": [
+      6,
+      12
+     ],
+     "dir": [
+      -1,
+      0.05,
+      0
+     ],
+     "spread": 0.08,
+     "shape": [
+      0.2,
+      0.9,
+      0.3
+     ],
+     "size": [
+      0.05,
+      0.02
+     ],
+     "colA": "#ffffff",
+     "colB": "#bfe6ff",
+     "hdr": 2,
+     "stretch": 12
+    },
+    {
+     "mode": "smoke",
+     "count": 60,
+     "until": 0.5,
+     "life": [
+      0.8,
+      1.6
+     ],
+     "speed": [
+      1,
+      3
+     ],
+     "dir": [
+      -1,
+      0.3,
+      0
+     ],
+     "spread": 0.5,
+     "drag": 2,
+     "shape": [
+      0.3,
+      0.05,
+      0.3
+     ],
+     "size": [
+      0.2,
+      1.2
+     ],
+     "colA": "#c9bba6",
+     "colB": "#6a5c4a",
+     "opacity": 0.4
+    }
+   ],
+   "sfx": [
+    {
+     "type": "whoosh",
+     "gain": 1
+    }
+   ]
+  },
+  "power-aura": {
+   "about": "power-up aura flaring around a character (continuous; use attach: 'hero.hips' or pos at the character)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 360,
+     "pre": 1,
+     "life": [
+      0.4,
+      0.9
+     ],
+     "speed": [
+      0.8,
+      2
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.2,
+     "swirl": 2,
+     "shape": [
+      0.45,
+      0.05,
+      0.45
+     ],
+     "size": [
+      0.12,
+      0.02
+     ],
+     "colA": "#9fe8ff",
+     "colB": "#4a7aff",
+     "hdr": 3
+    },
+    {
+     "mode": "spark",
+     "count": 80,
+     "pre": 1,
+     "life": [
+      0.3,
+      0.7
+     ],
+     "speed": [
+      2,
+      4
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.4,
+     "shape": [
+      0.5,
+      0.2,
+      0.5
+     ],
+     "size": [
+      0.04,
+      0.015
+     ],
+     "colA": "#ffffff",
+     "colB": "#8ac8ff",
+     "hdr": 5,
+     "stretch": 5
+    },
+    {
+     "mode": "mote",
+     "count": 120,
+     "pre": 1,
+     "life": [
+      0.8,
+      1.6
+     ],
+     "speed": [
+      0.3,
+      0.8
+     ],
+     "dir": [
+      0,
+      1,
+      0
+     ],
+     "spread": 0.6,
+     "shape": [
+      1.2,
+      0.1,
+      1.2
+     ],
+     "size": [
+      0.015,
+      0.02
+     ],
+     "colA": "#cfe8ff",
+     "opacity": 0.8
+    }
+   ],
+   "light": {
+    "color": "#7ab8ff",
+    "intensity": 22,
+    "flicker": true,
+    "y": 1
+   },
+   "shake": {
+    "amp": 0.4,
+    "decay": 0.8
+   },
+   "sfx": [
+    {
+     "type": "riser",
+     "gain": 0.7
+    },
+    {
+     "type": "swell",
+     "gain": 0.6
+    }
+   ]
+  },
+  "energy-beam": {
+   "about": "energy blast fired along +x from pos (continuous between start/end; rotate the scene setup or pos to aim)",
+   "continuous": true,
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 500,
+     "life": [
+      0.15,
+      0.3
+     ],
+     "speed": [
+      14,
+      18
+     ],
+     "dir": [
+      1,
+      0,
+      0
+     ],
+     "spread": 0.02,
+     "shape": [
+      0.05,
+      0.08,
+      0.08
+     ],
+     "size": [
+      0.35,
+      0.25
+     ],
+     "colA": "#dff6ff",
+     "colB": "#4aa8ff",
+     "hdr": 3
+    },
+    {
+     "mode": "spark",
+     "count": 200,
+     "life": [
+      0.15,
+      0.4
+     ],
+     "speed": [
+      10,
+      16
+     ],
+     "dir": [
+      1,
+      0,
+      0
+     ],
+     "spread": 0.1,
+     "size": [
+      0.05,
+      0.02
+     ],
+     "colA": "#ffffff",
+     "colB": "#6ab8ff",
+     "hdr": 5,
+     "stretch": 10
+    },
+    {
+     "mode": "glow",
+     "count": 6,
+     "life": [
+      0.1,
+      0.2
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "size": [
+      0.7,
+      1
+     ],
+     "colA": "#ffffff",
+     "colB": "#6ab8ff",
+     "hdr": 2
+    }
+   ],
+   "light": {
+    "color": "#7ab8ff",
+    "intensity": 45,
+    "flicker": true,
+    "y": 0
+   },
+   "shake": {
+    "amp": 0.8,
+    "decay": 1
+   },
+   "sfx": [
+    {
+     "type": "zap",
+     "gain": 0.9
+    },
+    {
+     "type": "riser",
+     "gain": 0.6
+    }
+   ]
+  },
+  "sonic-boom": {
+   "about": "sound-barrier boom ring + vapor cone",
+   "layers": [
+    {
+     "mode": "fx",
+     "type": "shockwave",
+     "scale": 0.8,
+     "color": "#ffffff"
+    },
+    {
+     "mode": "smoke",
+     "count": 80,
+     "burst": 0.06,
+     "life": [
+      0.4,
+      0.9
+     ],
+     "speed": [
+      3,
+      6
+     ],
+     "radial": true,
+     "drag": 3,
+     "shape": [
+      0.05,
+      0.6,
+      0.6
+     ],
+     "size": [
+      0.3,
+      0.9
+     ],
+     "colA": "#ffffff",
+     "colB": "#c8d8e8",
+     "opacity": 0.45
+    }
+   ],
+   "shake": {
+    "amp": 1.4,
+    "decay": 0.3
+   },
+   "flash": {
+    "amp": 0.3
+   },
+   "sfx": [
+    {
+     "type": "boom",
+     "gain": 1
+    },
+    {
+     "type": "whoosh",
+     "gain": 0.8
+    }
+   ]
+  },
+  "teleport": {
+   "about": "teleport in/out: flash, sparkle burst, ring",
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 8,
+     "burst": 0.04,
+     "life": [
+      0.08,
+      0.2
+     ],
+     "speed": [
+      0,
+      0.1
+     ],
+     "size": [
+      1.2,
+      2
+     ],
+     "colA": "#e8f4ff",
+     "colB": "#8a7aff",
+     "hdr": 3
+    },
+    {
+     "mode": "glow",
+     "count": 260,
+     "burst": 0.06,
+     "life": [
+      0.4,
+      0.9
+     ],
+     "speed": [
+      1,
+      3
+     ],
+     "spread": 1,
+     "swirl": 4,
+     "shape": [
+      0.3,
+      0.9,
+      0.3
+     ],
+     "size": [
+      0.06,
+      0.01
+     ],
+     "colA": "#cfe0ff",
+     "colB": "#9a7aff",
+     "hdr": 3
+    },
+    {
+     "mode": "fx",
+     "type": "shockwave",
+     "scale": 0.4,
+     "color": "#b8a8ff"
+    }
+   ],
+   "flash": {
+    "amp": 0.45
+   },
+   "sfx": [
+    {
+     "type": "zap",
+     "gain": 0.8
+    },
+    {
+     "type": "shimmer",
+     "gain": 0.8
+    }
+   ]
   }
  }
 }

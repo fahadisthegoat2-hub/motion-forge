@@ -28,6 +28,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 /* ================================ DIRECTION ================================ */
@@ -557,6 +558,7 @@ const grade = new ShaderPass({
       c = mix(c, vec3(1.), uFlash); c *= 1. - uFade; if (vUv.y < uBars || vUv.y > 1. - uBars) c = vec3(0.); gl_FragColor = vec4(clamp(c, 0., 1.), 1.); }`,
 });
 composer.addPass(grade);
+const afterimage = new AfterimagePass(0.85); afterimage.enabled = false; composer.addPass(afterimage);   // speed trails (shot.afterimage)
 
 let currentLook = null;
 function applyLook(name, set) {
@@ -976,6 +978,15 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
         else { g.beginPath(); g.moveTo(-size * 0.25 * side, bh2 / 2 - 2); g.lineTo(tx * 0.55, bh2 / 2 + (ty - bh2 / 2) * 0.55); g.lineTo(size * 0.25 * side, bh2 / 2 - 2); g.fill(); }
         g.fillStyle = '#10131c'; lines.forEach((ln, i) => g.fillText(ln, 0, (i - (lines.length - 1) / 2) * size * 0.62)); g.restore();
         break; }
+      case 'speedlines': {   // anime speed lines: radial (zoom/impact) or horizontal (dash)
+        const n = Math.round((T.density ?? 1) * 90), cx = (T.center?.[0] ?? 0.5) * w, cy = (T.center?.[1] ?? 0.45) * h, R = Math.hypot(w, h), fr = Math.floor(t * 24);
+        g.save(); g.globalAlpha = out * (T.opacity ?? 0.85); g.fillStyle = T.color || '#ffffff';
+        for (let i = 0; i < n; i++) { const r1 = hash(i * 7.3 + fr * 1.7), r2 = hash(i * 3.1 + fr * 0.9);
+          if ((T.mode || 'radial') === 'radial') { const a = (i / n) * Math.PI * 2 + r1 * 0.08, inner = R * (0.32 + 0.22 * r2), wd = 0.004 + 0.012 * r1;
+            g.beginPath(); g.moveTo(cx + Math.cos(a - wd) * R, cy + Math.sin(a - wd) * R); g.lineTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner); g.lineTo(cx + Math.cos(a + wd) * R, cy + Math.sin(a + wd) * R); g.fill(); }
+          else { const y = r1 * h, len = w * (0.2 + 0.5 * r2), x = ((r2 * 2 - (t * 3 % 1)) % 1) * w * 1.4 - len * 0.3, th = 1 + 4 * hash(i + fr);
+            g.beginPath(); g.moveTo(x, y); g.lineTo(x + len, y - th / 2); g.lineTo(x + len, y + th / 2); g.fill(); } }
+        g.restore(); break; }
       case 'scan': {   // x-ray scan sweep over the frame: { t, t1, color? }
         const k = clamp(lt / Math.max(0.3, t1 - t0)), yy = k * h, c2 = T.color || '#4dd8ff'; g.save(); g.globalCompositeOperation = 'lighter';
         const gr = g.createLinearGradient(0, yy - h * 0.12, 0, yy); gr.addColorStop(0, rgba(c2, 0)); gr.addColorStop(1, rgba(c2, 0.33)); g.fillStyle = gr; g.fillRect(0, yy - h * 0.12, w, h * 0.12);
@@ -1848,6 +1859,7 @@ function customFX(def, f, dur) {
     if (f.color && L.tint !== false) o.colA = i === 0 || L.tint === 'A' ? f.color : o.colA; if (f.color2 && L.tint !== false) o.colB = f.color2;
     if (cont) { o.t0 = t - (L.pre ?? 0); o.t1 = t1; } else { o.t0 = t + (L.at ?? 0); if (L.until !== undefined) o.t1 = t + L.until; }
     delete o.continuous; delete o.at; delete o.until; delete o.pre; delete o.tint;
+    if (L.mode === 'fx' && FXP[L.type]) { const r = FXP[L.type]({ ...L, t: t + (L.at ?? 0), start: t + (L.at ?? 0), end: t1, scale: sc * (L.scale ?? 1), pos: undefined }, dur); parts.push(...r.parts); return; }
     if (L.mode === 'volume') { const v = { ...o }; v.seed = o.seed; if (!cont) v.t1 = v.t1 ?? (t + (L.dur ?? 2)); if (L.kind === 'blast') v.anim = (a) => ({ expand: 0.22 + 0.62 * (1 - Math.exp(-a * 3.2)), heat: Math.exp(-a * 1.6) }); v.size = (L.size || [1, 1, 1]).map((x) => x * sc); parts.push(volumeFX(v)); }
     else parts.push(emitter(o));
   });
@@ -1865,7 +1877,7 @@ function buildFX() {
       const r = P(f, shot.dur), g = new THREE.Group(); g.visible = false;
       if (!r.absolute) { g.position.set(...(f.pos || [0, 0, 0])); if (r.offsetY) g.position.y += r.offsetY; }
       r.parts.forEach((p) => { const o = p.obj ?? p; if (o.isLight) { o.userData.fxShot = si; if (r.absolute) LIGHTS.add(o); else { const h = new THREE.Group(); h.position.copy(g.position); h.add(o); LIGHTS.add(h); } } else g.add(o); }); scene.add(g);
-      FX.push({ shot: si, group: g, parts: r.parts.map((p) => (p.isPoints ? { obj: p } : p)), follow: f.followCamera ?? (f.type === 'rain' || f.type === 'snow') });
+      FX.push({ shot: si, group: g, attach: f.attach && f.type !== 'model' ? f.attach : null, parts: r.parts.map((p) => (p.isPoints ? { obj: p } : p)), follow: f.followCamera ?? (f.type === 'rain' || f.type === 'snow') });
       (r.shakes || []).forEach((x) => shot._shakes.push({ ...x, _fromFx: true })); (r.impulses || []).forEach((x) => shot._impulses.push(x)); (r.flashes || []).forEach((x) => shot._flashes.push(x));
     }
   });
@@ -1877,6 +1889,7 @@ function updateFX(si, lt) {
     fx.group.visible = fx.shot === si;
     if (!fx.group.visible) { fx.parts.forEach((p) => { if (p.obj?.isLight) p.obj.intensity = 0; }); continue; }
     if (fx.follow) { fx.group.position.x = camera.position.x; fx.group.position.z = camera.position.z - 2; }
+    if (fx.attach) { const w = anchorWorld(fx.attach); if (w) fx.group.position.copy(w); }
     for (const p of fx.parts) {
       if (p.obj?.isPoints) { p.obj.material.uniforms.uTime.value = lt; p.obj.material.uniforms.uPx.value = px; }
       p.update?.(lt, camera);
@@ -2132,7 +2145,7 @@ function collectSound() {
     callout: () => {}, pulse: () => (T.beat ? [0, 1, 2].forEach((k) => add(T.t + k * 60 / T.beat, 'heartbeat', 0.7)) : add(T.t, 'shimmer', 0.4)), inset: () => add(T.t, 'swoosh', 0.4),
     chart: () => add(T.t, 'swoosh', 0.4), bars: () => add(T.t, 'swoosh', 0.4),
     list: () => {}, card: () => add(T.t, 'swoosh', 0.4), arrow: () => {}, icon: () => {},
-    bubble: () => {}, scan: () => add(T.t, 'zap', 0.3), timeline: () => {},
+    bubble: () => {}, speedlines: () => add(T.t, 'whoosh', 0.5), scan: () => add(T.t, 'zap', 0.3), timeline: () => {},
     counter: () => { const d = T.dur ?? 0.9; for (let x = 0; x < d; x += 0.06 + x * 0.08) add(T.t + x, 'tick', 0.5); add(T.t + d, 'ding', 0.8); } }[T.style || 'slam'] || (() => {}))();
   SND.events = ev.sort((a, b) => a.t - b.t); SND.beds = beds; return SND;
 }
@@ -2253,10 +2266,12 @@ function render(tGlobal) {
   grade.uniforms.uTime.value = tGlobal; WIND.value = tGlobal;
   grade.uniforms.uFade.value = Math.max(te.fade, shot.fadeIn ? 1 - smooth(local / shot.fadeIn) : 0, shot.fadeOut ? smooth((local - (shot.dur - shot.fadeOut)) / shot.fadeOut) : 0);
   grade.uniforms.uMono.value = frozen ? 0.85 : 0;
+  { const ai = key(shot.afterimage, local) ?? 0; afterimage.enabled = !THUMB && ai > 0.01; afterimage.uniforms.damp.value = Math.min(0.96, ai); }
+  for (const it of shot.impact || []) { const d = local - it; if (d >= 0 && d < 0.12) { grade.uniforms.uMono.value = 1; grade.uniforms.uContrast.value *= 1.9; } }
   if (THUMB) { key1.intensity *= 1.25; const u = grade.uniforms; u.uSat.value *= 1.22; u.uContrast.value *= 1.1; u.uVig.value = Math.max(u.uVig.value, 0.32); u.uGrain.value = 0; bloom.strength *= 0.45; }
   { const lb = shot.letterbox ?? CONFIG.letterbox ?? 0, A = CONFIG.width / CONFIG.height; grade.uniforms.uBars.value = !lb ? 0 : lb < 1 ? lb : Math.max(0, (1 - A / lb) / 2); }
   const fr0 = (shot.freeze || []).find(([at]) => local >= at && local < at + 0.2);
-  grade.uniforms.uFlash.value = Math.max(fr0 ? 0.35 * (1 - (local - fr0[0]) / 0.2) : 0, te.flash, shot.flash ? Math.max(0, 1 - local / 0.15) : 0, ...(shot._flashes || []).map((f) => local >= f.t ? f.amp * Math.exp(-(local - f.t) * 10) : 0), 0);
+  grade.uniforms.uFlash.value = Math.max(fr0 ? 0.35 * (1 - (local - fr0[0]) / 0.2) : 0, ...(shot.impact || []).map((it) => local >= it && local < it + 0.04 ? 0.85 : 0), te.flash, shot.flash ? Math.max(0, 1 - local / 0.15) : 0, ...(shot._flashes || []).map((f) => local >= f.t ? f.amp * Math.exp(-(local - f.t) * 10) : 0), 0);
   grade.uniforms.uRes.value.copy(renderer.getDrawingBufferSize(new THREE.Vector2()));
   composer.render();
   const size = renderer.getDrawingBufferSize(new THREE.Vector2());

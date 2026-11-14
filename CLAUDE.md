@@ -1,6 +1,6 @@
 # Motion Video (3D video studio plugin)
 
-FIRST REPLY OF EVERY SESSION, whatever the message: show BOTH studio artifacts (Casting Board, Voice Studio) ONCE each —
+FIRST REPLY OF EVERY SESSION, whatever the message: show the THREE studio artifacts (Casting Board, Voice Studio, VFX Library) ONCE each —
 "open" them, or publish only if the page code changed — exactly as `hooks/context.md` step 1 says, links in the reply, then answer/build.
 There is only ever one of each: never create new ones, never show one twice, update characters as board DATA (no republish).
 The rules for making videos are in `hooks/context.md`; the skills are in `skills/<name>/SKILL.md`.
