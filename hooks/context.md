@@ -57,8 +57,8 @@ ALWAYS:
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
 - 10 CHECKS: no video reaches the user until all 10 checks in skills/quality-review PASS (auto checker + eyes + ears).
-- ORDERS: every message, re-read the user's previous 3 messages (the hook shows them) and make sure every request is handled. If the user asks
-  to check more/fewer, write {"count": N} to .motion-forge/recall.json.
+- SAVE USAGE: keep .motion-forge/state.md short and current (video in progress, files, decisions, the user's standing orders). A new chat
+  reads it first and continues from there, so the user can start fresh chats often (old chats re-send their whole history every message).
 - REPLIES: absolute respect. Short, direct. NO summaries, no recaps, no "what I did" lists. Only what the user must know or decide + links.
 - TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
 - FINAL MESSAGE = the link (or MP4) + one line + the publish pack (or the Good/High/Epic question). Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
