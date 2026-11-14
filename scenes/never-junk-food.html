@@ -43,139 +43,176 @@ const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a871
 
 const CONFIG = {
   width: 1080, height: 1920, fps: 30,
-  look: 'clean-cg', set: 'studio', captionY: 0.76,
-  sound: { music: { mood: 'upbeat', bpm: 128, drops: [17.6] }, sfx: true, ambience: true },
+  look: 'clean-cg', set: 'studio', captionY: 0.87,
+  sound: { music: { mood: 'upbeat', bpm: 120, drops: [18.3] }, sfx: true, ambience: true },
   letterbox: 0,
   animations: [['models/Xbot.glb', LIB + 'Xbot.glb'], kit('animations/ual-starter.glb')],
 };
-
 const CAST = {
   hero: { actor: 'jake', height: 1.80, wardrobe: { top: '#7ed321', bottom: '#2a3140', shoes: null, print: false }, skin: 'medium', hair: '#22160e' },
 };
 
-const HEAD = [0, 1.62, 0];
+// One consistent explainer framing: hero waist-up in the lower half, info panel in the upper half.
+const CAM = (dur, side = 0, d0 = 2.45, d1 = 2.2) => ({ pos: [[0, [side, 1.52, d0]], [dur, [side * 0.85, 1.52, d1], 'inOutSine']], look: [[0, [side * 0.15, 1.8, 0]]], fov: 32 });
+const idle = (d) => [{ clip: 'idle', start: 0, end: d }];
+
 const SHOTS = [
-  // 0 HOOK — burger slams in, crash zoom
-  { name: 'Hook', dur: 1.1, punch: [0.05],
-    camera: { move: 'crash-zoom', target: 'hero', size: 'ms', at: 0.05, az: 18, with: [0.45, 1.3, 0.55] },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.1 }], look: [[0, [0.45, 1.45, 0.5]]],
-      face: { shock: [[0, 0.3], [0.2, 1, 'outBack']] }, gestures: [{ type: 'handsup', start: 0, end: 1.1, amount: 0.7 }], talk: [[0.05, 1.0]] } },
-    fx: [{ type: 'prop', kind: 'burger', pos: [0.45, 1.25, 0.55], scale: 1.6, spin: 2.2, p: [[0, [0, 0.6, 0]], [0.3, [0, 0, 0], 'outBack']] }] },
-  // 1 ANSWER FAST — burger explodes in macro
-  { name: 'Smash', dur: 1.0, cut: 'smash', look: 'cinematic',
-    camera: { move: 'push', target: [0.45, 1.35, 0.55], size: 1.1, az: 10 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1 }] } },
-    fx: [{ type: 'prop', kind: 'burger', pos: [0.45, 1.25, 0.55], scale: 1.6, spin: 1.5, burst: 0.35, end: 0.95 },
-         { type: 'explosion', t: 0.35, pos: [0.45, 1.3, 0.55], scale: 0.18 }, { type: 'sparks', t: 0.35, pos: [0.45, 1.3, 0.55], scale: 0.4 }, { type: 'shockwave', t: 0.35, pos: [0.45, 1.3, 0.55], scale: 0.4 }] },
-  // 2 DAY 1 — junk orbits his head, he shakes it off
-  { name: 'Day1', dur: 1.6, cut: 'whip', set: 'interior', look: 'warm-film',
-    camera: { move: 'dutch', target: 'hero', size: 'mcu', az: 20, roll: 0.2 },
-    cast: { hero: { clips: [{ clip: 'headshake', start: 0, end: 1.6 }], look: [[0, [0.6, 1.8, 0.5]], [0.8, 'camera', 'outCubic']],
-      face: { angry: [[0, 0.3], [0.5, 0.9]] }, talk: [[0.2, 1.5]] } },
-    fx: [{ type: 'prop', kind: 'donut', pos: [0.32, 1.82, 0.3], scale: 1.1, spin: 3, p: [[0, [0, 0, 0]], [1.6, [-0.64, 0, -0.1], 'inOutSine']] },
-         { type: 'prop', kind: 'soda', pos: [-0.36, 1.6, 0.35], scale: 0.9, spin: -2.5, start: 0.15, p: [[0, [0, 0, 0]], [1.6, [0.7, 0.15, -0.2], 'inOutSine']] },
-         { type: 'prop', kind: 'fries', pos: [0.1, 2.05, 0.15], scale: 0.9, spin: 2, start: 0.3 }] },
-  // 3 DAY 3 — overhead, crouched in withdrawal
-  { name: 'Day3', dur: 1.4, cut: 'glitch', look: 'horror', set: 'interior',
-    camera: { move: 'overhead', target: 'hero', size: 'mls' },
-    cast: { hero: { clips: [{ clip: 'crouch', start: 0, end: 1.4 }], face: { sad: [[0, 0.9]] }, gestures: [{ type: 'facepalm', start: 0, end: 1.4 }] } },
-    fx: [{ type: 'sparks', t: 0.2, pos: [0, 1.0, 0], scale: 0.3 }] },
-  // 4 WEEK 1 — brain resets dopamine (low hero)
-  { name: 'Week1', dur: 1.6, cut: 'zoom', set: 'lab', look: 'neon-night',
-    camera: { move: 'push', target: [0.25, 1.75, 0.2], size: 0.9, az: -15 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, [0.45, 1.85, 0.4]]], face: { smile: [[0.6, 0], [1.1, 0.7]] },
-      gestures: [{ type: 'think', start: 0.1, end: 1.5 }] } },
-    fx: [{ type: 'prop', kind: 'brain', pos: [0.45, 1.85, 0.4], scale: 1.4, spin: 1.2, pulse: 120 }] },
-  // 5 WEEK 2 — apple tastes like candy
-  { name: 'Week2', dur: 1.6, cut: 'whip', set: 'interior', look: 'warm-film',
-    camera: { move: 'orbit', target: 'hero', size: 'mcu', span: 70, az: 15 },
-    cast: { hero: { clips: [{ clip: 'agree', start: 0, end: 1.6 }], look: [[0, [0.35, 1.45, 0.45]], [0.9, 'camera', 'outCubic']],
-      face: { smile: [[0, 0.2], [0.5, 1, 'outBack']] }, gestures: [{ type: 'present', start: 0, end: 1.5, side: 'right' }], talk: [[0.4, 1.5]] } },
-    fx: [{ type: 'prop', kind: 'apple', pos: [0.35, 1.3, 0.45], scale: 1.3, spin: 2 }, { type: 'sparks', t: 0.1, pos: [0.35, 1.4, 0.45], scale: 0.3 },
-         { type: 'prop', kind: 'broccoli', pos: [-0.4, 1.35, 0.35], scale: 1.2, spin: -2, start: 0.3 }] },
-  // 6 MONTH 1 — sprinting, tracking
-  { name: 'Month1', dur: 1.8, cut: 'zoom', set: 'city-day', look: 'golden-hour',
-    camera: { move: 'track', target: 'hero', size: 'ws', side: 'right' },
-    cast: { hero: { pos: [[0, [0, 0, -5]], [1.8, [0, 0, 5], 'linear']], rotY: [[0, 0]], clips: [{ clip: 'sprint', start: 0, end: 1.8, loop: true }], face: { smile: [[0, 0.8]] } } },
-    fx: [{ type: 'dust' }] },
-  // 7 MONTH 2 — backflip, freeze at apex
-  { name: 'Flip', dur: 1.6, cut: 'flash', set: 'outdoor', look: 'golden-hour', freeze: [[0.62, 0.3]],
-    camera: { pos: [[0, [4.6, 1.0, 1.2]], [1.6, [4.2, 1.1, 0.9], 'inOutSine']], look: [[0, [0, 1.3, 0]]], fov: 42 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { smile: [[0, 0.6], [0.9, 1]] },
-      pos: [[0, [0, 0, 0]], [0.22, [0, -0.2, 0], 'outCubic'], [0.62, [0, 1.25, 0], 'outCubic'], [1.0, [0, 0, 0], 'inCubic'], [1.12, [0, -0.15, 0], 'outCubic'], [1.4, [0, 0, 0], 'outBack']],
-      rotX: [[0, 0], [0.26, 0], [1.0, -Math.PI * 2, 'inOutCubic']],
-      bones: { leftupleg: [[0, [0, 0, 0]], [0.22, [1.1, 0, 0], 'outCubic'], [0.4, [0.2, 0, 0]], [0.62, [1.6, 0, 0]], [0.95, [0.2, 0, 0]], [1.12, [1.0, 0, 0]], [1.4, [0, 0, 0], 'outBack']],
-               rightupleg: [[0, [0, 0, 0]], [0.22, [1.1, 0, 0], 'outCubic'], [0.4, [0.2, 0, 0]], [0.62, [1.6, 0, 0]], [0.95, [0.2, 0, 0]], [1.12, [1.0, 0, 0]], [1.4, [0, 0, 0], 'outBack']],
-               leftleg: [[0, [0, 0, 0]], [0.22, [-1.4, 0, 0]], [0.4, [-0.2, 0, 0]], [0.62, [-2.0, 0, 0]], [0.95, [-0.2, 0, 0]], [1.12, [-1.3, 0, 0]], [1.4, [0, 0, 0], 'outBack']],
-               rightleg: [[0, [0, 0, 0]], [0.22, [-1.4, 0, 0]], [0.4, [-0.2, 0, 0]], [0.62, [-2.0, 0, 0]], [0.95, [-0.2, 0, 0]], [1.12, [-1.3, 0, 0]], [1.4, [0, 0, 0], 'outBack']],
-               leftarm: [[0, [0, 0, 0]], [0.22, [-0.8, 0, 0.6]], [0.45, [0, 0, 2.6], 'outCubic'], [1.1, [0, 0, 0.4]], [1.4, [0, 0, 0]]],
-               rightarm: [[0, [0, 0, 0]], [0.22, [-0.8, 0, -0.6]], [0.45, [0, 0, -2.6], 'outCubic'], [1.1, [0, 0, -0.4]], [1.4, [0, 0, 0]]] } } },
-    fx: [{ type: 'dust', t: 1.05, pos: [0, 0, 0] }, { type: 'shockwave', t: 1.05, pos: [0, 0.05, 0], scale: 0.6 }] },
-  // 8 MONTH 3 — glow-up
-  { name: 'Month3', dur: 1.5, cut: 'spin', look: 'warm-film', set: 'studio',
-    camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 25 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.5 }], look: [[0, [1, 1.7, 1]], [0.4, 'camera', 'outCubic']],
-      face: { smirk: [[0, 0], [0.5, 1, 'outBack']] }, gestures: [{ type: 'wave', start: 0.6, end: 1.5 }], talk: [[0.3, 1.4]] } },
-    fx: [{ type: 'sparks', t: 0.5, pos: [0.3, 1.8, 0.3], scale: 0.25 }] },
-  // 9 MONTH 6 — heart beating, BP counter
-  { name: 'Month6', dur: 1.8, cut: 'glitch', set: 'lab', look: 'cinematic',
-    camera: { move: 'orbit', target: 'hero', size: 'ms', az: 25, span: 30, with: [0.55, 1.45, 0.45] },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.8 }], look: [[0, [0.55, 1.45, 0.45]], [1.0, 'camera', 'outCubic']], face: { smile: [[0, 0.3], [1.0, 0.8]] }, gestures: [{ type: 'point', start: 0.3, end: 1.7 }] } },
-    fx: [{ type: 'prop', kind: 'heart', pos: [0.55, 1.45, 0.45], scale: 1.5, spin: 0.6, bob: 0.02, pulse: 72 }] },
-  // 10 YEAR 1 — dance, crane up
-  { name: 'Year1', dur: 1.8, cut: 'flash', look: 'golden-hour', set: 'outdoor',
-    camera: { move: 'crane-up', target: 'hero', size: 'mls', az: -30 },
-    cast: { hero: { clips: [{ clip: 'dance', start: 0, end: 1.8 }], look: [[0, 'camera']], face: { smile: [[0, 1]] } } },
-    fx: [{ type: 'embers' }, { type: 'sparks', t: 0.1, pos: [0, 2.2, 0], scale: 0.6 }] },
-  // 11 TWIST — smash to black/white, burger is back
-  { name: 'Twist', dur: 1.3, cut: 'smash', look: 'noir', set: 'studio', letterbox: 0.06,
-    camera: { move: 'reveal', target: 'hero', size: 'mcu', az: 30, with: [0.5, 1.35, 0.6] },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.3 }], look: [[0, 'camera'], [0.6, [0.5, 1.35, 0.6], 'outCubic']], face: { worried: [[0, 0.6]] }, talk: [[0.05, 1.2]] } },
-    fx: [{ type: 'prop', kind: 'burger', pos: [0.5, 1.3, 0.6], scale: 1.6, spin: 1.5, start: 0.5 }] },
-  // 12 PAYOFF — disgust, pushes it away, burger dissolves
-  { name: 'Payoff', dur: 1.7, cut: 'zoom', look: 'clean-cg', set: 'studio',
-    camera: { move: 'crash-zoom', target: 'hero', size: 'ms', at: 0.15, az: 20, with: [0.5, 1.3, 0.6] },
-    cast: { hero: { clips: [{ clip: 'headshake', start: 0, end: 1.7 }], look: [[0, [0.5, 1.35, 0.6]], [0.9, 'camera', 'outCubic']],
-      face: { disgust: [[0, 0], [0.2, 1, 'outBack'], [1.0, 0.2]], smirk: [[1.0, 0], [1.3, 1]] }, gestures: [{ type: 'shield', start: 0.1, end: 1.0, side: 'right' }], talk: [[0.2, 1.6]] } },
-    fx: [{ type: 'prop', kind: 'burger', pos: [0.5, 1.3, 0.6], scale: 1.6, spin: 1.5, burst: 0.55, end: 1.3, p: [[0, [0, 0, 0]], [0.55, [0.3, 0.05, -0.2], 'outCubic']] }, { type: 'sparks', t: 0.55, pos: [0.75, 1.35, 0.4], scale: 0.4 }] },
-  // 13 LOOP CTA
-  { name: 'Loop', dur: 1.4, fadeOut: 0.15,
-    camera: { move: 'push', target: 'hero', size: 'cu', az: -10 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.4 }], look: [[0, 'camera']], face: { smirk: [[0, 0.8]] }, gestures: [{ type: 'point', start: 0, end: 1.4 }], talk: [[0.1, 1.3]] } } },
+  { name: 'Hook', dur: 1.3, punch: [0.5],
+    camera: { pos: [[0, [0, 1.45, 1.6]], [1.3, [0, 1.45, 1.35], 'outCubic']], look: [[0, [0, 1.47, 0.45]]], fov: 32 },
+    cast: { hero: { clips: idle(1.3), look: [[0, [0, 1.45, 0.45]]], face: { shock: [[0.45, 0], [0.6, 1, 'outBack']] } } },
+    fx: [{ type: 'prop', kind: 'burger', pos: [0, 1.36, 0.45], scale: 1.0, spin: 1.6, bob: 0.01 }] },
+  { name: 'Cravings', dur: 2.4, camera: CAM(2.4, -0.35),
+    cast: { hero: { clips: [{ clip: 'headshake', start: 0, end: 1.5 }, { clip: 'idle', start: 1.5, end: 2.4 }],
+      look: [[0, [0.6, 1.4, 0.4]], [0.9, 'camera', 'outCubic']], face: { worried: [[0, 0.5], [0.6, 0.9]], angry: [[1.2, 0.4]] },
+      gestures: [{ type: 'facepalm', start: 1.3, end: 2.4 }], talk: [[0.1, 2.3]] } },
+    fx: [{ type: 'prop', kind: 'donut', pos: [0.62, 1.38, 0.35], scale: 1.1, spin: 2 }, { type: 'prop', kind: 'soda', pos: [-0.62, 1.25, 0.35], scale: 1.0, spin: -1.6, start: 0.2 }] },
+  { name: 'Taste', dur: 2.4, cut: 'whip', set: 'interior', camera: CAM(2.4, 0.35),
+    cast: { hero: { clips: idle(2.4), look: [[0, [0.38, 1.45, 0.4]], [1.2, 'camera', 'outCubic']], face: { smile: [[0.4, 0], [1.0, 0.9, 'outBack']] },
+      gestures: [{ type: 'present', start: 0, end: 2.3, side: 'right' }], talk: [[0.9, 2.3]] } },
+    fx: [{ type: 'prop', kind: 'apple', pos: [0.4, 1.38, 0.42], scale: 1.2, spin: 1.2 }] },
+  { name: 'Energy', dur: 2.4, set: 'city-day',
+    camera: { pos: [[0, [2.6, 1.5, -3]], [2.4, [2.6, 1.5, 3]]], look: [[0, [0, 1.95, -3]], [2.4, [0, 1.95, 3]]], fov: 34 },
+    cast: { hero: { pos: [[0, [0, 0, -3]], [2.4, [0, 0, 3]]], rotY: [[0, 0]], clips: [{ clip: 'jog', start: 0, end: 2.4, loop: true }], face: { smile: [[0, 0.7]] } } } },
+  { name: 'Fat', dur: 2.6, cut: 'zoom', camera: CAM(2.6, -0.3),
+    cast: { hero: { clips: idle(2.6), look: [[0, 'camera']], face: { smile: [[0, 0.3], [1.4, 0.8]] },
+      gestures: [{ type: 'explain', start: 0.2, end: 2.5 }], talk: [[0.1, 2.5]] } } },
+  { name: 'Sleep', dur: 2.4, set: 'interior', camera: CAM(2.4, 0.3, 2.3, 2.05),
+    cast: { hero: { clips: idle(2.4), look: [[0, [-0.8, 1.9, 1]], [0.7, 'camera', 'outCubic']], face: { smirk: [[0.5, 0], [1.0, 0.9]] },
+      gestures: [{ type: 'count', start: 0.4, end: 2.3 }], talk: [[0.2, 2.3]] } } },
+  { name: 'BP', dur: 2.4, cut: 'whip', set: 'lab', camera: CAM(2.4, 0.35),
+    cast: { hero: { clips: idle(2.4), look: [[0, [0.24, 1.48, 0.55]], [1.3, 'camera', 'outCubic']], face: { smile: [[0.8, 0], [1.4, 0.7]] },
+      gestures: [{ type: 'point', start: 0.2, end: 2.2, side: 'right' }], talk: [[1.1, 2.3]] } },
+    fx: [{ type: 'prop', kind: 'heart', pos: [0.24, 1.48, 0.55], scale: 1.0, spin: 0.5, pulse: 70 }] },
+  { name: 'Year', dur: 2.6, set: 'outdoor', look: 'golden-hour', camera: CAM(2.6, 0.3, 2.5, 2.25),
+    cast: { hero: { clips: idle(2.6), look: [[0, 'camera']], face: { smile: [[0, 0.6], [0.8, 1]] },
+      gestures: [{ type: 'fistpump', start: 0.9, end: 2.4 }], talk: [[0.1, 2.4]] } } },
+  { name: 'Twist', dur: 2.4, cut: 'smash', camera: CAM(2.4, -0.2, 2.4, 2.15),
+    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 0.6 }, { clip: 'headshake', start: 0.6, end: 2.4 }],
+      look: [[0, [0.27, 1.32, 0.6]], [1.5, 'camera', 'outCubic']], face: { disgust: [[0.4, 0], [0.6, 1, 'outBack'], [1.6, 0.2]], smirk: [[1.6, 0], [1.9, 1]] },
+      talk: [[0.6, 2.3]] } },
+    fx: [{ type: 'prop', kind: 'burger', pos: [0.27, 1.3, 0.6], scale: 1.1, spin: 1.2, burst: 1.45, end: 2.1 }, { type: 'sparks', t: 1.45, pos: [0.27, 1.32, 0.6], scale: 0.3 }] },
+  { name: 'CTA', dur: 1.8, fadeOut: 0.15, camera: CAM(1.8, 0, 2.1, 1.9),
+    cast: { hero: { clips: idle(1.8), look: [[0, 'camera']], face: { smirk: [[0, 0.8]] }, gestures: [{ type: 'point', start: 0, end: 1.8 }], talk: [[0.1, 1.6]] } } },
 ];
 const ST = SHOTS.reduce((a, s) => (a.push(a[a.length - 1] + s.dur), a), [0]);
 const at = (i, o = 0) => +(ST[i] + o).toFixed(2);
 
+/* ---------- infographic kit (drawn into the video) ---------- */
+const INK = { panel: 'rgba(10,14,24,0.8)', line: 'rgba(255,255,255,0.16)', red: '#ff4d4d', green: '#7ed321', yellow: '#ffd23f', dim: 'rgba(255,255,255,0.7)' };
+const E = (x) => EASE.outCubic(clamp(x)), mix = (a, b, k) => a + (b - a) * k;
+const lerpCol = (k) => `rgb(${Math.round(mix(255, 126, k))},${Math.round(mix(77, 211, k))},${Math.round(mix(77, 33, k))})`;
+function panel(g, lt, c, title, draw) {
+  const { w, h, S } = c, x = 0.06 * w, y = 0.115 * h, W = 0.88 * w, H = 0.33 * h, k = EASE.outBack(clamp(lt / 0.35));
+  g.save(); g.globalAlpha *= clamp(lt / 0.18); g.translate(x + W / 2, y + H / 2); g.scale(0.88 + 0.12 * k, 0.88 + 0.12 * k); g.translate(-(x + W / 2), -(y + H / 2));
+  roundRect(g, x, y, W, H, S * 0.04); g.fillStyle = INK.panel; g.fill(); g.lineWidth = S * 0.004; g.strokeStyle = INK.line; g.stroke();
+  g.textAlign = 'left'; g.font = `900 ${S * 0.066}px ${FONT}`; g.fillStyle = INK.yellow; g.fillText(title, x + W * 0.06, y + H * 0.12);
+  draw({ x, y, W, H, S }); g.restore();
+}
+function text(g, s, x, y, size, col = '#fff', align = 'left', weight = 800) { g.textAlign = align; g.font = `${weight} ${size}px ${FONT}`; g.fillStyle = col; g.fillText(s, x, y); }
+function bar(g, x, y, W, H, v, col, label, val) {
+  roundRect(g, x, y, W, H, H / 2); g.fillStyle = 'rgba(255,255,255,0.1)'; g.fill();
+  if (v > 0.005) { roundRect(g, x, y, Math.max(H, W * v), H, H / 2); g.fillStyle = col; g.fill(); }
+  if (label) text(g, label, x, y - H * 0.75, H * 0.75, INK.dim, 'left', 800);
+  if (val) text(g, val, x + W, y - H * 0.75, H * 0.8, col, 'right', 900);
+}
+function arrow(g, x, y, s, dir, col) {   // dir: 1 down, -1 up, 'l'/'r' horizontal
+  g.save(); g.translate(x, y); if (dir === 'l') g.rotate(Math.PI / 2); else if (dir === 'r') g.rotate(-Math.PI / 2); else if (dir === -1) g.rotate(Math.PI);
+  g.beginPath(); g.moveTo(-s * 0.22, -s * 0.5); g.lineTo(s * 0.22, -s * 0.5); g.lineTo(s * 0.22, 0); g.lineTo(s * 0.5, 0); g.lineTo(0, s * 0.5); g.lineTo(-s * 0.5, 0); g.lineTo(-s * 0.22, 0); g.closePath();
+  g.fillStyle = col; g.fill(); g.restore();
+}
+const GFX = {
+  no(g, lt, c) {   // hook: red NO sign slams over the burger
+    const k = EASE.outBack(clamp((lt - 0.45) / 0.22)); if (k <= 0) return; const r = c.w * 0.36 * (2 - k), X = c.w / 2, Y = c.h * 0.5;
+    g.save(); g.globalAlpha *= clamp((lt - 0.45) / 0.1); g.lineWidth = c.w * 0.055; g.strokeStyle = INK.red; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 20;
+    g.beginPath(); g.arc(X, Y, r, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.moveTo(X - r * 0.7, Y - r * 0.7); g.lineTo(X + r * 0.7, Y + r * 0.7); g.stroke(); g.restore();
+  },
+  timeline(g, lt, c) {   // progress through the year, top of frame
+    const { w, h, S } = c, x = 0.1 * w, W = 0.8 * w, y = 0.062 * h, p = clamp(lt / (at(8) - at(1)));
+    g.save(); g.globalAlpha *= clamp(lt / 0.3);
+    roundRect(g, x, y - S * 0.007, W, S * 0.014, S * 0.007); g.fillStyle = 'rgba(0,0,0,.45)'; g.fill();
+    roundRect(g, x, y - S * 0.007, W * p, S * 0.014, S * 0.007); g.fillStyle = INK.green; g.fill();
+    g.beginPath(); g.arc(x + W * p, y, S * 0.018, 0, 7); g.fillStyle = '#fff'; g.fill();
+    text(g, 'DAY 1', x, y - S * 0.035, S * 0.03, '#fff', 'left', 900); text(g, '1 YEAR', x + W, y - S * 0.035, S * 0.03, '#fff', 'right', 900); g.restore();
+  },
+  cravings: (g, lt, c) => panel(g, lt, c, 'CRAVING LEVEL', ({ x, y, W, H, S }) => {
+    [['SUGAR', 0.96], ['SALT', 0.82], ['FAT', 0.88]].forEach(([n, v], i) => {
+      const k = E((lt - 0.25 - i * 0.12) / 0.55), j = k >= 1 ? Math.sin(lt * 45 + i) * 0.015 : 0;
+      bar(g, x + W * 0.06, y + H * (0.36 + i * 0.2), W * 0.88, H * 0.075, v * k + j, INK.red, n, Math.round(v * k * 100) + '%');
+    });
+    text(g, 'Your brain is begging for its sugar hit', x + W / 2, y + H * 0.92, S * 0.042, INK.dim, 'center', 700);
+  }),
+  taste: (g, lt, c) => panel(g, lt, c, 'TASTE BUDS RESET', ({ x, y, W, H, S }) => {
+    bar(g, x + W * 0.06, y + H * 0.38, W * 0.88, H * 0.09, 0.3 * E((lt - 0.2) / 0.4), '#9aa3b2', 'APPLE SWEETNESS · BEFORE', '30%');
+    const k = E((lt - 0.7) / 0.8); bar(g, x + W * 0.06, y + H * 0.64, W * 0.88, H * 0.09, mix(0.3, 0.9, k) * E((lt - 0.5) / 0.3), INK.green, 'APPLE SWEETNESS · NOW', Math.round(mix(30, 90, k)) + '%');
+    text(g, 'Taste cells renew every ~2 weeks', x + W / 2, y + H * 0.9, S * 0.042, INK.dim, 'center', 700);
+  }),
+  energy: (g, lt, c) => panel(g, lt, c, 'YOUR ENERGY', ({ x, y, W, H, S }) => {
+    const gx = x + W * 0.07, gw = W * 0.86, gy = y + H * 0.24, gh = H * 0.56;
+    g.strokeStyle = INK.line; g.lineWidth = S * 0.003; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx, gy + gh); g.lineTo(gx + gw, gy + gh); g.stroke();
+    const junk = (u) => 0.42 + [0.15, 0.5, 0.82].reduce((a, m) => a + 0.5 * Math.exp(-(((u - m) / 0.035) ** 2)) - 0.32 * Math.exp(-(((u - m - 0.1) / 0.045) ** 2)), 0);
+    const clean = (u) => 0.68 + 0.025 * Math.sin(u * 14);
+    const line = (fn, p, col, wdt) => { g.beginPath(); for (let i = 0; i <= 120 * p; i++) { const u = i / 120, X = gx + gw * u, Y = gy + gh * (1 - clamp(fn(u))); i ? g.lineTo(X, Y) : g.moveTo(X, Y); } g.strokeStyle = col; g.lineWidth = wdt; g.lineJoin = 'round'; g.stroke(); };
+    line(junk, E((lt - 0.2) / 0.8), INK.red, S * 0.009); line(clean, E((lt - 0.9) / 0.9), INK.green, S * 0.013);
+    if (lt > 0.75) text(g, 'SUGAR CRASH', gx + gw * 0.6, gy + gh * 0.93, S * 0.028, INK.red, 'center', 900);
+    text(g, '● JUNK FOOD', gx, y + H * 0.9, S * 0.032, INK.red, 'left', 900); if (lt > 0.9) text(g, '● NOW: STEADY', gx + gw, y + H * 0.9, S * 0.032, INK.green, 'right', 900);
+  }),
+  fat: (g, lt, c) => panel(g, lt, c, 'BELLY FAT', ({ x, y, W, H, S }) => {
+    const cx = x + W * 0.27, cy = y + H * 0.56, k = E((lt - 0.5) / 1.4);
+    g.fillStyle = 'rgba(255,255,255,0.18)'; g.beginPath(); g.arc(cx, cy - H * 0.3, H * 0.075, 0, 7); g.fill();
+    roundRect(g, cx - H * 0.13, cy - H * 0.2, H * 0.26, H * 0.48, H * 0.1); g.fill();
+    g.save(); g.globalAlpha *= 0.9; g.fillStyle = INK.yellow; g.beginPath(); g.ellipse(cx, cy + H * 0.06, H * mix(0.22, 0.1, k), H * mix(0.15, 0.08, k), 0, 0, 7); g.fill(); g.restore();
+    const ax = H * mix(0.36, 0.2, k); arrow(g, cx - ax, cy + H * 0.06, H * 0.12, 'r', INK.green); arrow(g, cx + ax, cy + H * 0.06, H * 0.12, 'l', INK.green);
+    text(g, 'VISCERAL FAT', x + W * 0.53, y + H * 0.34, S * 0.04, '#fff', 'left', 900);
+    text(g, 'the fat around', x + W * 0.53, y + H * 0.46, S * 0.032, INK.dim, 'left', 700); text(g, 'your organs', x + W * 0.53, y + H * 0.56, S * 0.032, INK.dim, 'left', 700);
+    if (lt > 0.6) { arrow(g, x + W * 0.6, y + H * 0.76, H * 0.16, 1, INK.green); text(g, 'SHRINKS', x + W * 0.68, y + H * 0.77, S * 0.048, INK.green, 'left', 900); }
+  }),
+  sleep: (g, lt, c) => panel(g, lt, c, 'BODY UPGRADES', ({ x, y, W, H, S }) => {
+    const ix = x + W * 0.1, r = H * 0.07;
+    g.fillStyle = INK.yellow; g.beginPath(); g.arc(ix, y + H * 0.42, r, 0, 7); g.fill(); g.fillStyle = INK.panel; g.beginPath(); g.arc(ix + r * 0.5, y + H * 0.38, r * 0.85, 0, 7); g.fill();
+    const k1 = E((lt - 0.3) / 0.9); bar(g, x + W * 0.22, y + H * 0.42, W * 0.7, H * 0.08, mix(0.4, 0.92, k1), INK.green, 'DEEP SLEEP', '▲');
+    const sy = y + H * 0.74; g.fillStyle = '#9fe8ff'; g.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * 0.3 : r; g.lineTo(ix + Math.cos(a) * rr, sy + Math.sin(a) * rr); } g.fill();
+    const k2 = E((lt - 0.8) / 0.9); bar(g, x + W * 0.22, sy, W * 0.7, H * 0.08, mix(0.85, 0.25, k2), lerpCol(k2), 'SKIN INFLAMMATION', '▼');
+  }),
+  bp: (g, lt, c) => panel(g, lt, c, 'BLOOD PRESSURE', ({ x, y, W, H, S }) => {
+    const cx = x + W / 2, cy = y + H * 0.72, r = H * 0.4;
+    [[INK.green, Math.PI, Math.PI * 1.4], [INK.yellow, Math.PI * 1.4, Math.PI * 1.65], [INK.red, Math.PI * 1.65, Math.PI * 2]].forEach(([col, a0, a1]) => {
+      g.beginPath(); g.arc(cx, cy, r, a0 + 0.02, a1 - 0.02); g.strokeStyle = col; g.lineWidth = S * 0.04; g.stroke(); });
+    const k = EASE.outElastic ? EASE.inOutCubic(clamp((lt - 0.5) / 1.2)) : clamp(lt - 0.5), ang = Math.PI * mix(1.85, 1.2, k) + Math.sin(lt * 20) * 0.01;
+    g.strokeStyle = '#fff'; g.lineWidth = S * 0.012; g.lineCap = 'round'; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(ang) * r * 0.85, cy + Math.sin(ang) * r * 0.85); g.stroke();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, cy, S * 0.02, 0, 7); g.fill();
+    text(g, 'HEALTHY', cx - r, cy + H * 0.13, S * 0.03, INK.green, 'center', 900); text(g, 'HIGH', cx + r, cy + H * 0.13, S * 0.03, INK.red, 'center', 900);
+  }),
+  risk: (g, lt, c) => panel(g, lt, c, 'DISEASE RISK', ({ x, y, W, H, S }) => {
+    [['HEART DISEASE', 0.38], ['TYPE 2 DIABETES', 0.3], ['STROKE', 0.42]].forEach(([n, v], i) => {
+      const k = E((lt - 0.5 - i * 0.15) / 0.9); bar(g, x + W * 0.06, y + H * (0.36 + i * 0.22), W * 0.88, H * 0.075, mix(0.85, v, k), lerpCol(k), n, k > 0.05 ? '▼' : '');
+    });
+  }),
+  crave0: (g, lt, c) => panel(g, lt, c, 'JUNK FOOD CRAVINGS', ({ x, y, W, H, S }) => {
+    const k = E((lt - 0.4) / 1.3), v = 1 - k;
+    text(g, Math.round(v * 100) + '%', x + W / 2, y + H * 0.45, S * 0.14, lerpCol(k), 'center', 900);
+    bar(g, x + W * 0.06, y + H * 0.76, W * 0.88, H * 0.09, v, lerpCol(k), '', '');
+  }),
+};
+const D = (i, fn, o0 = 0.05, o1 = -0.05) => ({ t: at(i, o0), t1: at(i + 1, o1), style: 'draw', draw: GFX[fn] });
+
 const CAPTIONS = [
-  { t: at(0, 0.05), text: 'NEVER EAT JUNK FOOD?', hi: ['NEVER'] },
-  { t: at(1, 0.1), text: 'YOUR BODY REBOOTS IN DAYS', hi: ['REBOOTS'] },
-  { t: at(2, 0.05), text: 'CRAVINGS GO CRAZY', hi: ['CRAZY'] },
-  { t: at(3, 0.05), text: 'HEADACHES. BRAIN FOG.', hi: ['HEADACHES.'] },
-  { t: at(4, 0.05), text: 'DOPAMINE RESETS', hi: ['DOPAMINE'] },
-  { t: at(5, 0.05), text: 'FRUIT TASTES LIKE CANDY', hi: ['CANDY'] },
-  { t: at(6, 0.05), text: 'STEADY ENERGY ALL DAY', hi: ['ENERGY'] },
-  { t: at(7, 0.05), text: 'THE FAT STARTS DROPPING', hi: ['FAT'] },
-  { t: at(8, 0.05), text: 'CLEARER SKIN', hi: ['SKIN'] },
-  { t: at(9, 0.05), text: 'BLOOD PRESSURE DROPS', hi: ['DROPS'] },
-  { t: at(10, 0.05), text: 'HEART RISK PLUMMETS', hi: ['PLUMMETS'] },
-  { t: at(11, 0.05), text: 'BUT THE CRAZIEST PART?', hi: ['CRAZIEST'] },
-  { t: at(12, 0.1), text: "YOU STOP WANTING IT", hi: ['STOP'] },
-  { t: at(13, 0.05), text: 'COULD YOU DO IT?', hi: ['YOU'] },
+  { t: at(0, 0.05), text: 'NEVER EAT JUNK FOOD AGAIN?', hi: ['NEVER'] },
+  { t: at(1, 0.05), text: 'DAYS 1–3: INSANE CRAVINGS', hi: ['CRAVINGS'] },
+  { t: at(2, 0.05), text: 'WEEK 2: FRUIT TASTES LIKE CANDY', hi: ['CANDY'] },
+  { t: at(3, 0.05), text: 'WEEK 3: NO MORE SUGAR CRASHES', hi: ['CRASHES'] },
+  { t: at(4, 0.05), text: 'MONTH 1: BELLY FAT SHRINKS', hi: ['SHRINKS'] },
+  { t: at(5, 0.05), text: 'MONTH 3: DEEPER SLEEP, CLEARER SKIN', hi: ['SLEEP,', 'SKIN'] },
+  { t: at(6, 0.05), text: 'MONTH 6: BLOOD PRESSURE DROPS', hi: ['DROPS'] },
+  { t: at(7, 0.05), text: '1 YEAR: DISEASE RISK FALLS', hi: ['FALLS'] },
+  { t: at(8, 0.05), text: 'AND THE CRAZY PART? YOU STOP WANTING IT', hi: ['STOP'] },
+  { t: at(9, 0.05), text: 'COULD YOU LAST 1 YEAR?', hi: ['1', 'YEAR?'] },
 ];
 const TITLES = [
-  { t: at(0), t1: at(1, 0.9), style: 'slam', text: 'ZERO\nJUNK FOOD', pos: [0.5, 0.12], size: 0.1 },
-  { t: at(1, 0.3), t1: at(1, 1.0), style: 'glitch', text: '72 HOURS', pos: [0.5, 0.3], size: 0.075 },
-  { t: at(2), t1: at(3), style: 'tag', text: 'DAY 1', pos: [0.5, 0.1], size: 0.08 },
-  { t: at(3), t1: at(4), style: 'glitch', text: 'SUGAR\nWITHDRAWAL', pos: [0.5, 0.13], size: 0.08 },
-  { t: at(4), t1: at(5), style: 'tag', text: 'WEEK 1', pos: [0.5, 0.1], size: 0.08 },
-  
-  { t: at(5), t1: at(6), style: 'tag', text: 'WEEK 2', pos: [0.5, 0.1], size: 0.08 },
-  { t: at(6), t1: at(7), style: 'meter', text: 'ENERGY', value: 0.95, pos: [0.5, 0.12], size: 0.07, accent: '#7ed321' },
-  { t: at(7), t1: at(8), style: 'tag', text: 'MONTH 2', pos: [0.5, 0.1], size: 0.08 },
-  { t: at(8), t1: at(9), style: 'tag', text: 'MONTH 3', pos: [0.5, 0.1], size: 0.08 },
-  { t: at(9), t1: at(10), style: 'counter', text: 'BLOOD PRESSURE', from: 145, to: 118, pos: [0.5, 0.12], size: 0.08 },
-  { t: at(10), t1: at(11), style: 'stamp', text: '1 YEAR', pos: [0.5, 0.13], size: 0.11 },
-  { t: at(12), t1: at(13), style: 'counter', text: 'CRAVINGS', from: 100, to: 0, suffix: '%', pos: [0.5, 0.12], size: 0.09 },
+  { t: at(0), t1: at(1, -0.05), style: 'draw', draw: GFX.no },
+  { t: at(0, 0.05), t1: at(1, -0.1), style: 'slam', text: 'ZERO\nJUNK FOOD', pos: [0.5, 0.11], size: 0.11 },
+  { t: at(1), t1: at(8, -0.05), style: 'draw', draw: GFX.timeline },
+  D(1, 'cravings'), D(2, 'taste'), D(3, 'energy'), D(4, 'fat'), D(5, 'sleep'), D(6, 'bp'), D(7, 'risk'), D(8, 'crave0'),
+  { t: at(9, 0.05), t1: at(10), style: 'slam', text: 'COULD YOU\nLAST 1 YEAR?', pos: [0.5, 0.16], size: 0.1 },
 ];
 /* ============================== END DIRECTION ============================== */
 
@@ -606,6 +643,7 @@ function drawTitles(t, w, h) {
     const col = T.color || '#ffffff', acc = T.accent || '#ffe14d';
     g.save(); g.globalAlpha = out; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${size}px ${FONT}`;
     switch (T.style || 'slam') {
+      case 'draw': T.draw(g, lt, { w, h, S, t }); break;
       case 'slam': {
         if (t < t0) break;
         const s = 1 + 1.6 * (1 - EASE.outBack(clamp(lt / 0.18))), land = clamp((lt - 0.18) / 0.3), sh = (1 - land) * (lt > 0.18 ? 1 : 0) * size * 0.08;
