@@ -463,7 +463,7 @@ function microVessel(g, set, plaque) {
   const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), S = new THREE.Vector3(1, 1, 1), V = new THREE.Vector3();
   set.tick = (t, lvl, flow) => {
     const narrow = plaque ? 1 - 0.55 * lvl : 1, sp = 3.2 * flow * (plaque ? 0.4 + 0.6 * (1 - lvl) : 1);
-    for (let i = 0; i < N; i++) { const a = hash(i) * 6.283, r = Math.sqrt(hash(i + 7)) * RV * 0.78 * narrow, z = 6 - (((hash(i + 3) * 40 + t * sp * (0.7 + 0.5 * (1 - r / RV))) % 40)); 
+    for (let i = 0; i < N; i++) { const a = hash(i) * 6.283, r = (0.3 + 0.7 * Math.sqrt(hash(i + 7))) * RV * 0.78 * narrow, z = 6 - (((hash(i + 3) * 40 + t * sp * (0.7 + 0.5 * (1 - r / RV))) % 40)); 
       V.set(Math.cos(a) * r + Math.sin(t * .8 + i) * .05, Math.sin(a) * r + Math.cos(t * .7 + i) * .05, z); E.set(t * (0.3 + hash(i + 2)) + i, t * 0.5 * hash(i + 4) + i * 2, i); Q.setFromEuler(E);
       rbc.setMatrixAt(i, M.compose(V, Q, S.setScalar(1.3))); }
     rbc.instanceMatrix.needsUpdate = true;
@@ -2156,6 +2156,7 @@ buildFX();
   const hidden = []; scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
   if (!FAST) { try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); } }
   hidden.forEach((o) => (o.visible = false));
+  try { render(0); render(0); } catch (e) { console.warn('warm-up', e); }   // bind every clip/material once so frame 0 is never a bind pose
   status('');
   window.__mfReady = true;
   window.__mfClips = () => Object.fromEntries(Object.entries(characters).flatMap(([id, ch]) => Object.entries(clipLib).map(([k]) => { const a = clipFor(ch, k); return [id + ':' + k, +(a?.getClip().rootSpeed || 0).toFixed(2)]; })));

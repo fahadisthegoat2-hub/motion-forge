@@ -9,7 +9,8 @@ description: High-CTR thumbnails and cover frames for every finished video, rend
 the winner, at full quality. Never show drafts, comparisons, "here are 3 options" or a correction of an earlier thumbnail.
 
 ## 1. Write 4–6 variants into the scene (`const THUMBS = [...]` in the DIRECTION block)
-`{ shot, t, text, hi, accent, sub, face: { hero: { shock: 1 } }, cast: { hero: { xray: 1 } }, set, look, size, az, camera, shift, side, arrow, circle }`
+`{ shot, t, text, hi, accent, sub, face: { hero: { shock: 1 } }, cast: { hero: { xray: 1 } }, set, look, size, az, camera, shift, side, arrow, circle, titles }`
+- `titles`: body-anchored graphics drawn under the text, e.g. `[{ style: 'pulse', at: 'hero.heart', accent: '#ff3b5c' }]`.
 - `shot` + `t`: the moment (any shot, any time); `face` / `cast` override the expression or state; `set` / `look` override the world.
 - Framing defaults to a big face (`size: 'mcu'`), pushed to the side opposite the text (`side: 'left'` text, `shift` 0.2). Micro-world shots: `shift: 0`.
 - `arrow` / `circle`: a body part (`'hero.heart'`) or 3D point. Red, one at most.
