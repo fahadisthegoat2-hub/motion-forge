@@ -46,7 +46,7 @@ const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a871
 const CONFIG = {
   width: 1080, height: 1920, fps: 30,
   look: 'cinematic', set: 'place:unfinished_office',
-  sound: { music: { mood: 'tension', bpm: 100, volume: 0.5, drops: [24.6, 38.4] }, sfx: true, ambience: true },
+  sound: { music: { mood: 'tension', bpm: 100, volume: 0.5, drops: [22.15, 33.7] }, sfx: true, ambience: true, voice: { url: 'voice/internet-1kbps.wav' } },
   letterbox: 0,
   animations: [LIB + 'Xbot.glb', kit('animations/ual-starter.glb'), LIB + 'Soldier.glb', LIB + 'Michelle.glb'],
 };
@@ -55,87 +55,111 @@ const CAST = { hero: { character: 'dev', height: 1.74 } };
 
 const H = (extra) => Object.assign({ pos: [[0, [0, 0, 0]]], rotY: [[0, 0]] }, extra);
 const SHOTS = [
-  { name: 'Hook', dur: 3.0, look: 'noir',
+  { name: 'Hook', dur: 4.3, look: 'noir',
     camera: { move: 'crash-zoom', target: 'hero', size: 'mcu', az: 0, at: 0.5, fov: 34, handheld: 0.8 },
-    cast: { hero: H({ clips: [{ clip: 'idle', start: 0, end: 3 }], look: [[0, 'camera']],
-      face: { worried: [[0, 0], [1.4, 0.55, 'outCubic']] }, talk: [[0.1, 1.5], [1.9, 2.9]], gestures: [{ type: 'lean', start: 0.2, end: 1.2, amount: 0.5 }] }) },
+    cast: { hero: H({ clips: [{ clip: 'idle', start: 0, end: 4.3 }], look: [[0, 'camera']],
+      face: { worried: [[0, 0], [1.4, 0.55, 'outCubic']] }, talk: [[0, 2.2], [2.8, 4.2]], gestures: [{ type: 'lean', start: 0.2, end: 1.2, amount: 0.5 }] }) },
     sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.9, type: 'ding', gain: 0.8 }], fx: [{ type: 'dust' }] },
-  { name: 'Page', dur: 3.6, cut: 'whip',
+  { name: 'Page', dur: 3.0, cut: 'whip',
     camera: { move: 'push', target: 'hero', size: 'ms', az: 12, fov: 32, handheld: 0.9 },
-    cast: { hero: H({ rotY: [[0, 0.1]], clips: [{ clip: 'idle', start: 0, end: 3.6 }], look: [[0, 'camera'], [1.2, [0.8, 1.5, 1], 'inOutSine'], [1.9, 'camera', 'inOutSine']],
-      face: { worried: [[0, 0.3], [1.5, 0.75, 'outCubic']], squint: [[2, 0], [2.6, 0.5]] }, talk: [[0.2, 3.0]], gestures: [{ type: 'think', start: 1.2, end: 3.4 }] }) },
+    cast: { hero: H({ rotY: [[0, 0.1]], clips: [{ clip: 'idle', start: 0, end: 3.0 }], look: [[0, 'camera'], [1.2, [0.8, 1.5, 1], 'inOutSine'], [1.9, 'camera', 'inOutSine']],
+      face: { worried: [[0, 0.3], [1.5, 0.75, 'outCubic']], squint: [[2, 0], [2.6, 0.5]] }, talk: [[0.1, 2.8]], gestures: [{ type: 'think', start: 1.2, end: 2.9 }] }) },
     fx: [{ type: 'dust' }] },
-  { name: 'Movie', dur: 4.2,
+  { name: 'Movie', dur: 4.5,
     camera: { move: 'static', target: 'hero', size: 'mls', az: -14, height: -0.1, fov: 34, handheld: 0.8 },
-    cast: { hero: H({ rotY: [[0, -0.15]], clips: [{ clip: 'idle', start: 0, end: 4.2 }], look: [[0, 'camera']],
-      face: { sad: [[0, 0], [2.4, 0.7, 'outCubic']], shock: [[1.5, 0], [1.7, 0.6, 'outBack'], [2.6, 0.2]] }, talk: [[0.1, 4.0]],
-      gestures: [{ type: 'shrug', start: 0.6, end: 1.6 }, { type: 'facepalm', start: 2.6, end: 4.0 }] }) },
-    sfx: [{ t: 2.0, type: 'subdrop', gain: 0.8 }], fx: [{ type: 'dust' }] },
-  { name: 'Dead', dur: 3.6, cut: 'glitch', set: 'place:urban_street_01', look: 'cinematic',
+    cast: { hero: H({ rotY: [[0, -0.15]], clips: [{ clip: 'idle', start: 0, end: 4.5 }], look: [[0, 'camera']],
+      face: { sad: [[0, 0], [2.4, 0.7, 'outCubic']], shock: [[1.5, 0], [1.7, 0.6, 'outBack'], [2.6, 0.2]] }, talk: [[0.1, 1.5], [1.75, 4.3]],
+      gestures: [{ type: 'shrug', start: 0.3, end: 1.4 }, { type: 'facepalm', start: 2.8, end: 4.4 }] }) },
+    sfx: [{ t: 1.75, type: 'subdrop', gain: 0.8 }], fx: [{ type: 'dust' }] },
+  { name: 'Dead', dur: 3.05, cut: 'smash', set: 'place:hotel_room', look: 'cinematic',
     camera: { move: 'dolly-in', target: 'hero', size: 'mls', az: 8, fov: 38, handheld: 1.0 },
-    cast: { hero: H({ rotY: [[0, 0.25]], clips: [{ clip: 'idle', start: 0, end: 3.6 }], look: [[0, 'camera'], [1.8, [1.2, 1.7, 1.0], 'inOutSine']],
-      face: { shock: [[0.2, 0], [0.5, 0.8, 'outBack'], [3, 0.4]] }, talk: [[0.2, 3.2]], gestures: [{ type: 'handsup', start: 1.4, end: 3.2 }] }) },
-    sfx: [{ t: 1.3, type: 'glitch', gain: 0.7 }, { t: 2.2, type: 'glitch', gain: 0.7 }], fx: [{ type: 'dust' }] },
-  { name: 'Day3', dur: 4.8, cut: 'dip', set: 'place:modern_buildings_night', look: 'noir',
+    cast: { hero: H({ rotY: [[0, 0.25]], clips: [{ clip: 'idle', start: 0, end: 3.05 }], look: [[0, 'camera'], [1.8, [1.2, 1.7, 1.0], 'inOutSine']],
+      face: { shock: [[0.2, 0], [0.5, 0.8, 'outBack'], [3, 0.4]] }, talk: [[0.1, 2.8]], gestures: [{ type: 'handsup', start: 1.9, end: 3.0 }] }) },
+    sfx: [{ t: 1.3, type: 'glitch', gain: 0.7 }, { t: 2.45, type: 'glitch', gain: 0.7 }], fx: [{ type: 'dust' }] },
+  { name: 'Day3', dur: 4.7, cut: 'dip', set: 'place:modern_buildings_night', look: 'noir',
     camera: { move: 'track', target: 'hero', size: 'mls', side: 'left', fov: 36, handheld: 0.9 },
-    cast: { hero: H({ pos: [[0, [0, 0, 0]], [0.5, [0, 0, 0], 'inOutSine'], [4.8, [0, 0, -4.9], 'inOutSine']], rotY: [[0, 3.14]],
-      clips: [{ clip: 'idle', start: 0, end: 0.6, fade: 0.3 }, { clip: 'walk', start: 0.4, end: 4.8, fade: 0.4 }], look: [[0, [-1, 1.6, -3]], [2.5, [1.5, 1.7, -6], 'inOutSine']],
+    cast: { hero: H({ pos: [[0, [0, 0, 0]], [0.5, [0, 0, 0], 'inOutSine'], [4.7, [0, 0, -4.8], 'inOutSine']], rotY: [[0, 3.14]],
+      clips: [{ clip: 'idle', start: 0, end: 0.6, fade: 0.3 }, { clip: 'walk', start: 0.4, end: 4.7, fade: 0.4 }], look: [[0, [-1, 1.6, -3]], [2.5, [1.5, 1.7, -6], 'inOutSine']],
       face: { sad: [[0, 0], [1.2, 0.6, 'outCubic']] } }) },
     sfx: [{ t: 0, type: 'swell', gain: 0.6 }], fx: [{ type: 'rain', count: 800, opacity: 0.4 }] },
-  { name: 'DialUp', dur: 4.8, cut: 'whip', set: 'place:lythwood_lounge', look: 'clean-cg',
+  { name: 'DialUp', dur: 2.6, cut: 'whip', set: 'place:lythwood_lounge', look: 'clean-cg',
     camera: { move: 'orbit', target: 'hero', size: 'mls', az: -20, span: 24, height: 0.0, fov: 33, handheld: 0.8 },
-    cast: { hero: H({ rotY: [[0, 0.2]], clips: [{ clip: 'idle', start: 0, end: 4.8 }], look: [[0, 'camera']],
-      face: { squint: [[0.5, 0], [1.2, 0.5, 'outCubic']], smirk: [[2.8, 0], [3.4, 0.4]] }, talk: [[0.2, 4.2]], gestures: [{ type: 'explain', start: 0.8, end: 4.0 }] }) },
+    cast: { hero: H({ rotY: [[0, 0.2]], clips: [{ clip: 'idle', start: 0, end: 2.6 }], look: [[0, 'camera']],
+      face: { squint: [[0.2, 0], [0.8, 0.5, 'outCubic']], smirk: [[1.6, 0], [2.2, 0.4]] }, talk: [[0.1, 2.4]], gestures: [{ type: 'explain', start: 0.4, end: 2.4 }] }) },
     fx: [{ type: 'dust' }] },
-  { name: 'Twist', dur: 4.8, cut: 'flash', set: 'place:comfy_cafe', look: 'warm-film',
+  { name: 'Twist', dur: 3.5, cut: 'flash', set: 'place:comfy_cafe', look: 'warm-film',
     camera: { move: 'push', target: 'hero', size: 'mcu', az: 10, fov: 30, handheld: 0.8 },
-    cast: { hero: H({ rotY: [[0, 0.15]], clips: [{ clip: 'idle', start: 0, end: 4.8 }], look: [[0, [0.8, 1.4, 1]], [0.6, 'camera', 'outCubic']],
-      face: { smile: [[0.5, 0], [1.3, 0.8, 'outBack'], [4.8, 0.6]] }, talk: [[1.5, 4.5]], gestures: [{ type: 'fistpump', start: 0.9, end: 1.9, amount: 0.7 }] }) },
-    sfx: [{ t: 0.1, type: 'shimmer', gain: 0.8 }, { t: 1.8, type: 'ding', gain: 0.9 }], fx: [{ type: 'dust' }, { type: 'beam', pos: [-1.5, 3, -1], to: [0, 0, 0], radius: 0.4, intensity: 0.6 }] },
-  { name: 'Bytes', dur: 4.8, set: 'place:comfy_cafe', look: 'warm-film',
+    cast: { hero: H({ rotY: [[0, 0.15]], clips: [{ clip: 'idle', start: 0, end: 3.5 }], look: [[0, [0.8, 1.4, 1]], [0.6, 'camera', 'outCubic']],
+      face: { smile: [[0.5, 0], [1.3, 0.8, 'outBack'], [3.5, 0.6]] }, talk: [[0.1, 1.4], [2.1, 3.3]], gestures: [{ type: 'fistpump', start: 0.4, end: 1.4, amount: 0.7 }] }) },
+    sfx: [{ t: 0.1, type: 'shimmer', gain: 0.8 }, { t: 2.3, type: 'ding', gain: 0.9 }], fx: [{ type: 'dust' }, { type: 'beam', pos: [-1.5, 3, -1], to: [0, 0, 0], radius: 0.4, intensity: 0.6 }] },
+  { name: 'Bytes', dur: 3.95, set: 'place:comfy_cafe', look: 'warm-film',
     camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: -12, fov: 28, handheld: 0.7 },
-    cast: { hero: H({ rotY: [[0, -0.1]], clips: [{ clip: 'idle', start: 0, end: 4.8 }], look: [[0, 'camera']],
-      face: { smile: [[0, 0.5], [2, 0.7]] }, talk: [[0.1, 4.4]] }) },
-    sfx: [{ t: 3.2, type: 'ding', gain: 0.9 }], fx: [{ type: 'dust' }] },
-  { name: 'Video', dur: 4.8, cut: 'whip', set: 'place:comfy_cafe', look: 'warm-film',
+    cast: { hero: H({ rotY: [[0, -0.1]], clips: [{ clip: 'idle', start: 0, end: 3.95 }], look: [[0, 'camera']],
+      face: { smile: [[0, 0.5], [2, 0.7]] }, talk: [[0.1, 3.7]] }) },
+    sfx: [{ t: 3.1, type: 'ding', gain: 0.9 }], fx: [{ type: 'dust' }] },
+  { name: 'Video', dur: 4.1, cut: 'whip', set: 'place:comfy_cafe', look: 'warm-film',
     camera: { move: 'static', target: 'hero', size: 'mls', az: 16, height: 0.05, fov: 32, handheld: 0.8 },
-    cast: { hero: H({ rotY: [[0, 0.25]], clips: [{ clip: 'idle', start: 0, end: 4.8 }], look: [[0, 'camera'], [2.2, [-0.8, 1.5, 1], 'inOutSine'], [3.2, 'camera', 'inOutSine']],
-      face: { smirk: [[0.5, 0], [1.2, 0.6]] }, talk: [[0.2, 4.4]], gestures: [{ type: 'present', start: 1.0, end: 3.4 }] }) },
+    cast: { hero: H({ rotY: [[0, 0.25]], clips: [{ clip: 'idle', start: 0, end: 4.1 }], look: [[0, 'camera'], [2.2, [-0.8, 1.5, 1], 'inOutSine'], [3.2, 'camera', 'inOutSine']],
+      face: { smirk: [[0.5, 0], [1.2, 0.6]] }, talk: [[0.1, 3.9]], gestures: [{ type: 'present', start: 1.0, end: 3.4 }] }) },
     fx: [{ type: 'dust' }] },
-  { name: 'Loop', dur: 3.6, cut: 'dip', set: 'place:unfinished_office', look: 'noir',
+  { name: 'Loop', dur: 4.9, cut: 'dip', set: 'place:unfinished_office', look: 'noir',
     camera: { move: 'dolly-in', target: 'hero', size: 'mcu', az: 0, fov: 34, handheld: 0.8 },
-    cast: { hero: H({ clips: [{ clip: 'idle', start: 0, end: 3.6 }], look: [[0, 'camera']],
-      face: { worried: [[0, 0.3], [1.2, 0.55]], smile: [[2.0, 0], [2.6, 0.5, 'outCubic']] }, talk: [[0.1, 1.6], [2.0, 3.4]] }) },
-    sfx: [{ t: 3.2, type: 'ding', gain: 0.8 }], fx: [{ type: 'dust' }] },
+    cast: { hero: H({ clips: [{ clip: 'idle', start: 0, end: 4.9 }], look: [[0, 'camera']],
+      face: { worried: [[0, 0.3], [1.2, 0.55]], smile: [[2.9, 0], [3.5, 0.5, 'outCubic']] }, talk: [[0.1, 2.3], [2.9, 4.4]] }) },
+    sfx: [{ t: 4.4, type: 'ding', gain: 0.8 }], fx: [{ type: 'dust' }] },
 ];
 
 // VO timing estimate (replaced by the Voice Studio take when ready)
 const CAPTIONS = [
-  { t: 0.15, text: 'ONE KILOBYTE', hi: ['KILOBYTE'] }, { t: 1.4, text: 'PER SECOND.', hi: ['SECOND.'] }, { t: 2.0, text: 'THE ENTIRE INTERNET', hi: ['INTERNET'] },
-  { t: 3.1, text: 'ONE WEBPAGE?', hi: ['WEBPAGE?'] }, { t: 4.6, text: '45 MINUTES.', hi: ['45'] },
-  { t: 6.7, text: 'A PHOTO? ONE HOUR.', hi: ['HOUR.'] }, { t: 8.7, text: 'A MOVIE?', hi: ['MOVIE?'] }, { t: 9.6, text: '35 DAYS.', hi: ['35'] },
-  { t: 10.9, text: 'VIDEO CALLS. STREAMING. GAMES.', hi: ['GAMES.'] }, { t: 12.9, text: 'ALL DEAD.', hi: ['DEAD.'] },
-  { t: 14.5, text: 'DAY THREE.', hi: ['THREE.'] }, { t: 15.7, text: 'OFFICES GO DARK.', hi: ['DARK.'] }, { t: 17.3, text: 'THE WORLD GOES QUIET.', hi: ['QUIET.'] },
-  { t: 19.3, text: "7× SLOWER", hi: ['7×'] }, { t: 20.6, text: 'THAN DIAL-UP.', hi: ['DIAL-UP.'] },
-  { t: 24.1, text: 'BUT ONE THING SURVIVES', hi: ['SURVIVES'] }, { t: 26.6, text: 'A TEXT MESSAGE.', hi: ['TEXT'] },
-  { t: 28.9, text: 'JUST WORDS.', hi: ['WORDS.'] }, { t: 30.3, text: '140 BYTES. INSTANT.', hi: ['INSTANT.'] },
-  { t: 33.7, text: 'MOST OF THE INTERNET', hi: ['INTERNET'] }, { t: 35.2, text: 'IS VIDEO.', hi: ['VIDEO.'] }, { t: 36.3, text: 'WORDS WERE NEVER HEAVY.', hi: ['HEAVY.'] },
-  { t: 38.5, text: 'ONE KILOBYTE PER SECOND.', hi: ['KILOBYTE'] }, { t: 40.2, text: 'STILL ENOUGH TO SAY HI.', hi: ['HI.'] },
+  { t: 0.00, t1: 1.34, text: "ONE KILOBYTE", hi: ["KILOBYTE"] },
+  { t: 1.19, t1: 2.35, text: "PER SECOND.", hi: ["SECOND."] },
+  { t: 2.82, t1: 4.43, text: "THE ENTIRE INTERNET.", hi: ["INTERNET."] },
+  { t: 4.28, t1: 5.67, text: "A SINGLE WEBPAGE?", hi: ["WEBPAGE?"] },
+  { t: 5.84, t1: 7.23, text: "FORTY-FIVE MINUTES.", hi: ["MINUTES."] },
+  { t: 7.40, t1: 8.18, text: "A PHOTO?", hi: ["PHOTO?"] },
+  { t: 8.03, t1: 8.88, text: "ONE HOUR.", hi: ["HOUR."] },
+  { t: 9.05, t1: 10.04, text: "A MOVIE?", hi: ["MOVIE?"] },
+  { t: 9.89, t1: 11.72, text: "THIRTY-FIVE DAYS.", hi: ["DAYS."] },
+  { t: 11.89, t1: 12.79, text: "VIDEO CALLS,", hi: ["CALLS,"] },
+  { t: 12.64, t1: 13.42, text: "STREAMING,", hi: ["STREAMING,"] },
+  { t: 13.27, t1: 13.80, text: "GAMES.", hi: ["GAMES."] },
+  { t: 13.97, t1: 14.77, text: "ALL DEAD.", hi: ["DEAD."] },
+  { t: 14.94, t1: 16.46, text: "DAY THREE.", hi: ["THREE."] },
+  { t: 16.63, t1: 17.96, text: "OFFICES GO DARK.", hi: ["DARK."] },
+  { t: 17.81, t1: 19.07, text: "THE WORLD GOES", hi: ["GOES"] },
+  { t: 18.92, t1: 19.51, text: "QUIET.", hi: ["QUIET."] },
+  { t: 19.36, t1: 20.70, text: "IT'S SEVEN TIMES", hi: ["TIMES"] },
+  { t: 20.55, t1: 22.10, text: "SLOWER THAN DIAL-UP.", hi: ["DIAL-UP."] },
+  { t: 22.27, t1: 23.22, text: "BUT ONE THING", hi: ["THING"] },
+  { t: 23.07, t1: 23.73, text: "SURVIVES.", hi: ["SURVIVES."] },
+  { t: 24.30, t1: 25.57, text: "A TEXT MESSAGE.", hi: ["MESSAGE."] },
+  { t: 25.74, t1: 26.88, text: "JUST WORDS.", hi: ["WORDS."] },
+  { t: 27.05, t1: 28.14, text: "A HUNDRED AND", hi: ["AND"] },
+  { t: 28.00, t1: 28.95, text: "FORTY BYTES.", hi: ["BYTES."] },
+  { t: 28.80, t1: 29.49, text: "INSTANT.", hi: ["INSTANT."] },
+  { t: 29.66, t1: 30.61, text: "MOST OF THE", hi: ["THE"] },
+  { t: 30.46, t1: 31.81, text: "INTERNET IS VIDEO.", hi: ["VIDEO."] },
+  { t: 31.66, t1: 32.82, text: "THE WORDS WERE", hi: ["WERE"] },
+  { t: 32.67, t1: 33.62, text: "NEVER HEAVY.", hi: ["HEAVY."] },
+  { t: 33.79, t1: 35.13, text: "ONE KILOBYTE", hi: ["KILOBYTE"] },
+  { t: 34.98, t1: 36.13, text: "PER SECOND.", hi: ["SECOND."] },
+  { t: 36.60, t1: 37.77, text: "STILL ENOUGH TO", hi: ["TO"] },
+  { t: 37.62, t1: 38.21, text: "SAY HI.", hi: ["HI."] },
 ];
 const TITLES = [
-  { t: 0, t1: 2.9, style: 'slam', text: '1 KB/s', pos: [0.5, 0.15], size: 0.2, glow: true },
-  { t: 0.9, t1: 2.9, style: 'bubble', at: 'hero.head', text: 'hi ✓ SENT', side: 1 },
-  { t: 3.1, t1: 6.5, style: 'meter', text: 'LOADING PAGE', value: 2, dur: 3, pos: [0.5, 0.13], size: 0.085 },
-  { t: 4.5, t1: 6.5, style: 'counter', from: 0, to: 45, dur: 0.8, suffix: ' MIN', pos: [0.5, 0.22], size: 0.14 },
-  { t: 6.7, t1: 10.7, style: 'list', pos: [0.5, 0.16], size: 0.095, gap: 1.8, items: [{ text: 'PHOTO  ·  1 HOUR', icon: 'clock' }, { text: 'MOVIE  ·  35 DAYS', icon: 'warning', color: '#ff5a5a' }] },
-  { t: 10.9, t1: 14.3, style: 'list', pos: [0.5, 0.17], size: 0.095, gap: 0.55, items: [{ text: 'VIDEO CALLS', icon: 'cross', strike: true }, { text: 'STREAMING', icon: 'cross', strike: true }, { text: 'GAMES', icon: 'cross', strike: true }] },
-  { t: 0, t1: 42, style: 'timeline', pos: [0.5, 0.045], marks: [{ t: 0.5, text: 'DAY 1' }, { t: 14.5, text: 'DAY 3' }, { t: 24, text: 'DAY 7' }, { t: 38.4, text: 'DAY 30' }] },
-  { t: 14.5, t1: 18.9, style: 'tag', text: 'DAY 3', pos: [0.5, 0.12], size: 0.09 },
-  { t: 19.3, t1: 23.9, style: 'bars', pos: [0.5, 0.135], size: 0.085, text: 'SPEED (KB/s)', max: 8, items: [{ label: 'DIAL-UP', value: 7, color: '#ffb02e' }, { label: 'NOW', value: 1, color: '#ff4d4d' }] },
-  { t: 24.1, t1: 28.7, style: 'icon', icon: 'check', text: 'TEXT: OK', pos: [0.5, 0.1] },
-  { t: 28.9, t1: 33.5, style: 'counter', from: 0, to: 140, dur: 0.9, suffix: ' BYTES', pos: [0.5, 0.15], size: 0.12, sub: 'SENT IN 0.14 SECONDS' },
-  { t: 33.7, t1: 38.3, style: 'bars', pos: [0.5, 0.135], size: 0.085, text: 'INTERNET TRAFFIC', max: 100, items: [{ label: 'VIDEO', value: 70, color: '#ff4d4d', suffix: '%' }, { label: 'WORDS', value: 2, color: '#35e0a1', suffix: '%' }] },
-  { t: 38.4, t1: 41.9, style: 'bubble', at: 'hero.head', text: 'hi ✓ SENT', side: -1 },
+  { t: 0, t1: 4.2, style: 'slam', text: '1 KB/s', pos: [0.5, 0.15], size: 0.2, glow: true },
+  { t: 0.9, t1: 4.2, style: 'bubble', at: 'hero.head', text: 'hi ✓ SENT', side: 1 },
+  { t: 4.3, t1: 7.25, style: 'meter', text: 'LOADING PAGE', value: 2, dur: 2.6, pos: [0.5, 0.13], size: 0.085 },
+  { t: 5.8, t1: 7.25, style: 'counter', from: 0, to: 45, dur: 0.8, suffix: ' MIN', pos: [0.5, 0.22], size: 0.14 },
+  { t: 7.3, t1: 11.75, style: 'list', pos: [0.5, 0.13], size: 0.095, gap: 1.6, items: [{ text: 'PHOTO  ·  1 HOUR', icon: 'clock' }, { text: 'MOVIE  ·  35 DAYS', icon: 'warning', color: '#ff5a5a' }] },
+  { t: 11.8, t1: 14.8, style: 'list', pos: [0.5, 0.13], size: 0.095, gap: 0.6, items: [{ text: 'VIDEO CALLS', icon: 'cross', strike: true }, { text: 'STREAMING', icon: 'cross', strike: true }, { text: 'GAMES', icon: 'cross', strike: true }] },
+  { t: 0, t1: 38.6, style: 'timeline', pos: [0.5, 0.045], marks: [{ t: 0.5, text: 'DAY 1' }, { t: 14.85, text: 'DAY 3' }, { t: 22.15, text: 'DAY 7' }, { t: 33.7, text: 'DAY 30' }] },
+  { t: 14.9, t1: 19.5, style: 'tag', text: 'DAY 3', pos: [0.5, 0.12], size: 0.09 },
+  { t: 19.6, t1: 22.1, style: 'bars', pos: [0.5, 0.135], size: 0.085, text: 'SPEED (KB/s)', max: 8, items: [{ label: 'DIAL-UP', value: 7, color: '#ffb02e' }, { label: 'NOW', value: 1, color: '#ff4d4d' }] },
+  { t: 22.2, t1: 25.6, style: 'icon', icon: 'check', text: 'TEXT: OK', pos: [0.5, 0.1] },
+  { t: 26.9, t1: 29.55, style: 'counter', from: 0, to: 140, dur: 0.9, suffix: ' BYTES', pos: [0.5, 0.15], size: 0.12, sub: 'SENT IN 0.14 SECONDS' },
+  { t: 29.6, t1: 33.65, style: 'bars', pos: [0.5, 0.135], size: 0.085, text: 'INTERNET TRAFFIC', max: 100, items: [{ label: 'VIDEO', value: 70, color: '#ff4d4d', suffix: '%' }, { label: 'WORDS', value: 2, color: '#35e0a1', suffix: '%' }] },
+  { t: 36.7, t1: 38.55, style: 'bubble', at: 'hero.head', text: 'hi ✓ SENT', side: -1 },
 ];
 /* ============================== END DIRECTION ============================== */
 
@@ -2283,7 +2307,149 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1 };
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => { if (window.__mfReady && !window.__mfManual) render(clock.getElapsedTime() % TOTAL); });
 </script>
-<!-- motion-forge DEVICE RENDER PANEL — paste before <!-- motion-forge DEVICE RENDER PANEL — paste before </body> of any scene exposing window.__mf.
+<!-- motion-forge DEVICE RENDER PANEL — paste before </body> of any scene exposing window.__mf.
+     Renders frame-perfect on the viewer's own GPU (WebCodecs) and downloads MP4s. No server, no Python.
+     Long-form: set __mf.chapters = [{name, start, end}] → each chapter renders to its own file (iPad-safe memory). -->
+<div id="mf-panel" style="position:fixed;right:12px;bottom:12px;z-index:9999;font:13px/1.4 system-ui,sans-serif;color:#fff;background:rgba(10,20,35,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:12px 14px;width:min(300px,calc(100vw - 48px));box-shadow:0 8px 30px rgba(0,0,0,.35)">
+  <b style="font-size:14px">Render on this device</b>
+  <div id="mf-specs" style="opacity:.8;margin:6px 0 8px;font-size:12px"></div>
+  <label>Quality <select id="mf-q" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
+  <label id="mf-chl" style="display:none">Part <select id="mf-ch" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
+  <button id="mf-play" style="width:100%;padding:7px;border:1px solid #ffffff33;border-radius:8px;background:transparent;color:#fff;font-weight:600;cursor:pointer;margin-bottom:6px">▶ Preview with sound</button>
+  <button id="mf-go" style="width:100%;padding:8px;border:0;border-radius:8px;background:#22d3ee;color:#04202a;font-weight:700;cursor:pointer">Render MP4</button>
+  <div id="mf-bar" style="height:6px;background:#ffffff22;border-radius:3px;margin-top:8px;overflow:hidden"><div style="height:100%;width:0;background:#22d3ee"></div></div>
+  <div id="mf-msg" style="font-size:12px;margin-top:6px;opacity:.85"></div>
+</div>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const msg = (t) => ($('mf-msg').textContent = t);
+// --- Read device specs ---
+const cores = navigator.hardwareConcurrency || 4, mem = navigator.deviceMemory || 4;
+let gpu = 'unknown GPU';
+try { const gl = document.createElement('canvas').getContext('webgl'); const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } catch {}
+const apple = /apple/i.test(gpu) || /iPad|iPhone|Macintosh/.test(navigator.userAgent);
+const weakGpu = /intel|mali|adreno [1-5]|powervr|swiftshader|llvmpipe/i.test(gpu);
+const tier = (!weakGpu && (apple || (cores >= 8 && mem >= 8))) ? 2 : (cores >= 4 && mem >= 4) ? 1 : 0;
+$('mf-specs').textContent = `${cores} cores · ${mem}GB+ RAM · ${gpu.replace(/ANGLE \(|\)$/g, '').slice(0, 60)}`;
+
+const base = window.__mf || {}, W = base.width || 1080, H = base.height || 1920;
+const presets = [
+  { name: 'Good', s: 1, fps: 30 },
+  { name: 'High', s: 1, fps: 60 },
+  { name: 'Epic', s: 4 / 3, fps: 60 },
+];
+const dims = (p) => [Math.round(W * p.s / 2) * 2, Math.round(H * p.s / 2) * 2];
+$('mf-q').add(new Option('Choose quality…', ''));
+presets.forEach((p, i) => { const [w, h] = dims(p); $('mf-q').add(new Option(`${p.name} — ${w}×${h} @ ${p.fps}fps` + (i === tier ? '  ★ best for your device' : ''), i)); });
+$('mf-q').value = '';
+
+// Parts (chapters) for long-form
+const chapters = Array.isArray(base.chapters) && base.chapters.length ? base.chapters : null;
+if (chapters) {
+  $('mf-chl').style.display = '';
+  $('mf-ch').add(new Option(`All ${chapters.length} parts (one file each)`, 'all'));
+  chapters.forEach((c, i) => $('mf-ch').add(new Option(`Part ${i + 1}: ${c.name} (${Math.floor((c.end - c.start) / 60)}:${String(Math.round((c.end - c.start) % 60)).padStart(2, '0')})`, i)));
+}
+
+let encoderPick;
+async function pickEncoder(w, h, fps, br) {
+  const cands = [{ c: 'avc1.640033', m: 'avc' }, { c: 'avc1.4d0033', m: 'avc' }, { c: 'vp09.00.50.08', m: 'vp9' }];
+  for (const k of cands) for (const hw of ['prefer-hardware', 'no-preference']) {
+    const cfg = { codec: k.c, width: w, height: h, bitrate: br, framerate: fps, hardwareAcceleration: hw };
+    try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) return { ...k, cfg }; } catch {}
+  }
+}
+
+let audioPick = null, soundtrack = null;
+async function pickAudio() {   // AAC preferred (plays everywhere), Opus fallback
+  if (!('AudioEncoder' in window)) return null;
+  for (const [codec, m] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
+    const cfg = { codec, sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 };
+    try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) return { cfg, m }; } catch {}
+  }
+  return null;
+}
+async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayBufferTarget) {
+  const target = new ArrayBufferTarget();
+  const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
+  let failed;
+  const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
+  enc.configure(encoderPick.cfg);
+  const total = Math.round((end - start) * p.fps), t0 = performance.now();
+  for (let f = 0; f < total; f++) {
+    if (failed) throw failed;
+    await mf.render(start + f / p.fps);
+    const frame = new VideoFrame(canvas, { timestamp: Math.round(f * 1e6 / p.fps), duration: Math.round(1e6 / p.fps) });
+    enc.encode(frame, { keyFrame: f % (p.fps * 2) === 0 }); frame.close();
+    while (enc.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 1));
+    if (f % 5 === 0) {
+      const pct = (f + 1) / total, eta = (performance.now() - t0) / pct * (1 - pct) / 1000;
+      $('mf-bar').firstElementChild.style.width = (pct * 100).toFixed(1) + '%';
+      msg(`${label} · frame ${f + 1}/${total} · ~${Math.ceil(eta)}s left`);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+  }
+  await enc.flush(); enc.close();
+  if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
+    msg(label + ' · mixing sound…');
+    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
+    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
+    for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
+      const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
+    await ae.flush(); ae.close(); if (failed) throw failed;
+  }
+  muxer.finalize();
+  const url = URL.createObjectURL(new Blob([target.buffer], { type: 'video/mp4' }));
+  const file = `${(document.title || 'render').replace(/\W+/g, '-')}${label === 'Video' ? '' : '-' + label.replace(/\W+/g, '-')}.mp4`;
+  const a = Object.assign(document.createElement('a'), { href: url, download: file });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);   // free memory before next part
+}
+
+let liveAudio = null;
+$('mf-play').onclick = async () => {
+  const mf = window.__mf; if (!mf?.soundtrack) return;
+  if (liveAudio) { liveAudio.ctx.close(); liveAudio = null; $('mf-play').textContent = '▶ Preview with sound'; return; }
+  $('mf-play').textContent = 'Preparing sound…';
+  try { const buf = await mf.soundtrack(), ctx = new AudioContext(), src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
+    mf.restart?.(); src.start(); liveAudio = { ctx }; $('mf-play').textContent = '■ Stop preview'; } catch (e) { $('mf-play').textContent = '▶ Preview with sound'; msg('Sound preview failed: ' + (e.message || e)); }
+};
+$('mf-go').onclick = async () => {
+  const mf = window.__mf; if (!mf) return msg('Scene not ready yet.');
+  if ($('mf-q').value === '') return msg('Pick Good, High or Epic first.');
+  if (!('VideoEncoder' in window)) return msg('This browser lacks WebCodecs — use Chrome, Edge or Safari 17+.');
+  const p = presets[$('mf-q').value], [w, h] = dims(p);
+  const br = Math.min(Math.round(w * h * p.fps * 0.15), 35e6);
+  encoderPick = await pickEncoder(w, h, p.fps, br);
+  if (!encoderPick) return msg('No supported video encoder for this size — try a lower quality.');
+  const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm');
+  soundtrack = mf.soundtrack ? await mf.soundtrack().catch(() => null) : null; audioPick = soundtrack ? await pickAudio() : null;
+  if (soundtrack && !audioPick) msg('This browser cannot encode audio — the MP4 will be silent. Use Chrome/Edge or Safari 17.4+.');
+
+  const sel = chapters ? $('mf-ch').value : null;
+  const jobs = !chapters ? [{ start: 0, end: mf.duration, label: 'Video' }]
+    : sel === 'all' ? chapters.map((c, i) => ({ start: c.start, end: c.end, label: `Part ${i + 1}` }))
+    : [{ start: chapters[sel].start, end: chapters[sel].end, label: `Part ${+sel + 1}` }];
+
+  window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = .35;
+  const canvas = mf.canvas || document.querySelector('canvas');
+  mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
+  const t0 = performance.now();
+  try {
+    for (const j of jobs) {
+      await renderRange(mf, canvas, j.start, j.end, j.label, p, w, h, Muxer, ArrayBufferTarget);
+      if (jobs.length > 1) await new Promise((r) => setTimeout(r, 1500)); // let the download start
+    }
+    $('mf-bar').firstElementChild.style.width = '100%';
+    msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} downloaded.` +
+      (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
+  } catch (e) { msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); }
+  window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
+  dispatchEvent(new Event('resize'));
+};
+</script>
+<!-- motion-forge DEVICE RENDER PANEL — paste before </body> of any scene exposing window.__mf.
      Renders frame-perfect on the viewer's own GPU (WebCodecs) and downloads MP4s. No server, no Python.
      Long-form: set __mf.chapters = [{name, start, end}] → each chapter renders to its own file (iPad-safe memory). -->
 <div id="mf-panel" style="position:fixed;right:12px;bottom:12px;z-index:9999;font:13px/1.4 system-ui,sans-serif;color:#fff;background:rgba(10,20,35,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:12px 14px;width:min(300px,calc(100vw - 48px));box-shadow:0 8px 30px rgba(0,0,0,.35)">
@@ -2426,146 +2592,4 @@ $('mf-go').onclick = async () => {
 };
 </script>
 
-</body> of any scene exposing window.__mf.
-     Renders frame-perfect on the viewer's own GPU (WebCodecs) and downloads MP4s. No server, no Python.
-     Long-form: set __mf.chapters = [{name, start, end}] → each chapter renders to its own file (iPad-safe memory). -->
-<div id="mf-panel" style="position:fixed;right:12px;bottom:12px;z-index:9999;font:13px/1.4 system-ui,sans-serif;color:#fff;background:rgba(10,20,35,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:12px 14px;width:min(300px,calc(100vw - 48px));box-shadow:0 8px 30px rgba(0,0,0,.35)">
-  <b style="font-size:14px">Render on this device</b>
-  <div id="mf-specs" style="opacity:.8;margin:6px 0 8px;font-size:12px"></div>
-  <label>Quality <select id="mf-q" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
-  <label id="mf-chl" style="display:none">Part <select id="mf-ch" style="width:100%;margin:4px 0 8px;padding:4px;border-radius:6px"></select></label>
-  <button id="mf-play" style="width:100%;padding:7px;border:1px solid #ffffff33;border-radius:8px;background:transparent;color:#fff;font-weight:600;cursor:pointer;margin-bottom:6px">▶ Preview with sound</button>
-  <button id="mf-go" style="width:100%;padding:8px;border:0;border-radius:8px;background:#22d3ee;color:#04202a;font-weight:700;cursor:pointer">Render MP4</button>
-  <div id="mf-bar" style="height:6px;background:#ffffff22;border-radius:3px;margin-top:8px;overflow:hidden"><div style="height:100%;width:0;background:#22d3ee"></div></div>
-  <div id="mf-msg" style="font-size:12px;margin-top:6px;opacity:.85"></div>
-</div>
-<script type="module">
-const $ = (id) => document.getElementById(id);
-const msg = (t) => ($('mf-msg').textContent = t);
-// --- Read device specs ---
-const cores = navigator.hardwareConcurrency || 4, mem = navigator.deviceMemory || 4;
-let gpu = 'unknown GPU';
-try { const gl = document.createElement('canvas').getContext('webgl'); const ext = gl.getExtension('WEBGL_debug_renderer_info');
-  gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } catch {}
-const apple = /apple/i.test(gpu) || /iPad|iPhone|Macintosh/.test(navigator.userAgent);
-const weakGpu = /intel|mali|adreno [1-5]|powervr|swiftshader|llvmpipe/i.test(gpu);
-const tier = (!weakGpu && (apple || (cores >= 8 && mem >= 8))) ? 2 : (cores >= 4 && mem >= 4) ? 1 : 0;
-$('mf-specs').textContent = `${cores} cores · ${mem}GB+ RAM · ${gpu.replace(/ANGLE \(|\)$/g, '').slice(0, 60)}`;
-
-const base = window.__mf || {}, W = base.width || 1080, H = base.height || 1920;
-const presets = [
-  { name: 'Good', s: 1, fps: 30 },
-  { name: 'High', s: 1, fps: 60 },
-  { name: 'Epic', s: 4 / 3, fps: 60 },
-];
-const dims = (p) => [Math.round(W * p.s / 2) * 2, Math.round(H * p.s / 2) * 2];
-$('mf-q').add(new Option('Choose quality…', ''));
-presets.forEach((p, i) => { const [w, h] = dims(p); $('mf-q').add(new Option(`${p.name} — ${w}×${h} @ ${p.fps}fps` + (i === tier ? '  ★ best for your device' : ''), i)); });
-$('mf-q').value = '';
-
-// Parts (chapters) for long-form
-const chapters = Array.isArray(base.chapters) && base.chapters.length ? base.chapters : null;
-if (chapters) {
-  $('mf-chl').style.display = '';
-  $('mf-ch').add(new Option(`All ${chapters.length} parts (one file each)`, 'all'));
-  chapters.forEach((c, i) => $('mf-ch').add(new Option(`Part ${i + 1}: ${c.name} (${Math.floor((c.end - c.start) / 60)}:${String(Math.round((c.end - c.start) % 60)).padStart(2, '0')})`, i)));
-}
-
-let encoderPick;
-async function pickEncoder(w, h, fps, br) {
-  const cands = [{ c: 'avc1.640033', m: 'avc' }, { c: 'avc1.4d0033', m: 'avc' }, { c: 'vp09.00.50.08', m: 'vp9' }];
-  for (const k of cands) for (const hw of ['prefer-hardware', 'no-preference']) {
-    const cfg = { codec: k.c, width: w, height: h, bitrate: br, framerate: fps, hardwareAcceleration: hw };
-    try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) return { ...k, cfg }; } catch {}
-  }
-}
-
-let audioPick = null, soundtrack = null;
-async function pickAudio() {   // AAC preferred (plays everywhere), Opus fallback
-  if (!('AudioEncoder' in window)) return null;
-  for (const [codec, m] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
-    const cfg = { codec, sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 };
-    try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) return { cfg, m }; } catch {}
-  }
-  return null;
-}
-async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayBufferTarget) {
-  const target = new ArrayBufferTarget();
-  const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
-  let failed;
-  const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
-  enc.configure(encoderPick.cfg);
-  const total = Math.round((end - start) * p.fps), t0 = performance.now();
-  for (let f = 0; f < total; f++) {
-    if (failed) throw failed;
-    await mf.render(start + f / p.fps);
-    const frame = new VideoFrame(canvas, { timestamp: Math.round(f * 1e6 / p.fps), duration: Math.round(1e6 / p.fps) });
-    enc.encode(frame, { keyFrame: f % (p.fps * 2) === 0 }); frame.close();
-    while (enc.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 1));
-    if (f % 5 === 0) {
-      const pct = (f + 1) / total, eta = (performance.now() - t0) / pct * (1 - pct) / 1000;
-      $('mf-bar').firstElementChild.style.width = (pct * 100).toFixed(1) + '%';
-      msg(`${label} · frame ${f + 1}/${total} · ~${Math.ceil(eta)}s left`);
-      await new Promise((r) => requestAnimationFrame(r));
-    }
-  }
-  await enc.flush(); enc.close();
-  if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
-    msg(label + ' · mixing sound…');
-    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
-    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
-    for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
-      const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
-    await ae.flush(); ae.close(); if (failed) throw failed;
-  }
-  muxer.finalize();
-  const url = URL.createObjectURL(new Blob([target.buffer], { type: 'video/mp4' }));
-  const file = `${(document.title || 'render').replace(/\W+/g, '-')}${label === 'Video' ? '' : '-' + label.replace(/\W+/g, '-')}.mp4`;
-  const a = Object.assign(document.createElement('a'), { href: url, download: file });
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);   // free memory before next part
-}
-
-let liveAudio = null;
-$('mf-play').onclick = async () => {
-  const mf = window.__mf; if (!mf?.soundtrack) return;
-  if (liveAudio) { liveAudio.ctx.close(); liveAudio = null; $('mf-play').textContent = '▶ Preview with sound'; return; }
-  $('mf-play').textContent = 'Preparing sound…';
-  try { const buf = await mf.soundtrack(), ctx = new AudioContext(), src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
-    mf.restart?.(); src.start(); liveAudio = { ctx }; $('mf-play').textContent = '■ Stop preview'; } catch (e) { $('mf-play').textContent = '▶ Preview with sound'; msg('Sound preview failed: ' + (e.message || e)); }
-};
-$('mf-go').onclick = async () => {
-  const mf = window.__mf; if (!mf) return msg('Scene not ready yet.');
-  if ($('mf-q').value === '') return msg('Pick Good, High or Epic first.');
-  if (!('VideoEncoder' in window)) return msg('This browser lacks WebCodecs — use Chrome, Edge or Safari 17+.');
-  const p = presets[$('mf-q').value], [w, h] = dims(p);
-  const br = Math.min(Math.round(w * h * p.fps * 0.15), 35e6);
-  encoderPick = await pickEncoder(w, h, p.fps, br);
-  if (!encoderPick) return msg('No supported video encoder for this size — try a lower quality.');
-  const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm');
-  soundtrack = mf.soundtrack ? await mf.soundtrack().catch(() => null) : null; audioPick = soundtrack ? await pickAudio() : null;
-  if (soundtrack && !audioPick) msg('This browser cannot encode audio — the MP4 will be silent. Use Chrome/Edge or Safari 17.4+.');
-
-  const sel = chapters ? $('mf-ch').value : null;
-  const jobs = !chapters ? [{ start: 0, end: mf.duration, label: 'Video' }]
-    : sel === 'all' ? chapters.map((c, i) => ({ start: c.start, end: c.end, label: `Part ${i + 1}` }))
-    : [{ start: chapters[sel].start, end: chapters[sel].end, label: `Part ${+sel + 1}` }];
-
-  window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = .35;
-  const canvas = mf.canvas || document.querySelector('canvas');
-  mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
-  const t0 = performance.now();
-  try {
-    for (const j of jobs) {
-      await renderRange(mf, canvas, j.start, j.end, j.label, p, w, h, Muxer, ArrayBufferTarget);
-      if (jobs.length > 1) await new Promise((r) => setTimeout(r, 1500)); // let the download start
-    }
-    $('mf-bar').firstElementChild.style.width = '100%';
-    msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} downloaded.` +
-      (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
-  } catch (e) { msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); }
-  window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
-  dispatchEvent(new Event('resize'));
-};
-</script>
 </body></html>
