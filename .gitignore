@@ -3,3 +3,4 @@
 .motion-forge/gallery/
 motion-video-plugin*.zip
 *.pack/
+.motion-forge/voice/

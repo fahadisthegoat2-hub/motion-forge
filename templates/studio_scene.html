@@ -38,7 +38,7 @@ const kit = (p) => KIT.map((b) => b + p);
 // Built-in CC0 actors (MakeHuman, fully dressed, real hair, 59+ face controls). Pick with `actor:` in CAST.
 // Never build people, clothes or hair from primitives — pick an actor and restyle it (wardrobe / skin / hair / height).
 const ACTORS = {
-  jake:   { file: 'characters/jake.glb',   height: 1.80, about: 'man · button shirt + trousers · short hair' },
+  jake:   { file: 'characters/jake.glb',   height: 1.80, wardrobe: { top: '#26365e' }, about: 'man · button shirt + trousers · short hair' },
   marcus: { file: 'characters/marcus.glb', height: 1.84, about: 'big heavy-set man · work overalls · short hair' },
 };
 const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a8714f', brown: '#7c4f35', dark: '#4e3022' };
@@ -367,7 +367,7 @@ const ENV = {
       for (let i = 0; i < 200; i++) { c.fillStyle = `rgba(255,240,220,${.03 + hash(i) * .05})`; c.beginPath(); c.ellipse(hash(i + 1) * s, hash(i + 2) * s, 20 + hash(i + 3) * 120, 3 + hash(i + 4) * 8, 0, 0, 7); c.fill(); } }, 1);
     pTex.wrapS = THREE.RepeatWrapping;
     const planet = new THREE.Mesh(new THREE.SphereGeometry(9, 96, 64), new THREE.MeshStandardMaterial({ map: pTex, roughness: 0.9 })); planet.position.set(-12, -2, -40); planet.rotation.z = 0.35; g.add(planet);
-    const atm = new THREE.Mesh(new THREE.SphereGeometry(9.6, 64, 32), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide,
+    const atm = new THREE.Mesh(new THREE.SphereGeometry(9.6, 64, 32), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true, side: THREE.BackSide,
       vertexShader: 'varying vec3 n; varying vec3 v; void main(){ n = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); v = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }',
       fragmentShader: 'varying vec3 n; varying vec3 v; void main(){ float f = pow(1. - abs(dot(n, v)), 2.5); gl_FragColor = vec4(vec3(1., .6, .35) * f * 2.5, 0.); }' }));
     atm.position.copy(planet.position); g.add(atm);
@@ -924,7 +924,7 @@ function recolor(p, top, bottom, waist, detail = 0.45) {   // keeps fabric shadi
 }
 const COPY = ['map', 'normalMap', 'normalScale', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap', 'emissive', 'color', 'alphaTest', 'alphaMap'];
 function upgradeMaterials(root, def = {}) {
-  const wardrobe = def.wardrobe || {}, skin = def.skin ? (SKIN[def.skin] || def.skin) : null;
+  const wardrobe = def.wardrobe || (ACTORS[def.actor] || (!def.urls && !def.character ? ACTORS.jake : null))?.wardrobe || {}, skin = def.skin ? (SKIN[def.skin] || def.skin) : null;
   root.updateMatrixWorld(true);
   const world = new THREE.Box3().setFromObject(root), waistW = world.min.y + (world.max.y - world.min.y) * 0.565;
   root.traverse((o) => {
@@ -1238,7 +1238,7 @@ const FX_VERT = `
 attribute vec4 aSeed; attribute float aBirth;
 uniform float uTime, uScale, uPx, uDrag, uGravity, uBuoy, uTurb, uTurbF, uSpread, uFloorY, uBounce, uSwirl, uSpin;
 uniform vec2 uLife, uSpeed, uSize; uniform vec3 uDir, uWind, uShape; uniform int uRadial; uniform float uMaxPx;
-varying float vT; varying vec4 vSeed; varying float vRot; varying float vStretch; varying float vNear;
+varying float vT; varying vec4 vSeed; varying float vRot; varying float vStretch; varying float vNear; varying float vGround;
 vec3 rnd3(vec4 s){ float z = s.y*2.-1.; float a = s.z*6.2831853; float r = sqrt(max(0.,1.-z*z)); return vec3(r*cos(a), z, r*sin(a)); }
 vec3 pos(float age){
   vec3 dir = uRadial == 1 ? normalize(vec3(rnd3(aSeed).x, 0.08 * (aSeed.w - .5), rnd3(aSeed).z) + 1e-5)
@@ -1267,12 +1267,13 @@ void main(){
   vRot = length(sv) > 1e-5 ? atan(sv.y, sv.x) : aSeed.z * 6.2831853 + age * uSpin * (aSeed.w - .5);
   vStretch = clamp(length(sv) * 60., 0., 1.);
   float size = mix(uSize.x, uSize.y, pow(clamp(vT, 0., 1.), .6)) * uScale * (.6 + .8 * aSeed.z);
-  vNear = smoothstep(.35, 1.8, -mv.z);                       // fade out near the lens (no screen-filling sprites)
+  vNear = smoothstep(.35, 1.8, -mv.z);
+  vGround = smoothstep(0., max(.05, size * .45), (modelMatrix * vec4(p, 1.)).y);   // big puffs fade into the floor instead of slicing it                       // fade out near the lens (no screen-filling sprites)
   gl_PointSize = min(size * uPx / -mv.z, uMaxPx * uPx / 900.);
 }`;
 const FX_FRAG = `
 uniform int uMode; uniform vec3 uColA, uColB, uColC, uLightDir; uniform float uIntensity, uOpacity, uTime, uStretchK;
-varying float vT; varying vec4 vSeed; varying float vRot; varying float vStretch; varying float vNear;
+varying float vT; varying vec4 vSeed; varying float vRot; varying float vStretch; varying float vNear; varying float vGround;
 float hs(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f);
   return mix(mix(hs(i), hs(i+vec2(1,0)), f.x), mix(hs(i+vec2(0,1)), hs(i+vec2(1,1)), f.x), f.y); }
@@ -1295,11 +1296,11 @@ void main(){
   } else if (uMode == 1) {    // SMOKE — billowy, self-shadowed, fire-lit early
     float d = length(uv) * 2.;
     float n = fbm(r * 2.6 + sd + vT * .7);
-    float dens = smoothstep(1., .25, d) * smoothstep(.25, .75, n + (1. - d) * .45);
+    float dens = smoothstep(1., .2, d) * smoothstep(.38, .82, n + (1. - d) * .32);
     vec3 nrm = normalize(vec3(uv * 2.2 + (n - .5) * .6, sqrt(max(0., 1. - d * d)) + .2));
     float lit = clamp(dot(nrm, uLightDir) * .5 + .55, 0., 1.);
     vec3 col = mix(uColB, uColA, lit) + uColC * pow(max(0., 1. - vT * 2.2), 3.) * 2.5;
-    float a = dens * uOpacity * smoothstep(0., .12, vT) * (1. - smoothstep(.55, 1., vT));
+    float a = dens * uOpacity * smoothstep(0., .12, vT) * (1. - smoothstep(.55, 1., vT)) * vGround;
     outC = vec4(col * a, a);
   } else if (uMode == 2) {    // SPARK — motion-streaked hot core + glow
     vec2 q = vec2(r.x / (1. + vStretch * uStretchK), r.y);
@@ -1326,7 +1327,7 @@ void main(){
     outC = vec4(uColA * a, a * .5);
   } else {                    // LIQUID — droplet with spec highlight
     float d = length(r * vec2(1. / (1. + vStretch * 1.5), 1.)) * 2.;
-    float body = smoothstep(1., .8, d), spec = exp(-dot(uv - vec2(-.12, -.12), uv - vec2(-.12, -.12)) * 120.);
+    float body = smoothstep(1., .45, d), spec = exp(-dot(uv - vec2(-.12, -.12), uv - vec2(-.12, -.12)) * 120.);
     vec3 col = uColA * (.55 + .45 * (1. - d)) + spec * 1.5;
     float a = body * uOpacity * (1. - smoothstep(.85, 1., vT));
     outC = vec4(col * a, a);
@@ -1397,7 +1398,7 @@ const FXP = {
       }
       inst.instanceMatrix.needsUpdate = true; } });
     // shockwave ring on the ground
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 1, 96), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 1, 96), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
       uniforms: { uA: { value: 0 }, uR: { value: 0 } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
       fragmentShader: 'uniform float uA; varying vec2 vUv; void main(){ float r = length(vUv - .5) * 2.; float b = exp(-pow((r - .8) * 9., 2.)); gl_FragColor = vec4(vec3(1., .75, .45) * b * uA * 3., 0.); }' }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.02;
@@ -1422,8 +1423,8 @@ const FXP = {
   },
   smoke(f, dur) {
     const s = f.scale ?? 1, t0 = f.start ?? 0, t1 = f.end ?? dur;
-    return { parts: [emitter({ mode: 'smoke', count: f.count ?? 220, t0: t0 - 3, t1, life: [3, 5.5], speed: [0.3, 0.8], dir: f.dir || [0, 1, 0], spread: 0.35, buoy: 0.5, drag: 0.5, turb: 0.2,
-      wind: f.wind || [0.2, 0, 0], size: [0.6, 2.8], shape: [0.4, 0.1, 0.4], scale: s, colA: f.color || '#8a857e', colB: '#24211e', opacity: f.opacity ?? 0.5, seed: f.seed ?? 3 })] };
+    return { parts: [emitter({ mode: 'smoke', count: f.count ?? 130, t0: t0 - 3, t1, life: [3, 5.5], speed: [0.3, 0.8], dir: f.dir || [0, 1, 0], spread: 0.35, buoy: 0.5, drag: 0.5, turb: 0.3,
+      wind: f.wind || [0.2, 0, 0], size: [0.4, 1.9], shape: [0.4, 0.1, 0.4], scale: s, colA: f.color || '#9a948c', colB: '#2a2622', opacity: f.opacity ?? 0.34, seed: f.seed ?? 3 })] };
   },
   sparks(f) {
     const s = f.scale ?? 1, t = f.t ?? 0;
@@ -1432,11 +1433,11 @@ const FXP = {
   },
   magic(f, dur) {
     const s = f.scale ?? 1, t0 = f.start ?? 0, t1 = f.end ?? dur, ca = f.color || '#7ad8ff', cb = f.color2 || '#c27aff', parts = [];
-    parts.push(emitter({ mode: 'glow', count: 380, t0: t0 - 1, t1, life: [1.2, 2.4], speed: [0.3, 0.9], spread: 1, swirl: 2.8, buoy: 0.35, drag: 0.4, turb: 0.15, size: [0.12, 0.03], shape: [0.5, 0.2, 0.5], scale: s,
-      colA: ca, colB: cb, hdr: 4, seed: f.seed ?? 5 }));
-    parts.push(emitter({ mode: 'glow', count: 14, t0: t0 - 1, t1, life: [0.6, 1.2], speed: [0, 0.1], size: [1.2, 1.8], scale: s, colA: ca, colB: cb, hdr: 1.5, intensity: 0.6, seed: (f.seed ?? 5) + 1 }));
+    parts.push(emitter({ mode: 'glow', count: 260, t0: t0 - 1, t1, life: [1.2, 2.4], speed: [0.3, 0.9], spread: 1, swirl: 2.8, buoy: 0.35, drag: 0.4, turb: 0.15, size: [0.07, 0.02], shape: [0.5, 0.2, 0.5], scale: s,
+      colA: ca, colB: cb, hdr: 2.2, seed: f.seed ?? 5 }));
+    parts.push(emitter({ mode: 'glow', count: 8, t0: t0 - 1, t1, life: [0.6, 1.2], speed: [0, 0.1], size: [0.35, 0.6], scale: s, colA: ca, colB: cb, hdr: 1.2, intensity: 0.3, seed: (f.seed ?? 5) + 1 }));
     const L = new THREE.PointLight(ca, 0, 0, 2); L.position.y = 0.3 * s;
-    parts.push({ obj: L, update(lt) { L.intensity = lt < t0 || lt > t1 ? 0 : 25 * s * s * (0.8 + 0.2 * fbm(lt * 5, 3)); } });
+    parts.push({ obj: L, update(lt) { L.intensity = lt < t0 || lt > t1 ? 0 : 2.5 * s * s * (0.8 + 0.2 * fbm(lt * 5, 3)); } });
     return { parts };
   },
   dust(f, dur) {
@@ -1458,22 +1459,29 @@ const FXP = {
   },
   splash(f) {
     const t = f.t ?? 0, s = f.scale ?? 1;
-    return { parts: [emitter({ mode: 'liquid', count: f.count ?? 140, t0: t, burst: 0.06, life: [0.5, 1.2], speed: [2, 5], dir: f.dir || [0, 1, 0], spread: 0.45, gravity: 9.8, drag: 0.3, size: [0.07, 0.03],
-      scale: s, colA: f.color || '#9fd3ff', opacity: 0.9, seed: f.seed ?? 10 })] };
+    const c = f.color || '#9fd3ff'; return { parts: [
+      emitter({ mode: 'liquid', count: f.count ?? 160, t0: t, burst: 0.06, life: [0.5, 1.2], speed: [2, 5.5], dir: f.dir || [0, 1, 0], spread: 0.45, gravity: 9.8, drag: 0.3, size: [0.09, 0.04], scale: s, colA: c, opacity: 0.9, seed: f.seed ?? 10 }),
+      emitter({ mode: 'liquid', count: 220, t0: t, burst: 0.05, life: [0.3, 0.8], speed: [3, 7], dir: f.dir || [0, 1, 0], spread: 0.7, gravity: 9.8, drag: 0.8, size: [0.035, 0.015], scale: s, colA: '#e8f6ff', opacity: 0.8, seed: (f.seed ?? 10) + 1 }),
+      emitter({ mode: 'smoke', count: 40, t0: t + 0.03, burst: 0.12, life: [0.6, 1.3], speed: [0.8, 2], spread: 0.8, drag: 1.5, buoy: 0.2, size: [0.25, 1.1], shape: [0.2, 0.05, 0.2], scale: s, colA: '#eef8ff', colB: '#9fb8c8', opacity: 0.3, seed: (f.seed ?? 10) + 2 })] };
   },
   shockwave(f) {
     const t = f.t ?? 0, s = f.scale ?? 1, col = new THREE.Color(f.color || '#9fe0ff');
-    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 24), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 24), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
       uniforms: { uA: { value: 0 }, uC: { value: col } }, vertexShader: 'varying vec3 n; varying vec3 v; void main(){ n = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); v = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }',
-      fragmentShader: 'uniform float uA; uniform vec3 uC; varying vec3 n; varying vec3 v; void main(){ float f = pow(1. - abs(dot(n, v)), 3.); gl_FragColor = vec4(uC * f * uA * 4., 0.); }' }));
-    return { parts: [{ obj: m, update(lt) { const a = lt - t; m.visible = a > 0 && a < 0.6; const e = EASE.outCubic(clamp(a / 0.6)); m.scale.setScalar((0.2 + e * 4) * s); m.material.uniforms.uA.value = 1 - e; } }],
+      fragmentShader: 'uniform float uA; uniform vec3 uC; varying vec3 n; varying vec3 v; void main(){ float f = pow(1. - abs(dot(n, v)), 3.5); gl_FragColor = vec4(uC * f * uA * 2.5, 0.); }' }));
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 1, 96), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true, uniforms: { uA: { value: 0 }, uC: { value: col } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+      fragmentShader: 'uniform float uA; uniform vec3 uC; varying vec2 vUv; void main(){ float r = length(vUv - .5) * 2.; float b = exp(-pow((r - .85) * 8., 2.)); gl_FragColor = vec4(uC * b * uA * 3., 0.); }' }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03 - (f.pos?.[1] ?? 0);
+    const dust = emitter({ mode: 'smoke', count: 70, t0: t, burst: 0.08, life: [1, 2], speed: [3, 5], drag: 2.4, radial: true, size: [0.3, 1.4], shape: [0.4, 0, 0.4], scale: s, colA: '#b8ad9c', colB: '#5a5046', opacity: 0.4, seed: 21 });
+    return { parts: [dust, { obj: ring, update(lt) { const a = lt - t; ring.visible = a > 0 && a < 0.8; const e = EASE.outCubic(clamp(a / 0.8)); ring.scale.setScalar((0.3 + e * 6) * s); ring.material.uniforms.uA.value = 1 - e; } }, { obj: m, update(lt) { const a = lt - t; m.visible = a > 0 && a < 0.6; const e = EASE.outCubic(clamp(a / 0.6)); m.scale.setScalar((0.2 + e * 4) * s); m.material.uniforms.uA.value = 1 - e; } }],
       shakes: [{ t, amp: 0.6 * s, decay: 0.3 }], impulses: [{ t, pos: f.pos || [0, 1, 0], amp: 0.6 * s }] };
   },
   beam(f) {   // volumetric light shaft (god rays) from pos toward `to`
     const from = new THREE.Vector3(...(f.pos || [0, 4, 0])), to = new THREE.Vector3(...(f.to || [0, 0, 0])), len = from.distanceTo(to), R = f.radius ?? 0.8;
     const geo = new THREE.CylinderGeometry(R * 0.35, R, len, 48, 24, true); geo.translate(0, -len / 2, 0); geo.rotateX(-Math.PI / 2);
-    const m = new THREE.Mesh(geo, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-      uniforms: { uC: { value: new THREE.Color(f.color || '#fff2d6') }, uI: { value: f.intensity ?? 0.4 }, uT: { value: 0 } },
+    const m = new THREE.Mesh(geo, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true, side: THREE.DoubleSide,
+      uniforms: { uC: { value: new THREE.Color(f.color || '#fff2d6') }, uI: { value: f.intensity ?? 0.16 }, uT: { value: 0 } },
       vertexShader: 'varying vec3 n; varying vec3 v; varying vec3 lp; void main(){ lp = position; n = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); v = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }',
       fragmentShader: `uniform vec3 uC; uniform float uI, uT; varying vec3 n; varying vec3 v; varying vec3 lp;
         float hs(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }

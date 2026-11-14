@@ -15,3 +15,7 @@
 - **Character builder** (`vendor/dramatis-builder.mjs`): bundled from Dramatis (Apache-2.0), tosijs-3d (Apache-2.0) and
   fflate (MIT) — licences in `vendor/`.
 - Built characters in `characters/*.glb` carry their asset licences inside the file (`asset.extras.dramatis.licences`).
+
+## Voice
+- Kokoro-82M voice model and voices (hexgrad, Apache-2.0) via onnx-community/Kokoro-82M-v1.0-ONNX; kokoro-js (Apache-2.0).
+- ONNX Runtime Web (Microsoft, MIT) as bundled by Transformers.js (Hugging Face, Apache-2.0).

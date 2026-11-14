@@ -1,0 +1,296 @@
+<title>Voice Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a mixing-desk workspace — script list rail on the left, the take (editor → waveform) as the main channel. Dark single-look. */
+:root {
+  --bg: #0e1013; --panel: #161a1f; --panel2: #1d2228; --line: #2a3038; --fg: #e8ecf1; --muted: #8e98a5; --accent: #ff9f43; --ok: #3ddc84; --bad: #ff5d5d;
+  --display: "Familjen Grotesk", "Inter", system-ui, sans-serif; --body: "Inter", system-ui, -apple-system, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font: 14px/1.5 var(--body); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 40px; max-width: 1180px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+h1 { font: 700 26px/1.1 var(--display); margin: 0; letter-spacing: -0.01em; }
+.pill { font: 500 12px var(--mono); padding: 4px 10px; border-radius: 99px; background: var(--panel2); color: var(--muted); border: 1px solid var(--line); }
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.pill.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+.grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.rail, .main { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.rail h2, .main h2 { font: 600 11px var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.list { display: grid; gap: 6px; }
+.item { text-align: left; background: var(--panel2); border: 1px solid transparent; color: var(--fg); border-radius: 8px; padding: 8px 10px; cursor: pointer; font: inherit; display: grid; gap: 2px; }
+.item small { color: var(--muted); font-size: 12px; }
+.item[aria-current="true"] { border-color: var(--accent); }
+button, select, input, textarea { font: inherit; color: var(--fg); }
+.btn { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.btn.primary { background: var(--accent); color: #1a1006; border-color: var(--accent); font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:focus-visible, .item:focus-visible, .chip:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row > label { display: grid; gap: 4px; color: var(--muted); font-size: 12px; }
+select, input[type=text] { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+input[type=text] { width: min(100%, 360px); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--panel2); color: var(--fg); border-radius: 99px; padding: 4px 10px; cursor: pointer; font-size: 12px; display: inline-flex; gap: 6px; align-items: center; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+textarea { width: 100%; min-height: 150px; resize: vertical; background: #0b0d10; border: 1px solid var(--line); border-radius: 10px; padding: 12px; font: 500 14px/1.6 var(--mono); box-sizing: border-box; }
+.preview { background: #0b0d10; border: 1px solid var(--line); border-radius: 10px; padding: 12px; line-height: 1.9; min-height: 40px; overflow-wrap: anywhere; }
+.preview span { border-radius: 4px; padding: 1px 3px; }
+.preview .pause { font: 500 11px var(--mono); color: var(--muted); border: 1px dashed var(--line); }
+.wave { width: 100%; height: 96px; display: block; background: #0b0d10; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.note { color: var(--muted); font-size: 12px; }
+.progress { height: 4px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.empty { color: var(--muted); padding: 8px 2px; }
+code { font: 500 12px var(--mono); background: var(--panel2); padding: 1px 5px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Voice Studio</h1>
+    <span class="pill" id="engine">Voice engine: not loaded</span>
+    <span class="pill" id="sync">Connecting…</span>
+  </header>
+  <div class="grid">
+    <aside class="rail" aria-label="Scripts">
+      <h2>Voiceover scripts</h2>
+      <div class="list" id="list"><div class="empty">No scripts yet. Claude adds one for every video, or start one with New script.</div></div>
+      <button class="btn" id="new">New script</button>
+    </aside>
+    <main class="main">
+      <div class="row">
+        <label>Title <input type="text" id="title" value="Example — 30 days without junk food"></label>
+        <label>Voice <select id="voice"></select></label>
+        <label>Speed <input type="range" id="speed" min="0.7" max="1.3" step="0.05" value="1"></label>
+        <button class="btn" id="sample">▶ Voice sample</button>
+      </div>
+      <h2>Tones — select words, then tap a tone</h2>
+      <div class="chips" id="chips"></div>
+      <textarea id="text" spellcheck="false">[excited]Thirty days without junk food.[/] [calm]Here's what actually happens to your body.[/] [pause 0.4] [serious]Day three is the hardest.[/] [whisper]The cravings hit hard.[/] [excited]But by week two, an apple tastes like candy![/]</textarea>
+      <div class="preview" id="preview" aria-label="How the tones are applied"></div>
+      <div class="row">
+        <button class="btn primary" id="gen">Generate voice</button>
+        <button class="btn" id="play" disabled>▶ Play</button>
+        <button class="btn" id="dl" disabled>Download WAV</button>
+        <button class="btn" id="save">Save script</button>
+        <span class="note" id="status">Tags: <code>[excited]words[/]</code> · <code>[pause 0.5]</code> · <code>[voice am_adam]</code></span>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+      <canvas class="wave" id="wave" width="1100" height="96" aria-label="Waveform, colored by tone"></canvas>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ---------- engine files: everything is served from this artifact (the page cannot fetch other sites) ---------- */
+const HF = 'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/';
+const realFetch = window.fetch.bind(window);
+let ENGINE = null, wasmBuf = null, modelBuf = null;
+const b64ToBytes = (s) => { const bin = atob(s.trim()), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; };
+async function manifest() { if (!ENGINE) ENGINE = await realFetch('engine.json').then((r) => (r.ok ? r.json() : null)).catch(() => null); return ENGINE; }
+function idb(op, key, val) { return new Promise((res) => { try { const r = indexedDB.open('voice-studio', 1); r.onupgradeneeded = () => r.result.createObjectStore('f');
+  r.onsuccess = () => { try { const tx = r.result.transaction('f', op === 'get' ? 'readonly' : 'readwrite'), st = tx.objectStore('f'), q = op === 'get' ? st.get(key) : st.put(val, key); q.onsuccess = () => res(q.result); q.onerror = () => res(null); } catch { res(null); } }; r.onerror = () => res(null); } catch { res(null); } }); }
+async function joinParts(parts, label, sha, from, to) {
+  const key = sha || parts.join('|'), cached = await idb('get', key); if (cached) return cached;
+  const chunks = []; let n = 0;
+  for (const p of parts) { const r = await realFetch(p); if (!r.ok) throw new Error(label + ' file missing: ' + p); chunks.push(b64ToBytes(await r.text())); n++; progress(from + (to - from) * n / parts.length, 'Loading ' + label + '… ' + Math.round(100 * n / parts.length) + '%'); }
+  const total = chunks.reduce((s, c) => s + c.length, 0), out = new Uint8Array(total); let o = 0; for (const c of chunks) { out.set(c, o); o += c.length; }
+  if (sha) { const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', out))].map((x) => x.toString(16).padStart(2, '0')).join(''); if (h !== sha) throw new Error(label + ' failed its integrity check'); }
+  idb('put', key, out.buffer); return out.buffer;
+}
+window.fetch = async (input, init) => {
+  const url = String(input?.url ?? input);
+  if (url.startsWith(HF)) {
+    const rel = url.slice(HF.length).split('?')[0], M = await manifest(); let buf = null;
+    if (rel.startsWith('onnx/')) buf = modelBuf;
+    else if (rel.startsWith('voices/')) { const v = M?.voices?.[rel.slice(7).replace('.bin', '')]; if (v) buf = b64ToBytes(await (await realFetch(v)).text()).buffer; }
+    else if (M?.files?.[rel]) buf = await (await realFetch(M.files[rel])).arrayBuffer();
+    if (!buf) return new Response('', { status: 404 });
+    return new Response(buf.slice(0), { status: 200, headers: { 'Content-Type': rel.endsWith('.json') ? 'application/json' : 'application/octet-stream', 'Content-Length': String(buf.byteLength) } });
+  }
+  if (/ort-wasm[^/]*\.wasm(\?|$)/.test(url) && wasmBuf) return new Response(wasmBuf.slice(0), { status: 200, headers: { 'Content-Type': 'application/wasm' } });
+  return realFetch(input, init);
+};
+
+/* ---------- tones: speed, pitch (semitones), loudness and color, applied per phrase ---------- */
+const TONES = {
+  neutral:    { c: '#9aa5b1', speed: 1,    pitch: 0,    gain: 1 },
+  excited:    { c: '#ff9f43', speed: 1.1,  pitch: 2,    gain: 1.2 },
+  happy:      { c: '#ffd166', speed: 1.05, pitch: 1,    gain: 1.08 },
+  calm:       { c: '#5ec8e5', speed: 0.9,  pitch: -1,   gain: 0.85 },
+  serious:    { c: '#8a9bff', speed: 0.95, pitch: -2,   gain: 1 },
+  sad:        { c: '#6c8fb3', speed: 0.86, pitch: -2.5, gain: 0.8 },
+  angry:      { c: '#ff5d5d', speed: 1.06, pitch: -1,   gain: 1.3, drive: 0.35 },
+  whisper:    { c: '#b6c2cf', speed: 0.93, pitch: 0,    gain: 0.5, hp: 700, breath: 0.35 },
+  scared:     { c: '#c792ea', speed: 1.15, pitch: 2.5,  gain: 0.85, trem: 0.25 },
+  dramatic:   { c: '#f78c6c', speed: 0.86, pitch: -1.5, gain: 1.1, verb: 0.2 },
+  shout:      { c: '#ff6b9a', speed: 1.04, pitch: 2.5,  gain: 1.45, drive: 0.5 },
+  mysterious: { c: '#7fdbca', speed: 0.88, pitch: -2,   gain: 0.8, lp: 3500, verb: 0.25 },
+};
+const VOICES = [['af_heart', 'Heart · US woman, warm'], ['af_bella', 'Bella · US woman, bright'], ['af_nicole', 'Nicole · US woman, soft'], ['af_sarah', 'Sarah · US woman'], ['af_sky', 'Sky · US woman, young'], ['af_nova', 'Nova · US woman'],
+  ['am_michael', 'Michael · US man, narrator'], ['am_adam', 'Adam · US man, deep'], ['am_eric', 'Eric · US man'], ['am_fenrir', 'Fenrir · US man, gritty'], ['am_liam', 'Liam · US man, young'], ['am_onyx', 'Onyx · US man, low'], ['am_puck', 'Puck · US man, playful'],
+  ['bf_emma', 'Emma · UK woman'], ['bf_isabella', 'Isabella · UK woman'], ['bm_george', 'George · UK man, storyteller'], ['bm_lewis', 'Lewis · UK man'], ['bm_daniel', 'Daniel · UK man'], ['bm_fable', 'Fable · UK man, bright']];
+
+function parse(text, baseVoice) {
+  const out = [], stack = ['neutral']; let voice = baseVoice, last = 0; const re = /\[(\/?)([a-z_]*)(?:[ :]([^\]]+))?\]/gi; let m;
+  const push = (s) => { s = s.replace(/\s+/g, ' '); if (!s.trim()) { if (out.length && s) out.at(-1).text += ' '; return; } const tone = stack.at(-1), prev = out.at(-1);
+    if (prev && prev.type === 'say' && prev.tone === tone && prev.voice === voice) prev.text += s; else out.push({ type: 'say', text: s, tone, voice }); };
+  while ((m = re.exec(text))) {
+    push(text.slice(last, m.index)); last = re.lastIndex; const [, close, name0, arg] = m, name = name0.toLowerCase();
+    if (close) { if (stack.length > 1) stack.pop(); }
+    else if (name === 'pause') out.push({ type: 'pause', sec: Math.min(3, Math.max(0.05, parseFloat(arg) || 0.4)) });
+    else if (name === 'voice' && arg) voice = arg.trim();
+    else if (TONES[name]) stack.push(name);
+  }
+  push(text.slice(last));
+  const res = []; for (const s of out) { if (s.type !== 'say') { res.push(s); continue; } s.text = s.text.trim();   // keep chunks short for the model
+    const parts = s.text.match(/[^.!?]+[.!?]*\s*/g) || [s.text]; let cur = ''; for (const p of parts) { if ((cur + p).length > 220 && cur) { res.push({ ...s, text: cur.trim() }); cur = ''; } cur += p; } if (cur.trim()) res.push({ ...s, text: cur.trim() }); }
+  return res;
+}
+
+/* ---------- audio ---------- */
+let tts = null, take = null, playing = null;
+const SR = 24000;
+function progress(p, msg) { document.getElementById('bar').style.width = Math.round(p * 100) + '%'; if (msg) document.getElementById('status').textContent = msg; }
+async function loadEngine() {
+  if (tts) return tts; const pill = document.getElementById('engine'); pill.textContent = 'Voice engine: loading…'; pill.className = 'pill';
+  try {
+    const M = await manifest(); if (!M?.model) throw new Error('Voice engine files are not installed on this page yet. Ask Claude: "install the voice engine".');
+    wasmBuf = await joinParts(M.wasm.parts, 'audio engine', M.wasm.sha256, 0, 0.25);
+    modelBuf = await joinParts(M.model.parts, 'voice model', M.model.sha256, 0.25, 0.9);
+    progress(0.92, 'Starting the voice engine…');
+    const { KokoroTTS } = await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js');
+    tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8', device: 'wasm' });
+    pill.textContent = 'Voice engine: ready'; pill.className = 'pill ok'; progress(1, 'Ready.'); return tts;
+  } catch (e) { pill.textContent = 'Voice engine: unavailable'; pill.className = 'pill bad'; progress(0, e.message || String(e)); throw e; }
+}
+function trim(f32) { const th = 0.012; let a = 0, b = f32.length - 1; while (a < b && Math.abs(f32[a]) < th) a++; while (b > a && Math.abs(f32[b]) < th) b--; return f32.slice(Math.max(0, a - 240), Math.min(f32.length, b + 480)); }
+function impulse(ctx, sec) { const n = Math.round(sec * SR), b = ctx.createBuffer(1, n, SR), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); return b; }
+async function shape(f32, T) {   // pitch via playback rate (speed was pre-compensated), filters, drive, tremolo, breath, room
+  const r = Math.pow(2, T.pitch / 12), len = Math.ceil(f32.length / r) + Math.round(SR * (T.verb ? 0.6 : 0.02));
+  const ctx = new OfflineAudioContext(1, len, SR), buf = ctx.createBuffer(1, f32.length, SR); buf.copyToChannel(f32, 0);
+  const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = r; let node = src;
+  const add = (n) => { node.connect(n); node = n; };
+  if (T.hp) { const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = T.hp; add(f); }
+  if (T.lp) { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = T.lp; add(f); }
+  if (T.drive) { const ws = ctx.createWaveShaper(), k = T.drive * 30, c = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; c[i] = Math.tanh(x * (1 + k)) / Math.tanh(1 + k); } ws.curve = c; add(ws); }
+  const g = ctx.createGain(); g.gain.value = T.gain; add(g);
+  if (T.trem) { const lfo = ctx.createOscillator(), d = ctx.createGain(); lfo.frequency.value = 7; d.gain.value = T.trem * T.gain; lfo.connect(d); d.connect(g.gain); lfo.start(); }
+  node.connect(ctx.destination);
+  if (T.verb) { const cv = ctx.createConvolver(), w = ctx.createGain(); cv.buffer = impulse(ctx, 1.2); w.gain.value = T.verb; g.connect(cv); cv.connect(w); w.connect(ctx.destination); }
+  if (T.breath) { const n = ctx.createBufferSource(), nb = ctx.createBuffer(1, len, SR), d = nb.getChannelData(0); let env = 0;   // breathy noise that follows the voice
+    for (let i = 0; i < len; i++) { const s = f32[Math.min(f32.length - 1, Math.floor(i * r))] || 0; env = Math.max(Math.abs(s), env * 0.9995); d[i] = (Math.random() * 2 - 1) * env * T.breath; }
+    n.buffer = nb; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3000; f.Q.value = 0.7; n.connect(f); f.connect(ctx.destination); n.start(); }
+  src.start(); return (await ctx.startRendering()).getChannelData(0);
+}
+async function generate() {
+  const text = document.getElementById('text').value, base = document.getElementById('voice').value, gspeed = +document.getElementById('speed').value;
+  const segs = parse(text, base); if (!segs.some((s) => s.type === 'say')) { progress(0, 'Write something to say first.'); return null; }
+  await loadEngine();
+  const pieces = [], words = [], marks = []; let t = 0, k = 0;
+  for (const s of segs) {
+    k++; progress(k / segs.length, `Generating ${k}/${segs.length}…`);
+    if (s.type === 'pause') { pieces.push(new Float32Array(Math.round(s.sec * SR))); t += s.sec; continue; }
+    const T = TONES[s.tone] || TONES.neutral, r = Math.pow(2, T.pitch / 12), voice = VOICES.some(([v]) => v === s.voice) ? s.voice : base;
+    const raw = await tts.generate(s.text, { voice, speed: Math.min(2, Math.max(0.5, T.speed * gspeed / r)) });
+    const y = await shape(trim(raw.audio), T), dur = y.length / SR;
+    marks.push({ tone: s.tone, start: t, end: t + dur });
+    const ws = s.text.split(/\s+/).filter(Boolean), wts = ws.map((w) => w.replace(/[^\p{L}\p{N}]/gu, '').length + 1), tot = wts.reduce((a, b) => a + b, 0); let acc = 0;
+    ws.forEach((w, i) => { const a = t + dur * acc / tot; acc += wts[i]; words.push([w, +a.toFixed(3), +(t + dur * acc / tot).toFixed(3), s.tone]); });
+    pieces.push(y); t += dur;
+    const gap = /[.!?]$/.test(s.text) ? 0.32 : /[,;:]$/.test(s.text) ? 0.14 : 0.05; pieces.push(new Float32Array(Math.round(gap * SR))); t += gap;
+  }
+  const n = pieces.reduce((a, p) => a + p.length, 0), out = new Float32Array(n); let o = 0; for (const p of pieces) { out.set(p, o); o += p.length; }
+  let sq = 0, cnt = 0; for (let i = 0; i < n; i++) if (Math.abs(out[i]) > 0.01) { sq += out[i] * out[i]; cnt++; }   // master: voiced RMS to about -18 dBFS, soft limit
+  const g = cnt ? Math.min(6, 0.126 / Math.sqrt(sq / cnt)) : 1; for (let i = 0; i < n; i++) { const x = out[i] * g; out[i] = Math.abs(x) < 0.85 ? x : Math.sign(x) * (0.85 + 0.15 * Math.tanh((Math.abs(x) - 0.85) / 0.15)); }
+  take = { samples: out, words, marks, duration: n / SR, voice: base };
+  drawWave(); document.getElementById('play').disabled = false; document.getElementById('dl').disabled = false;
+  progress(1, `Done — ${take.duration.toFixed(1)}s.`); return take;
+}
+function wav(f32) { const b = new ArrayBuffer(44 + f32.length * 2), v = new DataView(b), w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); v.setUint32(4, 36 + f32.length * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, SR, true); v.setUint32(28, SR * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, f32.length * 2, true);
+  for (let i = 0; i < f32.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, f32[i])) * 32767, true); return b; }
+function drawWave(head) {
+  const c = document.getElementById('wave'), g = c.getContext('2d'), W = c.width = c.clientWidth * devicePixelRatio || 1100, H = c.height = 96 * devicePixelRatio; g.clearRect(0, 0, W, H); if (!take) return;
+  const s = take.samples, step = Math.max(1, Math.floor(s.length / W));
+  for (let x = 0; x < W; x++) { let m = 0; for (let i = x * step; i < (x + 1) * step && i < s.length; i++) m = Math.max(m, Math.abs(s[i])); const tt = x * step / SR, mk = take.marks.find((q) => tt >= q.start && tt <= q.end);
+    g.fillStyle = mk ? TONES[mk.tone].c : '#3a424c'; const h = Math.max(1, m * H * 0.9); g.fillRect(x, (H - h) / 2, 1, h); }
+  if (head !== undefined) { g.fillStyle = '#ffffff'; g.fillRect(head * W, 0, 2 * devicePixelRatio, H); }
+}
+async function play() {
+  if (!take) return; if (playing) { playing.stop(); playing = null; return; }
+  const ctx = new AudioContext({ sampleRate: SR }), b = ctx.createBuffer(1, take.samples.length, SR); b.copyToChannel(take.samples, 0);
+  const src = ctx.createBufferSource(); src.buffer = b; src.connect(ctx.destination); src.start(); playing = src; const t0 = ctx.currentTime;
+  const tick = () => { if (playing !== src) { drawWave(); return; } drawWave((ctx.currentTime - t0) / take.duration); requestAnimationFrame(tick); }; tick();
+  src.onended = () => { if (playing === src) playing = null; ctx.close(); };
+}
+
+/* ---------- shared scripts (Claude writes them; takes go back to Claude) ---------- */
+let db = null, assets = null, downloads = null, current = null, docs = [];
+const $ = (id) => document.getElementById(id);
+function renderPreview() {
+  const segs = parse($('text').value, $('voice').value), p = $('preview'); p.textContent = '';
+  for (const s of segs) { const el = document.createElement('span');
+    if (s.type === 'pause') { el.className = 'pause'; el.textContent = `pause ${s.sec}s`; }
+    else { const c = (TONES[s.tone] || TONES.neutral).c; el.style.background = c + '26'; el.style.boxShadow = `inset 0 -2px 0 ${c}`; el.title = s.tone + (s.voice !== $('voice').value ? ' · ' + s.voice : ''); el.textContent = s.text; }
+    p.append(el, ' '); }
+}
+function renderList() {
+  const L = $('list'); L.textContent = '';
+  if (!docs.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = db ? 'No scripts yet. Claude adds one for every video, or start one with New script.' : 'Scripts sync when you are signed in.'; L.append(e); return; }
+  for (const d of docs) { const b = document.createElement('button'); b.className = 'item'; b.setAttribute('aria-current', String(d.id === current));
+    const t = document.createElement('span'); t.textContent = d.title || 'Untitled'; const s = document.createElement('small');
+    s.textContent = d.take ? `Voice ready · ${(+d.take.duration || 0).toFixed(1)}s` : d.status === 'queued' ? 'Waiting to generate' : 'Draft'; b.append(t, s); b.onclick = () => open(d.id); L.append(b); }
+}
+function open(id) { const d = docs.find((x) => x.id === id); if (!d) return; current = id; $('title').value = d.title || ''; $('text').value = d.text || ''; if (d.voice) $('voice').value = d.voice; $('speed').value = d.speed ?? 1; renderPreview(); renderList(); }
+async function save(extra = {}) {
+  if (!db) { progress(0, 'Sign in to save scripts.'); return; }
+  current ??= 's' + Date.now().toString(36);
+  const data = { title: $('title').value.trim() || 'Untitled', text: $('text').value, voice: $('voice').value, speed: +$('speed').value, updatedAt: Date.now(), ...extra };
+  try { await db.collection('scripts').doc(current).update(data); } catch { try { await db.collection('scripts').doc(current).set(data); } catch (e) { progress(0, 'Could not save: ' + (e.message || e.code)); } }
+}
+async function deliver() {   // the take goes to Claude: base64 WAV as a text asset + word timings in the script doc
+  if (!take || !assets || !db) return;
+  try { const bytes = new Uint8Array(wav(take.samples)); let s = ''; for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode(...bytes.subarray(i, i + 32768));
+    const up = await assets.upload(new Blob([btoa(s)], { type: 'text/plain' }));
+    await save({ status: 'ready', take: { assetId: up.id, format: 'wav-base64', duration: +take.duration.toFixed(3), voice: take.voice, words: take.words.map((w) => ({ w: w[0], start: w[1], end: w[2], tone: w[3] })), tones: take.marks, at: Date.now() } });
+    progress(1, `Done — ${take.duration.toFixed(1)}s. Saved for Claude.`);
+  } catch (e) { progress(1, 'Generated, but saving it for Claude failed: ' + (e.message || e.code)); }
+}
+
+/* ---------- UI wiring ---------- */
+for (const [v, label] of VOICES) { const o = document.createElement('option'); o.value = v; o.textContent = label; $('voice').append(o); }
+$('voice').value = 'am_michael';
+for (const [name, T] of Object.entries(TONES)) { if (name === 'neutral') continue; const b = document.createElement('button'); b.className = 'chip'; b.type = 'button';
+  const dot = document.createElement('i'); dot.style.background = T.c; b.append(dot, name[0].toUpperCase() + name.slice(1));
+  b.onclick = () => { const ta = $('text'), a = ta.selectionStart, z = ta.selectionEnd; if (a === z) { progress(0, 'Select the words first, then tap a tone.'); return; }
+    ta.setRangeText(`[${name}]${ta.value.slice(a, z)}[/]`, a, z, 'end'); ta.focus(); renderPreview(); }; $('chips').append(b); }
+{ const b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.textContent = '+ Pause'; b.onclick = () => { const ta = $('text'); ta.setRangeText(' [pause 0.5] ', ta.selectionStart, ta.selectionEnd, 'end'); ta.focus(); renderPreview(); }; $('chips').append(b); }
+$('text').addEventListener('input', renderPreview); $('voice').addEventListener('change', renderPreview);
+$('gen').onclick = async () => { $('gen').disabled = true; try { await save(); if (await generate()) await deliver(); } catch {} $('gen').disabled = false; };
+$('play').onclick = play;
+$('sample').onclick = async () => { const keep = $('text').value; $('text').value = 'Hi! This is how I sound when I tell your story.'; try { await generate(); play(); } catch {} $('text').value = keep; renderPreview(); };
+$('save').onclick = async () => { await save(); progress(0, 'Saved.'); };
+$('new').onclick = () => { current = null; $('title').value = 'New script'; $('text').value = ''; take = null; drawWave(); renderPreview(); renderList(); $('text').focus(); };
+$('dl').onclick = async () => { if (!take) return; if (!downloads) { progress(1, 'Downloading isn’t available here — Claude already has this take.'); return; }
+  try { await downloads.save({ filename: ($('title').value || 'voiceover').replace(/[^\w\- ]+/g, '').trim() + '.wav', data: new Blob([wav(take.samples)]) }); } catch (e) { if (e?.code !== 'declined') progress(1, 'Download failed: ' + (e.message || e.code)); } };
+window.addEventListener('resize', () => drawWave());
+renderPreview(); drawWave();
+manifest().then((M) => { if (!M?.model) { $('engine').textContent = 'Voice engine: not installed'; $('engine').className = 'pill bad'; } });
+
+(async () => {
+  [db, assets, downloads] = await Promise.all(['db', 'assets', 'downloads'].map((n) => window.claude?.use?.(n) ?? null));
+  const sync = $('sync');
+  if (!db) { sync.textContent = 'Offline: scripts won’t sync'; renderList(); return; }
+  const timer = setTimeout(() => { sync.textContent = 'Scripts are slow to load'; }, 10000);
+  db.collection('scripts').orderBy('updatedAt', 'desc').limit(50).onSnapshot(async (snap) => {
+    clearTimeout(timer); sync.textContent = 'Synced with Claude'; sync.className = 'pill ok';
+    docs = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) })); if (!current && docs[0]) open(docs[0].id); renderList();
+    const q = docs.find((d) => d.status === 'queued');   // Claude asked for a take: render it here and send it back
+    if (q && !$('gen').disabled && !q._busy) { q._busy = true; open(q.id); $('gen').click(); }
+  }, () => { clearTimeout(timer); sync.textContent = 'Couldn’t load scripts'; sync.className = 'pill bad'; });
+})();
+</script>

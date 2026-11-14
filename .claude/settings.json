@@ -1,8 +1,25 @@
 {
   "extraKnownMarketplaces": {
     "motion-video-marketplace": {
-      "source": { "source": "github", "repo": "fahadisthegoat2-hub/motion-forge" }
+      "source": {
+        "source": "github",
+        "repo": "fahadisthegoat2-hub/motion-forge"
+      }
     }
   },
-  "enabledPlugins": { "motion-video@motion-video-marketplace": true }
+  "enabledPlugins": {
+    "motion-video@motion-video-marketplace": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/hooks/project-start.sh\""
+          }
+        ]
+      }
+    ]
+  }
 }
