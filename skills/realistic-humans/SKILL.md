@@ -24,17 +24,15 @@ description: Create realistic or semi-realistic 3D humans and believable backgro
 2. **Blender + Cycles (ONLY if user said "Blender/Python allowed")** —
    `blender -b -P ${CLAUDE_PLUGIN_ROOT}/scripts/blender_base_scene.py -- --out renders/ --character model.fbx --render`.
 
-## Getting the human (never model a body from primitives, never use Xbot as a person)
+## Getting the human — compose, never invent
 | Priority | Source | Notes |
 |---|---|---|
-| 1 | `characters/*.glb|fbx` in the project | The user's own. Check this folder first, every time. |
-| 2 | **Avaturn** GLB (free, iPad-friendly) | Realistic, ARKit face shapes → blinks + expressions |
-| 3 | **Mixamo** FBX (free Adobe acct) | Good bodies, no face shapes |
-| 4 | Sample `readyplayer.me.glb` (template default) | Placeholder semi-real man (hat, mustache) |
-If the result needs a specific look the sample can't give (casual tee, woman, child), tell the
-user once, in one line, how to add a character (see `characters/README.md`) — then continue with
-the sample instead of blocking. Multiple people = multiple CAST entries (vary height 1.6–1.9,
-wardrobe colors). Extra motions: Mixamo FBX "Without Skin" in `animations/`.
+| 1 | `characters/*.glb|fbx` in the project | The user's own. Check this folder first. |
+| 2 | Built-in CC0 actors `jake`, `marcus` (`actor:` in CAST) | Dressed, real hair, face rigs (blinks, expressions, lip-sync). Restyle with `wardrobe` / `skin` / `hair` / `height`. |
+| 3 | Avaturn GLB / Mixamo FBX the user uploads | Tell the user once how (characters/README.md), keep going with built-ins meanwhile. |
+**Never** build bodies, t-shirts, clothing, hair strands/curls, faces or eyes from primitives, tubes or
+curves — that is exactly what looks cheap. If a look can't be reached with wardrobe colors, say so
+in one line and use the closest built-in.
 
 ## Skin & face realism checklist
 - Principled BSDF: Subsurface Weight 0.15–0.3, Radius (1.0, 0.35, 0.2), Scale ~0.01 m,

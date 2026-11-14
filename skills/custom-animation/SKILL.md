@@ -63,6 +63,10 @@ stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
   cut on action (start the next shot mid-movement).
 - **Hold key poses** ≥ 0.4s so they read on a phone.
 
+## Auto-acting (template)
+- Characters gesture automatically while they `talk` (beat · explain · present · count · point) and glance around when quiet. Tune with `acting: calm | big | none`. So: give every speaking line a `talk` range.
+- Clips: idle · walk · jog · sprint · dance · crouch (Quaternius) + Xbot/Soldier/Michelle + `animations/*.fbx`.
+
 ## Body language toolkit (template)
 - `gestures: [{ type, start, end, side: right|left|both, amount }]` — `point, handsup, shrug,
   armsout, fistpump, shield, think, facepalm, wave, lean, slump, scared`. Each has automatic

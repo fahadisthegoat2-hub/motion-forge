@@ -13,6 +13,9 @@ Final renders: ask the user Good / High / Epic, pass `--quality`.
 Build as one HTML file (Canvas2D, SVG or Three.js + GSAP), driven by a single time `t`,
 then render to video with the bundled renderer.
 
+## Built-in kinetic titles (3D videos)
+In the studio template use `TITLES` (see templates/SCENE_API.md): slam (hooks), stack, typewriter, counter (numbers), glitch, lower-third, stamp ("FAKE"/"TRUE"), meter (progress bars), ring (highlight a detail), tag ("DAY 30" pills). Hook = slam in the first 0.3s; one title per beat; never over the face.
+
 ## Design rules
 - **Grid & safe areas**: 1920×1080 (16:9), 1080×1920 (9:16), 1080×1080. Keep text inside
   90% title-safe.

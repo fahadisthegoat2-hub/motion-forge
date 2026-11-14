@@ -24,6 +24,7 @@ no aliasing shimmer · correct aspect/resolution · loop seam clean (if looping)
 **Visual**: NO reference image used as a texture/print and no copied logos or text on clothing · clear focal point every frame · readable silhouette · value contrast ·
 colors match style bible · skin not plastic, eyes have catchlights · text inside safe area,
 legible at phone size.
+**Composition**: eyes on the upper third · subject never cropped at the head in wide shots · titles/captions never over faces · FX inside the frame (use camera `with`) · nothing built from primitives where an actor/kit exists.
 **Motion**: no stiff shots (something changes every ~1s; look/face/talk layered on clips) · no foot skating (walk ≈1.45 m/s, run ≈2.57 m/s) · no instant turns/snaps · eyes alive (look targets change) · no Xbot/mannequin used as a person · no linear easing on organic motion · no pops/snaps between frames · arcs ·
 overlap/secondary motion · holds long enough to read · camera moves motivated.
 **VFX**: every effect layered (core + smoke/sparks/debris + light + shake + reaction) · no

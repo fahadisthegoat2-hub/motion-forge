@@ -1,65 +1,82 @@
 # Studio scene API (templates/studio_scene.html)
 
 Copy the template next to the project files (e.g. `scenes/my-short.html`) and edit only the
-**DIRECTION** block. Everything is a pure function of time `t`, so previews, cloud renders and
-on-device renders are identical.
+**DIRECTION** block (CONFIG · CAST · SHOTS · CAPTIONS · TITLES). Everything is a pure function of
+time `t`, so previews, cloud renders and on-device renders are frame-identical.
+
+**Golden rule: compose, don't invent.** Use the built-in actors, clips, sets, effects and titles.
+Never model people, clothes, hair, faces or foliage from primitives — that is what looks cheap.
 
 ## CONFIG
-`width/height` (1080×1920 shorts · 1920×1080 long-form) · `fps` · `bgTop/bgBottom` (studio
-gradient) · `grain` · `vignette` · `animations: [urls]` — clip libraries. Any Mixamo/humanoid
-clip is **auto-retargeted** onto every character (world-space transfer + rest-pose calibration,
-so T-pose and A-pose rigs both work).
+`width/height` (1080×1920 shorts · 1920×1080 long-form) · `fps` · `look` · `set` · `captionY`
+(0..1, default 0.74) · `animations` (clip libraries; any Mixamo/Unreal/MakeHuman clip is
+auto-retargeted onto every actor).
 
-Built-in clips: `idle, walk, run, agree, headshake, sad_pose, sneak_pose` (+ `tpose`).
-User clips: Mixamo FBX in `animations/` → add `'animations/Waving.fbx'` → clip `waving`.
+**look** (`CONFIG.look` / per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
+dreamy · horror · golden-hour`.
+**set** (`CONFIG.set` / per-shot `shot.set`): `studio · void · outdoor · interior · street-night ·
+jungle · lab · city-day · space · { url, scale, pos, rotY }` (GLB).
 
-**look** (`CONFIG.look` or per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
-dreamy · horror · golden-hour` — light rig + split-tone grade + bloom + fog + chromatic aberration + grain.
-**set** (`CONFIG.set` or per-shot `shot.set`): `studio` (gradient cyclorama) · `void` (dark glossy floor) ·
-`outdoor` (grass, hills, sky with sun) · `interior` (wood floor, plaster walls, window + light shaft) ·
-`street-night` (wet concrete, buildings with lit windows, street lamp + beam, dust) · `{ url, scale, pos, rotY }` GLB.
-
-## CAST
+## CAST — built-in CC0 actors (dressed, real hair, face rigs, lip-sync)
 ```js
-hero: { urls: ['characters/hero.glb', 'characters/hero.fbx', LIB + 'readyplayer.me.glb'],
-        height: 1.80, wardrobe: { top: '#b6f22e', bottom: null, shoes: null } }
+hero: { actor: 'jake',            // jake (casual top + trousers) · marcus (big build, work overalls)
+        height: 1.80,             // metres (0.3–3.2)
+        wardrobe: { top: '#2e6bd6', bottom: '#20242c', shoes: null, print: false },  // keeps fabric shading
+        skin: 'medium',           // pale · light · medium · tan · brown · dark · '#hex'
+        hair: '#2a1b12' }         // hair color
 ```
-First URL that loads wins. Model auto-scaled to `height`, materials auto-upgraded (skin
-sheen + warmth, glossy eyes, fabric sheen). `wardrobe` = plain solid clothing colors.
+Your own characters: `urls: ['characters/name.glb']` (Avaturn GLB / Mixamo FBX) or a file named
+`characters/<castId>.glb`. Several people = several cast entries (vary height, skin, hair, wardrobe).
+
+## Clips
+`idle · walk · jog · sprint · dance · crouch` (Quaternius CC0) · `run · agree · headshake · sad_pose ·
+sneak_pose` (Xbot) · `sambadance` (Michelle) + anything in `animations/*.fbx`.
+Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
 
 ## SHOTS (play back-to-back)
 ```js
-{ name, dur, chapter?, fadeIn?, fadeOut?, flash?,
-  camera: { pos: keys, look: keys, fov: keys|number, handheld: 0..2, shakes: [{ t, amp, decay }] },
+{ name, dur, chapter?, look?, set?, cut?, fadeIn?, fadeOut?, flash?,
+  camera: { move, target, size, az, height, span, side, at, with, fov, ease, handheld, roll, shakes }
+          // or manual: { pos: keys, look: keys, fov }
   cast: { hero: {
-    pos: keys([x,y,z]), rotY: keys(radians),            // placement; omit a character to hide it
-    clips: [{ clip, start, end, fade?, speed?, offset?, loop? }],
-    look: keys([x,y,z] | 'camera'),                      // head+neck+spine+eyes, spring-smoothed
-    face: { smile|shock|worried|sad|angry: keys(0..1) }, // ARKit/RPM morphs, auto-mapped
-    talk: [[start, end], ...],                           // mouth flap + speech head-nods
-    gestures: [{ type, start, end, side?, amount? }],    // point handsup shrug armsout fistpump shield think facepalm wave lean slump scared
+    pos: keys([x,y,z]), rotY: keys(rad),
+    clips: [{ clip, start, end, fade?, speed?, loop? }],
+    look: keys([x,y,z] | 'camera'),
+    face: { smile|smirk|shock|scream|worried|sad|angry|disgust|squint: keys(0..1) },
+    talk: [[start, end], ...], talkRate?,      // syllable lip-sync + automatic hand gestures
+    gestures: [{ type, start, end, side?, amount? }],
+    acting: 'auto' | 'calm' | 'big' | 'none',  // auto talk gestures + idle glances (default auto)
   } },
-  fx: [{ type, t | start/end, pos, scale, ... }],        // see skills/vfx — explosion fire smoke sparks magic lightning shockwave beam dust embers rain snow splash
-  look?, set?, flash? }
+  fx: [{ type, t | start/end, pos, scale, ... }] }
 ```
-**keys** = `[[time, value, ease?], ...]` in shot-local seconds. Eases: `linear inSine outSine
-inOutSine inCubic outCubic inOutCubic outExpo inOutExpo outBack outElastic spring`.
-A shot's `chapter: 'Name'` starts a render Part (long-form).
+**keys** = `[[time, value, ease?], ...]` (shot-local seconds). Eases: `linear inSine outSine inOutSine
+inCubic outCubic inOutCubic outExpo inOutExpo outBack outElastic spring`.
 
-## Automatic life layer (always on — never disable)
-Breathing (3.8s) · weight-shift sway · micro head noise · eyes lead the head with saccades
-every 0.45–2s · spring-smoothed look-at (spine 15% / neck 35% / head 50%) · blinks every
-2–5s (if the model has blink morphs) · talk mouth + nods · clip cross-fades · **foot-locked
-locomotion**: when a walk/run clip plays while `pos` moves, the cycle phase follows distance
-travelled, so feet never skate. Natural speeds: walk 1.45 m/s, run 2.57 m/s — plan `pos`
-keys near those speeds.
+### Camera moves (auto-framed on the target's eye line; `az` is relative to the target's facing, 0 = their face)
+`static · dolly-in · push · dolly-out · orbit (span°) · crane-up · crane-down · low-hero · overhead ·
+crash-zoom (at) · reveal · track/follow (rides beside a walking character, side: left|right) ·
+over-shoulder · dutch`.
+**size**: `ecu · cu · mcu · ms · mls · ws · ews` (or metres). `with: [x,y,z]` pans toward a second
+subject (e.g. an explosion) while keeping the actor in frame.
 
-## CAPTIONS
-`[{ t, t1?, text, hi: ['WORD'] }]` — word-by-word pop-in, highlighted words in yellow, drawn
-into the video (works in every render path).
+### Transitions (`shot.cut` = how this shot comes in)
+`whip · zoom · spin · glitch · flash · dip · smash · blur` — motion-blurred camera moves across the cut.
+Use one every 2–3 cuts; hard cuts are fine in between.
+
+### Gestures (auto anticipation → overshoot → living hold → settle)
+`point · handsup · shrug · armsout · fistpump · shield · think · facepalm · wave · lean · slump · scared ·
+beat · explain · present · count`.
+
+### Effects (`fx`) — see skills/vfx
+`explosion · fire · smoke · sparks · magic · lightning · shockwave · beam · dust · embers · rain · snow · splash`.
+
+## CAPTIONS & TITLES (drawn into the video)
+`CAPTIONS = [{ t, t1?, text, hi: ['WORD'] }]` — word-by-word pop, highlighted words yellow, at `captionY`.
+`TITLES = [{ t, t1, style, text, pos:[x,y], size, color, accent, sub, from, to, prefix, suffix, value, radius }]`
+styles: `slam` (hook titles, `\n` stacks lines, last line accent) · `stack` · `typewriter` · `counter`
+· `glitch` · `lower-third` · `stamp` · `meter` · `ring` (highlight circle) · `tag` (pill label like "DAY 30").
+Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 
 ## Rendering
-- Preview / QA: `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --width 540 --height 960 --fps 4 --frames-only`
-- Final (cloud): `--quality good|high|epic` (+ `--chapter N` for long-form parts)
-- Final (device): open the page → Render on this device panel.
-Sample models come from the three.js CDN; if blocked, the renderer fetches them via git automatically.
+- QA in the cloud (no GPU): `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 405 --height 720 --fps 4 --frames-only`
+- Finals: on the user's device (open the page → Render panel), or cloud `--quality good|high|epic` only if asked (slow).

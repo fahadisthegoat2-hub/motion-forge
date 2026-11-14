@@ -48,6 +48,12 @@ Say **"Blender/Python allowed"** to unlock the Blender pipeline.
 All skills load automatically: a startup hook tells Claude which skills to use for every
 kind of request, so you never have to name them.
 
+## Built-in kit (no downloads needed)
+- **Built-in actors:** Jake and Marcus (CC0, dressed, real hair, face rigs, lip-sync), restyled per video with clothing colors, skin tone, hair color and height.
+- **Animations:** idle, walk, jog, sprint, dance, crouch (+ more) — auto-retargeted, feet locked.
+- **Sets:** jungle, lab, city-day, space, street-night, interior, outdoor, studio, void.
+- **Camera moves, transitions, kinetic titles, VFX** — see templates/SCENE_API.md.
+
 ## Your folders (upload on iPad: GitHub → Add file → Upload files)
 - `characters/` — your people (Avaturn GLB best, Mixamo FBX ok)
 - `animations/` — extra Mixamo moves (FBX, Without Skin)
