@@ -83,3 +83,15 @@ the hook and twist. `qa_check.js` fails any short that breaks these numbers.
 
 **Before building**: write 5 hooks, score each (stops the scroll? visual? curiosity gap?), keep the best. Read the script out loud in
 your head at 1.15× — if any 3 seconds would let a viewer swipe, rewrite them.
+
+## CHANNEL DATA (from Sir's analytics — these rules override older ones)
+Best short: 43% stayed. Flops: 75–80% swiped in the first second, viewers gone by 0:13 because the payoff came too late,
+34% stayed when the twist was slow. GOAL: 60%+ stayed to watch.
+1. **0.0 s = motion + shock line on screen** — never a still face, a title card or a slow push. Camera AND subject move on frame 1.
+2. **Payoff first, then rewind**: shot 1 shows the most shocking result / the twist image (mark it `role: 'payoff'`), then
+   "3 days earlier…" and the story. The twist is teased in second 1 and paid off at the end.
+3. **New angle or zoom every 2–3 s** (cut, punch-in or a camera move) — no exceptions.
+4. **25–35 s** for shorts unless Sir asks for another length.
+5. **Ending loops into the start** (the last line/image leads straight into shot 1).
+6. **One comment question** at the end (caption + pinned comment), e.g. "Would you have survived?".
+7. **Niche: crazy TRUE stories** (story-research) — same niche every day so the algorithm learns the audience.
