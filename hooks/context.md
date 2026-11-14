@@ -38,6 +38,7 @@ ROUTING (load every matching skill, in this order, before working):
 - Reference images or videos (chat or references/ folder) → reference-learning first (scripts/analyze_video.js for videos), then apply the saved style everywhere
 - Effects, action, destruction, weather, magic, "epic" → vfx (+ art-direction)
 - "Better visuals / more detail / more style / cinematic" → art-direction + realistic-humans
+- Real/true stories, "find a story", vague themes, ideas → story-research (then story-writing)
 - Script/plot/idea only → story-writing
 - Titles, descriptions, tags, views, growth → viral-growth
 - Thumbnails, covers, CTR → thumbnails (many drafts silently, deliver ONLY the single best)
