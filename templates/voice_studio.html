@@ -118,17 +118,17 @@ window.fetch = async (input, init) => {
 /* ---------- tones: speed, pitch (semitones), loudness and color, applied per phrase ---------- */
 const TONES = {
   neutral:    { c: '#9aa5b1', speed: 1,    pitch: 0,    gain: 1 },
-  excited:    { c: '#ff9f43', speed: 1.1,  pitch: 2,    gain: 1.2 },
-  happy:      { c: '#ffd166', speed: 1.05, pitch: 1,    gain: 1.08 },
-  calm:       { c: '#5ec8e5', speed: 0.9,  pitch: -1,   gain: 0.85 },
-  serious:    { c: '#8a9bff', speed: 0.95, pitch: -2,   gain: 1 },
-  sad:        { c: '#6c8fb3', speed: 0.86, pitch: -2.5, gain: 0.8 },
-  angry:      { c: '#ff5d5d', speed: 1.06, pitch: -1,   gain: 1.3, drive: 0.35 },
-  whisper:    { c: '#b6c2cf', speed: 0.93, pitch: 0,    gain: 0.5, hp: 700, breath: 0.35 },
-  scared:     { c: '#c792ea', speed: 1.15, pitch: 2.5,  gain: 0.85, trem: 0.25 },
-  dramatic:   { c: '#f78c6c', speed: 0.86, pitch: -1.5, gain: 1.1, verb: 0.2 },
-  shout:      { c: '#ff6b9a', speed: 1.04, pitch: 2.5,  gain: 1.45, drive: 0.5 },
-  mysterious: { c: '#7fdbca', speed: 0.88, pitch: -2,   gain: 0.8, lp: 3500, verb: 0.25 },
+  excited:    { c: '#ff9f43', speed: 1.1,  pitch: 1,    gain: 1.15, presence: 2 },
+  happy:      { c: '#ffd166', speed: 1.05, pitch: 0.6,  gain: 1.06, presence: 1 },
+  calm:       { c: '#5ec8e5', speed: 0.9,  pitch: -0.5, gain: 0.88, air: -2 },
+  serious:    { c: '#8a9bff', speed: 0.95, pitch: -1,   gain: 1 },
+  sad:        { c: '#6c8fb3', speed: 0.86, pitch: -1.2, gain: 0.8, air: -3 },
+  angry:      { c: '#ff5d5d', speed: 1.06, pitch: -0.5, gain: 1.25, presence: 3 },
+  whisper:    { c: '#b6c2cf', speed: 0.93, pitch: 0,    gain: 0.55, hp: 260, air: 2 },
+  scared:     { c: '#c792ea', speed: 1.12, pitch: 1.4,  gain: 0.85, trem: 0.12 },
+  dramatic:   { c: '#f78c6c', speed: 0.86, pitch: -0.7, gain: 1.08, verb: 0.14 },
+  shout:      { c: '#ff6b9a', speed: 1.04, pitch: 1.4,  gain: 1.35, presence: 3 },
+  mysterious: { c: '#7fdbca', speed: 0.88, pitch: -1,   gain: 0.82, air: -4, verb: 0.18 },
 };
 const VOICES = [['af_heart', 'Heart · US woman, warm'], ['af_bella', 'Bella · US woman, bright'], ['af_nicole', 'Nicole · US woman, soft'], ['af_sarah', 'Sarah · US woman'], ['af_sky', 'Sky · US woman, young'], ['af_nova', 'Nova · US woman'],
   ['am_michael', 'Michael · US man, narrator'], ['am_adam', 'Adam · US man, deep'], ['am_eric', 'Eric · US man'], ['am_fenrir', 'Fenrir · US man, gritty'], ['am_liam', 'Liam · US man, young'], ['am_onyx', 'Onyx · US man, low'], ['am_puck', 'Puck · US man, playful'],
@@ -168,23 +168,30 @@ async function loadEngine() {
   } catch (e) { pill.textContent = 'Voice engine: unavailable'; pill.className = 'pill bad'; progress(0, e.message || String(e)); throw e; }
 }
 function trim(f32) { const th = 0.012; let a = 0, b = f32.length - 1; while (a < b && Math.abs(f32[a]) < th) a++; while (b > a && Math.abs(f32[b]) < th) b--; return f32.slice(Math.max(0, a - 240), Math.min(f32.length, b + 480)); }
-function impulse(ctx, sec) { const n = Math.round(sec * SR), b = ctx.createBuffer(1, n, SR), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); return b; }
-async function shape(f32, T) {   // pitch via playback rate (speed was pre-compensated), filters, drive, tremolo, breath, room
-  const r = Math.pow(2, T.pitch / 12), len = Math.ceil(f32.length / r) + Math.round(SR * (T.verb ? 0.6 : 0.02));
-  const ctx = new OfflineAudioContext(1, len, SR), buf = ctx.createBuffer(1, f32.length, SR); buf.copyToChannel(f32, 0);
-  const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = r; let node = src;
-  const add = (n) => { node.connect(n); node = n; };
-  if (T.hp) { const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = T.hp; add(f); }
-  if (T.lp) { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = T.lp; add(f); }
-  if (T.drive) { const ws = ctx.createWaveShaper(), k = T.drive * 30, c = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; c[i] = Math.tanh(x * (1 + k)) / Math.tanh(1 + k); } ws.curve = c; add(ws); }
+function resample(x, r) {   // read x at rate r (r > 1 = higher pitch, shorter); Lanczos-8 with anti-alias cutoff
+  if (Math.abs(r - 1) < 1e-4) return x; const n = Math.floor(x.length / r), y = new Float32Array(n), A = 8, fc = Math.min(1, 1 / r), W = Math.ceil(A / fc);
+  const sinc = (v) => (v === 0 ? 1 : Math.sin(Math.PI * v) / (Math.PI * v));
+  for (let i = 0; i < n; i++) { const p = i * r, j0 = Math.floor(p); let acc = 0, ws = 0;
+    for (let j = j0 - W + 1; j <= j0 + W; j++) { if (j < 0 || j >= x.length) continue; const d = (p - j) * fc; if (Math.abs(d) >= A) continue; const w = sinc(d) * sinc(d / A); acc += x[j] * w; ws += w; }
+    y[i] = ws ? acc / ws : 0; }
+  return y;
+}
+function fade(y, ms = 6) { const k = Math.min(y.length >> 1, Math.round(SR * ms / 1000)); for (let i = 0; i < k; i++) { const g = 0.5 - 0.5 * Math.cos(Math.PI * i / k); y[i] *= g; y[y.length - 1 - i] *= g; } return y; }
+function impulse(ctx, sec) { const n = Math.round(sec * SR), b = ctx.createBuffer(1, n, SR), d = b.getChannelData(0); let lp = 0; for (let i = 0; i < n; i++) { lp += 0.35 * ((Math.random() * 2 - 1) - lp); d[i] = lp * Math.pow(1 - i / n, 3) * 1.6; } return b; }
+async function shape(f32, T) {   // clean chain: sinc pitch, gentle EQ, no distortion or fake noise
+  const x = resample(f32, Math.pow(2, T.pitch / 12)), len = x.length + Math.round(SR * (T.verb ? 0.5 : 0.01));
+  const ctx = new OfflineAudioContext(1, len, SR), buf = ctx.createBuffer(1, x.length, SR); buf.copyToChannel(x, 0);
+  const src = ctx.createBufferSource(); src.buffer = buf; let node = src; const add = (n) => { node.connect(n); node = n; };
+  const eq = (type, f, g, q = 0.7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; if (g !== undefined) b.gain.value = g; b.Q.value = q; add(b); };
+  eq('highpass', T.hp || 70);                    // rumble
+  eq('peaking', 6800, -2.5, 2);                   // tame sibilance ("sss/shh")
+  eq('highshelf', 9000, -2 + (T.air || 0));       // smooth top end
+  if (T.presence) eq('peaking', 2500, T.presence, 0.9);
   const g = ctx.createGain(); g.gain.value = T.gain; add(g);
-  if (T.trem) { const lfo = ctx.createOscillator(), d = ctx.createGain(); lfo.frequency.value = 7; d.gain.value = T.trem * T.gain; lfo.connect(d); d.connect(g.gain); lfo.start(); }
+  if (T.trem) { const lfo = ctx.createOscillator(), d = ctx.createGain(); lfo.frequency.value = 6; d.gain.value = T.trem * T.gain; lfo.connect(d); d.connect(g.gain); lfo.start(); }
   node.connect(ctx.destination);
-  if (T.verb) { const cv = ctx.createConvolver(), w = ctx.createGain(); cv.buffer = impulse(ctx, 1.2); w.gain.value = T.verb; g.connect(cv); cv.connect(w); w.connect(ctx.destination); }
-  if (T.breath) { const n = ctx.createBufferSource(), nb = ctx.createBuffer(1, len, SR), d = nb.getChannelData(0); let env = 0;   // breathy noise that follows the voice
-    for (let i = 0; i < len; i++) { const s = f32[Math.min(f32.length - 1, Math.floor(i * r))] || 0; env = Math.max(Math.abs(s), env * 0.9995); d[i] = (Math.random() * 2 - 1) * env * T.breath; }
-    n.buffer = nb; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3000; f.Q.value = 0.7; n.connect(f); f.connect(ctx.destination); n.start(); }
-  src.start(); return (await ctx.startRendering()).getChannelData(0);
+  if (T.verb) { const cv = ctx.createConvolver(), w = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5000; cv.buffer = impulse(ctx, 1.1); w.gain.value = T.verb; g.connect(lp); lp.connect(cv); cv.connect(w); w.connect(ctx.destination); }
+  src.start(); return fade((await ctx.startRendering()).getChannelData(0).slice(0));
 }
 async function generate() {
   const text = document.getElementById('text').value, base = document.getElementById('voice').value, gspeed = +document.getElementById('speed').value;
@@ -196,7 +203,7 @@ async function generate() {
     if (s.type === 'pause') { pieces.push(new Float32Array(Math.round(s.sec * SR))); t += s.sec; continue; }
     const T = TONES[s.tone] || TONES.neutral, r = Math.pow(2, T.pitch / 12), voice = VOICES.some(([v]) => v === s.voice) ? s.voice : base;
     const raw = await tts.generate(s.text, { voice, speed: Math.min(2, Math.max(0.5, T.speed * gspeed / r)) });
-    const y = await shape(trim(raw.audio), T), dur = y.length / SR;
+    const y = await shape(fade(trim(raw.audio), 4), T), dur = y.length / SR;
     marks.push({ tone: s.tone, start: t, end: t + dur });
     const ws = s.text.split(/\s+/).filter(Boolean), wts = ws.map((w) => w.replace(/[^\p{L}\p{N}]/gu, '').length + 1), tot = wts.reduce((a, b) => a + b, 0); let acc = 0;
     ws.forEach((w, i) => { const a = t + dur * acc / tot; acc += wts[i]; words.push([w, +a.toFixed(3), +(t + dur * acc / tot).toFixed(3), s.tone]); });
@@ -205,7 +212,7 @@ async function generate() {
   }
   const n = pieces.reduce((a, p) => a + p.length, 0), out = new Float32Array(n); let o = 0; for (const p of pieces) { out.set(p, o); o += p.length; }
   let sq = 0, cnt = 0; for (let i = 0; i < n; i++) if (Math.abs(out[i]) > 0.01) { sq += out[i] * out[i]; cnt++; }   // master: voiced RMS to about -18 dBFS, soft limit
-  const g = cnt ? Math.min(6, 0.126 / Math.sqrt(sq / cnt)) : 1; for (let i = 0; i < n; i++) { const x = out[i] * g; out[i] = Math.abs(x) < 0.85 ? x : Math.sign(x) * (0.85 + 0.15 * Math.tanh((Math.abs(x) - 0.85) / 0.15)); }
+  const g = cnt ? Math.min(2.5, 0.112 / Math.sqrt(sq / cnt)) : 1; for (let i = 0; i < n; i++) { const x = out[i] * g; out[i] = Math.abs(x) < 0.9 ? x : Math.sign(x) * (0.9 + 0.09 * Math.tanh((Math.abs(x) - 0.9) / 0.09)); }
   take = { samples: out, words, marks, duration: n / SR, voice: base };
   drawWave(); document.getElementById('play').disabled = false; document.getElementById('dl').disabled = false;
   progress(1, `Done — ${take.duration.toFixed(1)}s.`); return take;
