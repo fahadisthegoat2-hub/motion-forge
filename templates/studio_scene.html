@@ -943,6 +943,8 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   const [pitch, yaw] = ch.spring.x, g = goal(t);
   ch.root.updateMatrixWorld(true);
   applyGestures(ch, cast, t);
+  // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
+  for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
   // breathing (4s cycle, slight chest + shoulder lift)
   const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
   rotateInRootSpace(ch, B.spine1, -0.012 * br, 0);
@@ -1423,7 +1425,7 @@ function render(tGlobal) {
     const cast = shot.cast?.[ch.id];
     ch.root.visible = !!cast || shot.cast === undefined;
     if (!ch.root.visible) continue;
-    ch.root.position.set(...(key(cast?.pos, local) || [0, 0, 0])); ch.root.rotation.y = key(cast?.rotY, local) || 0;
+    ch.root.position.set(...(key(cast?.pos, local) || [0, 0, 0])); ch.root.rotation.set(key(cast?.rotX, local) || 0, key(cast?.rotY, local) || 0, key(cast?.rotZ, local) || 0, 'YXZ');   // rotX/rotZ: flips, falls, tumbles
     applyClips(ch, cast, local); ch.root.updateMatrixWorld(true);
     life(ch, cast, local, tGlobal, camPosAt);
   }

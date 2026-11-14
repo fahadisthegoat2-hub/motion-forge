@@ -47,6 +47,8 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
     talk: [[start, end], ...], talkRate?,      // syllable lip-sync + automatic hand gestures
     gestures: [{ type, start, end, side?, amount? }],
     acting: 'auto' | 'calm' | 'big' | 'none',  // auto talk gestures + idle glances (default auto)
+    bones: { <joint>: keys([pitch, yaw, roll]) }, // CUSTOM animation: any joint, layered on the clip (see below)
+    rotX: keys, rotZ: keys,                    // whole-body flips, falls, tumbles (with rotY)
   } },
   fx: [{ type, t | start/end, pos, scale, ... }] }
 ```
@@ -63,6 +65,14 @@ subject (e.g. an explosion) while keeping the actor in frame.
 ### Transitions (`shot.cut` = how this shot comes in)
 `whip · zoom · spin · glitch · flash · dip · smash · blur` — motion-blurred camera moves across the cut.
 Use one every 2–3 cuts; hard cuts are fine in between.
+
+### Custom animation (not limited to the library)
+Animate anything by keyframing joints: `bones: { rightarm: [[0,[0,0,0]], [0.4,[0,0,-2.4],'outBack'], [1.2,[0,0,0]]] }`.
+Joints: hips spine spine1 spine2 neck head · leftshoulder leftarm leftforearm lefthand (+ right…) · leftupleg leftleg leftfoot lefttoebase (+ right…).
+Values are radians in the character's own space: **pitch** + tips forward/down (legs swing forward, head nods down) · **yaw** + turns toward the character's left ·
+**roll** − raises the RIGHT arm outward/up, + raises the LEFT arm (mirror for left/right). Crouch/land = lower the root with `pos` y −0.1…−0.3 while bending
+`upleg` (+pitch) and `leg` (−pitch). Jumps = `pos` y up with outCubic, down with inCubic. Layer on top of a clip, add anticipation
+before and overshoot/settle after (see skills/custom-animation). New reusable poses can be added to `GESTURES` in the scene file.
 
 ### Gestures (auto anticipation → overshoot → living hold → settle)
 `point · handsup · shrug · armsout · fistpump · shield · think · facepalm · wave · lean · slump · scared ·

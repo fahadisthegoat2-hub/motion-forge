@@ -63,6 +63,12 @@ stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
   cut on action (start the next shot mid-movement).
 - **Hold key poses** ≥ 0.4s so they read on a phone.
 
+## Custom keyframed motion — never limited to the clip library
+The clips are only a base layer. Build any action (jumps, falls, punches, dances, panic, sneaking, climbing, collapsing) with
+`bones` keys per joint + root `pos`/`rotX`/`rotY`/`rotZ` keys (templates/SCENE_API.md → Custom animation). Block the key poses first,
+then add anticipation (0.1–0.2s counter-move), overshoot (`outBack`), follow-through on arms/head 2–4 frames later, and a settle.
+Check it with a --fast frame strip (8–12fps around the action) and fix pops, foot sliding and floaty timing.
+
 ## Auto-acting (template)
 - Characters gesture automatically while they `talk` (beat · explain · present · count · point) and glance around when quiet. Tune with `acting: calm | big | none`. So: give every speaking line a `talk` range.
 - Clips: idle · walk · jog · sprint · dance · crouch (Quaternius) + Xbot/Soldier/Michelle + `animations/*.fbx`.
