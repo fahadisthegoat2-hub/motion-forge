@@ -5,3 +5,4 @@ motion-video-plugin*.zip
 *.pack/
 .motion-forge/voice/
 .motion-forge/castdb/
+scenes/_*
