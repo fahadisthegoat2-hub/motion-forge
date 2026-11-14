@@ -19,16 +19,20 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
   await page.goto(server.origin + path.resolve(input) + '?fast=1');
   await page.waitForFunction(() => window.__mf && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });
   await page.evaluate(() => { document.getElementById('mf-panel')?.remove(); window.__mfManual = true; window.__mf.setSize(270, 480); });
-  const info = await page.evaluate(() => ({ dur: __mf.duration, target: window.CONFIG?.targetDuration, shots: __mfDebug.shots() }));
+  const info = await page.evaluate(() => ({ dur: __mf.duration, target: __mfDebug.pacing().target, shots: __mfDebug.shots() }));
   const target = +(opt('--target') || info.target || 0);
   if (target && Math.abs(info.dur - target) / target > 0.05) fails.push(`LENGTH: video is ${info.dur.toFixed(1)}s but ${target}s was asked (must be within 5%)`);
   const frames = [];
   for (const sh of info.shots) {
     for (const f of [0.2, 0.5, 0.85]) {
       const t = sh.start + sh.dur * f, r = await page.evaluate((t) => __mfDebug.probe(t), t);
-      if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p); }
+      if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p);
+        for (const c of r.chars) if (c.face) { try { const o = require('child_process').spawnSync(ffmpeg(), ['-hide_banner', '-i', p, '-vf', `crop=iw*0.12:iw*0.12:iw*${Math.max(0, c.face[0] - 0.06)}:ih*${Math.max(0, c.face[1] - 0.04)},signalstats,metadata=print`, '-f', 'null', '-']).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
+          if (y < 45) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is too dark (${y.toFixed(0)}/255) — add a key/rim light or change the look`); if (y > 225) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is blown out (${y.toFixed(0)}/255)`); } catch {} } }
       for (const c of r.chars) {
         const where = `shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id}`;
+        if (c.face && c.face[1] < 0.1) fails.push(`FRAMING: ${where} face is cut off at the top of the frame — wider size or lower camera`);
+        if (c.face) for (const T of r.titles || []) if (Math.abs(T.pos[0] - c.face[0]) < 0.3 && Math.abs(T.pos[1] - c.face[1]) < 0.09) fails.push(`FRAMING: ${where} a ${T.style || 'slam'} title covers the face — move it to the top 25% or the other side`);
         for (const m of c.missing) fails.push(`CLIP: ${where} uses "${m}" which doesn't exist (see SCENE_API clip list)`);
         if (c.footY !== null && !c.airborne && c.footY > 0.14) fails.push(`FEET: ${where} floats ${(c.footY * 100).toFixed(0)} cm above the ground`);
         if (c.footY !== null && c.footY < -0.06) fails.push(`FEET: ${where} sinks ${(-c.footY * 100).toFixed(0)} cm into the ground`);

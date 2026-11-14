@@ -46,6 +46,7 @@ const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a871
 const CONFIG = {
   width: 1080, height: 1920, fps: 30,          // long-form: width 1920, height 1080
   look: 'clean-cg',      // clean-cg · cinematic · warm-film · noir · neon-night · dreamy · horror · golden-hour (per-shot override: shot.look)
+  targetDuration: null,  // seconds the user asked for (qa_check enforces it) — e.g. 780 for a 13-minute video
   set: 'studio',         // studio · void · outdoor · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   // Clip libraries (Mixamo-style rigs). Any clip auto-retargets onto any humanoid in CAST.
@@ -58,58 +59,35 @@ const CONFIG = {
 // Characters: first URL that loads wins. Best: your own models in the repo's characters/ folder
 // (Avaturn GLB = face + blink/expressions; Mixamo FBX = body). Fallback: sample semi-real man.
 const CAST = {
-  hero: {
-    actor: 'jake',                                 // jake · marcus   (or urls: ['characters/my.glb'] for your own)
-    height: 1.80,                                  // metres
-    wardrobe: { top: '#2e6bd6', bottom: '#20242c', shoes: null },   // recolors keep fabric folds & texture
-    skin: null,                                    // pale · light · medium · tan · brown · dark · '#hex'
-    hair: null,                                    // '#hex' hair color
-  },
+  hero: { character: 'jake' },   // Casting Board id (characters/library.json) · or actor: 'jake' · urls: ['characters/x.glb']
 };
 
-// Shots play back-to-back. Inside a shot every key list is [[time, value, ease?], ...] in shot-local seconds.
-// Clips: idle, walk, run, agree, headshake, sad_pose, sneak_pose (+ any you add). 'camera' = look at the lens.
-// Faces: smile, shock, worried, sad, angry (0..1). talk: [[start,end],...] mouth flaps while speaking.
+// SHORTS RHYTHM (skills/viral-3d-shorts): hook on screen by 0.3 s, first shot ≤ 2 s, shots 0.8–2.2 s, a beat every ≤ 3 s.
+// Every key list is [[time, value, ease?], ...] in shot-local seconds. Clips: plain names work (idle walk run sit kneel pickup talk phone…).
 const SHOTS = [
-  {
-    name: 'Hook', dur: 3.0, fadeIn: 0.25,
-    camera: { pos: [[0, [0.25, 1.62, 2.6]], [3, [0.05, 1.6, 1.85], 'inOutSine']], look: [[0, [0, 1.55, 0]]], fov: 30, handheld: 1 },
-    cast: {
-      hero: {
-        clips: [{ clip: 'idle', start: 0, end: 3 }],
-        look: [[0, [0.8, 1.5, 1]], [0.9, 'camera', 'outCubic']],
-        face: { worried: [[0, 0], [1.2, 0.7, 'outCubic']] },
-        gestures: [{ type: 'shrug', start: 1.5, end: 2.4 }],
-        talk: [[1.0, 2.7]],
-      },
-    },
-    fx: [{ type: 'dust' }],
-  },
-  {
-    name: 'Boom', dur: 3.5, look: 'neon-night', set: 'street-night',
-    camera: { pos: [[0, [-1.6, 1.3, 3.6]], [3.5, [-1.2, 1.35, 3.1], 'inOutSine']], look: [[0, [0, 1.2, -1]]], fov: 36, handheld: 1.2 },
-    cast: {
-      hero: {
-        pos: [[0, [0, 0, 0]]], rotY: [[0, 0.35]],
-        clips: [{ clip: 'idle', start: 0, end: 3.5 }],
-        look: [[0, 'camera'], [0.75, [1.5, 1.2, -4], 'outCubic']],
-        gestures: [{ type: 'shield', start: 0.95, end: 2.6, side: 'both' }],
-        face: { shock: [[0.9, 0], [1.05, 1, 'outBack'], [3.2, 0.5]] },
-      },
-    },
-    fx: [{ type: 'explosion', t: 0.9, pos: [1.6, 0, -4.5], scale: 1.2 }, { type: 'embers' }, { type: 'fire', start: 1.2, pos: [1.6, 0, -4.5], scale: 1.1 }],
-  },
+  { name: 'Hook', dur: 1.6, camera: { move: 'crash-zoom', target: 'hero', size: 'ms', at: 0.15, az: 15 },
+    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { shock: [[0, 0.4], [0.2, 1, 'outBack']] },
+      gestures: [{ type: 'shield', start: 0.1, end: 1.5, side: 'both' }] } },
+    sfx: [{ t: 0, type: 'impact' }] },
+  { name: 'Setup', dur: 2.0, cut: 'whip', camera: { move: 'push', target: 'hero', size: 'ms', az: -25 },
+    cast: { hero: { clips: [{ clip: 'talk', start: 0, end: 2 }], look: [[0, 'camera']], talk: [[0.1, 1.8]] } } },
+  { name: 'Escalation', dur: 1.8, cut: 'zoom', look: 'cinematic', camera: { move: 'orbit', target: 'hero', size: 'mls', span: 40, az: 20 },
+    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 0.6 }, { clip: 'run', start: 0.5, end: 1.8, fade: 0.25 }], face: { worried: [[0, 0.8]] } } },
+    fx: [{ type: 'sparks', t: 0.4, pos: [0.8, 1.2, -0.6] }] },
+  { name: 'Twist', dur: 1.6, cut: 'smash', look: 'noir', punch: [0.2], camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 10 },
+    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { smirk: [[0.3, 0], [0.6, 1, 'outBack']] } } } },
 ];
 
-// Word-by-word captions (drawn into the video). hi = words to highlight.
+// Word-by-word captions (highlight words in hi). Keep them going the whole short.
 const CAPTIONS = [
-  { t: 0.15, text: 'WHAT HAPPENS IF', hi: ['HAPPENS'] },
-  { t: 1.6, text: 'YOU NEVER SLEEP?', hi: ['NEVER'] },
-  { t: 3.9, text: 'DAY 3…', hi: ['3…'] },
+  { t: 0.0, text: 'YOU HAVE 10 SECONDS', hi: ['10'] },
+  { t: 1.6, text: 'before the floor disappears', hi: ['floor'] },
+  { t: 3.6, text: 'and it already started', hi: ['started'] },
+  { t: 5.4, text: 'or did it?', hi: ['did'] },
 ];
-// Kinetic titles / motion graphics (drawn into the video). styles: slam stack typewriter counter glitch lower-third stamp meter ring tag
+
 const TITLES = [
-  { t: 3.2, t1: 4.6, style: 'tag', text: 'DAY 3', pos: [0.5, 0.12], size: 0.09 },
+  { t: 0.05, t1: 1.5, style: 'slam', text: '10 SECONDS', pos: [0.5, 0.11], size: 0.12 },
 ];
 /* ============================== END DIRECTION ============================== */
 
@@ -2303,7 +2281,7 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     for (const T of (typeof TITLES !== "undefined" ? TITLES : [])) beats.push(T.t);
     for (const C of (typeof CAPTIONS !== "undefined" ? CAPTIONS : [])) beats.push(C.t);
     const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
-    return { portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
+    return { target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
       voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
   },
   shots: () => { let acc = 0; return SHOTS.map((sh, i) => { const r = { i, name: sh.name || 'shot ' + (i + 1), start: acc, dur: sh.dur, set: setIdOf(sh), cast: Object.keys(sh.cast || {}) }; acc += sh.dur; return r; }); },
@@ -2316,9 +2294,11 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
       const reach = (cast.reach || []).filter((R) => local >= (R.start ?? 0) + (R.blend ?? 0.25) && local <= (R.end ?? 1e9)).map((R) => { const T = reachTarget(ch, R.to, R.offset); if (!T) return null;
         return { to: R.to, err: Math.max(...(R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']).map((h) => ch.bones[h + 'hand'] ? ch.bones[h + 'hand'].getWorldPosition(V()).distanceTo(T) : 0)) }; }).filter(Boolean);
       const missing = (cast.clips || []).map((c) => c.clip).filter((c) => { const k = normName(c); return !clipLib[k] && !clipLib[CLIP_ALIAS[k]]; });
-      out.push({ id: ch.id, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+      const fc = anchorScreen(ch.id + '.face', 1, 1);
+      out.push({ id: ch.id, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
-    return { shot: shot.name, t: tg, local, chars: out };
+    const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
+    return { shot: shot.name, t: tg, local, chars: out, titles };
   } };
 const clock = new THREE.Clock();
 let _pv = { last: 0, avg: 33, scale: 1, n: 0 };
