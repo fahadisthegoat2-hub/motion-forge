@@ -575,7 +575,7 @@ function applyLook(name, set) {
   set.sky.material.uniforms.sunCol.value.copy(set.sunCol || new THREE.Color(0, 0, 0));
   set.sky.material.uniforms.sun.value.copy(key1.position).normalize();
   const G = L.grade, u = grade.uniforms;
-  u.uContrast.value = G.contrast; u.uSat.value = G.sat; u.uLift.value.set(...G.lift); u.uGain.value.set(...G.gain); u.uShadows.value.set(...G.shadows); u.uHigh.value.set(...G.highlights);
+  u.uContrast.value = G.contrast; u.uSat.value = G.sat * (CONFIG.saturation ?? 0.85);   // natural color by default (CONFIG.saturation to change) u.uLift.value.set(...G.lift); u.uGain.value.set(...G.gain); u.uShadows.value.set(...G.shadows); u.uHigh.value.set(...G.highlights);
   u.uGrain.value = CONFIG.grain ?? L.grain; u.uVig.value = CONFIG.vignette ?? L.vignette; u.uCA.value = L.ca;
   bloom.strength = L.bloom[0]; bloom.radius = L.bloom[1]; bloom.threshold = L.bloom[2];
 }
@@ -1846,6 +1846,7 @@ function volumeFX(o) {   // o: { kind: 'blast'|'plume', size: [x,y,z] m, y, t0, 
   const iw = new THREE.Matrix4();
   return { obj: m, update(lt) {
     const age = lt - (o.t0 ?? 0); m.visible = age >= 0 && lt <= (o.t1 ?? 1e9) + (o.tail ?? 0); if (!m.visible) return;
+    u.uSteps.value = window.__mfManual ? (FAST ? 22 : 48) : 16;   // live preview: light volumes so playback stays smooth; renders: full quality
     u.uTime.value = lt; const e = o.anim ? o.anim(age) : {}; u.uExpand.value = e.expand ?? o.expandC ?? 0.8; u.uRise.value = e.rise ?? o.rise ?? 0.6; u.uHeat.value = e.heat ?? o.heat ?? 0;
     u.uDensity.value = (e.density ?? 1) * (o.density ?? 1) * (o.t1 !== undefined && lt > o.t1 ? Math.max(0, 1 - (lt - o.t1) / (o.tail || 0.5)) : 1);
     m.updateMatrixWorld(); iw.copy(m.matrixWorld).invert(); u.uLightDir.value.copy(key1.position).normalize().transformDirection(iw).normalize();
@@ -2403,8 +2404,8 @@ let _pv = { last: 0, avg: 33, scale: 1, n: 0 };
 renderer.setAnimationLoop((now) => {
   if (!window.__mfReady || window.__mfManual) return;
   const dt = _pv.last ? now - _pv.last : 33; _pv.last = now; _pv.avg = _pv.avg * 0.9 + dt * 0.1;
-  if (++_pv.n % 30 === 0) {   // live preview only: drop / restore internal resolution to stay smooth
-    const want = _pv.avg > 45 ? Math.max(0.45, _pv.scale * 0.8) : _pv.avg < 28 ? Math.min(1, _pv.scale * 1.1) : _pv.scale;
+  if (++_pv.n % 15 === 0) {   // live preview only: drop / restore internal resolution to stay smooth
+    const want = _pv.avg > 36 ? Math.max(0.4, _pv.scale * 0.75) : _pv.avg < 26 ? Math.min(1, _pv.scale * 1.08) : _pv.scale;
     if (Math.abs(want - _pv.scale) > 0.02) { _pv.scale = want; renderer.setPixelRatio(Math.min(devicePixelRatio, 2) * want); composer.setPixelRatio?.(Math.min(devicePixelRatio, 2) * want); }
   }
   render(clock.getElapsedTime() % TOTAL);
