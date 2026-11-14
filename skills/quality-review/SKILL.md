@@ -24,6 +24,7 @@ at least one frame from EVERY shot plus motion strips of the key actions. A vide
 8. **Sound**: every effect lines up with a visible event on that exact frame; music under voice; no dead air; nothing random.
 9. **Smoothness**: no stutter, pops, snaps or frozen frames; camera moves ease; cuts on action.
 10. **Story & rules**: shorts follow the SHORTS RETENTION FORMULA (viral-3d-shorts) — hook on screen by 0.3 s, a beat every 2–3 s, escalation, twist, loop — never documentary pacing; Motion Forge only, no photos, no logos; publish pack ready.
+Retention target: 80–87% stayed to watch — judge every second as a viewer about to swipe.
 Record PASS/FAIL for all 10 internally each round. Any FAIL → fix → re-run all 10. Never show the user a video with a FAIL.
 
 ## 1. Gather evidence (cheap first)

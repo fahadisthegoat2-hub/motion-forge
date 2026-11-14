@@ -86,7 +86,7 @@ your head at 1.15× — if any 3 seconds would let a viewer swipe, rewrite them.
 
 ## CHANNEL DATA (from Sir's analytics — these rules override older ones)
 Best short: 43% stayed. Flops: 75–80% swiped in the first second, viewers gone by 0:13 because the payoff came too late,
-34% stayed when the twist was slow. GOAL: 60%+ stayed to watch.
+34% stayed when the twist was slow. GOAL: 80–87% stayed to watch.
 1. **0.0 s = motion + shock line on screen** — never a still face, a title card or a slow push. Camera AND subject move on frame 1.
 2. **Payoff first, then rewind**: shot 1 shows the most shocking result / the twist image (mark it `role: 'payoff'`), then
    "3 days earlier…" and the story. The twist is teased in second 1 and paid off at the end.

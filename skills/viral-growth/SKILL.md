@@ -49,5 +49,5 @@ description: Growth expert for short-form video — maximize views, watch time, 
 
 ## CHANNEL DATA (Sir's analytics)
 - Every publish pack has ONE comment question (also as the last caption) and a pinned comment repeating it.
-- Posting plan: one short per day, same niche (crazy true stories), 25–35 s, payoff-first hooks. Success = 60%+ stayed to watch.
+- Posting plan: one short per day, same niche (crazy true stories), 25–35 s, payoff-first hooks. Success = 80–87% stayed to watch.
 - After a flop, compare the first 2 s and the 0:13 mark against the best short (43% stayed) before making the next one.
