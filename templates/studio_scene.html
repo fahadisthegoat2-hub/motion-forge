@@ -734,7 +734,7 @@ function upgradeMaterials(root, def = {}) {
           else if (isHat && wardrobe.hat) recolor(p, wardrobe.hat, wardrobe.hat, -1e9);
           else if (!isShoe && !isHat && (wardrobe.top || wardrobe.bottom)) {
             const top = wardrobe.top || null, bot = wardrobe.bottom || null;
-            const det = wardrobe.print ? 1 : 0.45;
+            const det = wardrobe.print ? 1 : 0.3;
             if (bb.min.y > waist) recolor(p, top, top, -1e9, det); else if (bb.max.y < waist) recolor(p, bot, bot, -1e9, det); else recolor(p, top, bot, waist, det);
           }
         }
