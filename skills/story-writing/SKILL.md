@@ -45,3 +45,25 @@ Rule: fair-play. The twist must be **surprising but inevitable** — re-watching
 2. **Script table**: `time | VO line | on-screen action | shot & camera | expression | SFX`.
 3. **3 alternate hooks** and **2 alternate twists**.
 4. Self-score 1–10 on: hook, escalation, twist fairness, loop; rewrite anything < 8.
+
+## SHORTS RETENTION FORMULA (mandatory — a short that feels like a documentary is a FAIL)
+**Voice**: second person or a character in danger, present tense, urgent. Never "In this video…", "Did you know…", "Let's…",
+calm narrator facts, history lessons or slow intros. Every line ≤ 10 words, every line is a NEW image or a NEW stake.
+
+**0–2 s HOOK** (pick one, the scariest/strangest version of the premise, shown not told):
+- Impossible situation: "You wake up and the whole city is a jungle."
+- Countdown: "You have 60 seconds before your heart stops."
+- Payoff first: show the crazy end state, then "here's how it happened."
+- Direct threat: "If you're reading this, don't touch the water."
+On screen by 0.3 s: hook title (slam) + caption + a hit sound + the most dramatic image. First shot ≤ 2 s.
+
+**Beat map** (45 s example): 0–2 hook · 2–6 setup + plant the twist clue · 6–30 three escalations, each WORSE, each opened by a
+re-hook line ("but that's not the worst part…", "then it moved.") · 30–38 climax (slow-mo/freeze/silence, then drop) ·
+38–43 twist (smash cut, boom) · 43–45 loop line that leads back into the first frame.
+
+**Rhythm**: shots 0.8–2.2 s (avg ≤ 2.4 s), a beat (cut, title, punch-in, effect, sound hit) at least every 2–3 s, speed ramps on action,
+music drops on the twist, captions word-by-word the whole way. Voiceover at Voice Studio speed 1.1–1.2 with excited/dramatic tones on
+the hook and twist. `qa_check.js` fails any short that breaks these numbers.
+
+**Before building**: write 5 hooks, score each (stops the scroll? visual? curiosity gap?), keep the best. Read the script out loud in
+your head at 1.15× — if any 3 seconds would let a viewer swipe, rewrite them.

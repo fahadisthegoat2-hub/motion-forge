@@ -2297,6 +2297,15 @@ window.__mf = {
     THUMB = T || null; if (T) render(0); },   // render one thumbnail (scripts/thumbnail.js)
 };
 window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
+  pacing() {   // beats the viewer feels: cuts, titles, caption changes, effects, punch-ins, sound hits
+    const ev = collectSound().events.map((e) => e.t), beats = [...ev]; let acc = 0;
+    for (const sh of SHOTS) { beats.push(acc); for (const f of sh.fx || []) beats.push(acc + (f.t ?? f.start ?? 0)); for (const p of sh.punch || []) beats.push(acc + p); acc += sh.dur; }
+    for (const T of (typeof TITLES !== "undefined" ? TITLES : [])) beats.push(T.t);
+    for (const C of (typeof CAPTIONS !== "undefined" ? CAPTIONS : [])) beats.push(C.t);
+    const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
+    return { portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
+      voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
+  },
   shots: () => { let acc = 0; return SHOTS.map((sh, i) => { const r = { i, name: sh.name || 'shot ' + (i + 1), start: acc, dur: sh.dur, set: setIdOf(sh), cast: Object.keys(sh.cast || {}) }; acc += sh.dur; return r; }); },
   probe(tg) {   // automatic QA: feet on the ground, hands on their targets, clips that exist
     render(tg); const { shot, local } = shotAt(clamp(tg, 0, TOTAL - 1e-4)), out = [], V = () => new THREE.Vector3();
