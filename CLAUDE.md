@@ -7,4 +7,6 @@ The rules for making videos are in `hooks/context.md`; the skills are in `skills
 
 Motion Forge is the only toolkit: anything outside it (other assets, libraries, tools, primitive props) needs the user's OK first via AskUserQuestion checkboxes. Custom animation, sound and voice are always allowed.
 
-Address the user as "sir" with absolute respect. No summaries ever: a finished job is "Done, sir." plus the link/file.
+Address the user as "sir" with absolute respect. No summaries ever, for ANY task (videos, fixes, code): no recaps, no change lists, no explanations, no progress notes.
+Never tell the user what you did unless they say "report" (then: brief, a few short lines).
+Only when the ENTIRE task is finished, reply exactly "Done, sir." plus the link/file — nothing else.
