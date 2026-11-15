@@ -1,0 +1,618 @@
+{
+ "voice": "am_michael",
+ "duration": 38.503,
+ "words": [
+  {
+   "w": "This",
+   "start": 0.05,
+   "end": 0.325,
+   "tone": "shout"
+  },
+  {
+   "w": "wave",
+   "start": 0.325,
+   "end": 0.6,
+   "tone": "shout"
+  },
+  {
+   "w": "isn't",
+   "start": 0.6,
+   "end": 0.875,
+   "tone": "shout"
+  },
+  {
+   "w": "water.",
+   "start": 0.875,
+   "end": 1.356,
+   "tone": "shout"
+  },
+  {
+   "w": "It's",
+   "start": 1.556,
+   "end": 1.804,
+   "tone": "dramatic"
+  },
+  {
+   "w": "molasses.",
+   "start": 1.804,
+   "end": 2.631,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Boston,",
+   "start": 3.031,
+   "end": 3.708,
+   "tone": "serious"
+  },
+  {
+   "w": "1919.",
+   "start": 3.708,
+   "end": 4.215,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 4.215,
+   "end": 4.384,
+   "tone": "serious"
+  },
+  {
+   "w": "giant",
+   "start": 4.384,
+   "end": 4.807,
+   "tone": "serious"
+  },
+  {
+   "w": "tank",
+   "start": 4.807,
+   "end": 5.146,
+   "tone": "serious"
+  },
+  {
+   "w": "looms",
+   "start": 5.146,
+   "end": 5.569,
+   "tone": "serious"
+  },
+  {
+   "w": "over",
+   "start": 5.569,
+   "end": 5.907,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 5.907,
+   "end": 6.161,
+   "tone": "serious"
+  },
+  {
+   "w": "street.",
+   "start": 6.161,
+   "end": 6.838,
+   "tone": "serious"
+  },
+  {
+   "w": "Two",
+   "start": 6.938,
+   "end": 7.123,
+   "tone": "neutral"
+  },
+  {
+   "w": "million",
+   "start": 7.123,
+   "end": 7.555,
+   "tone": "neutral"
+  },
+  {
+   "w": "gallons",
+   "start": 7.555,
+   "end": 7.987,
+   "tone": "neutral"
+  },
+  {
+   "w": "of",
+   "start": 7.987,
+   "end": 8.11,
+   "tone": "neutral"
+  },
+  {
+   "w": "syrup",
+   "start": 8.11,
+   "end": 8.419,
+   "tone": "neutral"
+  },
+  {
+   "w": "inside.",
+   "start": 8.419,
+   "end": 8.912,
+   "tone": "neutral"
+  },
+  {
+   "w": "It's",
+   "start": 9.112,
+   "end": 9.317,
+   "tone": "mysterious"
+  },
+  {
+   "w": "been",
+   "start": 9.317,
+   "end": 9.59,
+   "tone": "mysterious"
+  },
+  {
+   "w": "leaking",
+   "start": 9.59,
+   "end": 10.067,
+   "tone": "mysterious"
+  },
+  {
+   "w": "for",
+   "start": 10.067,
+   "end": 10.271,
+   "tone": "mysterious"
+  },
+  {
+   "w": "months.",
+   "start": 10.271,
+   "end": 10.817,
+   "tone": "mysterious"
+  },
+  {
+   "w": "The",
+   "start": 10.817,
+   "end": 11.022,
+   "tone": "mysterious"
+  },
+  {
+   "w": "company's",
+   "start": 11.022,
+   "end": 11.567,
+   "tone": "mysterious"
+  },
+  {
+   "w": "fix?",
+   "start": 11.567,
+   "end": 11.908,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Paint",
+   "start": 12.108,
+   "end": 12.456,
+   "tone": "dramatic"
+  },
+  {
+   "w": "it",
+   "start": 12.456,
+   "end": 12.596,
+   "tone": "dramatic"
+  },
+  {
+   "w": "brown.",
+   "start": 12.596,
+   "end": 13.083,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Then,",
+   "start": 13.383,
+   "end": 13.742,
+   "tone": "serious"
+  },
+  {
+   "w": "at",
+   "start": 13.742,
+   "end": 13.862,
+   "tone": "serious"
+  },
+  {
+   "w": "lunchtime,",
+   "start": 13.862,
+   "end": 14.52,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 14.52,
+   "end": 14.699,
+   "tone": "serious"
+  },
+  {
+   "w": "rivets",
+   "start": 14.699,
+   "end": 15.058,
+   "tone": "serious"
+  },
+  {
+   "w": "start",
+   "start": 15.058,
+   "end": 15.357,
+   "tone": "serious"
+  },
+  {
+   "w": "popping.",
+   "start": 15.357,
+   "end": 15.895,
+   "tone": "serious"
+  },
+  {
+   "w": "Like",
+   "start": 15.945,
+   "end": 16.196,
+   "tone": "scared"
+  },
+  {
+   "w": "machine-gun",
+   "start": 16.196,
+   "end": 16.822,
+   "tone": "scared"
+  },
+  {
+   "w": "fire.",
+   "start": 16.822,
+   "end": 17.197,
+   "tone": "scared"
+  },
+  {
+   "w": "The",
+   "start": 17.397,
+   "end": 17.594,
+   "tone": "shout"
+  },
+  {
+   "w": "tank",
+   "start": 17.594,
+   "end": 17.857,
+   "tone": "shout"
+  },
+  {
+   "w": "bursts.",
+   "start": 17.857,
+   "end": 18.383,
+   "tone": "shout"
+  },
+  {
+   "w": "A",
+   "start": 18.533,
+   "end": 18.658,
+   "tone": "excited"
+  },
+  {
+   "w": "wave",
+   "start": 18.658,
+   "end": 18.907,
+   "tone": "excited"
+  },
+  {
+   "w": "twenty-five",
+   "start": 18.907,
+   "end": 19.529,
+   "tone": "excited"
+  },
+  {
+   "w": "feet",
+   "start": 19.529,
+   "end": 19.778,
+   "tone": "excited"
+  },
+  {
+   "w": "high,",
+   "start": 19.778,
+   "end": 20.151,
+   "tone": "excited"
+  },
+  {
+   "w": "moving",
+   "start": 20.151,
+   "end": 20.524,
+   "tone": "excited"
+  },
+  {
+   "w": "thirty-five",
+   "start": 20.524,
+   "end": 21.146,
+   "tone": "excited"
+  },
+  {
+   "w": "miles",
+   "start": 21.146,
+   "end": 21.457,
+   "tone": "excited"
+  },
+  {
+   "w": "an",
+   "start": 21.457,
+   "end": 21.582,
+   "tone": "excited"
+  },
+  {
+   "w": "hour.",
+   "start": 21.582,
+   "end": 21.955,
+   "tone": "excited"
+  },
+  {
+   "w": "It",
+   "start": 22.055,
+   "end": 22.177,
+   "tone": "excited"
+  },
+  {
+   "w": "flattens",
+   "start": 22.177,
+   "end": 22.666,
+   "tone": "excited"
+  },
+  {
+   "w": "buildings.",
+   "start": 22.666,
+   "end": 23.339,
+   "tone": "excited"
+  },
+  {
+   "w": "It",
+   "start": 23.339,
+   "end": 23.461,
+   "tone": "excited"
+  },
+  {
+   "w": "bends",
+   "start": 23.461,
+   "end": 23.767,
+   "tone": "excited"
+  },
+  {
+   "w": "steel",
+   "start": 23.767,
+   "end": 24.073,
+   "tone": "excited"
+  },
+  {
+   "w": "train",
+   "start": 24.073,
+   "end": 24.378,
+   "tone": "excited"
+  },
+  {
+   "w": "tracks.",
+   "start": 24.378,
+   "end": 24.868,
+   "tone": "excited"
+  },
+  {
+   "w": "You",
+   "start": 24.968,
+   "end": 25.13,
+   "tone": "scared"
+  },
+  {
+   "w": "can't",
+   "start": 25.13,
+   "end": 25.346,
+   "tone": "scared"
+  },
+  {
+   "w": "outrun",
+   "start": 25.346,
+   "end": 25.67,
+   "tone": "scared"
+  },
+  {
+   "w": "it.",
+   "start": 25.67,
+   "end": 25.886,
+   "tone": "scared"
+  },
+  {
+   "w": "And",
+   "start": 26.136,
+   "end": 26.338,
+   "tone": "serious"
+  },
+  {
+   "w": "as",
+   "start": 26.338,
+   "end": 26.472,
+   "tone": "serious"
+  },
+  {
+   "w": "it",
+   "start": 26.472,
+   "end": 26.607,
+   "tone": "serious"
+  },
+  {
+   "w": "cools,",
+   "start": 26.607,
+   "end": 27.077,
+   "tone": "serious"
+  },
+  {
+   "w": "it",
+   "start": 27.077,
+   "end": 27.212,
+   "tone": "serious"
+  },
+  {
+   "w": "turns",
+   "start": 27.212,
+   "end": 27.548,
+   "tone": "serious"
+  },
+  {
+   "w": "to",
+   "start": 27.548,
+   "end": 27.682,
+   "tone": "serious"
+  },
+  {
+   "w": "glue.",
+   "start": 27.682,
+   "end": 28.085,
+   "tone": "serious"
+  },
+  {
+   "w": "You're",
+   "start": 28.085,
+   "end": 28.421,
+   "tone": "serious"
+  },
+  {
+   "w": "stuck.",
+   "start": 28.421,
+   "end": 28.891,
+   "tone": "serious"
+  },
+  {
+   "w": "Twenty-one",
+   "start": 29.191,
+   "end": 29.832,
+   "tone": "sad"
+  },
+  {
+   "w": "people",
+   "start": 29.832,
+   "end": 30.259,
+   "tone": "sad"
+  },
+  {
+   "w": "died.",
+   "start": 30.259,
+   "end": 30.687,
+   "tone": "sad"
+  },
+  {
+   "w": "The",
+   "start": 30.987,
+   "end": 31.168,
+   "tone": "calm"
+  },
+  {
+   "w": "harbor",
+   "start": 31.168,
+   "end": 31.531,
+   "tone": "calm"
+  },
+  {
+   "w": "stayed",
+   "start": 31.531,
+   "end": 31.894,
+   "tone": "calm"
+  },
+  {
+   "w": "brown",
+   "start": 31.894,
+   "end": 32.197,
+   "tone": "calm"
+  },
+  {
+   "w": "for",
+   "start": 32.197,
+   "end": 32.378,
+   "tone": "calm"
+  },
+  {
+   "w": "months.",
+   "start": 32.378,
+   "end": 32.862,
+   "tone": "calm"
+  },
+  {
+   "w": "And",
+   "start": 33.012,
+   "end": 33.243,
+   "tone": "mysterious"
+  },
+  {
+   "w": "on",
+   "start": 33.243,
+   "end": 33.396,
+   "tone": "mysterious"
+  },
+  {
+   "w": "hot",
+   "start": 33.396,
+   "end": 33.627,
+   "tone": "mysterious"
+  },
+  {
+   "w": "days,",
+   "start": 33.627,
+   "end": 34.088,
+   "tone": "mysterious"
+  },
+  {
+   "w": "locals",
+   "start": 34.088,
+   "end": 34.549,
+   "tone": "mysterious"
+  },
+  {
+   "w": "swear",
+   "start": 34.549,
+   "end": 34.933,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Boston",
+   "start": 34.933,
+   "end": 35.394,
+   "tone": "mysterious"
+  },
+  {
+   "w": "still",
+   "start": 35.394,
+   "end": 35.778,
+   "tone": "mysterious"
+  },
+  {
+   "w": "smells",
+   "start": 35.778,
+   "end": 36.239,
+   "tone": "mysterious"
+  },
+  {
+   "w": "sweet.",
+   "start": 36.239,
+   "end": 36.776,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Would",
+   "start": 37.026,
+   "end": 37.282,
+   "tone": "neutral"
+  },
+  {
+   "w": "you",
+   "start": 37.282,
+   "end": 37.436,
+   "tone": "neutral"
+  },
+  {
+   "w": "have",
+   "start": 37.436,
+   "end": 37.64,
+   "tone": "neutral"
+  },
+  {
+   "w": "made",
+   "start": 37.64,
+   "end": 37.845,
+   "tone": "neutral"
+  },
+  {
+   "w": "it",
+   "start": 37.845,
+   "end": 37.947,
+   "tone": "neutral"
+  },
+  {
+   "w": "out?",
+   "start": 37.947,
+   "end": 38.203,
+   "tone": "neutral"
+  }
+ ]
+}
