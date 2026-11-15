@@ -57,8 +57,7 @@ Always apply `art-direction` (look brief, per-shot `look`/`set`) and `vfx` for a
    duration, captions drawn in-scene), include `templates/device_render_panel.html` before
    </body>, and pack it (`node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js short.html` → pass the printed JSON as `files`) and
    publish it with the Artifact tool if available, else open it with
-   `node ${CLAUDE_PLUGIN_ROOT}/scripts/open_in_chrome.js short.html`. The user clicks **Render MP4** and it renders on their own GPU at the tier their
-   specs support. Custom GLB models must be fetchable URLs or base64-embedded.
+   `node ${CLAUDE_PLUGIN_ROOT}/scripts/open_in_chrome.js short.html`. Set `CONFIG.quality` first: the page then renders the MP4 BY ITSELF on the user's GPU the moment it opens (reads the device's specs, no buttons) and shows the finished video with Save — never tell the user to click anything. Custom GLB models must be fetchable URLs or base64-embedded.
 8. Run `viral-growth` → write `publish.md` (titles, description, tags, hashtags, pinned
    comment, cover frame). Final message: artifact link/MP4 path + publish pack, nothing else (no review text, no feature lists).
 

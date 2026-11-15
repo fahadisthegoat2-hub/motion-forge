@@ -49,7 +49,7 @@ All skills load automatically: a startup hook tells Claude which skills to use f
 kind of request, so you never have to name them.
 
 ## Built-in kit (no downloads needed)
-- **Built-in actors:** Jake and Marcus (CC0, dressed, real hair, face rigs, lip-sync), restyled per video with clothing colors, skin tone, hair color and height.
+- **Built-in actors:** Jake and Marcus (CC0, dressed, real hair, face rigs, posed hands and fingers), restyled per video with clothing colors, skin tone, hair color and height.
 - **Animations:** idle, walk, jog, sprint, dance, crouch (+ more) — auto-retargeted, feet locked.
 - **Sets:** jungle, lab, city-day, space, street-night, interior, outdoor, studio, void.
 - **Camera moves, transitions, kinetic titles, VFX** — see templates/SCENE_API.md.
@@ -60,5 +60,5 @@ kind of request, so you never have to name them.
 - `references/` — images or videos to learn a style from
 
 ## Render on your device
-Scenes open in Chrome with a **Render on this device** panel: pick Good, High or Epic,
-click Render MP4, and it renders on your GPU and downloads the video.
+Open a scene (or its Artifact) and it renders itself: the page reads your device's specs, renders the MP4 on your GPU
+with sound at the quality chosen for the video, then shows the finished video with a Save button. Nothing to click.

@@ -28,8 +28,10 @@ Artifact `read` with the url and `path: <assetId>` saves the file: it is base64 
 `node -e "fs=require('fs');fs.writeFileSync('voice/<slug>.wav',Buffer.from(fs.readFileSync('<saved>','utf8'),'base64'))"`.
 
 ## 4. Use it in the scene
-- `CONFIG.sound.voice = { url: 'voice/<slug>.wav' }` → music ducks under it and mouths lip-sync to it automatically.
-- CAPTIONS from `take.words` (group 2–4 words per caption, `t` = first word start; highlight the toned/keywords in `hi`).
+- `CONFIG.sound.voice = { url: 'voice/<slug>.wav' }` → music ducks under it automatically.
+- **The voice is the NARRATOR — invisible, never a character.** No character lip-syncs or "says" the voiceover; the cast acts out what the narrator describes (no `talk` on anyone).
+- Captions land on the spoken words: `CONFIG.captions = { style: 'pop' | 'karaoke' | 'one' | 'box', sync: take.words }` (pass the take's word list as `[[word, start, end], …]` or `[{ w, start, end }]`).
+  Write CAPTIONS as before (group 2–4 words, `t` = first word start, keywords in `hi`) — or leave `CAPTIONS = []` and they are written from the words automatically.
 - Time shots to the words: cut on sentence starts, put graphics/punch-ins on the stressed word.
 - For pack_scene / artifacts the WAV is packed like any other asset.
 

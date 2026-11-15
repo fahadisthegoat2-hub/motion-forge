@@ -66,13 +66,14 @@ const CAST = {
 // SHORTS RHYTHM (skills/viral-3d-shorts): hook on screen by 0.3 s, first shot ≤ 2 s, shots 0.8–2.2 s, a beat every ≤ 3 s.
 // Every key list is [[time, value, ease?], ...] in shot-local seconds. Clips: plain names work (idle walk run sit kneel pickup talk phone…).
 // Gestures are posed with IK + fingers (point shield shrug think stop thumbsup headhold gasp clap…); hands: { right: 'fist' } sets fingers.
+// ONE NARRATOR, NEVER ON SCREEN: characters act the story out — no talk/lip-sync to the voiceover (a real in-scene line needs dialogue: true).
 const SHOTS = [
   { name: 'Hook', role: 'payoff', dur: 1.6, camera: { move: 'crash-zoom', target: 'hero', size: 'ms', at: 0.15, az: 15 },
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { shock: [[0, 0.4], [0.2, 1, 'outBack']] },
       gestures: [{ type: 'headhold', start: 0.05, end: 1.5 }] } },
     sfx: [{ t: 0, type: 'impact' }] },
   { name: 'Setup', dur: 2.0, cut: 'whip', camera: { move: 'push', target: 'hero', size: 'ms', az: -25 },
-    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 2 }], look: [[0, 'camera']], talk: [[0.1, 1.8]], gestures: [{ type: 'point', start: 1.0, end: 1.8, to: [0.4, 0, 1.2] }] } } },
+    cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 2 }], look: [[0, [0.4, 0.2, 1.4]], [0.9, [0.4, 0, 1.2]]], face: { worried: [[0.2, 0], [0.8, 0.9]] }, gestures: [{ type: 'point', start: 0.5, end: 1.8, to: [0.4, 0, 1.2] }] } } },
   { name: 'Escalation', dur: 1.8, cut: 'zoom', look: 'cinematic', camera: { move: 'orbit', target: 'hero', size: 'mls', span: 40, az: 20 },
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 0.6 }, { clip: 'run', start: 0.5, end: 1.8, fade: 0.25 }], face: { worried: [[0, 0.8]] } } },
     fx: [{ type: 'sparks', t: 0.4, pos: [0.8, 1.2, -0.6] }] },
@@ -681,7 +682,9 @@ const _av = new THREE.Vector3(), _aq = new THREE.Quaternion();
 function anchorWorld(at) {
   if (Array.isArray(at)) return _av.set(at[0], at[1], at[2]);
   const [id, part0 = 'head'] = String(at).split('.'), ch = characters[id]; if (!ch || !ch.root.visible) return null;
-  const part = part0.toLowerCase().replace(/[^a-z]/g, ''), B = BODY[part] || BODY.chest, s = (ch.def.height || 1.8) / 1.8, b = ch.bones[B[0]];
+  const part = part0.toLowerCase().replace(/[^a-z]/g, '');
+  if ((part === 'hands' || part === 'carry') && ch.bones.lefthand && ch.bones.righthand) { ch.root.getWorldQuaternion(_aq); return ch.bones.lefthand.getWorldPosition(_av).add(ch.bones.righthand.getWorldPosition(new THREE.Vector3())).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.02, 0.05).applyQuaternion(_aq)); }
+  const B = BODY[part] || BODY.chest, s = (ch.def.height || 1.8) / 1.8, b = ch.bones[B[0]];
   ch.root.getWorldQuaternion(_aq);
   if (b) b.getWorldPosition(_av); else { ch.root.getWorldPosition(_av); _av.y += (BODY_Y[part] ?? 0.75) * (ch.def.height || 1.8); }
   return _av.add(new THREE.Vector3(B[1] * s, b ? B[2] * s : 0, B[3] * s).applyQuaternion(_aq));
@@ -1323,7 +1326,7 @@ function upgradeMaterials(root, def = {}) {
         if (p.alphaMap || m.alphaTest || m.transparent || p.map) { p.alphaTest = Math.max(m.alphaTest || 0, 0.42); p.alphaToCoverage = true; }
         if (def.hair && /hair|ponytail|bob0|braid|afro|short0|long0|beard|brow|mustache/.test(n)) recolor(p, def.hair, def.hair, -1e9);
       } else {   // clothing & props: solid, thick-feeling fabric — opaque, double-sided (no see-through sleeves/collars)
-        Object.assign(p, { roughness: Math.max(p.roughness, 0.78), sheen: 0.45, sheenRoughness: 0.8, sheenColor: new THREE.Color('#ffffff'), side: THREE.DoubleSide });
+        Object.assign(p, { roughness: Math.max(p.roughness, 0.78), sheen: 0.16, sheenRoughness: 0.85, sheenColor: new THREE.Color('#ffffff'), side: THREE.DoubleSide });   // light sheen only — more washes dark fabric out to grey
         p.alphaTest = m.alphaTest || 0;
         if (isCloth) {
           const g = o.geometry; g.computeBoundingBox(); const inv = o.matrixWorld.clone().invert(), waist = new THREE.Vector3(0, waistW, 0).applyMatrix4(inv).y;
@@ -1439,7 +1442,9 @@ const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
   zombie: 'zombiewalkfwdloop', zombieidle: 'zombieidleloop', formalwalk: 'walkformalloop', torch: 'idletorchloop', lantern: 'idlelanternloop', spell: 'spellsimpleshoot',
   crouch: 'crouchidleloop' };
 // plain name → library key. A built-in alias wins over a name that only exists because "_Loop"/"_Fwd" was stripped (jump ≠ Jump_Loop); your own clip files always win.
-const CLIP_TUNE = { walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] } };   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
+const CLIP_TUNE = { walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
+  carry: { spine: [0.1, 0, 0], spine1: [0.1, 0, 0], spine2: [0.06, 0, 0], neck: [0.1, 0, 0], head: [0.18, 0, 0] },      // the library clip leans far back and looks at the sky
+  kneel: { spine: [-0.2, 0, 0], spine1: [-0.2, 0, 0], spine2: [-0.12, 0, 0], neck: [-0.22, 0, 0], head: [-0.28, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
 function clipKey(name) { const k = normName(name), a = CLIP_ALIAS[k]; return a && clipLib[a] && (!clipLib[k] || clipLib[k].derived) ? a : k; }
 function clipFor(ch, name) {
   let k = clipKey(name); ch.actions[k] ??= (() => {
@@ -1479,12 +1484,15 @@ Object.assign(GESTURES, {
   present: { R: { rightarm: [-0.55, -0.2, -0.35], rightforearm: [-0.55, 0.2, 0] }, in: 0.22, out: 0.4 },
   count:   { R: { rightarm: [-0.5, 0.15, -0.1], rightforearm: [-1.3, 0.2, 0] }, anim: { rightforearm: [0.12, 0, 0, 7] }, in: 0.2, out: 0.3 },
 });
+// ONE NARRATOR, NEVER ON SCREEN: the voiceover belongs to an invisible narrator. Characters are the people IN the story — they act it out,
+// they never mouth the narration or explain to the camera. Lips only move for a real in-scene line: cast.<id>.dialogue = true + talk: [[start, end]].
+const speech = (cast) => (cast?.dialogue === true ? cast.talk || [] : []);
 function autoGestures(cast) {
   if (cast._auto) return cast._auto;
   const mode = cast.acting || 'auto', out = []; if (mode === 'none') return (cast._auto = out);
   const big = mode === 'big' ? 1.25 : mode === 'calm' ? 0.6 : 1, user = cast.gestures || [], busy = (a, b) => user.some((g) => a < g.end + 0.45 && b > g.start - 0.4);
   let k = 0;
-  for (const [a, b] of cast.talk || []) {
+  for (const [a, b] of speech(cast)) {
     let t = a + 0.12;
     while (t < b - 0.3) {
       const len = 0.42 + hash(k * 1.7 + 3) * 0.55, r = hash(k * 2.9 + 1), side = hash(k * 4.3) < 0.55 ? 'right' : 'left';
@@ -1497,7 +1505,7 @@ function autoGestures(cast) {
 }
 // idle glances: when not talking, eyes/head drift to nearby points every few seconds (springs smooth it)
 function glanceAt(cast, t, seed) {
-  if ((cast?.acting || 'auto') === 'none' || (cast?.talk || []).some(([a, b]) => t >= a - 0.2 && t <= b + 0.2)) return [0, 0];
+  if ((cast?.acting || 'auto') === 'none' || speech(cast).some(([a, b]) => t >= a - 0.2 && t <= b + 0.2)) return [0, 0];
   let acc = 1.2 + hash(seed) * 1.5, k = 0;
   while (acc < t + 2) { const len = 0.6 + hash(k * 3.3 + seed) * 0.9;
     if (t >= acc && t < acc + len) { const e = Math.sin(Math.PI * clamp((t - acc) / len)) ** 0.6; return [(hash(k * 5.5 + seed) - 0.6) * 0.25 * e, (hash(k * 7.7 + seed) - 0.5) * 0.9 * e]; }
@@ -1539,7 +1547,10 @@ function poseFingers(ch, side, pose, w) {   // blend the fingers toward a pose (
 }
 function orientHand(ch, side, F, N, w) {   // F = finger direction, N = palm normal (world) → hand rotation, blended from the clip
   const H = ch.hand?.[side], b = ch.bones[side + 'hand'], r = ch.rest[side + 'hand']; if (!H || !b || Math.abs(w) < 1e-3) return;
-  const f = F.clone().normalize(), n = N.clone().addScaledVector(f, -N.dot(f)); if (n.lengthSq() < 1e-6) return; n.normalize();
+  const f = F.clone().normalize(), fo = ch.bones[side + 'forearm'];
+  if (fo) { const fa = b.getWorldPosition(new THREE.Vector3()).sub(fo.getWorldPosition(new THREE.Vector3())).normalize(), ang = Math.acos(clamp(fa.dot(f), -1, 1)), MAX = 1.3;   // a wrist can't fold past ~75°
+    if (ang > MAX) { const ax = fa.clone().cross(f); if (ax.lengthSq() > 1e-8) f.copy(fa).applyAxisAngle(ax.normalize(), MAX); } }
+  const n = N.clone().addScaledVector(f, -N.dot(f)); if (n.lengthSq() < 1e-6) return; n.normalize();
   _hm0.makeBasis(H.f, H.n, _hv.copy(H.f).cross(H.n)); _hm1.makeBasis(f, n, f.clone().cross(n));
   const qW = _hq.setFromRotationMatrix(_hm1.multiply(_hm0.transpose())).multiply(r.q), pW = b.parent.getWorldQuaternion(_hq2).invert();
   b.quaternion.slerp(pW.multiply(qW), w); b.updateMatrixWorld(true);
@@ -1567,6 +1578,7 @@ const POSES = {
   hips:      { arm: { from: 'hips', p: [0.2, 0.1, 0.01], dir: [-0.25, -0.9, 0.35], palm: [-1, 0, 0], fingers: 'grip', pole: [1, -0.1, -0.6] }, both: true, body: { spine2: [-0.04, 0, 0] } },
   clap:      { arm: { from: 'chest', p: [0.03, 0.04, 0.3], dir: [-0.15, 0.55, 0.82], palm: [-1, 0, 0], fingers: 'flat', osc: { p: [0.06, 0, 0], f: 13, abs: true } }, both: true },
   plead:     { arm: { from: 'chest', p: [0.012, 0.1, 0.24], dir: [0, 1, 0.25], palm: [-1, 0, 0], fingers: 'flat' }, both: true, body: { spine2: [0.08, 0, 0], head: [-0.08, 0, 0] } },
+  kneelrest: { arm: { p: [0.08, -0.46, 0.08], dir: [0, -1, 0.15], palm: [-1, 0, 0], fingers: 'relaxed' }, L: { from: 'leftknee', p: [0.0, 0.07, 0.05], dir: [-0.35, -0.2, 0.9], palm: [0, -1, 0.2], fingers: 'soft', pole: [0.9, -0.5, -0.2] }, both: true },
   beat:      { arm: { p: [0.06, -0.25, 0.3], dir: [-0.15, 0.25, 0.95], palm: [-0.7, 0.7, 0], fingers: 'soft', osc: { p: [0, 0.025, 0], f: 8 } }, in: 0.16, out: 0.32 },
   open:      { arm: { p: [0.2, -0.23, 0.3], dir: [0.45, 0.05, 0.9], palm: [0, 1, 0], fingers: 'soft' }, in: 0.2, out: 0.36 },
   explain:   { arm: { p: [0.12, -0.22, 0.33], dir: [0.3, 0.1, 0.95], palm: [-0.3, 0.95, 0], fingers: 'soft' }, both: true, body: { spine2: [0.03, 0, 0] }, in: 0.2, out: 0.35 },
@@ -1601,7 +1613,7 @@ function applyPose(ch, G, g, t) {
       const sh = up.getWorldPosition(new THREE.Vector3()), d = tp.sub(sh).normalize(); T = sh.addScaledVector(d, H.arm * 0.93); F = null;
       orientLater.set(d.x, d.y, d.z);
     } else {
-      const fromB = { head: ch.bones.head, chest: ch.bones.spine2, hips: ch.bones.hips }[L.from] || up, k = L.from ? hs : H.arm / 0.534;
+      const fromB = { head: ch.bones.head, chest: ch.bones.spine2, hips: ch.bones.hips, leftknee: ch.bones.leftleg, rightknee: ch.bones.rightleg }[L.from] || up, k = L.from ? hs : H.arm / 0.534;
       const p = [L.p[0] + (o?.p ? o.p[0] * so : 0) + 0.006 * fbm(t * 0.9, seed + ph), L.p[1] + (o?.p ? o.p[1] * so : 0) + 0.006 * fbm(t * 0.8, seed + 5 + ph), L.p[2] + (o?.p ? o.p[2] * so : 0)];
       T = fromB.getWorldPosition(new THREE.Vector3()).add(toW(p, k));
       if (F && o?.dir) F = F.map((v, i) => v + o.dir[i] * so);
@@ -1707,6 +1719,16 @@ function rotateInRootSpace(ch, bone, pitch, yaw, roll = 0) {
   const world = bone.getWorldQuaternion(new THREE.Quaternion()).premultiply(delta);
   bone.quaternion.copy(parentW.invert().multiply(world)); bone.updateMatrixWorld(true);
 }
+// Game rigs have no forearm twist bones: a wrist turned far from the forearm collapses like a candy wrapper ("morphed hands").
+// Share that twist with the forearm (as real pronation does) — the hand keeps its exact place and direction.
+const _tw = { q: new THREE.Quaternion(), r: new THREE.Quaternion(), a: new THREE.Vector3() };
+function relaxWrists(ch, share = 0.55) {
+  for (const s of ['left', 'right']) { const fo = ch.bones[s + 'forearm'], ha = ch.bones[s + 'hand'], r0 = ch.rest[s + 'hand']; if (!fo || !ha || !r0 || ha.position.lengthSq() < 1e-10) continue;
+    const ax = _tw.a.copy(ha.position).normalize(), r = _tw.r.copy(ha.quaternion).multiply(_tw.q.copy(r0.local).invert());   // rotation from rest, in the forearm's frame
+    let ang = 2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w); if (ang > Math.PI) ang -= 2 * Math.PI; if (ang < -Math.PI) ang += 2 * Math.PI;
+    if (Math.abs(ang) < 0.05) continue;
+    const tw = _tw.q.setFromAxisAngle(ax, ang * share); fo.quaternion.multiply(tw); ha.quaternion.premultiply(tw.invert()); fo.updateMatrixWorld(true); }
+}
 function lookTargetAt(ch, cast, t, camPosAt) {
   const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : x));
   if (!v) return null;
@@ -1728,7 +1750,10 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   }
   const [pitch, yaw] = ch.spring.x, g = goal(t);
   ch.root.updateMatrixWorld(true);
-  for (const [tn, tw] of ch._tune || []) for (const [bn, e] of Object.entries(tn)) rotateInRootSpace(ch, B[bn], e[0] * tw, e[1] * tw, e[2] * tw);
+  for (const [tn, tw0] of ch._tune || []) { const tw = tw0 * (tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1);   // low: only while the body is actually down
+    for (const [bn, e] of Object.entries(tn)) if (Array.isArray(e)) rotateInRootSpace(ch, B[bn], e[0] * tw, e[1] * tw, e[2] * tw);
+    const lowK = tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1;
+    if (tn.pose && lowK > 0.01 && POSES[tn.pose] && !(cast?.gestures || []).some((g) => t > g.start - 0.2 && t < g.end + 0.4)) applyPose(ch, POSES[tn.pose], { type: tn.pose, start: -1e6, end: 1e6, amount: tw * lowK }, t); }
   applyGestures(ch, cast, t);
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
@@ -1743,10 +1768,11 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   // look distribution: spine2 15% · neck 35% · head 50% (+ micro noise), eyes lead
   rotateInRootSpace(ch, B.spine2, pitch * 0.1, yaw * 0.15);
   rotateInRootSpace(ch, B.neck, pitch * 0.35, yaw * 0.35);
-  const talking = (cast?.talk || []).some(([a, b]) => t >= a && t <= b);
+  const talking = speech(cast).some(([a, b]) => t >= a && t <= b);
   const nod = talking ? 0.03 * Math.max(0, noise(tGlobal * 3.1, seed + 7)) : 0;
   rotateInRootSpace(ch, B.head, pitch * 0.5 + 0.012 * fbm(tGlobal * 0.6, seed + 1) + nod, yaw * 0.5 + 0.015 * fbm(tGlobal * 0.5, seed + 2), 0.01 * fbm(tGlobal * 0.4, seed + 5));
   applyImpulses(ch, shotAt(tGlobal).shot, t);
+  relaxWrists(ch);
   // eyes: remaining angle to target + saccades (eyes move first, head catches up)
   let acc = 0, k = 0; while (acc + 0.45 + hash(k + seed) * 1.6 <= tGlobal) { acc += 0.45 + hash(k + seed) * 1.6; k++; }
   const sac = [(hash(k * 3 + seed) - .5) * 0.06, (hash(k * 7 + seed) - .5) * 0.1];
@@ -1760,7 +1786,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   for (const [M, lt, k] of activeMotions(cast, t)) for (const [name, keys] of Object.entries(M.face || {})) { const wv = (key(keys, lt) || 0) * k; for (const [mn, mw] of Object.entries(FACE[name] || { [name]: 1 })) ch.setMorph(mn, mw * wv); }
   for (const [name, keys] of Object.entries(cast?.face || {})) { const wv = key(keys, t) || 0; for (const [mn, mw] of Object.entries(FACE[name] || { [name]: 1 })) ch.setMorph(mn, mw * wv); }
   if (talking) {   // syllable lip-sync: a mouth shape per syllable, word gaps, closures, small jaw energy variation
-    const seg = (cast.talk || []).find(([a, b]) => t >= a && t <= b), u = t - seg[0], rate = cast.talkRate ?? 4.6;
+    const seg = speech(cast).find(([a, b]) => t >= a && t <= b), u = t - seg[0], rate = cast.talkRate ?? 4.6;
     const si = Math.floor(u * rate), ph = u * rate - si, word = hash(Math.floor(si / 3) * 1.7 + seed) < 0.18 && si % 3 === 2;
     const v = VIS[hash(si * 3.1 + seed) < 0.16 ? 7 : Math.floor(hash(si * 1.3 + seed) * 7)], env = (word ? 0.15 : 0.35 + 0.65 * Math.pow(Math.sin(Math.PI * ph), 0.8)) * (0.75 + 0.25 * hash(si + 9 + seed));
     const fadeOut = clamp((seg[1] - t) / 0.12) * clamp(u / 0.08);
@@ -1918,8 +1944,14 @@ const FXP = {
     return { parts: [{ obj: holder, update(lt) {
       holder.visible = lt >= t0 && lt <= t1; if (!holder.visible) return;
       const o = key(f.p, lt) || [0, 0, 0], sc = key(f.scale, lt) ?? 1, pl = f.pulse ? 1 + 0.06 * Math.exp(-((lt * f.pulse / 60) % 1) * 6) : 1;
-      if (f.attach) { const w = anchorWorld(f.attach); if (w) { holder.parent.updateMatrixWorld(true); holder.position.copy(holder.parent.worldToLocal(w.clone())).add(new THREE.Vector3(o[0], o[1], o[2])); } }
-      else holder.position.set(o[0], o[1] + (f.bob ? Math.sin(lt * 2.2) * f.bob : 0), o[2]); holder.rotation.y = (f.rotY ?? 0) + (f.spin ?? 0) * lt; holder.scale.setScalar(sc * pl);
+      holder.rotation.set(0, (f.rotY ?? 0) + (f.spin ?? 0) * lt, 0);
+      if (f.attach) { const w = anchorWorld(f.attach); if (w) { holder.parent.updateMatrixWorld(true);
+          const [cid, part = ''] = Array.isArray(f.attach) ? [] : String(f.attach).split('.'), ch = characters[cid], hb = ch && f.grip ? ch.bones[/left/i.test(part) ? 'lefthand' : 'righthand'] : null;
+          if (ch) {   // a held thing turns with the body; grip: true = it also follows the hand itself (phone, torch, sword…), rot: [x, y, z] adjusts it
+            const q = hb ? hb.getWorldQuaternion(new THREE.Quaternion()).multiply(ch.rest[/left/i.test(part) ? 'lefthand' : 'righthand'].q.clone().invert()).multiply(ch.root.getWorldQuaternion(new THREE.Quaternion())) : ch.root.getWorldQuaternion(new THREE.Quaternion());
+            holder.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(f.rot?.[0] ?? 0, (f.rot?.[1] ?? 0) + (f.rotY ?? 0) + (f.spin ?? 0) * lt, f.rot?.[2] ?? 0))); }
+          holder.position.copy(holder.parent.worldToLocal(w.clone())).add(new THREE.Vector3(o[0], o[1], o[2]).applyQuaternion(ch ? ch.root.getWorldQuaternion(new THREE.Quaternion()) : new THREE.Quaternion())); } }
+      else holder.position.set(o[0], o[1] + (f.bob ? Math.sin(lt * 2.2) * f.bob : 0), o[2]); holder.scale.setScalar(sc * pl);
     } }] };
   },
   explosion(f) {
@@ -2530,7 +2562,7 @@ function applyClips(ch, cast, t) {
       lt = pathLen(cast.pos, Math.max(e.start, 0), t) / rs + (e.offset || 0);   // feet lock to the ground: cycle phase follows distance travelled
     a.time = e.loop === false ? Math.min(lt, d - 1e-4) : lt % d; a.setEffectiveWeight(Math.max(a.getEffectiveWeight(), w / sum));
   }
-  ch.mixer.update(0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
+  ch.mixer.update(0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[normName(e.clip)] || CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
   for (const [k, b] of Object.entries(ch.bones)) { const s = (P[k] ??= { q: new THREE.Quaternion(), p: new THREE.Vector3() }); s.q.copy(b.quaternion); s.p.copy(b.position); }
 }
 function cameraAt(shot, lt, tGlobal) {
@@ -2674,7 +2706,7 @@ function resize() {
 addEventListener('resize', () => { if (!window.__mfManual) resize(); }); resize();
 
 window.__mf = {
-  duration: TOTAL, fps: CONFIG.fps, width: CONFIG.width, height: CONFIG.height, canvas: renderer.domElement, chapters: CHAPTERS,
+  duration: TOTAL, fps: CONFIG.fps, width: CONFIG.width, height: CONFIG.height, canvas: renderer.domElement, chapters: CHAPTERS, quality: CONFIG.quality, autoRender: CONFIG.autoRender,
   setSize(w, h) { bokeh.enabled = true; renderer.setSize(w, h, false); composer.setSize(w, h); bloom.resolution.set(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%'; },
   render,
   soundtrack: () => renderSoundtrack(),
@@ -2695,7 +2727,7 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     for (const C of (typeof CAPTIONS !== "undefined" ? CAPTIONS : [])) beats.push(C.t);
     const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
     const S0 = SHOTS[0] || {}, cam0 = S0.camera || {}, caps = typeof CAPTIONS !== "undefined" ? CAPTIONS : [];
-    return { payoffFirst: S0.role === "payoff", staticOpen: (!cam0.move || cam0.move === "static") && !(Array.isArray(cam0.pos) && cam0.pos.length > 1), question: caps.slice(-2).some((C) => /\?\s*$/.test(C.text || "")),
+    return { narratorLips: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).filter(([, c]) => c?.talk?.length && c.dialogue !== true).map(([id]) => (sh.name || 'shot ' + (i + 1)) + ':' + id)), payoffFirst: S0.role === "payoff", staticOpen: (!cam0.move || cam0.move === "static") && !(Array.isArray(cam0.pos) && cam0.pos.length > 1), question: caps.slice(-2).some((C) => /\?\s*$/.test(C.text || "")),
       target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
       voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
   },
@@ -2710,7 +2742,13 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         return { to: R.to, err: Math.max(...(R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']).map((h) => ch.bones[h + 'hand'] ? ch.bones[h + 'hand'].getWorldPosition(V()).distanceTo(T) : 0)) }; }).filter(Boolean);
       const missing = (cast.clips || []).map((c) => c.clip).filter((c) => !clipLib[clipKey(c)]);
       const fc = anchorScreen(ch.id + '.face', 1, 1);
-      out.push({ id: ch.id, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+      const hands = ['left', 'right'].map((s) => { const fo = ch.bones[s + 'forearm'], ha = ch.bones[s + 'hand'], mid = ch.bones[s + 'handmiddle1']; if (!fo || !ha) return null;
+        const pf = fo.getWorldPosition(V()), ph = ha.getWorldPosition(V()), fa = ph.clone().sub(pf).normalize(), bend = mid ? Math.acos(clamp(mid.getWorldPosition(V()).sub(ph).normalize().dot(fa), -1, 1)) * 57.3 : 0;
+        const r = ha.quaternion.clone().multiply(ch.rest[s + 'hand'].local.clone().invert()), ax = ha.position.clone().normalize(); let tw = 2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w) * 57.3; if (tw > 180) tw -= 360; if (tw < -180) tw += 360;
+        const lp = ch.root.worldToLocal(ph.clone()), sp = ch.bones.spine1 ? ch.root.worldToLocal(ch.bones.spine1.getWorldPosition(V())) : null, hp = ch.bones.hips ? ch.root.worldToLocal(ch.bones.hips.getWorldPosition(V())) : null, nk = ch.bones.neck ? ch.root.worldToLocal(ch.bones.neck.getWorldPosition(V())) : null;
+        const inside = !!(sp && hp && nk && lp.y > hp.y + 0.06 && lp.y < nk.y - 0.04 && Math.abs(lp.x - sp.x) < 0.11 && lp.z - sp.z < 0.05 && lp.z - sp.z > -0.08);
+        return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
+      out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
     return { shot: shot.name, t: tg, local, chars: out, titles };
@@ -2822,9 +2860,19 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   muxer.finalize();
   const url = URL.createObjectURL(new Blob([target.buffer], { type: 'video/mp4' }));
   const file = `${(document.title || 'render').replace(/\W+/g, '-')}${label === 'Video' ? '' : '-' + label.replace(/\W+/g, '-')}.mp4`;
-  const a = Object.assign(document.createElement('a'), { href: url, download: file });
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);   // free memory before next part
+  results.push({ label, url, file });
+  try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
+}
+const results = [];
+function showResults(secs) {   // the finished video, playing on the page, with a save button (pages inside an app can't always download by themselves)
+  $('mf-done')?.remove(); const single = results.length === 1, box = document.createElement('div'); box.id = 'mf-done';
+  box.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(6,10,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;font:14px/1.4 system-ui,sans-serif;color:#fff';
+  const btn = 'padding:12px 22px;border-radius:10px;background:#22d3ee;color:#04202a;font-weight:800;text-decoration:none;font-size:15px;border:0;cursor:pointer';
+  box.innerHTML = '<b style="font-size:16px">Your video is ready</b>' + (single ? '<video controls playsinline loop style="max-width:100%;max-height:68vh;border-radius:12px;background:#000"></video>' : '') +
+    '<div id="mf-links" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div><div style="opacity:.7;font-size:12px">Rendered on this device in ' + secs + 's</div><button id="mf-close" style="' + btn + ';background:transparent;color:#fff;border:1px solid #ffffff44;font-weight:600;font-size:13px;padding:8px 16px">Back to the scene</button>';
+  document.body.appendChild(box); if (single) box.querySelector('video').src = results[0].url;
+  for (const r of results) { const a = Object.assign(document.createElement('a'), { href: r.url, download: r.file, textContent: single ? 'Save MP4' : 'Save ' + r.label }); a.style.cssText = btn; box.querySelector('#mf-links').appendChild(a); }
+  box.querySelector('#mf-close').onclick = () => { box.querySelector('video')?.pause(); box.remove(); };
 }
 
 let liveAudio = null;
@@ -2835,15 +2883,25 @@ $('mf-play').onclick = async () => {
   try { const buf = await mf.soundtrack(), ctx = new AudioContext(), src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.loopEnd = mf.duration; src.connect(ctx.destination);
     mf.restart?.(); src.start(); liveAudio = { ctx }; $('mf-play').textContent = '■ Stop preview'; } catch (e) { $('mf-play').textContent = '▶ Preview with sound'; msg('Sound preview failed: ' + (e.message || e)); }
 };
-$('mf-go').onclick = async () => {
-  const mf = window.__mf; if (!mf) return msg('Scene not ready yet.');
+let busy = false;
+async function loadMuxer() {   // MP4 writer: the copy published next to the page first (works offline / inside apps), then the public CDNs
+  for (const u of ['./mp4-muxer.mjs', '../vendor/mp4-muxer.mjs', '../../vendor/mp4-muxer.mjs', 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm', 'https://unpkg.com/mp4-muxer@5.1.3/build/mp4-muxer.mjs', 'https://cdn.jsdelivr.net/gh/fahadisthegoat2-hub/motion-forge@main/vendor/mp4-muxer.mjs']) {
+    try { const m = await import(u); if (m?.Muxer) return m; } catch {} }
+  return null;
+}
+$('mf-go').onclick = () => run(false);
+async function run(isAuto) {
+  const mf = window.__mf; if (!mf) return msg('Scene not ready yet.'); if (busy) return;
   if ($('mf-q').value === '') return msg('Pick Good, High or Epic first.');
   if (!('VideoEncoder' in window)) return msg('This browser lacks WebCodecs — use Chrome, Edge or Safari 17+.');
+  const lower = () => { const i = +$('mf-q').value; if (isAuto && i > 0) { $('mf-q').value = i - 1; msg('Trying a lighter quality…'); setTimeout(() => run(true), 300); return true; } return false; };
   const p = presets[$('mf-q').value], [w, h] = dims(p);
   const br = Math.min(Math.round(w * h * p.fps * 0.15), 35e6);
   encoderPick = await pickEncoder(w, h, p.fps, br);
-  if (!encoderPick) return msg('No supported video encoder for this size — try a lower quality.');
-  const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm');
+  if (!encoderPick) { if (!lower()) msg('No supported video encoder for this size — try a lower quality.'); return; }
+  busy = true; results.length = 0; $('mf-done')?.remove(); if (liveAudio) { liveAudio.ctx.close(); liveAudio = null; $('mf-play').textContent = '▶ Preview with sound'; }
+  const mux = await loadMuxer(); if (!mux) { busy = false; return msg('Could not load the MP4 writer (no connection?) — reload the page to try again.'); }
+  const { Muxer, ArrayBufferTarget } = mux;
   soundtrack = mf.soundtrack ? await mf.soundtrack().catch(() => null) : null; audioPick = soundtrack ? await pickAudio() : null;
   if (soundtrack && !audioPick) msg('This browser cannot encode audio — the MP4 will be silent. Use Chrome/Edge or Safari 17.4+.');
 
@@ -2852,7 +2910,7 @@ $('mf-go').onclick = async () => {
     : sel === 'all' ? chapters.map((c, i) => ({ start: c.start, end: c.end, label: `Part ${i + 1}` }))
     : [{ start: chapters[sel].start, end: chapters[sel].end, label: `Part ${+sel + 1}` }];
 
-  window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = .35;
+  window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = isAuto ? 1 : .35;
   const canvas = mf.canvas || document.querySelector('canvas');
   mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
   const t0 = performance.now();
@@ -2862,11 +2920,24 @@ $('mf-go').onclick = async () => {
       if (jobs.length > 1) await new Promise((r) => setTimeout(r, 1500)); // let the download start
     }
     $('mf-bar').firstElementChild.style.width = '100%';
-    msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} downloaded.` +
+    msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} ready.` +
       (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
-  } catch (e) { msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); }
-  window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
+    showResults(((performance.now() - t0) / 1000).toFixed(0));
+  } catch (e) { busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
+    if (!lower()) msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); return; }
+  busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
   dispatchEvent(new Event('resize'));
-};
+}
+// AUTO-RENDER: as soon as the scene has loaded, the page renders the MP4 by itself on this device — at the quality chosen for the video
+// (CONFIG.quality), capped by what this device can do, stepping down if the encoder refuses. Nothing to click.
+// Off with CONFIG.autoRender = false or ?preview in the address; never runs in the automatic QA/cloud renderer.
+(async () => {
+  const qs = new URLSearchParams(location.search); if (qs.has('fast') || qs.has('preview') || navigator.webdriver) return;
+  const t0 = performance.now(); while (!window.__mf || window.__mfReady === false) { if (performance.now() - t0 > 600000) return; await new Promise((r) => setTimeout(r, 300)); }
+  if (window.__mf.autoRender === false || window.__mfManual || busy) return;
+  const want = { good: 0, high: 1, epic: 2 }[String(window.__mf.quality || '').toLowerCase()];
+  $('mf-q').value = String(want === undefined ? tier : Math.min(want, Math.max(tier, 0) + 1));   // at most one step above what the device is rated for
+  msg('Rendering your video on this device…'); await new Promise((r) => setTimeout(r, 600)); run(true);
+})();
 </script>
 </body></html>

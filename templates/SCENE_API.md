@@ -9,7 +9,7 @@ Never model people, clothes, hair, faces or foliage from primitives — that is 
 
 ## CONFIG
 `targetDuration` (the length the user asked for, seconds) · `width/height` (1080×1920 shorts · 1920×1080 long-form) · `fps` · `look` · `set` · `captionY`
-(0..1, default 0.74) · `animations` (clip libraries; any Mixamo/Unreal/MakeHuman clip is
+(0..1, default 0.74) · `quality` (good | high | epic — the page renders itself at this quality) · `captions` (see CAPTIONS) · `animations` (clip libraries; any Mixamo/Unreal/MakeHuman clip is
 auto-retargeted onto every actor).
 
 **look** (`CONFIG.look` / per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
@@ -29,7 +29,10 @@ From the collection: `{ character: 'leo' }` (characters/library.json — see ski
 Your own characters: `urls: ['characters/name.glb']` (Avaturn GLB / Mixamo FBX) or a file named
 `characters/<castId>.glb`. Several people = several cast entries (vary height, skin, hair, wardrobe).
 
-## Clips (plain names: sit sitdown standup kneel crouchidle pickup push carry eat phone talk foldarms yes no jump roll climb punch hit die swim drive chop… — 89 real animations)
+## Clips (plain names: sit sitdown standup kneel fix crouch crouchwalk pickup push carry eat phone foldarms nod no thumbsup jump jumploop land roll climb punch hit die swim drive chop… — 89 real animations)
+One-shot clips hold their LAST pose with `loop: false` (sitdown, die, pickup, jump…). `kneel` = upright on one knee, hand resting on it · `fix` = the same clip hunched over, working on the ground.
+**Clips made for a prop need the prop:** `carry` → a model with `attach: 'hero.hands'` · `push` → something to push in front · `phone`/`eat` → a held model with `grip: true`. No prop = pick another clip.
+**ONE NARRATOR, NEVER ON SCREEN:** the voiceover is an invisible narrator. Characters are the people in the story: they act it out and never mouth the narration (`talk` is ignored unless the cast entry has `dialogue: true` for a real in-scene line).
 Hand IK: `reach: [{ hand: 'right'|'left'|'both', to: 'castId.part' | [x,y,z], offset, start, end }]` — hands land exactly on targets (within arm reach; qa_check measures it). Held models: fx model `attach: 'hero.righthand'`.
 
 ### Original clip list
@@ -47,9 +50,10 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
     clips: [{ clip, start, end, fade?, speed?, loop? }],
     look: keys([x,y,z] | 'camera'),
     face: { smile|smirk|shock|scream|worried|sad|angry|disgust|squint: keys(0..1) },
-    talk: [[start, end], ...], talkRate?,      // syllable lip-sync + automatic hand gestures
-    gestures: [{ type, start, end, side?, amount? }],
-    acting: 'auto' | 'calm' | 'big' | 'none',  // auto talk gestures + idle glances (default auto)
+    gestures: [{ type, start, end, side?: 'right'|'left'|'both', amount?, to?, fingers?, n? }],   // posed with IK + fingers (list below)
+    hands: { right: 'fist' | keys, left, both },   // finger pose any time: relaxed open soft flat fist point peace thumbsup grip claw pinch count1…5
+    dialogue: true, talk: [[start, end], ...], // ONLY for a real line spoken in the scene (never for the narrator's voiceover): lip-sync + talking gestures
+    acting: 'auto' | 'calm' | 'big' | 'none',  // idle glances (+ gestures while in dialogue)
     bones: { <joint>: keys([pitch, yaw, roll]) }, // CUSTOM animation: any joint, layered on the clip (see below)
     rotX: keys, rotZ: keys,                    // whole-body flips, falls, tumbles (with rotY)
     motions: [{ name, start, speed?, amount?, loop?, hold? }], // saved custom motions (animations/custom/motions.json)
@@ -63,8 +67,9 @@ inCubic outCubic inOutCubic outExpo inOutExpo outBack outElastic spring`.
 `static · dolly-in · push · dolly-out · orbit (span°) · crane-up · crane-down · low-hero · overhead ·
 crash-zoom (at) · reveal · track/follow (rides beside a walking character, side: left|right) ·
 over-shoulder · dutch`.
-**size**: `ecu · cu · mcu · ms · mls · ws · ews` (or metres). `with: [x,y,z]` pans toward a second
-subject (e.g. an explosion) while keeping the actor in frame.
+**size**: `ecu · cu · mcu · ms · mls · ws · ews` (or metres = exact frame height). `with: [x,y,z]` pans toward a second
+subject (e.g. an explosion) while keeping the actor in frame. In vertical video the eyes sit about a third down at every size, so the top fifth is free for titles.
+`crash-zoom` starts wide and lands on the asked size · `reveal` slides the subject in from the frame edge · `over-shoulder` sits behind the other person's shoulder (`over: 'castId'`, default the nearest other cast member).
 
 ### Transitions (`shot.cut` = how this shot comes in)
 `whip · zoom · spin · glitch · flash · dip · smash · blur` — motion-blurred camera moves across the cut.
@@ -78,9 +83,11 @@ Values are radians in the character's own space: **pitch** + tips forward/down (
 `upleg` (+pitch) and `leg` (−pitch). Jumps = `pos` y up with outCubic, down with inCubic. Layer on top of a clip, add anticipation
 before and overshoot/settle after (see skills/custom-animation). New reusable poses can be added to `GESTURES` in the scene file.
 
-### Gestures (auto anticipation → overshoot → living hold → settle)
-`point · handsup · shrug · armsout · fistpump · shield · think · facepalm · wave · lean · slump · scared ·
-beat · explain · present · count`.
+### Gestures — posed with hand IK and fingers (anticipation → overshoot → living hold → settle; the body leads, the hand drags behind)
+`point · handsup · shrug · armsout · fistpump · cheer · shield · think · facepalm · gasp · headhold · salute · wave · stop · thumbsup · scared · hips · clap · plead ·
+beat · open · explain · present · count · lean · slump`.
+They are absolute poses blended from whatever the clip is doing, so they read the same on idle, sit, walk… `point` aims with `to: 'pal.head' | [x,y,z] | 'camera'`; `count` takes `n: 1–5`;
+any gesture takes `fingers: 'fist'`. Wrists never fold or twist past real limits (qa_check fails deformed hands and hands inside the body). New poses: add to `POSES` in the scene file.
 
 ### Epic action (anime / superhero)
 `shot.afterimage: 0.85` (or keys) = speed trails · `shot.impact: [t]` = anime impact frames (flash + hard B/W frames) ·
@@ -99,6 +106,7 @@ Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
 ## 3D models (Model Forge, see skills/model-forge)
 `fx: [{ type: 'model', id, pos, height, rotY, spin, bob, pulse, p: keys, scale: keys, start, end, color }]` — any model in assets/models (models.json).
+Held and carried things: `attach: 'hero.righthand'` (+ `grip: true` → follows the hand itself, `rot: [x,y,z]` to seat it) · `attach: 'hero.hands'` = between both hands (with the `carry` clip). They turn with the character.
 
 ## Inside the body — real 3D (prefer these over 2D)
 - Micro worlds: `set: 'blood' | 'fat' | 'neurons' | 'artery'` (camera flies forward automatically; characters hidden). `shot.micro = { level: keys 0..1, flow }`:
@@ -128,13 +136,22 @@ Any title can follow a body part or 3D point: `at: 'hero.heart'` (+ `offset: [dx
 All get automatic sounds. Panels go where the face isn't (frame the hero `mls`/`ws` low in frame for data panels).
 
 ## CAPTIONS & TITLES (drawn into the video)
-`CAPTIONS = [{ t, t1?, text, hi: ['WORD'] }]` — word-by-word pop, highlighted words yellow, at `captionY`.
-`TITLES = [{ t, t1, style, text, pos:[x,y], size, color, accent, sub, from, to, prefix, suffix, value, radius }]`
-styles: `slam` (hook titles, `\n` stacks lines, last line accent) · `stack` · `typewriter` · `counter`
-· `glitch` · `lower-third` · `stamp` · `meter` · `ring` (highlight circle) · `tag` (pill label like "DAY 30").
+`CAPTIONS = [{ t, t1?, text, hi: ['WORD'], w?: [start time of each word], style?, size?, y? }]` at `captionY`.
+`CONFIG.captions = { style, size, color, hi, active, y, upper, sync, group }` — styles: `pop` (words pop in as spoken, default) · `karaoke` (a highlight box glides word to word) · `one` (one huge word at a time) · `box` (dark plate).
+**Voice sync:** `sync: take.words` (the voiceover's word times) puts every caption word on its spoken word; with `CAPTIONS = []` the captions are written from the words automatically.
+
+`TITLES = [{ t, t1, style, text, pos:[x,y], size, color, accent, sub, … }]` — every style also takes `in` / `out` moves: `pop · fade · up · down · left · right · zoom · drop · spin · blur · none`
+(`inDur`, `outDur`), `rotate`, `float`. Long text shrinks to fit the frame by itself.
+Hook & type: `slam` (`\n` stacks lines, last line accent) · `kinetic` (`text: 'THIS|CHANGES|EVERYTHING'`, `hi`, one phrase at a time, each with a different entrance) · `letters` (letter-by-letter rise, `hi`, `wave`)
+· `marker` (highlighter swipes behind `hi` words) · `wipe` (bar reveals a name plate, `sub`) · `underline` · `stack` · `typewriter` · `glitch` · `stamp` · `burst` (comic starburst) · `zoomthrough` (word flies through the lens, on a cut) · `tag`.
+Numbers & data: `counter` · `stat` (`value`, `max`, `suffix`, `text` — big number in a progress ring) · `meter` · `versus` (`a: { text, value }`, `b: {…}` — panels slam together, winner framed) · `countdown` (`from`, `step`, `text: 'GO!'`) · `steps` (`items`, active step grows).
+Story furniture: `lower-third` · `place` (typed location/date stamp, `sub`) · `chapter` (line opens, title drops out, `sub: 'PART 2'`) · `quote` (word by word, `sub: '— Name'`) · `ticker` (news band, `label`) · `cta` (follow/subscribe button that gets tapped: `text`, `done`, `sub`, `icon: 'bell'|'like'|'heart'`)
+· `ring` · `box` (frame draws itself around `at: 'hero.head'`, `box: [w,h]`).
 Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 
 ## Rendering
 - QA in the cloud (no GPU): `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 405 --height 720 --fps 4 --frames-only`
 - Artifact page: `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` → publish scene.html with the printed JSON as `files` (artifacts can't load .glb or the GitHub CDN otherwise — no characters).
-- Finals: on the user's device (open the page → Render panel), or cloud `--quality good|high|epic` only if asked (slow).
+- Finals render THEMSELVES: set `CONFIG.quality` (good | high | epic), publish the page — the moment it opens it reads the device's specs and renders the MP4 on that device with sound (no buttons), then shows the finished video with Save.
+  `CONFIG.autoRender = false` or `?preview` in the address turns that off. Cloud `--quality good|high|epic` only if asked (slow, no GPU).
+- Old scenes get engine fixes with `node ${CLAUDE_PLUGIN_ROOT}/scripts/upgrade_scene.js scene.html` (keeps the DIRECTION block, swaps in the current engine; re-run qa_check after).

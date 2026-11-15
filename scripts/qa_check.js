@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Automatic QA for a scene — run it on EVERY video before showing anything to the user. Exit code 1 = must fix.
 // Checks: page errors · missing clips/effects/models · length vs the requested length · feet floating/sinking · hands missing their
-// reach targets · sound effects with nothing on screen / too dense · a contact sheet of every shot to look at.
+// reach targets · deformed wrists / hands inside the body · characters lip-syncing the narrator · sound effects with nothing on screen / too dense · a contact sheet of every shot to look at.
 // Usage: node qa_check.js scene.html [--target <seconds>] [--out dir]
 const { launchBrowser, ffmpeg, startStaticServer, routeAssets } = require('./lib/deps');
 const { execFileSync } = require('child_process');
@@ -37,10 +37,16 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
         if (c.footY !== null && !c.airborne && c.footY > 0.14) fails.push(`FEET: ${where} floats ${(c.footY * 100).toFixed(0)} cm above the ground`);
         if (c.footY !== null && c.footY < -0.06) fails.push(`FEET: ${where} sinks ${(-c.footY * 100).toFixed(0)} cm into the ground`);
         for (const R of c.reach) if (R.err > 0.08) fails.push(`HANDS: ${where} hand is ${(R.err * 100).toFixed(0)} cm from ${JSON.stringify(R.to)} (move the target or the character closer)`);
+        for (const H of c.hands || []) {   // deformed ("morphed") hands: a wrist folded or twisted past what a real one can do, or a hand sunk into the body
+          if (H.bend > 88) fails.push(`HANDS: ${where} ${H.side} wrist is folded ${H.bend}° (max ~80°) — change the gesture/clip or the hand direction`);
+          if (H.twist > 100) fails.push(`HANDS: ${where} ${H.side} wrist is twisted ${H.twist}° — the hand will look deformed; change the gesture/clip`);
+          if (H.inside) fails.push(`HANDS: ${where} ${H.side} hand is inside the body — move it out (gesture, reach target or another clip)`);
+        }
       }
     }
   }
   const P = await page.evaluate(() => __mfDebug.pacing());
+  for (const n of P.narratorLips || []) fails.push(`NARRATOR: ${n} lip-syncs to the voiceover — the narrator is never on screen. Remove talk (characters act the story out); only a real in-scene line may use dialogue: true`);
   if (P.portrait) {   // SHORTS retention rules
     const first = Math.min(P.firstCaption ?? 99, P.firstTitle ?? 99);
     if (first > 0.3) fails.push(`HOOK: no words on screen until ${first === 99 ? "never" : first.toFixed(1) + "s"} — the hook line/title must be on screen by 0.3s`);
@@ -68,7 +74,6 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     try { execFileSync(ffmpeg(), ['-y', '-loglevel', 'error', ...inputs, '-filter_complex', fil, sheet]); } catch { notes.push('contact sheet failed'); }
   }
   for (const [i, f] of frames.entries()) {   // lighting: too dark / blown out
-    try { const o = execFileSync(ffmpeg(), ["-hide_banner", "-i", f, "-vf", "signalstats,metadata=print", "-f", "null", "-"], { stdio: ["ignore", "pipe", "pipe"] }).toString(); } catch (e) {}
     try { const o = require("child_process").spawnSync(ffmpeg(), ["-hide_banner", "-i", f, "-vf", "signalstats,metadata=print", "-f", "null", "-"]).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
       if (y < 38) fails.push(`LIGHT: shot ${i + 1} "${info.shots[i].name}" is too dark (avg ${y.toFixed(0)}/255)`); if (y > 215) fails.push(`LIGHT: shot ${i + 1} "${info.shots[i].name}" is blown out (avg ${y.toFixed(0)}/255)`); } catch {}
   }

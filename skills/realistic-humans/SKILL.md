@@ -20,7 +20,7 @@ description: Create realistic or semi-realistic 3D humans and believable backgro
    `${CLAUDE_PLUGIN_ROOT}/templates/SCENE_API.md`. It already does: auto-scale, material upgrade
    (warm skin sheen, glossy eyes with catchlights, fabric sheen), solid wardrobe colors, soft
    key/fill/rim + contact shadows, DoF, grain/vignette, auto-retargeted Mixamo clips and the
-   always-on life layer (breathing, saccades, blinks, look-at, talk).
+   always-on life layer (breathing, saccades, blinks, look-at, posed hands).
 2. **Blender + Cycles (ONLY if user said "Blender/Python allowed")** —
    `blender -b -P ${CLAUDE_PLUGIN_ROOT}/scripts/blender_base_scene.py -- --out renders/ --character model.fbx --render`.
 

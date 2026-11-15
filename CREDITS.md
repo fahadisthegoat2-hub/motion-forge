@@ -23,3 +23,6 @@
 
 ## Model Forge
 - Tencent Hunyuan3D-2 / 2mini / Paint / HunyuanDiT (Tencent Hunyuan 3D Community License), downloaded on the user's PC by the setup script.
+
+## Rendering
+- mp4-muxer (Vanilagy, MIT) — vendor/mp4-muxer.mjs, writes the MP4 for on-device renders.

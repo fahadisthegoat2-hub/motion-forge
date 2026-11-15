@@ -8,13 +8,20 @@ description: Produce polished motion graphics — kinetic typography, logo revea
 
 # Motion Graphics
 
-Final renders: ask the user Good / High / Epic, pass `--quality`.
+Final renders: the quality was asked at the start (CONFIG.quality) — the published page renders itself on the user's device; never ask again.
 
 Build as one HTML file (Canvas2D, SVG or Three.js + GSAP), driven by a single time `t`,
 then render to video with the bundled renderer.
 
 ## Built-in kinetic titles (3D videos)
-In the studio template use `TITLES` (see templates/SCENE_API.md): slam (hooks), stack, typewriter, counter (numbers), glitch, lower-third, stamp ("FAKE"/"TRUE"), meter (progress bars), ring (highlight a detail), tag ("DAY 30" pills). Hook = slam in the first 0.3s; one title per beat; never over the face.
+In the studio template use `TITLES` (see templates/SCENE_API.md). Pick the style by the job — never plain text that just appears:
+- **Hook (first 0.3s):** `slam`, `kinetic` (phrase-by-phrase: `'HE DIED|7 TIMES'`), `burst`, `glitch`.
+- **Emphasis on a word:** `marker` (highlighter swipe), `underline`, `letters`, `stamp` ("FAKE"/"TRUE"), `zoomthrough` across a cut.
+- **Numbers:** `counter`, `stat` (number in a ring), `meter`, `versus` (A vs B), `countdown`, `chart`, `bars`.
+- **Structure:** `chapter`, `place` (where/when), `steps`, `timeline`, `tag` ("DAY 30"), `lower-third`/`wipe` (who), `quote`, `ticker`.
+- **Point at things:** `callout`, `ring`, `box`, `arrow`, `pulse`, `inset`.  **Ending:** `cta` (follow button that gets tapped) + the comment question.
+Every title has an entrance AND an exit (`in` / `out`: pop fade up down left right zoom drop spin blur), lands on a beat or a spoken word, and lives 1–2.5s. One graphic per beat, a different style from the previous one, never over the face.
+Captions: `CONFIG.captions.style` = pop · karaoke · one · box, synced to the voice with `sync: take.words`.
 
 ## Design rules
 - **Grid & safe areas**: 1920×1080 (16:9), 1080×1920 (9:16), 1080×1080. Keep text inside

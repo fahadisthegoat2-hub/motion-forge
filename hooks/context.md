@@ -51,13 +51,21 @@ ALWAYS:
 - COMPOSE, DON'T INVENT: build every video from templates/studio_scene.html + templates/SCENE_API.md. People = Casting Board characters ({ character: '<id>' }). NEVER model people, clothes, t-shirts, hair, faces or foliage from primitives or curves. New people are built with scripts/build_character.js (MakeHuman CC0, offline). Sets = built-in kits.
 - Custom motions: check scripts/motion_library.js list first and reuse; save every new custom motion to the library (silently — the library is internal, never show it to the user).
 - Every video has SOUND (music mood + drops, auto SFX, ambience; voiceover if given) and an edit plan (editing skill): hook hit at frame 1, pattern interrupt every 2–3s, speed ramp / freeze / punch on the big moments.
-- Every shot moves: named camera move, clips + talk (auto gestures) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
+- Every shot moves: named camera move, clips + posed gestures (hand IK + fingers) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
+- ONE NARRATOR, NEVER ON SCREEN: the voiceover is an invisible narrator. The characters are the MAIN CHARACTERS of the story — they live it and act it out. They never lip-sync the narration, never explain to the camera,
+  never stand there "talking". No `talk` on any character (only a real in-scene line may use `dialogue: true`). qa_check fails a character that mouths the narrator.
+- HANDS ARE NEVER WRONG: gestures come from the posed list (SCENE_API → Gestures) and `hands:` finger poses; a clip made for a prop is only used WITH the prop (`carry` → model `attach: 'hero.hands'`; held things `grip: true`);
+  look at every hand in the QA sheet. qa_check fails folded/twisted wrists, hands inside the body and hands off their targets — fix them, never ship them.
+- MOTION GRAPHICS WORK HARD: every beat gets a designed graphic with an entrance and an exit (kinetic · letters · marker · wipe · stat · versus · countdown · steps · burst · place · chapter · cta…), captions synced to the voice
+  (`CONFIG.captions.sync = take.words`). No bare text that just appears.
 - Reference images are for studying the style ONLY — never paste them onto shirts, textures or props.
 - START OF EVERY VIDEO/ANIMATION (and the first video of every session): BEFORE any work, ask with ONE AskUserQuestion call, two questions:
   1) "Video quality?" → Good (1080p 30fps) · High (1080p 60fps) · Epic (1440p 60fps).
   2) "Effort level?" → Standard (2 review rounds) · High (4 rounds, every shot checked twice) · Maximum (6+ rounds, frame-by-frame motion, sound and hands checks, multiple takes of key shots).
   Use the answers for the whole video; do not ask again before the final render. Save them in the scene (CONFIG.quality, CONFIG.effort).
-- Finals render on the user's device (render page / Artifact) — cloud machines have no GPU; cloud renders only for --fast QA previews.
+- FINALS RENDER THEMSELVES: set CONFIG.quality from the answer, publish the scene as the Artifact (pack_scene.js) — the page reads the device's specs and renders the MP4 on the user's device the moment it opens, then shows
+  the finished video with Save. Never ask the user to pick a quality or press a button on the page. Cloud machines have no GPU; cloud renders only for --fast QA previews.
+- ENGINE FIXES REACH OLD SCENES: before re-delivering or editing an older scene run `scripts/upgrade_scene.js scene.html`, then qa_check.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
 - LENGTH IS LAW: if the user names a length ("13 minute video", "30s short"), that is the length — set CONFIG.targetDuration (seconds);
@@ -74,7 +82,7 @@ ALWAYS:
   reads it first and continues from there, so the user can start fresh chats often (old chats re-send their whole history every message).
 - REPLIES: absolute respect. Short, direct. NO summaries, no recaps, no "what I did" lists. Only what the user must know or decide + links.
 - TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
-- FINAL MESSAGE = the link (or MP4) + one line + the publish pack (or the Good/High/Epic question). Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
+- FINAL MESSAGE = the link (or MP4) + one line + the publish pack. Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
 - 3D MODELS: any object/prop/food/creature/vehicle/building a video needs → assets/models (reuse) or Model Forge (skills/model-forge:
   AI-sculpted on the user's NVIDIA PC; Python allowed there for Model Forge only). Never build props from primitive shapes.
 - NO PHOTOS: never use photographs or photo backgrounds (HDRI photos, stock images) anywhere — every background is a 3D set.

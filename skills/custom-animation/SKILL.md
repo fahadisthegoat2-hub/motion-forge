@@ -44,12 +44,12 @@ stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
   `CustomEase`-like bezier strings. Make timelines seekable: `tl.pause(); tl.seek(t)`.
 - **Three.js characters**: use the studio template's system (`templates/SCENE_API.md`): clip
   scheduling with cross-fades, auto-retargeting, foot-locked locomotion, look-at springs,
-  faces, talk. Don't hand-roll mixers for characters.
+  faces, posed gestures with fingers. Don't hand-roll mixers for characters.
 - **CSS/WAAPI** for DOM UI motion; animate only `transform`/`opacity`.
 
 ## Never stiff — character checklist (apply to EVERY shot)
 - **Never a single static clip for a whole shot.** Layer: body clip + `look` changes + `face`
-  keys + `talk`. Something meaningful changes every 0.8–1.5s.
+  keys + a posed gesture or `hands` pose. Something meaningful changes every 0.8–1.5s.
 - **Eyes lead, head follows, body last**: change `look` 0.1–0.2s before a turn (`rotY`) or
   clip change. Turns use `outCubic`/`inOutSine` over 0.4–0.7s, never instant.
 - **Anticipation + overlap**: before a big reaction, a 0.1–0.2s counter-move (small `rotY` or
@@ -58,7 +58,9 @@ stagger 30–80ms per item · hold key poses ≥ 6 frames so they read.
 - **Locomotion**: walk ≈ 1.45 m/s, run ≈ 2.57 m/s; feet are auto-locked to distance travelled.
   Ease into/out of walks (first/last 0.3s of `pos` keys `inOutSine`) — no instant starts/stops.
 - **Expressions**: build → peak (`outBack`, 0.2s) → hold → relax to 30–50%, never snap to 0.
-- **Talking**: `talk` ranges match the VO lines; look at camera while talking to the viewer.
+- **Acting, not talking**: the narrator is invisible — characters never mouth the voiceover or explain to the camera. They DO what the line says (clip + posed gesture + face + look target). `talk` only with `dialogue: true` for a real in-scene line.
+- **Hands**: every held pose gets a finger pose (`hands: { right: 'fist' }` or the gesture's own); gestures come from the posed list (point · stop · shrug · think · headhold · gasp · hips · clap · thumbsup …) — they are IK-solved, so the hand lands where it should on any clip.
+  A clip made for a prop (carry, push, phone, eat) is only used with that prop attached (`attach: 'hero.hands'` / `grip: true`). Check every hand in the QA sheet: no folded wrists, no hands inside the body or floating beside the thing they hold.
 - **Camera is a character**: slow push-ins (2–5%/s), `handheld` 0.5–1.2, `shakes` on impacts,
   cut on action (start the next shot mid-movement).
 - **Hold key poses** ≥ 0.4s so they read on a phone.
@@ -78,14 +80,14 @@ Every custom motion is saved and reused: `animations/custom/motions.json` via `n
 3. Improve motions in place (same name) when a shot needs a better version; commit + push `animations/custom/` with the video work.
 
 ## Auto-acting (template)
-- Characters gesture automatically while they `talk` (beat · explain · present · count · point) and glance around when quiet. Tune with `acting: calm | big | none`. So: give every speaking line a `talk` range.
+- Characters glance around on their own when idle (`acting: calm | big | none`). Body language is DIRECTED: one posed gesture or clip change per beat, matched to what the narrator says at that moment.
 - Clips: idle · walk · jog · sprint · dance · crouch (Quaternius) + Xbot/Soldier/Michelle + `animations/*.fbx`.
 
 ## Body language toolkit (template)
-- `gestures: [{ type, start, end, side: right|left|both, amount }]` — `point, handsup, shrug,
-  armsout, fistpump, shield, think, facepalm, wave, lean, slump, scared`. Each has automatic
-  anticipation (counter-move), overshoot (`outBack`), a living hold and a soft settle; they
-  layer on top of any clip. Stack 1–2 per line of dialogue — talking without hands = stiff.
+- `gestures: [{ type, start, end, side: right|left|both, amount, to, fingers }]` — `point, handsup, shrug, armsout, fistpump, cheer,
+  shield, think, facepalm, gasp, headhold, salute, wave, stop, thumbsup, scared, hips, clap, plead, beat, open, explain, present, count, lean, slump`.
+  Each is an absolute pose (hand IK + finger pose) with anticipation, overshoot (`outBack`), a living hold and a soft settle; the body leads and the
+  hand drags behind. They blend from any clip. One clear gesture per narrated beat — it must MEAN what the narrator is saying.
 - Blasts/impacts (`explosion`, `shockwave`) automatically make nearby characters recoil
   (lean away + head whip + flinch + shock face). Add `shield`/`scared` gestures for the hold.
 - Extra Mixamo motions: `animations/*.fbx` ("Without Skin") → retargeted onto everyone.

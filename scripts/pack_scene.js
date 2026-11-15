@@ -40,6 +40,8 @@ function keyOf(url, origin) {
     if (b64.length > 16e6) { console.error(`too big for an artifact (${(b64.length / 1e6).toFixed(1)} MB): ${k}`); continue; }
     fs.writeFileSync(path.join(outDir, pub), b64); manifest[k] = pub; files[pub] = path.relative(process.cwd(), path.join(outDir, pub)); total += b64.length;
   }
+  // the MP4 writer ships with the page so the automatic on-device render never depends on a CDN
+  const mux = path.join(__dirname, '..', 'vendor', 'mp4-muxer.mjs'); if (fs.existsSync(mux)) { fs.copyFileSync(mux, path.join(outDir, 'mp4-muxer.mjs')); files['mp4-muxer.mjs'] = path.relative(process.cwd(), path.join(outDir, 'mp4-muxer.mjs')); }
   fs.writeFileSync(path.join(outDir, 'mf-pack.json'), JSON.stringify(manifest, null, 1));
   files['mf-pack.json'] = path.relative(process.cwd(), path.join(outDir, 'mf-pack.json'));
   if (total > 60e6) console.error(`warning: ${(total / 1e6).toFixed(0)} MB total — publish in two calls (artifact limit 64 MB per publish)`);

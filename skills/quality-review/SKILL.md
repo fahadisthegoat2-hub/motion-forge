@@ -18,7 +18,7 @@ at least one frame from EVERY shot plus motion strips of the key actions. A vide
 2. **Length**: exactly what the user asked (±5%). A "13-minute video" is 13 minutes, never a short.
 3. **Feet**: on the ground in every shot (no floating, no sinking, no sliding).
 4. **Hands & arms**: every touch/hold/point lands on its target (`reach` IK); no arms through bodies or props.
-5. **Right action**: every clip fits its moment (sit when sitting, kneel when kneeling, talk when talking); no random moves.
+5. **Right action**: every clip fits its moment (sit when sitting, kneel when kneeling); no random moves. Nobody lip-syncs the narrator. Hands: natural wrists and fingers, on their targets, props seated in the hand — zoom into every hand.
 6. **Framing**: subject and the thing discussed in frame; faces never cropped or covered.
 7. **Lighting**: faces lit and readable, nothing too dark or blown out (auto LIGHT check + your eyes), matches the mood.
 8. **Sound**: every effect lines up with a visible event on that exact frame; music under voice; no dead air; nothing random.

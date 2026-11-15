@@ -36,8 +36,8 @@ saved-motion event already makes its sound, and each set has its ambience. Your 
 - Pick the mood from the story's emotion; change energy with `drops` (first drop = when the hook pays off).
 - Extra sounds anywhere: `shot.sfx: [{ t, type, gain }]` — types: whoosh swoosh impact hit boom subdrop riser glitch pop tick ding
   stamp typing shimmer thunder footstep land bodyfall zap splash scratch punch heartbeat swell. Heartbeat under tension, riser into reveals.
-- **Voiceover:** if the user gives a VO file (or uploads one), set `voice.url` — music ducks under it automatically and lip-sync
-  follows its loudness; align `talk` ranges and captions to it. No VO? captions carry the story; keep music + SFX rich.
+- **Voiceover:** if the user gives a VO file (or uploads one), set `voice.url` — music ducks under it automatically. It is the invisible
+  NARRATOR: no character lip-syncs it (no `talk`). Sync captions with `CONFIG.captions.sync` (word times). No VO? captions carry the story; keep music + SFX rich.
 - **Own music:** `track: { url, volume }` replaces generated music (the user must own/license it).
 - Mastered automatically to short-form loudness (~-14 LUFS, -1 dBFS ceiling).
 

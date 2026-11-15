@@ -42,8 +42,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
   for establishing shots, real environments (not only studio backdrop) — see `realistic-humans`.
 - **Chapters**: build one HTML with a shot timeline and set
   `chapter: 'Name'` on the first shot of each story chapter (see `templates/SCENE_API.md`) (keep each ≤ ~2–3 min
-  so iPads/phones don't run out of memory). The device render panel then shows **Part**: all
-  parts (one MP4 each) or a single part.
+  so iPads/phones don't run out of memory). The page renders every part by itself when it opens (one MP4 each, quality from `CONFIG.quality`) and lists them with Save buttons.
 - If the scene file would get huge, split into one HTML per chapter (each with its own
   `window.__mf`), same style constants.
 - **Cloud render alternative**: `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js long.html partN.mp4 --quality <choice> --chapter N`,
