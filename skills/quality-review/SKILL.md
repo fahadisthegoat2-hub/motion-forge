@@ -123,6 +123,8 @@ Long-form: wherever a check says "every shot", do every shot — chapters are re
 
 Retention target: 80–87% stayed to watch — judge every second as a viewer about to swipe.
 Never show Sir a video until `review_log.js --verify` prints REVIEW PASS.
+**All review material is internal**: proof files, sheets, strips, crops, waveforms and previews are for YOUR eyes only (Read them) —
+never send them to Sir (no SendUserFile, no file cards, no links), never message mid-review. Sir gets only the finished video.
 
 ## 1. Gather evidence (cheap first)
 - Re-read every file you wrote; check console errors (`page.on('pageerror')`).
