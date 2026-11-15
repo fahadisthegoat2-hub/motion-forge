@@ -20,15 +20,25 @@ A **round** = render → run gates → LOOK/LISTEN to every check of the tier �
 the tier (a fix breaks other things). The gate is mechanical — the video cannot ship until it passes:
 ```
 node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --init            # once; reads CONFIG.effort, lists the tier's checks
+# each round:
 node ${CLAUDE_PLUGIN_ROOT}/scripts/qa_check.js scene.html --target <s>        # scene gate (feet, hands, framing, light, hook, pacing…)
 node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 540 --height 960
 node ${CLAUDE_PLUGIN_ROOT}/scripts/av_check.js prev.mp4 --out scene_qa [--holds "a-b"]   # sound + picture forensics → av.json, wave.png
-# fill scene_qa/review.json: per check status PASS/FAIL + evidence (+ fix for each FAIL)
-node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --round           # next round … repeat
-node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --verify          # MUST print REVIEW PASS before pack/publish
+node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --round           # snapshots THIS render into scene_qa/rN/
+#   → capture your proof into scene_qa/rN/ (hand/face crops, 12 fps strips, frame grabs, listening notes), fill every check, fix every FAIL
+node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --verify          # MUST print REVIEW PASS — pack_scene.js refuses otherwise
 ```
-**Evidence rule:** each check's evidence names what was measured and where — shot, time/frame, value
-(`"shot 3 @7.4s f222: SFX impact onset 7.41s vs fist contact 7.40s, +1f"`). "ok", "looks good", "checked" = automatic FAIL.
+## PROOF OF WORK — the gate rejects box-ticking
+- **Round 1 must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum). No first draft is that clean — look harder.
+- **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to); "minor tweaks", "polished",
+  "improved" are rejected, and the scene diff to the next round must be real (≥ 2 changed lines per FAIL). `--round` refuses while FAILs are unfixed.
+- **Every round is a fresh render**: qa_check + av_check re-run on the current scene before `--round`; the delivered scene must be the
+  last reviewed one (any edit after → another full round).
+- **Every check has its own proof**: ≥ 1 file you made in this round's `rN/` (crop, strip, grab, note) and listed in `proof`; copies of an
+  earlier round's files and files made before the round started are rejected.
+- **No copy-paste**: evidence identical to the previous round is rejected — look at THIS render and write what you see now.
+- **Evidence names what, where and the value** (`"shot 3 @7.4s f222: SFX impact onset 7.41s vs fist contact 7.40s, +1f"`); "ok", "same",
+  "looks good" = FAIL.
 A check that cannot apply (e.g. no in-scene dialogue) is PASS with evidence of why (`"0 dialogue lines in SHOTS (grep dialogue:true = 0)"`).
 Long-form: wherever a check says "every shot", do every shot — chapters are reviewed one by one, never sampled.
 
