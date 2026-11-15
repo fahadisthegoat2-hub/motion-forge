@@ -14,7 +14,7 @@ auto-retargeted onto every actor).
 
 **look** (`CONFIG.look` / per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
 dreamy · horror · golden-hour`.
-**set** (`CONFIG.set` / per-shot `shot.set`): `studio · void · outdoor · interior · street-night ·
+**set** (`CONFIG.set` / per-shot `shot.set`): `studio · void · outdoor · medieval (village street, CC0 kit) · interior · street-night ·
 jungle · lab · city-day · space · { url, scale, pos, rotY }` (GLB).
 
 ## CAST — built-in CC0 actors (dressed, real hair, face rigs, lip-sync)
@@ -43,7 +43,7 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
 ## SHOTS (play back-to-back)
 ```js
 { name, dur, chapter?, look?, set?, cut?, fadeIn?, fadeOut?, flash?,
-  camera: { move, target, size, az, height, span, side, at, with, fov, ease, handheld, roll, shakes }
+  camera: { move, target, size, az, height, span, side, at, with, fov, ease, handheld, roll, shakes, eye }   // eye: exact eye-line height (auto-lowered for kneel/crouch/sit)
           // or manual: { pos: keys, look: keys, fov }
   cast: { hero: {
     pos: keys([x,y,z]), rotY: keys(rad),

@@ -48,7 +48,7 @@ const CONFIG = {
   width: 1080, height: 1920, fps: 30,          // long-form: width 1920, height 1080
   look: 'clean-cg',      // clean-cg · cinematic · warm-film · noir · neon-night · dreamy · horror · golden-hour (per-shot override: shot.look)
   targetDuration: null,  // seconds the user asked for (qa_check enforces it) — e.g. 780 for a 13-minute video
-  set: 'studio',         // studio · void · outdoor · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
+  set: 'studio',         // studio · void · outdoor · medieval · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   sound: { music: { mood: 'tension', drops: [] }, sfx: true, ambience: true },   // moods: tension epic mystery upbeat sad horror action lofi · track: { url } (own music) · voice: { url } (voiceover)
   captions: { style: 'pop' },   // pop · karaoke · one · box — add sync: take.words (voiceover word times) and every caption word lands on the spoken word
@@ -521,9 +521,18 @@ function buildSet(spec) {
     set.extraFx = [{ type: 'beam', pos: [1.8, 4.2, -1.2], to: [1.2, 0, -0.6], radius: 1.4, color: '#ffbf75', intensity: 0.28, always: true }, { type: 'dust', pos: [0, 1.5, 0], always: true }];
   } else if (ENV[type]) { ENV[type](g, set, spec);
     (set.lightsExtra || []).forEach(([c, i, p]) => { const l = new THREE.PointLight(c, i, 0, 1.6); l.position.set(...p); g.add(l); });
+  } else if (type === 'medieval') {   // medieval village street (Quaternius Medieval Village MegaKit, CC0 — assets/sets/medieval-village.glb)
+    set.skyCols = ['#6f7c8c', '#c9c6bb']; set.fog = ['#9a978c', 0.022]; set.sunCol = new THREE.Color('#ffd9a0');
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160, 48, 48), new THREE.MeshStandardMaterial({ map: TEX.grass(), color: '#8a7656', roughness: 1 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
+    const hills = new THREE.Mesh(new THREE.CylinderGeometry(55, 55, 10, 160, 6, true), new THREE.MeshStandardMaterial({ color: '#4f5a44', roughness: 1, side: THREE.BackSide }));
+    const hp = hills.geometry.attributes.position; for (let i = 0; i < hp.count; i++) { const a = Math.atan2(hp.getZ(i), hp.getX(i)), y = hp.getY(i);
+      if (y > 0) hp.setY(i, y - 1 + 5 * (0.5 + 0.5 * fbm(a * 3, 4)) + 3 * fbm(a * 9, 8)); } hills.geometry.computeVertexNormals(); g.add(hills);
+    ASSET_LOADS.push(loadFirst(spec.url ? [spec.url] : kit('sets/medieval-village.glb')).then((r) => { if (!r) return console.warn('set failed: medieval');
+      r.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material?.map) o.material.map.colorSpace = THREE.SRGBColorSpace; } }); g.add(r.scene); }));
   } else if (type === 'glb') {
-    gltfLoader.loadAsync(spec.url).then((r) => { const m = r.scene; m.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      if (spec.scale) m.scale.setScalar(spec.scale); if (spec.pos) m.position.set(...spec.pos); if (spec.rotY) m.rotation.y = spec.rotY; g.add(m); }).catch(() => console.warn('set failed', spec.url));
+    ASSET_LOADS.push(gltfLoader.loadAsync(spec.url).then((r) => { const m = r.scene; m.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      if (spec.scale) m.scale.setScalar(spec.scale); if (spec.pos) m.position.set(...spec.pos); if (spec.rotY) m.rotation.y = spec.rotY; g.add(m); }).catch(() => console.warn('set failed', spec.url)));
   }
   g.traverse((o) => { if (o.isLight) set.lights = [...(set.lights || []), o]; });
   (set.lights || []).forEach((l) => { l.userData.base = l.intensity; const wp = new THREE.Vector3(); l.getWorldPosition(wp); LIGHTS.attach(l); if (l.target) LIGHTS.attach(l.target); });
@@ -931,7 +940,7 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
           g.restore(); }
         break; }
       case 'pulse': {   // glowing highlight on a body part / object (organ scan): { at: 'hero.heart', text?, beat?: bpm }
-        const A = T.at ? anchorScreen(T.at, w, h) : [X, Y]; if (!A) break; const r = (T.radius ?? 0.07) * S, bpm = T.beat ?? 0;
+        const A = T.at ? anchorScreen(T.at, w, h) : [X, Y]; if (!A || !Number.isFinite(A[0] + A[1])) break; const r = (T.radius ?? 0.07) * S, bpm = T.beat ?? 0;
         const beat = bpm ? Math.exp(-((lt * bpm / 60) % 1) * 6) : 0.5 + 0.5 * Math.sin(t * 4), e = EASE.outBack(clamp(lt / 0.3));
         g.save(); g.globalCompositeOperation = 'lighter'; const gr = g.createRadialGradient(A[0], A[1], 0, A[0], A[1], r * 1.6 * e * (1 + 0.15 * beat));
         gr.addColorStop(0, acc); gr.addColorStop(0.35, rgba(acc, 0.53)); gr.addColorStop(1, rgba(acc, 0)); g.fillStyle = gr; g.globalAlpha = out * (0.55 + 0.35 * beat); g.beginPath(); g.arc(A[0], A[1], r * 1.6 * e * 1.15, 0, 7); g.fill(); g.restore();
@@ -1730,7 +1739,7 @@ function relaxWrists(ch, share = 0.55) {
     const tw = _tw.q.setFromAxisAngle(ax, ang * share); fo.quaternion.multiply(tw); ha.quaternion.premultiply(tw.invert()); fo.updateMatrixWorld(true); }
 }
 function lookTargetAt(ch, cast, t, camPosAt) {
-  const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : x));
+  const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : typeof x === 'string' ? (anchorWorld(x)?.toArray() ?? camPosAt(t)) : x));   // [x,y,z] · 'camera' · 'castId.part'
   if (!v) return null;
   const head = ch.rest.head ? ch.rest.head.p : new THREE.Vector3(0, 1.6, 0);
   const local = ch.root.worldToLocal(_v.set(...v));
@@ -2230,12 +2239,15 @@ function targetAt(shot, id, lt) {
   if (Array.isArray(id)) return new THREE.Vector3(...id);
   const cid = id || Object.keys(shot.cast || {})[0] || Object.keys(CAST)[0], ch = characters[cid], cast = shot.cast?.[cid];
   const p = key(cast?.pos, lt) || [0, 0, 0];
-  const eye = ch ? ch.eyeY : (CAST[cid]?.height || 1.75) * 0.94;
-  return new THREE.Vector3(p[0], eye, p[2]);
+  let eye = ch ? ch.eyeY : (CAST[cid]?.height || 1.75) * 0.94;
+  const cl = (cast?.clips || []).filter((c) => lt >= c.start - 0.2 && lt <= (c.end ?? 1e9)).pop();   // low poses (kneel, crouch, sit) frame on the lowered eye line
+  if (cl && /^(kneel|fix|crouch|crouchidle|crouchwalk|sit|sittalk|sitdown)$/.test(cl.clip)) eye *= /^sit/.test(cl.clip) ? 0.7 : /^crouch/.test(cl.clip) ? 0.66 : 0.64;
+  return new THREE.Vector3(p[0], eye + (p[1] || 0), p[2]);
 }
 function cameraMove(shot, lt, c) {
   const m = c.move, d = shot.dur, e = (EASE[c.ease] || EASE.inOutSine)(clamp(lt / d));
-  const T = targetAt(shot, c.target, lt), fov0 = typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 30;
+  const T = targetAt(shot, c.target, lt); if (c.eye != null) T.y = key(c.eye, lt);   // camera.eye: exact eye-line height (m) to frame on
+  const fov0 = typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 30;
   const tid = Array.isArray(c.target) ? null : (c.target || Object.keys(shot.cast || {})[0]), tc = tid ? shot.cast?.[tid] : null;
   let face = tc ? key(tc.rotY, lt) || 0 : 0;   // az is measured from the character's facing (0 = in front of their face)
   if ((c.move === 'track' || c.move === 'follow') && tc?.pos) { const a0 = key(tc.pos, Math.max(0, lt - 0.1)), a1 = key(tc.pos, lt + 0.1); if (Math.hypot(a1[0] - a0[0], a1[2] - a0[2]) > 1e-3) face = Math.atan2(a1[0] - a0[0], a1[2] - a0[2]); }
@@ -2403,7 +2415,7 @@ const BEDS = {
     for (let x = t0; x < t1; x += 0.8) bp.frequency.linearRampToValueAtTime(300 + r() * 500, x); const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.18 * g, t0 + 0.6); v.gain.setValueAtTime(0.18 * g, Math.max(t0 + 0.6, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1);
     n.connect(bp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
 };
-const SET_BED = { jungle: 'jungle', 'street-night': 'city', 'city-day': 'city', lab: 'hum', outdoor: 'wind', space: null, interior: 'hum', studio: null, void: null };
+const SET_BED = { medieval: 'wind', jungle: 'jungle', 'street-night': 'city', 'city-day': 'city', lab: 'hum', outdoor: 'wind', space: null, interior: 'hum', studio: null, void: null };
 // original music by mood (generated, royalty-free)
 const MOODS = {
   tension: { bpm: 100, minor: true, kick: [0], hat: 16, bass: 8, pad: true, arp: false, snare: [] },
@@ -2508,7 +2520,7 @@ async function renderSoundtrack() {
       src.connect(tg).connect(musicBus); src.start(0, S.track.offset ?? 0); } catch (e) { console.warn('music track failed', e); }
   } else if (S.music) music(c, musicBus, verb, S.music, TOTAL);
   for (const [b, t0, t1, g] of SND.beds) if (BEDS[b] && t1 > t0) BEDS[b](c, sfxBus, t0, t1, g * (S.ambienceVolume ?? 1), Math.round(t0 * 100) + 3);
-  SND.events.forEach((e, i) => SFX[e.type](c, sfxBus, verb, e.t, e.gain, i * 13 + 5, e.extra));
+  SND.events.forEach((e, i) => { for (const d of [0, 0.1, 0.2, 0.4]) { try { SFX[e.type](c, sfxBus, verb, e.t + d, e.gain, i * 13 + 5, e.extra); break; } catch {} } });   // sounds with a lead-in (whoosh) right at 0 s start a hair later instead of failing the soundtrack
   if (S.voice?.url) {   // voiceover: duck music under it, drive lip-sync from its loudness
     try { const ab = await (await fetch(S.voice.url)).arrayBuffer(), vb = await c.decodeAudioData(ab), src = c.createBufferSource(); src.buffer = vb;
       const vg = c.createGain(); vg.gain.value = S.voice.volume ?? 1; src.connect(vg).connect(master); src.start(S.voice.offset ?? 0);
