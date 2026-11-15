@@ -34,9 +34,11 @@ last resort for abstract topics.
 4. **Contrast**: subject separated from the background (rim light, dark vs bright, complementary colors); faces lit, never muddy.
 5. **Curiosity**: show the moment BEFORE the payoff or the strange result, not the answer. Honest: it must happen in the video.
 6. **Clean**: ≤ 3 elements (subject, text, one arrow/circle). No logos, no clutter, nothing in the bottom-right corner (YouTube timestamp).
-7. **Shorts**: the cover is chosen in-app from the video. Make the first frame a strong cover too, and render a `--cover` 1080×1920 version.
+7. **Shorts = 9:16, never 16:9**: a YouTube Short / TikTok / Reel gets a vertical 1080×1920 cover (thumbnail.js does this automatically
+   for vertical scenes). Design it for 9:16: subject + text in the middle 1080×1420 (top 12% / bottom 20% are covered by the app UI),
+   big stacked text. Make the first frame a strong cover too. Only long-form (16:9) videos get 1280×720 thumbnails.
 
 ## 3. Render → judge → final
 - Drafts: `node ${CLAUDE_PLUGIN_ROOT}/scripts/thumbnail.js scene.html thumbs --fast` → view `thumbs/preview.jpg` + the full-size drafts, score, fix, repeat if nothing scores ≥ 8.
-- Final: `node ${CLAUDE_PLUGIN_ROOT}/scripts/thumbnail.js scene.html thumbs --only <N>` (full quality) and `--cover` for Shorts.
+- Final: `node ${CLAUDE_PLUGIN_ROOT}/scripts/thumbnail.js scene.html thumbs --only <N>` (full quality) — the ratio follows the video (vertical → 1080×1920 Shorts cover, horizontal → 1280×720).
 - Deliver `thumbs/thumb_<N>.jpg` (+ cover) with the publish pack. One line, no scores.
