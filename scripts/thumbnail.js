@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Renders the scene's THUMBS (DIRECTION block) as YouTube thumbnails (1280×720) or vertical covers (--cover → 1080×1920).
-// Usage: node thumbnail.js scene.html outDir [--fast] [--only N] [--cover]
+// Renders the scene's THUMBS (DIRECTION block). The ratio follows the VIDEO: a vertical scene (Shorts/TikTok/Reels, CONFIG height > width)
+// gets 1080×1920 (9:16) covers; a horizontal scene gets 1280×720 (16:9) YouTube thumbnails. --cover / --wide force one or the other.
+// Usage: node thumbnail.js scene.html outDir [--fast] [--only N] [--cover | --wide]
 //   Drafts: --fast → thumb_N.jpg for every variant + preview.jpg (all variants at phone size, to judge readability).
 //   Final:  --only N (no --fast) → the single winner at full quality. Show the user ONLY that one.
 const { launchBrowser, ffmpeg, startStaticServer, routeAssets } = require('./lib/deps');
@@ -8,8 +9,10 @@ const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2), flag = (n) => args.includes(n), opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const [input, outDir = 'thumbs'] = args.filter((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(only)$/));
-if (!input) { console.error('usage: thumbnail.js scene.html outDir [--fast] [--only N] [--cover]'); process.exit(1); }
-const [W, H] = flag('--cover') ? [1080, 1920] : [1280, 720];
+if (!input) { console.error('usage: thumbnail.js scene.html outDir [--fast] [--only N] [--cover | --wide]'); process.exit(1); }
+const cfg = fs.readFileSync(input, 'utf8').match(/CONFIG\s*=\s*\{[^]*?\bwidth\s*:\s*(\d+)\s*,\s*height\s*:\s*(\d+)/);
+const vertical = flag('--cover') || (!flag('--wide') && (!cfg || +cfg[2] > +cfg[1]));   // shorts template default is 1080×1920
+const [W, H] = vertical ? [1080, 1920] : [1280, 720];
 (async () => {
   fs.mkdirSync(outDir, { recursive: true });
   const browser = await launchBrowser(), page = await browser.newPage();
@@ -29,8 +32,9 @@ const [W, H] = flag('--cover') ? [1080, 1920] : [1280, 720];
   for (const f of out) { execFileSync(ffmpeg(), ['-y', '-loglevel', 'error', '-i', f, '-q:v', '2', f.replace('.png', '.jpg')]); fs.rmSync(f); }
   if (out.length > 1) {   // what a viewer sees in the feed: every variant at phone size
     const jpgs = out.map((f) => f.replace('.png', '.jpg')), inputs = jpgs.flatMap((f) => ['-i', f]);
-    const sw = flag('--cover') ? 120 : 196, filt = jpgs.map((_, i) => `[${i}]scale=${sw}:-1[s${i}]`).join(';') + ';' + jpgs.map((_, i) => `[s${i}]`).join('') + `hstack=${jpgs.length}`;
+    const sw = vertical ? 120 : 196, filt = jpgs.map((_, i) => `[${i}]scale=${sw}:-1[s${i}]`).join(';') + ';' + jpgs.map((_, i) => `[s${i}]`).join('') + `hstack=${jpgs.length}`;
     execFileSync(ffmpeg(), ['-y', '-loglevel', 'error', ...inputs, '-filter_complex', filt, path.join(outDir, 'preview.jpg')]);
   }
+  console.log(`${vertical ? '9:16 Shorts cover 1080×1920' : '16:9 thumbnail 1280×720'}`);
   console.log(out.map((f) => f.replace('.png', '.jpg')).join('\n') + (out.length > 1 ? '\n' + path.join(outDir, 'preview.jpg') : ''));
 })().catch((e) => { console.error(e); process.exit(1); });

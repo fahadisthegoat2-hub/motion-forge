@@ -48,6 +48,7 @@ const CONFIG = {
   width: 1080, height: 1920, fps: 30,          // long-form: width 1920, height 1080
   look: 'clean-cg',      // clean-cg · cinematic · warm-film · noir · neon-night · dreamy · horror · golden-hour (per-shot override: shot.look)
   targetDuration: null,  // seconds the user asked for (qa_check enforces it) — e.g. 780 for a 13-minute video
+  effort: 'standard',    // Sir's effort answer: standard (10 checks × 2 rounds) · high (25 × 4) · maximum (35 × 6) — review_log.js enforces it
   set: 'studio',         // studio · void · outdoor · medieval · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   sound: { music: { mood: 'tension', drops: [] }, sfx: true, ambience: true },   // moods: tension epic mystery upbeat sad horror action lofi · track: { url } (own music) · voice: { url } (voiceover)
