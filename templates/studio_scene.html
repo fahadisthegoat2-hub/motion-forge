@@ -575,9 +575,14 @@ function applyLook(name, set) {
   set.sky.material.uniforms.sunCol.value.copy(set.sunCol || new THREE.Color(0, 0, 0));
   set.sky.material.uniforms.sun.value.copy(key1.position).normalize();
   const G = L.grade, u = grade.uniforms;
-  u.uContrast.value = G.contrast; u.uSat.value = G.sat * (CONFIG.saturation ?? 0.85);   // natural color by default (CONFIG.saturation to change) u.uLift.value.set(...G.lift); u.uGain.value.set(...G.gain); u.uShadows.value.set(...G.shadows); u.uHigh.value.set(...G.highlights);
-  u.uGrain.value = CONFIG.grain ?? L.grain; u.uVig.value = CONFIG.vignette ?? L.vignette; u.uCA.value = L.ca;
-  bloom.strength = L.bloom[0]; bloom.radius = L.bloom[1]; bloom.threshold = L.bloom[2];
+  u.uLift.value.set(...G.lift); u.uGain.value.set(...G.gain); u.uShadows.value.set(...G.shadows); u.uHigh.value.set(...G.highlights);
+  u.uCA.value = L.ca; bloom.radius = L.bloom[1]; bloom.threshold = L.bloom[2];
+  LOOK_BASE = { contrast: G.contrast, sat: G.sat * (CONFIG.saturation ?? 0.85), grain: CONFIG.grain ?? L.grain, vig: CONFIG.vignette ?? L.vignette, bloom: L.bloom[0], key: L.key[1] };   // natural color by default (CONFIG.saturation to change)
+}
+let LOOK_BASE = null;
+function resetLook() {   // per-frame effects (impact, thumbs) multiply these — restore every frame so they never stack up
+  const B = LOOK_BASE, u = grade.uniforms; if (!B) return;
+  u.uContrast.value = B.contrast; u.uSat.value = B.sat; u.uGrain.value = B.grain; u.uVig.value = B.vig; bloom.strength = B.bloom; key1.intensity = B.key;
 }
 
 /* ---------- captions HUD ---------- */
@@ -2204,8 +2209,12 @@ function applyClips(ch, cast, t) {
   list.forEach((e, i) => {
     const fade = e.fade ?? 0.3, fadeOut = list[i + 1]?.fade ?? fade;
     const win = (e.start <= 0 ? 1 : smooth((t - e.start) / fade)) * (1 - smooth((t - e.end) / fadeOut));
-    if (win > 0.001) ws.push([e, win]);
+    if (win > 0.001 && clipFor(ch, e.clip)) ws.push([e, win]);   // missing clips don't steal weight (→ half T-pose)
   });
+  if (!ws.length) {   // gap between clips → hold the nearest clip instead of flashing the bind pose
+    const ok = list.filter((e) => clipFor(ch, e.clip)), prev = ok.filter((e) => e.start <= t).pop(), near = prev || ok[0];
+    if (near) ws.push([{ ...near, ...(prev ? { start: near.start } : { start: t }) }, 1]);
+  }
   const sum = ws.reduce((s, x) => s + x[1], 0) || 1;
   for (const [e, w] of ws) {
     const a = clipFor(ch, e.clip); if (!a) continue;
@@ -2238,7 +2247,7 @@ function render(tGlobal) {
   const { shot, local } = THUMB ? { shot: thumbShot(THUMB), local: THUMB.t ?? 0 } : shotAt(clamp(tGlobal, 0, TOTAL - 1e-4)), shotStart = tGlobal - local, ct = THUMB ? local : contentTime(shot, local), frozen = THUMB ? false : isFrozen(shot, local);
   const si = THUMB ? (SHOTS[THUMB.shot] ? THUMB.shot : 0) : SHOTS.indexOf(shot), set = SETS[setIdOf(shot)];
   for (const st of Object.values(SETS)) { st.group.visible = st === set; (st.lights || []).forEach((l) => (l.intensity = st === set ? l.userData.base : 0)); }
-  applyLook(shot.look || CONFIG.look, set);
+  applyLook(shot.look || CONFIG.look, set); resetLook();
   set.tick?.(ct, clamp(key(shot.micro?.level, ct) ?? 1), shot.micro?.flow ?? 1);
   const cam = cameraAt(shot, ct, shotStart + ct), te = applyTransition(transitionAt(si, local), cam, tGlobal);
   for (const p of shot.punch || []) cam.fov *= 1 - 0.13 * smooth((local - p) / 0.06);   // punch-in zooms (edit time, hold until the cut)
