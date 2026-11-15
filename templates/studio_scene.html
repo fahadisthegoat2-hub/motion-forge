@@ -2028,7 +2028,8 @@ const SFX = {
     const v = c.createGain(); env(v, t, 0.008, 1.0 * g, 2.6); n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 3);
     for (let i = 0; i < 9; i++) SFX.tick(c, o, rv, t + 0.25 + srng(s + i)() * 1.6, g * 0.25, s + i, 900 + srng(s * 3 + i)() * 2500); },
   subdrop(c, o, rv, t, g) { const os = c.createOscillator(); os.frequency.setValueAtTime(95, t); os.frequency.exponentialRampToValueAtTime(30, t + 0.9); const v = c.createGain(); env(v, t, 0.01, 1.1 * g, 1.0); os.connect(v).connect(o); os.start(t); os.stop(t + 1.2); },
-  riser(c, o, rv, t, g, s, dur = 1.4) { const t0 = Math.max(0, t - dur), n = c.createBufferSource(); n.buffer = noiseBuf(c, dur + 0.05, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2;
+  riser(c, o, rv, t, g, s, dur = 1.4) { if (t < 0.1) return;   // no room to rise (e.g. an effect already running at frame 0) — a negative ramp time kills the whole soundtrack
+    const t0 = Math.max(0, t - dur), n = c.createBufferSource(); n.buffer = noiseBuf(c, dur + 0.05, s); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2;
     f.frequency.setValueAtTime(300, t0); f.frequency.exponentialRampToValueAtTime(7000, t); const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.exponentialRampToValueAtTime(0.55 * g, t - 0.01); v.gain.linearRampToValueAtTime(0, t + 0.02);
     n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t0); n.stop(t + 0.05);
     const os = c.createOscillator(); os.type = 'sawtooth'; os.frequency.setValueAtTime(180, t0); os.frequency.exponentialRampToValueAtTime(900, t); const lp = c.createBiquadFilter(); lp.frequency.value = 2500;
