@@ -26,7 +26,7 @@ const cast = {
   p2: { character: 'kwame', wardrobe: { top: '#6a5a44', bottom: '#2e2a24', shoes: '#1a1612' } },
 };
 const SPRINT = 3.9;   // run clip at 1.5× speed (2.6 m/s × 1.5) — feet lock to it
-const FLOOD = (o) => ({ type: 'flood', pos: [0, 0, 0], size: [19, 90], res: [90, 280], color: '#2a1306', ...o });
+const FLOOD = (o) => ({ type: 'flood', pos: [0, 0, 0], size: [19, 90], res: [90, 280], color: '#2a1306', glow: '#2a0f03', ...o });
 const idle = (d) => [{ clip: 'idle', start: 0, end: d + 1 }];
 const run = (d) => [{ clip: 'run', start: 0, end: d + 1, speed: 1.5 }];
 const lookBack = (t0, t1) => ({ neck: [[t0, [0, 0, 0]], [t0 + 0.25, [0, 0.55, 0], 'outCubic'], [t1 - 0.2, [0, 0.6, 0]], [t1, [0, 0, 0], 'inOutSine']], spine2: [[t0, [0, 0, 0]], [t0 + 0.3, [0, 0.35, 0], 'outCubic'], [t1, [0, 0, 0], 'inOutSine']] });
@@ -107,7 +107,7 @@ S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.05, b
   camera: { pos: [[0, [-3.5, 10.5, 16]], [dF, [-3.0, 10, 14], 'inOutSine']], look: [[0, [3, 2, -5]], [dF, [3, 2, 0], 'inOutSine']], fov: 55, handheld: 1.3 },
   cast: {},
   fx: [FLOOD({ front: [[0, -6], [dF, -6 + 6 * dF, 'linear']], crest: [[0, 7.6]] }),
-    { type: 'ground-slam', t: 0.05, pos: [8.5, 0.2, -5.6], scale: 1.2, color: '#5a3a1e' }, { type: 'ground-slam', t: bends, pos: [5.5, 0.2, -6 + 6 * bends], scale: 1.3, color: '#5a3a1e' },
+    { type: 'ground-slam', t: 0.05, pos: [8.5, 0.2, -5.6], scale: 1.2, color: '#5a3a1e' }, { type: 'molasses-burst', t: 0.4, pos: [8.6, 5, -6 + 6 * 0.4], scale: 1.3 }, { type: 'molasses-burst', t: 1.1, pos: [-8.6, 5, -6 + 6 * 1.1], scale: 1.3 }, { type: 'molasses-burst', t: bends, pos: [5.5, 5, -6 + 6 * bends], scale: 1.4 }, { type: 'ground-slam', t: bends, pos: [5.5, 0.2, -6 + 6 * bends], scale: 1.3, color: '#5a3a1e' },
     { type: 'sparks', t: bends + 0.05, pos: [5.3, 3, -6 + 6 * bends], count: 140, spread: 1 }],
   sfx: [{ t: 0.05, type: 'boom', gain: 0.8 }, { t: bends, type: 'impact', gain: 0.9 }, { t: bends + 0.08, type: 'scratch', gain: 0.7 }] });
 // 11 · "You can't outrun it." — it swallows him
