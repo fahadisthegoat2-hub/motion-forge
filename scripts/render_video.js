@@ -13,7 +13,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
 
 (async () => {
   const browser = await launchBrowser();
-  const page = await browser.newPage();
+  const page = await browser.newPage(); page.setDefaultTimeout(0);   // slow CPU frames (no GPU) must never time out
   page.on('pageerror', (e) => console.error('page error:', e.message));
   await routeAssets(page);
   const server = await startStaticServer();
