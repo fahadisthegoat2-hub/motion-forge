@@ -7,5 +7,5 @@ Use `long-form` with `story-writing`, `art-direction`, `realistic-humans`, `cust
 
 Work silently. Steps: chaptered script (cold open → chapters with mini-cliffhangers →
 2+ twists → final reveal) — FIRST ask me video quality + effort level → visual plan table (`visual-clarity`) → 16:9 scene with `chapter:` on shots (templates/SCENE_API.md) → preview +
-`quality-review` (≥2 full rounds) → `scripts/pack_scene.js` → (quality + effort asked at the start) → deliver the render page (renders part by
+`quality-review` (≥2 full rounds) → `scripts/pack_scene.js` (publish with `capabilities: { downloads: true }`) → (quality + effort asked at the start) → deliver the render page (renders part by
 part on my device) + long-form publish pack with chapter timestamps. One final message.

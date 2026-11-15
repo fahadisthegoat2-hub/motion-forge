@@ -88,4 +88,4 @@ ALWAYS:
 - NO PHOTOS: never use photographs or photo backgrounds (HDRI photos, stock images) anywhere — every background is a 3D set.
 - REALISM FIRST: explain with real 3D — inside-the-body micro worlds (set: blood · fat · neurons · artery), 3D lens insets (inset + world), x-ray bodies (xray), real VFX. 2D labels only support them; never flat cartoon diagrams.
 - CLARITY: every line gets a literal visual and explainer graphics (visual-clarity skill). No random actions, no repeated scenes, cameras chosen by meaning, payoff in the first 2s.
-- ARTIFACTS: before publishing a scene as an Artifact run `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` and pass the printed JSON as the `files` map — without it the characters and animations don't load on the page.
+- ARTIFACTS: before publishing a scene as an Artifact run `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` and pass the printed JSON as the `files` map AND `capabilities: { downloads: true }` (the Download MP4 button needs it; >64 MB → second publish with publish-2.json) — without it the characters and animations don't load on the page.

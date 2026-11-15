@@ -151,7 +151,7 @@ Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 
 ## Rendering
 - QA in the cloud (no GPU): `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 405 --height 720 --fps 4 --frames-only`
-- Artifact page: `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` → publish scene.html with the printed JSON as `files` (artifacts can't load .glb or the GitHub CDN otherwise — no characters).
+- Artifact page: `node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js scene.html` → publish scene.html with the printed JSON as `files` and `capabilities: { downloads: true }` (Download MP4 button) (artifacts can't load .glb or the GitHub CDN otherwise — no characters).
 - Finals render THEMSELVES: set `CONFIG.quality` (good | high | epic), publish the page — the moment it opens it reads the device's specs and renders the MP4 on that device with sound (no buttons), then shows the finished video with Save.
   `CONFIG.autoRender = false` or `?preview` in the address turns that off. Cloud `--quality good|high|epic` only if asked (slow, no GPU).
 - Old scenes get engine fixes with `node ${CLAUDE_PLUGIN_ROOT}/scripts/upgrade_scene.js scene.html` (keeps the DIRECTION block, swaps in the current engine; re-run qa_check after).

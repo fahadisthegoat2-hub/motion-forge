@@ -55,7 +55,7 @@ Always apply `art-direction` (look brief, per-shot `look`/`set`) and `vfx` for a
 7. **Device render (default for final quality):** build the whole short as ONE HTML with a
    shot timeline (`shots=[{start,end,setup(),update(t)}]`, one `window.__mf` for the full
    duration, captions drawn in-scene), include `templates/device_render_panel.html` before
-   </body>, and pack it (`node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js short.html` → pass the printed JSON as `files`) and
+   </body>, and pack it (`node ${CLAUDE_PLUGIN_ROOT}/scripts/pack_scene.js short.html` → pass the printed JSON as `files`, plus `capabilities: { downloads: true }` so the Download MP4 button works) and
    publish it with the Artifact tool if available, else open it with
    `node ${CLAUDE_PLUGIN_ROOT}/scripts/open_in_chrome.js short.html`. Set `CONFIG.quality` first: the page then renders the MP4 BY ITSELF on the user's GPU the moment it opens (reads the device's specs, no buttons) and shows the finished video with Save — never tell the user to click anything. Custom GLB models must be fetchable URLs or base64-embedded.
 8. Run `viral-growth` → write `publish.md` (titles, description, tags, hashtags, pinned

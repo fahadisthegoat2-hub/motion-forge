@@ -3,6 +3,7 @@
 // characters/animations would be missing. This loads the scene once, records every model/data file it uses and
 // writes them as base64 .txt next to it; the template's loader reads them back (mf-pack.json).
 // Usage: node pack_scene.js scene.html   → prints the Artifact `files` map to pass when publishing scene.html
+// Always publish with capabilities: { downloads: true } (the page saves the finished MP4 through the downloads capability).
 const { launchBrowser, startStaticServer, routeAssets } = require('./lib/deps');
 const fs = require('fs'), path = require('path');
 
@@ -29,6 +30,7 @@ function keyOf(url, origin) {
   await page.goto(server.origin + scene + '?fast=1');
   await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });
   await page.evaluate(() => window.__mf.render(0.5));
+  await page.evaluate(() => window.__mf.soundtrack?.()).catch(() => {});   // loads the voiceover / own music track so they get packed too
   await new Promise((r) => setTimeout(r, 1500));
   await browser.close(); server.close();
 
@@ -44,7 +46,14 @@ function keyOf(url, origin) {
   const mux = path.join(__dirname, '..', 'vendor', 'mp4-muxer.mjs'); if (fs.existsSync(mux)) { fs.copyFileSync(mux, path.join(outDir, 'mp4-muxer.mjs')); files['mp4-muxer.mjs'] = path.relative(process.cwd(), path.join(outDir, 'mp4-muxer.mjs')); }
   fs.writeFileSync(path.join(outDir, 'mf-pack.json'), JSON.stringify(manifest, null, 1));
   files['mf-pack.json'] = path.relative(process.cwd(), path.join(outDir, 'mf-pack.json'));
-  if (total > 60e6) console.error(`warning: ${(total / 1e6).toFixed(0)} MB total — publish in two calls (artifact limit 64 MB per publish)`);
+  let out = files;
+  if (total > 60e6) {   // one publish carries at most 64 MB: first map goes out with the page, the rest in a second publish to the same artifact
+    const first = {}, second = {}; let a = 0;
+    for (const [k, v] of Object.entries(files)) { const s = fs.statSync(v).size; if (/mf-pack\.json$|mp4-muxer/.test(k) || a + s < 45e6) { first[k] = v; a += s; } else second[k] = v; }
+    const p2 = path.join(outDir, 'publish-2.json'); fs.writeFileSync(p2, JSON.stringify(second));
+    console.error(`${(total / 1e6).toFixed(0)} MB total — publish the page with the printed files map, then publish again to the same artifact with the files map in ${path.relative(process.cwd(), p2)}`); out = first;
+  }
   console.error(`packed ${Object.keys(manifest).length} files (${(total / 1e6).toFixed(1)} MB): ${Object.keys(manifest).join(', ')}`);
-  console.log(JSON.stringify(files));
+  console.error('publish with capabilities: { downloads: true } — the page saves the finished MP4 through it (Download MP4 button)');
+  console.log(JSON.stringify(out));
 })().catch((e) => { console.error(e); process.exit(1); });

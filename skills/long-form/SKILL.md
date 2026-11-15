@@ -52,7 +52,7 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 ## Deliver
 1. Script doc: logline, chapter outline with timestamps, full narration, shot list per chapter,
    where each twist's clue is planted.
-2. The scene file(s) / artifact with the render panel (run `scripts/pack_scene.js` first and publish with its files map).
+2. The scene file(s) / artifact with the render panel (run `scripts/pack_scene.js` first and publish with its files map and `capabilities: { downloads: true }`).
 
 Apply `visual-clarity` to every chapter: literal visual + explainer graphics per narration line, cameras by meaning, a `timeline` per chapter.
 3. `viral-growth` long-form publish pack (title, description **with chapter timestamps**,
