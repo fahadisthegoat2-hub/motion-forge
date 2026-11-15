@@ -48,7 +48,7 @@ S('hook', { ...hookShot('hook'), role: 'payoff', punch: [0.06], sfx: [{ t: 0.03,
 S('molasses', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.35],
   camera: { move: 'crash-zoom', target: 'hero', size: 'cu', at: 0.05, az: 12, handheld: 1 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dur('molasses')), look: [[0, [0, 6, -8]]], bones: { head: [[0, [-0.25, 0.3, 0]]] }, face: { shock: [[0, 1]], disgust: [[0.6, 0], [1.1, 0.5]] }, acting: 'none' } },
-  fx: [{ type: 'molasses-leak', start: 0, end: 2, pos: [0.16, 2.3, 0.42] }, { type: 'molasses-leak', start: 0.3, end: 2, pos: [-0.2, 2.3, 0.5], seed: 4 }, { type: 'splash', t: 0.3, pos: [0.1, 1.75, 0.35], dir: [0, 1, 0.5], color: '#2e1607', scale: 0.4, count: 220 }] });
+  fx: [FLOOD({ front: [[0, -4.2], [dur('molasses'), -2.6, 'linear']], crest: [[0, 7.4]], sprayCount: 1400 }), { type: 'molasses-burst', t: 0.15, pos: [0, 3.4, -2.2], scale: 0.45 }] });
 // 3 · "Boston, 1919. A giant tank looms over the street." — calm before: walking, looks up
 S('boston', { cut: 'dip', set: 'city-day', look: 'warm-film',
   camera: { move: 'crane-down', target: 'hero', size: 'ws', az: 24, handheld: 0.3 },
@@ -104,7 +104,7 @@ S('wave', { cut: 'whip', set: 'city-day', look: 'cinematic', punch: [wt('twenty-
 // 10 · "It flattens buildings. It bends steel train tracks." — side-on as it sweeps through
 const dF = dur('flatten'), bends = wt('bends', T.flatten) - T.flatten;
 S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.05, bends],
-  camera: { pos: [[0, [-3.5, 2.2, 6]], [dF, [-3.0, 2.6, 4], 'inOutSine']], look: [[0, [6, 3.5, -2]], [dF, [6, 3.5, 4], 'inOutSine']], fov: 60, handheld: 1.3 },
+  camera: { pos: [[0, [-3.5, 10.5, 16]], [dF, [-3.0, 10, 14], 'inOutSine']], look: [[0, [3, 2, -5]], [dF, [3, 2, 0], 'inOutSine']], fov: 55, handheld: 1.3 },
   cast: {},
   fx: [FLOOD({ front: [[0, -6], [dF, -6 + 6 * dF, 'linear']], crest: [[0, 7.6]] }),
     { type: 'ground-slam', t: 0.05, pos: [8.5, 0.2, -5.6], scale: 1.2, color: '#5a3a1e' }, { type: 'ground-slam', t: bends, pos: [5.5, 0.2, -6 + 6 * bends], scale: 1.3, color: '#5a3a1e' },
@@ -131,7 +131,7 @@ S('died', { cut: 'dip', set: 'city-day', look: 'cinematic',
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), acting: 'none' },
     p1: { pos: [[0, [2.5, 0, 2.5]], [dD, [1.6, 0, 1.6], 'linear']], rotY: [[0, -2.35]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] },
     p2: { pos: [[0, [-2.8, 0, -2]], [dD, [-2.0, 0, -1.4], 'linear']], rotY: [[0, 0.95]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] } },
-  fx: [FLOOD({ level: [[0, 0.95]], flow: 0.4, rough: 0.3 })] });
+  fx: [FLOOD({ level: [[0, 0.95]], flow: 0.4, rough: 0.55 })] });
 // 14 · "The harbor stayed brown for months." — the whole street a brown lake, sun going down
 const dH = dur('harbor');
 S('harbor', { set: 'city-day', look: SUN,
