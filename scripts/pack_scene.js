@@ -2,12 +2,16 @@
 // Make a scene work as a claude.ai Artifact. Artifact pages can't load .glb/.fbx files or the GitHub CDN, so
 // characters/animations would be missing. This loads the scene once, records every model/data file it uses and
 // writes them as base64 .txt next to it; the template's loader reads them back (mf-pack.json).
-// Usage: node pack_scene.js scene.html   → prints the Artifact `files` map to pass when publishing scene.html
+// Usage: node pack_scene.js scene.html [--no-review]   → refuses unless review_log.js --verify passes; prints the Artifact `files` map to pass when publishing scene.html
 const { launchBrowser, startStaticServer, routeAssets } = require('./lib/deps');
 const fs = require('fs'), path = require('path');
 
 const input = process.argv[2];
 if (!input) { console.error('usage: pack_scene.js scene.html'); process.exit(1); }
+if (!process.argv.includes('--no-review')) {   // effort gate: a final never ships without its full review (skills/quality-review)
+  const r = require('child_process').spawnSync(process.execPath, [require('path').join(__dirname, 'review_log.js'), input, '--verify'], { encoding: 'utf8' });
+  if (r.status !== 0) { console.error((r.stdout || '') + (r.stderr || '') + '\npack refused: finish the review first (only VFX/tool previews may pass --no-review)'); process.exit(1); }
+}
 const scene = path.resolve(input), sceneDir = path.dirname(scene), name = path.basename(scene).replace(/\.html?$/i, '');
 const outDir = path.join(sceneDir, name + '.pack'), ASSET = /\.(glb|gltf|bin|fbx|json|png|jpe?g|webp|ktx2|hdr|mp3|wav|ogg|m4a)(\?|$)/i;
 
