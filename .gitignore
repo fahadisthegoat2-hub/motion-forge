@@ -13,3 +13,4 @@ modelforge/cache/
 scenes/*/*_qa/
 scenes/*/*.pack/
 scenes/*/*_qa/
+scenes/*/qa/
