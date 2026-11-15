@@ -37,18 +37,18 @@ const shots = [];
 const S = (id, o) => shots.push({ name: id, dur: dur(id), ...o });
 const hookShot = (id, extra = {}) => {
   const d = dur(id);
-  return { set: 'city-day', look: 'cinematic', camera: { move: 'dolly-out', target: 'hero', size: 'ws', az: 6, handheld: 1.2 },
+  return { set: 'city-day', look: 'cinematic', camera: { pos: [[0, [1.1, 0.75, 4.6]], [d, [1.1, 0.85, 4.6 + SPRINT * d * 0.97], 'linear']], look: [[0, [0, 2.9, -3]], [d, [0, 3.0, -3 + SPRINT * d], 'linear']], fov: 66, handheld: 1.2 },
     cast: { hero: { pos: [[0, [0, 0, 0]], [d, [0, 0, SPRINT * d], 'linear']], rotY: [[0, 0]], clips: run(d), bones: lookBack(0.15, d), face: { scream: [[0, 0.6]], scared: [[0, 1]] }, acting: 'none' } },
     fx: [FLOOD({ front: [[0, -4.5], [d, -4.5 + (SPRINT + 0.7) * d, 'linear']], crest: [[0, 7.4]], level: [[0, 0]] }), { type: 'molasses-burst', t: -0.4, pos: [0, 3, -7], scale: 0.8 }], ...extra };
 };
 
 // 1 · HOOK — sprinting at camera, a 7 m brown wave right behind him
-S('hook', { ...hookShot('hook'), role: 'payoff', impact: [0.05], punch: [0.06], sfx: [{ t: 0.03, type: 'impact', gain: 1 }] });
+S('hook', { ...hookShot('hook'), role: 'payoff', punch: [0.06], sfx: [{ t: 0.03, type: 'impact', gain: 1 }] });
 // 2 · "It's molasses." — close on the face, thick brown drops raining on him
 S('molasses', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.35],
   camera: { move: 'crash-zoom', target: 'hero', size: 'cu', at: 0.05, az: 12, handheld: 1 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dur('molasses')), look: [[0, [0, 6, -8]]], bones: { head: [[0, [-0.25, 0.3, 0]]] }, face: { shock: [[0, 1]], disgust: [[0.6, 0], [1.1, 0.5]] }, acting: 'none' } },
-  fx: [{ type: 'splash', t: 0.25, pos: [0.3, 2.2, -0.6], dir: [0, -1, 0.4], color: '#2e1607', scale: 0.6, count: 200 }, { type: 'splash', t: 0.7, pos: [-0.4, 2.4, -0.4], dir: [0, -1, 0.3], color: '#3a1b08', scale: 0.5 }] });
+  fx: [{ type: 'molasses-leak', start: 0, end: 2, pos: [0.16, 2.3, 0.42] }, { type: 'molasses-leak', start: 0.3, end: 2, pos: [-0.2, 2.3, 0.5], seed: 4 }, { type: 'splash', t: 0.3, pos: [0.1, 1.75, 0.35], dir: [0, 1, 0.5], color: '#2e1607', scale: 0.4, count: 220 }] });
 // 3 · "Boston, 1919. A giant tank looms over the street." — calm before: walking, looks up
 S('boston', { cut: 'dip', set: 'city-day', look: 'warm-film',
   camera: { move: 'crane-down', target: 'hero', size: 'ws', az: 24, handheld: 0.3 },
@@ -76,7 +76,7 @@ S('paint', { cut: 'whip', set: 'city-day', look: 'warm-film', punch: [0.15],
 const tR = dur('rivets'), pop0 = wt('popping', T.rivets) - T.rivets;
 const rivetT = [pop0 - 0.2, pop0 + 0.15, pop0 + 0.4];
 S('rivets', { cut: 'dip', set: 'city-day', look: 'warm-film', punch: [pop0 - 0.2],
-  camera: { move: 'push', target: 'hero', size: 'ms', az: 20, with: [-1.5, 9, -9], handheld: 0.5 },
+  camera: { move: 'push', target: 'hero', size: 'ms', az: 20, handheld: 0.5 },
   cast: { hero: { pos: [[0, [0.25, 0, -0.85]]], rotY: [[0, 0]], clips: idle(tR), look: [[0, [0, 1.6, 4]], [pop0 - 0.15, [-1.5, 9, -9], 'outCubic']],
     motions: [{ name: 'startle', start: pop0 - 0.18 }], face: { smile: [[0, 0.3], [pop0 - 0.2, 0]], shock: [[pop0 - 0.2, 0], [pop0, 1, 'outBack']] }, acting: 'none' } },
   fx: rivetT.map((t, i) => ({ type: 'sparks', t, pos: [-1.5 + (i % 3) * 0.9, 8 + (i % 2) * 1.5, -9], count: 50, spread: 0.6 })),
@@ -84,15 +84,15 @@ S('rivets', { cut: 'dip', set: 'city-day', look: 'warm-film', punch: [pop0 - 0.2
 // 7b · "Like machine-gun fire." — low angle up past him, rivets ripping in a line
 const tG = dur('gun'), gunT = Array.from({ length: 10 }, (_, i) => 0.08 + i * 0.11);
 S('gun', { cut: 'smash', set: 'city-day', look: 'cinematic',
-  camera: { move: 'low-hero', target: 'hero', size: 'mls', az: -35, with: [1.5, 9, -9], handheld: 0.8, shakes: gunT.map((t) => ({ t, amp: 0.22, decay: 0.1 })) },
+  camera: { move: 'low-hero', target: 'hero', size: 'mls', az: -35, handheld: 0.8, shakes: gunT.map((t) => ({ t, amp: 0.22, decay: 0.1 })) },
   cast: { hero: { pos: [[0, [0.25, 0, -0.85]]], rotY: [[0, 0]], clips: idle(tG), look: [[0, [1.5, 9, -9]]], gestures: [{ type: 'shield', start: 0.05, end: tG }], face: { scared: [[0, 1]], shock: [[0, 0.7]] }, acting: 'none' } },
   fx: gunT.map((t, i) => ({ type: 'sparks', t, pos: [-2.5 + i * 0.55, 8.5 + (i % 2) * 0.6, -9], count: 45, spread: 0.6 })),
-  sfx: gunT.map((t) => ({ t, type: 'rivet', gain: 0.85 })) });
+  sfx: gunT.map((t, i) => ({ t, type: 'rivet', gain: i % 2 ? 0.65 : 0.85 })) });
 // 8 · "The tank bursts." — wall of syrup blasts out
-S('burst', { cut: 'flash', set: 'city-day', look: 'cinematic', impact: [0.05], afterimage: 0.5,
-  camera: { move: 'static', target: 'hero', size: 'ws', az: 160, height: 0.3, with: [0, 6, -12], handheld: 1.4 },
+S('burst', { cut: 'flash', set: 'city-day', look: 'cinematic', afterimage: 0.5,
+  camera: { pos: [[0, [1.3, 1.5, 3.4]], [dur('burst'), [1.2, 1.6, 2.9], 'outCubic']], look: [[0, [0, 3.6, -12]]], fov: 62, handheld: 1.4 },
   cast: { hero: { pos: [[0, [0.25, 0, -0.85]]], rotY: [[0, 0]], clips: idle(dur('burst')), look: [[0, [0, 6, -12]]], gestures: [{ type: 'shield', start: 0, end: dur('burst') }], face: { scream: [[0.05, 1]] }, acting: 'none' } },
-  fx: [{ type: 'molasses-burst', t: 0.05, pos: [0, 6, -14], scale: 1.6 }, FLOOD({ front: [[0, -16], [dur('burst'), -16 + 11 * dur('burst'), 'outCubic']], crest: [[0, 2], [dur('burst'), 7.6, 'outCubic']] })],
+  fx: [{ type: 'molasses-burst', t: 0.05, pos: [0, 5, -12], scale: 2.6 }, FLOOD({ front: [[0, -15], [dur('burst'), -15 + 7 * dur('burst'), 'outCubic']], crest: [[0, 2], [dur('burst'), 7.6, 'outCubic']] })],
   sfx: [{ t: 0.05, type: 'thunder', gain: 0.6 }] });
 // 9 · "A wave twenty-five feet high, moving thirty-five miles an hour." — the wave charges at camera
 const dW = dur('wave');
@@ -103,7 +103,7 @@ S('wave', { cut: 'whip', set: 'city-day', look: 'cinematic', punch: [wt('twenty-
   fx: [FLOOD({ front: [[0, -12], [dW, -12 + 6.2 * dW, 'linear']], crest: [[0, 7.6]] }), { type: 'dust', count: 260 }] });
 // 10 · "It flattens buildings. It bends steel train tracks." — side-on as it sweeps through
 const dF = dur('flatten'), bends = wt('bends', T.flatten) - T.flatten;
-S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.05, bends], punch: [bends],
+S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.05, bends],
   camera: { pos: [[0, [-3.5, 2.2, 6]], [dF, [-3.0, 2.6, 4], 'inOutSine']], look: [[0, [6, 3.5, -2]], [dF, [6, 3.5, 4], 'inOutSine']], fov: 60, handheld: 1.3 },
   cast: {},
   fx: [FLOOD({ front: [[0, -6], [dF, -6 + 6 * dF, 'linear']], crest: [[0, 7.6]] }),
@@ -113,9 +113,9 @@ S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.05, 
 // 11 · "You can't outrun it." — it swallows him
 const dO = dur('outrun');
 S('outrun', { cut: 'whip', set: 'city-day', look: 'cinematic', flash: [dO - 0.12],
-  camera: { move: 'follow', target: 'hero', size: 'ws', side: 'left', handheld: 1.2 },
+  camera: { pos: [[0, [2.6, 1.2, 4.2]], [dO, [2.6, 1.3, 4.2 + SPRINT * dO * 0.9], 'linear']], look: [[0, [0, 2.4, -2.5]], [dO, [0, 2.4, -2.5 + SPRINT * dO], 'linear']], fov: 64, handheld: 1.2 },
   cast: { hero: { pos: [[0, [0, 0, 0]], [dO, [0, 0, SPRINT * dO], 'linear']], rotY: [[0, 0]], clips: run(dO), bones: lookBack(0.1, dO), face: { scream: [[0, 1]] }, acting: 'none' } },
-  fx: [FLOOD({ front: [[0, -2.2], [dO, SPRINT * dO + 0.8, 'inCubic']], crest: [[0, 7.6]] })],
+  fx: [FLOOD({ front: [[0, -3.2], [dO, SPRINT * dO + 0.8, 'inCubic']], crest: [[0, 7.6]] })],
   sfx: [{ t: dO - 0.12, type: 'splash', gain: 1 }, { t: dO - 0.1, type: 'subdrop', gain: 0.8 }] });
 // 12 · "And as it cools, it turns to glue. You're stuck." — waist-deep, can't move
 const dG = dur('glue');
@@ -126,8 +126,8 @@ S('glue', { cut: 'dip', set: 'city-day', look: 'cinematic', punch: [wt('stuck', 
   fx: [FLOOD({ level: [[0, 1.05], [dG, 1.0]], flow: 0.5, rough: 0.28 })] });
 // 13 · "Twenty-one people died." — overhead, rescuers wading
 const dD = dur('died');
-S('died', { cut: 'dip', set: 'city-day', look: 'noir',
-  camera: { move: 'overhead', target: 'hero', size: 'ews', handheld: 0.2 },
+S('died', { cut: 'dip', set: 'city-day', look: 'cinematic',
+  camera: { pos: [[0, [3.2, 6.2, 5.4]], [dD, [2.9, 5.6, 4.8], 'inOutSine']], look: [[0, [0, 0.6, 0]]], fov: 50, handheld: 0.2 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), acting: 'none' },
     p1: { pos: [[0, [2.5, 0, 2.5]], [dD, [1.6, 0, 1.6], 'linear']], rotY: [[0, -2.35]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] },
     p2: { pos: [[0, [-2.8, 0, -2]], [dD, [-2.0, 0, -1.4], 'linear']], rotY: [[0, 0.95]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] } },
@@ -135,7 +135,7 @@ S('died', { cut: 'dip', set: 'city-day', look: 'noir',
 // 14 · "The harbor stayed brown for months." — the whole street a brown lake, sun going down
 const dH = dur('harbor');
 S('harbor', { set: 'city-day', look: SUN,
-  camera: { move: 'crane-up', target: 'p1', size: 'ews', az: 200 },
+  camera: { pos: [[0, [5, 5, 12]], [dH, [5.5, 9, 14], 'inOutSine']], look: [[0, [0, 0.5, -8]], [dH, [0, 0, -14], 'inOutSine']], fov: 55 },
   cast: { p1: { pos: [[0, [1.0, 0, 3]], [dH, [1.0, 0, 3 - 0.6 * dH], 'linear']], rotY: [[0, P]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] },
     p2: { pos: [[0, [-1.6, 0, 1.4]], [dH, [-1.6, 0, 1.4 - 0.6 * dH], 'linear']], rotY: [[0, P]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] } },
   fx: [FLOOD({ level: [[0, 0.7]], flow: 0.3, rough: 0.3 })] });

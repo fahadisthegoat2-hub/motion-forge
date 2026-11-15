@@ -2427,7 +2427,7 @@ const SFX = {
   punch(c, o, rv, t, g, s) { SFX.whoosh(c, o, rv, t, g * 0.45, s, 0.16); SFX.subdrop(c, o, rv, t, g * 0.4); },
   heartbeat(c, o, rv, t, g) { for (const [d, a] of [[0, 1], [0.24, 0.7]]) { const os = c.createOscillator(); os.frequency.setValueAtTime(70, t + d); os.frequency.exponentialRampToValueAtTime(40, t + d + 0.15); const v = c.createGain(); env(v, t + d, 0.008, a * g, 0.18); os.connect(v).connect(o); os.start(t + d); os.stop(t + d + 0.3); } },
   swell(c, o, rv, t, g, s) { SFX.riser(c, o, rv, t, g * 0.5, s, 0.8); },
-  rivet(c, o, rv, t, g, s) { SFX.tick(c, o, rv, t, g * 0.9, s, 3400); SFX.tick(c, o, rv, t + 0.004, g * 0.6, s + 1, 1700); const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.09, s); const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1500; const v = c.createGain(); env(v, t, 0.001, 0.7 * g, 0.06); n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 0.1); },
+  rivet(c, o, rv, t, g, s) { const pr = srng(s + 17)(); SFX.tick(c, o, rv, t, g * 0.9, s, 3000 + pr * 900); SFX.tick(c, o, rv, t + 0.004, g * 0.6, s + 1, 1500 + pr * 500); const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.09, s); const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1500; const v = c.createGain(); env(v, t, 0.001, 0.7 * g, 0.06); n.connect(f).connect(v); v.connect(o); v.connect(rv); n.start(t); n.stop(t + 0.1); },
 };
 // ambience beds (continuous) — bed(ctx, out, t0, t1, gain, seed)
 const BEDS = {
@@ -2567,8 +2567,8 @@ async function renderSoundtrack() {
   const buf = await c.startRendering();
   // master to short-form loudness (~-14 LUFS ≈ -15 dBFS RMS of active audio) with a soft limiter, ceiling -1 dBFS
   let sum = 0, cnt = 0; for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i += 4) { const x = d[i]; if (Math.abs(x) > 1e-4) { sum += x * x; cnt++; } } }
-  const rms = Math.sqrt(sum / Math.max(1, cnt)), gainK = rms > 0 ? Math.min(12, Math.pow(10, (-15 - 20 * Math.log10(rms)) / 20)) : 1, ceil = 0.89;
-  for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) { const x = d[i] * gainK; d[i] = Math.abs(x) < 0.6 ? x : Math.sign(x) * (0.6 + (ceil - 0.6) * Math.tanh((Math.abs(x) - 0.6) / (ceil - 0.6))); } }
+  const rms = Math.sqrt(sum / Math.max(1, cnt)), gainK = rms > 0 ? Math.min(12, Math.pow(10, (-15 - 20 * Math.log10(rms)) / 20)) : 1, ceil = 0.74;   // -2.6 dBFS sample ceiling leaves room for AAC + inter-sample overshoot (true peak ≤ -1 dBTP)
+  for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) { const x = d[i] * gainK; d[i] = Math.abs(x) < 0.5 ? x : Math.sign(x) * (0.5 + (ceil - 0.5) * Math.tanh((Math.abs(x) - 0.5) / (ceil - 0.5))); } }
   return (SND.buffer = buf);
 }
 function wavBase64(buf, t0 = 0, t1 = buf.duration) {   // 16-bit stereo WAV of a range (for cloud muxing)
