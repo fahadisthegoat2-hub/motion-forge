@@ -2870,12 +2870,19 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
     await ae.flush(); ae.close(); if (failed) throw failed;
   }
   muxer.finalize();
-  const url = URL.createObjectURL(new Blob([target.buffer], { type: 'video/mp4' }));
+  const blob = new Blob([target.buffer], { type: 'video/mp4' }), url = URL.createObjectURL(blob);
   const file = `${(document.title || 'render').replace(/\W+/g, '-')}${label === 'Video' ? '' : '-' + label.replace(/\W+/g, '-')}.mp4`;
-  results.push({ label, url, file });
-  try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
+  results.push({ label, url, file, blob });
+  if (!DL) try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
 }
 const results = [];
+let DL = null;   // claude.ai artifact: files are saved through the downloads capability (declare capabilities: { downloads: true })
+try { window.claude?.use?.('downloads').then((d) => { DL = d; }).catch(() => {}); } catch {}
+async function saveResult(r, btn) {
+  if (!DL) try { DL = await window.claude?.use?.('downloads') ?? null; } catch {}
+  if (DL) { try { await DL.save({ filename: r.file, data: r.blob }); btn.textContent = 'Saved ✓'; } catch (e) { if (e?.code === 'rate_limited') btn.textContent = 'Try again in a moment'; else if (e?.code !== 'declined') btn.textContent = 'Saving unavailable here'; } return; }
+  const a = Object.assign(document.createElement('a'), { href: r.url, download: r.file }); document.body.appendChild(a); a.click(); a.remove();
+}
 function showResults(secs) {   // the finished video, playing on the page, with a save button (pages inside an app can't always download by themselves)
   $('mf-done')?.remove(); const single = results.length === 1, box = document.createElement('div'); box.id = 'mf-done';
   box.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(6,10,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;font:14px/1.4 system-ui,sans-serif;color:#fff';
@@ -2883,7 +2890,7 @@ function showResults(secs) {   // the finished video, playing on the page, with 
   box.innerHTML = '<b style="font-size:16px">Your video is ready</b>' + (single ? '<video controls playsinline loop style="max-width:100%;max-height:68vh;border-radius:12px;background:#000"></video>' : '') +
     '<div id="mf-links" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div><div style="opacity:.7;font-size:12px">Rendered on this device in ' + secs + 's</div><button id="mf-close" style="' + btn + ';background:transparent;color:#fff;border:1px solid #ffffff44;font-weight:600;font-size:13px;padding:8px 16px">Back to the scene</button>';
   document.body.appendChild(box); if (single) box.querySelector('video').src = results[0].url;
-  for (const r of results) { const a = Object.assign(document.createElement('a'), { href: r.url, download: r.file, textContent: single ? 'Save MP4' : 'Save ' + r.label }); a.style.cssText = btn; box.querySelector('#mf-links').appendChild(a); }
+  for (const r of results) { const b = Object.assign(document.createElement('button'), { textContent: single ? '⬇ Download MP4' : '⬇ Download ' + r.label }); b.style.cssText = btn; b.onclick = () => saveResult(r, b); box.querySelector('#mf-links').appendChild(b); }
   box.querySelector('#mf-close').onclick = () => { box.querySelector('video')?.pause(); box.remove(); };
 }
 

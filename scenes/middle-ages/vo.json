@@ -1,0 +1,570 @@
+{
+ "voice": "am_michael",
+ "duration": 33.267,
+ "words": [
+  {
+   "w": "You",
+   "start": 0.05,
+   "end": 0.231,
+   "tone": "shout"
+  },
+  {
+   "w": "survive",
+   "start": 0.231,
+   "end": 0.653,
+   "tone": "shout"
+  },
+  {
+   "w": "the",
+   "start": 0.653,
+   "end": 0.833,
+   "tone": "shout"
+  },
+  {
+   "w": "Middle",
+   "start": 0.833,
+   "end": 1.195,
+   "tone": "shout"
+  },
+  {
+   "w": "Ages.",
+   "start": 1.195,
+   "end": 1.556,
+   "tone": "shout"
+  },
+  {
+   "w": "Barely.",
+   "start": 1.706,
+   "end": 2.378,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Six",
+   "start": 2.728,
+   "end": 2.932,
+   "tone": "neutral"
+  },
+  {
+   "w": "hours",
+   "start": 2.932,
+   "end": 3.271,
+   "tone": "neutral"
+  },
+  {
+   "w": "earlier.",
+   "start": 3.271,
+   "end": 3.882,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 3.932,
+   "end": 4.25,
+   "tone": "serious"
+  },
+  {
+   "w": "wake",
+   "start": 4.25,
+   "end": 4.674,
+   "tone": "serious"
+  },
+  {
+   "w": "up",
+   "start": 4.674,
+   "end": 4.886,
+   "tone": "serious"
+  },
+  {
+   "w": "in",
+   "start": 4.886,
+   "end": 5.098,
+   "tone": "serious"
+  },
+  {
+   "w": "1348.",
+   "start": 5.098,
+   "end": 5.734,
+   "tone": "serious"
+  },
+  {
+   "w": "No",
+   "start": 5.834,
+   "end": 5.976,
+   "tone": "neutral"
+  },
+  {
+   "w": "signal.",
+   "start": 5.976,
+   "end": 6.545,
+   "tone": "neutral"
+  },
+  {
+   "w": "Just",
+   "start": 6.545,
+   "end": 6.829,
+   "tone": "neutral"
+  },
+  {
+   "w": "mud",
+   "start": 6.829,
+   "end": 7.043,
+   "tone": "neutral"
+  },
+  {
+   "w": "and",
+   "start": 7.043,
+   "end": 7.256,
+   "tone": "neutral"
+  },
+  {
+   "w": "smoke.",
+   "start": 7.256,
+   "end": 7.754,
+   "tone": "neutral"
+  },
+  {
+   "w": "Your",
+   "start": 7.854,
+   "end": 8.125,
+   "tone": "mysterious"
+  },
+  {
+   "w": "watch",
+   "start": 8.125,
+   "end": 8.465,
+   "tone": "mysterious"
+  },
+  {
+   "w": "beeps:",
+   "start": 8.465,
+   "end": 8.94,
+   "tone": "mysterious"
+  },
+  {
+   "w": "storm",
+   "start": 8.94,
+   "end": 9.279,
+   "tone": "mysterious"
+  },
+  {
+   "w": "at",
+   "start": 9.279,
+   "end": 9.415,
+   "tone": "mysterious"
+  },
+  {
+   "w": "three.",
+   "start": 9.415,
+   "end": 9.89,
+   "tone": "mysterious"
+  },
+  {
+   "w": "You're",
+   "start": 10.14,
+   "end": 10.426,
+   "tone": "neutral"
+  },
+  {
+   "w": "thirsty.",
+   "start": 10.426,
+   "end": 10.939,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 10.939,
+   "end": 11.111,
+   "tone": "neutral"
+  },
+  {
+   "w": "drink",
+   "start": 11.111,
+   "end": 11.396,
+   "tone": "neutral"
+  },
+  {
+   "w": "the",
+   "start": 11.396,
+   "end": 11.567,
+   "tone": "neutral"
+  },
+  {
+   "w": "ditch",
+   "start": 11.567,
+   "end": 11.853,
+   "tone": "neutral"
+  },
+  {
+   "w": "water.",
+   "start": 11.853,
+   "end": 12.253,
+   "tone": "neutral"
+  },
+  {
+   "w": "Big",
+   "start": 12.303,
+   "end": 12.491,
+   "tone": "scared"
+  },
+  {
+   "w": "mistake.",
+   "start": 12.491,
+   "end": 13.056,
+   "tone": "scared"
+  },
+  {
+   "w": "Dysentery.",
+   "start": 13.106,
+   "end": 13.86,
+   "tone": "neutral"
+  },
+  {
+   "w": "Your",
+   "start": 13.86,
+   "end": 14.134,
+   "tone": "neutral"
+  },
+  {
+   "w": "gut",
+   "start": 14.134,
+   "end": 14.339,
+   "tone": "neutral"
+  },
+  {
+   "w": "is",
+   "start": 14.339,
+   "end": 14.476,
+   "tone": "neutral"
+  },
+  {
+   "w": "on",
+   "start": 14.476,
+   "end": 14.613,
+   "tone": "neutral"
+  },
+  {
+   "w": "fire.",
+   "start": 14.613,
+   "end": 15.024,
+   "tone": "neutral"
+  },
+  {
+   "w": "But",
+   "start": 15.274,
+   "end": 15.447,
+   "tone": "serious"
+  },
+  {
+   "w": "that's",
+   "start": 15.447,
+   "end": 15.736,
+   "tone": "serious"
+  },
+  {
+   "w": "not",
+   "start": 15.736,
+   "end": 15.909,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 15.909,
+   "end": 16.082,
+   "tone": "serious"
+  },
+  {
+   "w": "worst",
+   "start": 16.082,
+   "end": 16.371,
+   "tone": "serious"
+  },
+  {
+   "w": "part.",
+   "start": 16.371,
+   "end": 16.718,
+   "tone": "serious"
+  },
+  {
+   "w": "The",
+   "start": 16.768,
+   "end": 16.958,
+   "tone": "neutral"
+  },
+  {
+   "w": "doctor's",
+   "start": 16.958,
+   "end": 17.401,
+   "tone": "neutral"
+  },
+  {
+   "w": "cure?",
+   "start": 17.401,
+   "end": 17.781,
+   "tone": "neutral"
+  },
+  {
+   "w": "Bleed",
+   "start": 17.781,
+   "end": 18.098,
+   "tone": "neutral"
+  },
+  {
+   "w": "you.",
+   "start": 18.098,
+   "end": 18.415,
+   "tone": "neutral"
+  },
+  {
+   "w": "A",
+   "start": 18.415,
+   "end": 18.542,
+   "tone": "neutral"
+  },
+  {
+   "w": "whole",
+   "start": 18.542,
+   "end": 18.859,
+   "tone": "neutral"
+  },
+  {
+   "w": "pint.",
+   "start": 18.859,
+   "end": 19.239,
+   "tone": "neutral"
+  },
+  {
+   "w": "Then",
+   "start": 19.489,
+   "end": 19.688,
+   "tone": "neutral"
+  },
+  {
+   "w": "they",
+   "start": 19.688,
+   "end": 19.886,
+   "tone": "neutral"
+  },
+  {
+   "w": "see",
+   "start": 19.886,
+   "end": 20.035,
+   "tone": "neutral"
+  },
+  {
+   "w": "your",
+   "start": 20.035,
+   "end": 20.234,
+   "tone": "neutral"
+  },
+  {
+   "w": "sneakers.",
+   "start": 20.234,
+   "end": 20.731,
+   "tone": "neutral"
+  },
+  {
+   "w": "Witch!",
+   "start": 20.781,
+   "end": 21.32,
+   "tone": "shout"
+  },
+  {
+   "w": "They",
+   "start": 21.57,
+   "end": 21.785,
+   "tone": "scared"
+  },
+  {
+   "w": "tie",
+   "start": 21.785,
+   "end": 21.947,
+   "tone": "scared"
+  },
+  {
+   "w": "you",
+   "start": 21.947,
+   "end": 22.108,
+   "tone": "scared"
+  },
+  {
+   "w": "to",
+   "start": 22.108,
+   "end": 22.215,
+   "tone": "scared"
+  },
+  {
+   "w": "a",
+   "start": 22.215,
+   "end": 22.323,
+   "tone": "scared"
+  },
+  {
+   "w": "stake.",
+   "start": 22.323,
+   "end": 22.699,
+   "tone": "scared"
+  },
+  {
+   "w": "They",
+   "start": 22.699,
+   "end": 22.915,
+   "tone": "scared"
+  },
+  {
+   "w": "light",
+   "start": 22.915,
+   "end": 23.183,
+   "tone": "scared"
+  },
+  {
+   "w": "the",
+   "start": 23.183,
+   "end": 23.345,
+   "tone": "scared"
+  },
+  {
+   "w": "fire.",
+   "start": 23.345,
+   "end": 23.668,
+   "tone": "scared"
+  },
+  {
+   "w": "Two",
+   "start": 24.018,
+   "end": 24.255,
+   "tone": "whisper"
+  },
+  {
+   "w": "fifty-nine.",
+   "start": 24.255,
+   "end": 25.125,
+   "tone": "whisper"
+  },
+  {
+   "w": "Three.",
+   "start": 25.475,
+   "end": 26.092,
+   "tone": "dramatic"
+  },
+  {
+   "w": "The",
+   "start": 26.292,
+   "end": 26.488,
+   "tone": "shout"
+  },
+  {
+   "w": "storm",
+   "start": 26.488,
+   "end": 26.816,
+   "tone": "shout"
+  },
+  {
+   "w": "hits.",
+   "start": 26.816,
+   "end": 27.209,
+   "tone": "shout"
+  },
+  {
+   "w": "The",
+   "start": 27.259,
+   "end": 27.44,
+   "tone": "neutral"
+  },
+  {
+   "w": "rain",
+   "start": 27.44,
+   "end": 27.683,
+   "tone": "neutral"
+  },
+  {
+   "w": "kills",
+   "start": 27.683,
+   "end": 27.986,
+   "tone": "neutral"
+  },
+  {
+   "w": "the",
+   "start": 27.986,
+   "end": 28.168,
+   "tone": "neutral"
+  },
+  {
+   "w": "flames.",
+   "start": 28.168,
+   "end": 28.653,
+   "tone": "neutral"
+  },
+  {
+   "w": "They",
+   "start": 28.653,
+   "end": 28.896,
+   "tone": "neutral"
+  },
+  {
+   "w": "run.",
+   "start": 28.896,
+   "end": 29.199,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 29.199,
+   "end": 29.381,
+   "tone": "neutral"
+  },
+  {
+   "w": "crawl.",
+   "start": 29.381,
+   "end": 29.805,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 29.855,
+   "end": 30.091,
+   "tone": "dramatic"
+  },
+  {
+   "w": "survived.",
+   "start": 30.091,
+   "end": 30.877,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Barely.",
+   "start": 30.927,
+   "end": 31.537,
+   "tone": "whisper"
+  },
+  {
+   "w": "Would",
+   "start": 31.787,
+   "end": 32.082,
+   "tone": "neutral"
+  },
+  {
+   "w": "you",
+   "start": 32.082,
+   "end": 32.259,
+   "tone": "neutral"
+  },
+  {
+   "w": "last",
+   "start": 32.259,
+   "end": 32.495,
+   "tone": "neutral"
+  },
+  {
+   "w": "one",
+   "start": 32.495,
+   "end": 32.672,
+   "tone": "neutral"
+  },
+  {
+   "w": "day?",
+   "start": 32.672,
+   "end": 32.967,
+   "tone": "neutral"
+  }
+ ]
+}
