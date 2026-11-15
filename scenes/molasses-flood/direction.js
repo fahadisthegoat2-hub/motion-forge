@@ -97,7 +97,7 @@ S('burst', { cut: 'flash', set: 'city-day', look: 'cinematic', afterimage: 0.5,
 // 9 · "A wave twenty-five feet high, moving thirty-five miles an hour." — the wave charges at camera
 const dW = dur('wave');
 S('wave', { cut: 'whip', set: 'city-day', look: 'cinematic', punch: [wt('twenty-five', T.wave) - T.wave],
-  camera: { pos: [[0, [1.5, 1.0, 14]], [dW, [1.5, 1.2, 12], 'inOutSine']], look: [[0, [0, 4, -6]], [dW, [0, 5, -2], 'inOutSine']], fov: 52, handheld: 0.9 },
+  camera: { pos: [[0, [1.4, 1.0, 11]], [dW, [1.4, 1.2, 9.5], 'inOutSine']], look: [[0, [0, 4, -6]], [dW, [0, 5, -2], 'inOutSine']], fov: 52, handheld: 0.9 },
   cast: { hero: { pos: [[0, [0, 0, -3]], [dW, [0, 0, -3 + SPRINT * dW], 'linear']], rotY: [[0, 0]], clips: run(dW), bones: lookBack(0.4, 2.2), face: { scream: [[0, 0.8]], scared: [[0, 1]] }, acting: 'none' },
     p1: { pos: [[0, [3.6, 0, -1]], [dW, [3.6, 0, -1 + 5 * dW], 'linear']], rotY: [[0, 0]], clips: run(dW), face: { scared: [[0, 1]] } } },
   fx: [FLOOD({ front: [[0, -12], [dW, -12 + 6.2 * dW, 'linear']], crest: [[0, 7.6]] }), { type: 'dust', count: 260 }] });
@@ -172,7 +172,7 @@ const titles = [
   { t: at('wave', 2.0), t1: at('flatten', -0.05), style: 'stat', value: 35, max: 40, suffix: ' MPH', text: 'FAST', pos: [0.5, 0.13], size: 0.08 },
   { t: at('flatten', bends + 0.05), t1: at('outrun', -0.05), style: 'tag', text: 'STEEL BENT', pos: [0.5, 0.1], accent: '#ff3b2f' },
   { t: at('glue', 1.2), t1: at('died', -0.05), style: 'callout', at: 'hero.hips', text: 'STUCK', sub: 'THICK AS GLUE', icon: 'warning', side: 1 },
-  { t: at('died', 0.1), t1: at('harbor', -0.05), style: 'counter', from: 0, to: 21, sub: 'LIVES LOST', pos: [0.5, 0.08], size: 0.08, dur: 0.9 },
+  { t: at('died', 0.1), t1: at('harbor', -0.05), style: 'counter', from: 0, to: 21, sub: 'LIVES LOST', pos: [0.5, 0.085], size: 0.095, dur: 0.9 },
   { t: at('harbor', 0.2), t1: at('sweet', -0.05), style: 'tag', text: 'BROWN FOR MONTHS', pos: [0.5, 0.1], accent: '#c8742a' },
   { t: at('smell', sniff + 0.4), t1: at('question', -0.05), style: 'bubble', at: 'hero.head', text: 'syrup...?', thought: true },
   { t: at('question', 0.1), t1: END, style: 'kinetic', text: 'WOULD YOU|MAKE IT|OUT?', hi: ['OUT?'], pos: [0.5, 0.12], size: 0.1 },
