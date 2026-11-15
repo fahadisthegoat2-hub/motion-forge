@@ -10,3 +10,4 @@ modelforge/.venv/
 modelforge/Hunyuan3D-2/
 modelforge/cache/
 .motion-forge/vfxprev/
+scenes/*/*_qa/
