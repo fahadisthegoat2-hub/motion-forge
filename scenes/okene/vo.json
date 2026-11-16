@@ -1,0 +1,396 @@
+{
+ "voice": "am_michael",
+ "duration": 25.062,
+ "words": [
+  {
+   "w": "A",
+   "start": 0.05,
+   "end": 0.207,
+   "tone": "dramatic"
+  },
+  {
+   "w": "diver",
+   "start": 0.207,
+   "end": 0.601,
+   "tone": "dramatic"
+  },
+  {
+   "w": "grabs",
+   "start": 0.601,
+   "end": 0.995,
+   "tone": "dramatic"
+  },
+  {
+   "w": "a",
+   "start": 0.995,
+   "end": 1.152,
+   "tone": "dramatic"
+  },
+  {
+   "w": "dead",
+   "start": 1.152,
+   "end": 1.467,
+   "tone": "dramatic"
+  },
+  {
+   "w": "man's",
+   "start": 1.467,
+   "end": 1.782,
+   "tone": "dramatic"
+  },
+  {
+   "w": "hand.",
+   "start": 1.782,
+   "end": 2.254,
+   "tone": "dramatic"
+  },
+  {
+   "w": "The",
+   "start": 2.504,
+   "end": 2.728,
+   "tone": "shout"
+  },
+  {
+   "w": "hand",
+   "start": 2.728,
+   "end": 3.027,
+   "tone": "shout"
+  },
+  {
+   "w": "grabs",
+   "start": 3.027,
+   "end": 3.4,
+   "tone": "shout"
+  },
+  {
+   "w": "back.",
+   "start": 3.4,
+   "end": 3.848,
+   "tone": "shout"
+  },
+  {
+   "w": "Three",
+   "start": 4.298,
+   "end": 4.631,
+   "tone": "serious"
+  },
+  {
+   "w": "days",
+   "start": 4.631,
+   "end": 4.897,
+   "tone": "serious"
+  },
+  {
+   "w": "earlier.",
+   "start": 4.897,
+   "end": 5.496,
+   "tone": "serious"
+  },
+  {
+   "w": "Harrison",
+   "start": 5.696,
+   "end": 6.163,
+   "tone": "neutral"
+  },
+  {
+   "w": "cooks",
+   "start": 6.163,
+   "end": 6.454,
+   "tone": "neutral"
+  },
+  {
+   "w": "on",
+   "start": 6.454,
+   "end": 6.571,
+   "tone": "neutral"
+  },
+  {
+   "w": "a",
+   "start": 6.571,
+   "end": 6.688,
+   "tone": "neutral"
+  },
+  {
+   "w": "tugboat.",
+   "start": 6.688,
+   "end": 7.213,
+   "tone": "neutral"
+  },
+  {
+   "w": "A",
+   "start": 7.313,
+   "end": 7.446,
+   "tone": "excited"
+  },
+  {
+   "w": "wave",
+   "start": 7.446,
+   "end": 7.713,
+   "tone": "excited"
+  },
+  {
+   "w": "flips",
+   "start": 7.713,
+   "end": 8.046,
+   "tone": "excited"
+  },
+  {
+   "w": "it",
+   "start": 8.046,
+   "end": 8.179,
+   "tone": "excited"
+  },
+  {
+   "w": "over.",
+   "start": 8.179,
+   "end": 8.579,
+   "tone": "excited"
+  },
+  {
+   "w": "It",
+   "start": 8.679,
+   "end": 8.848,
+   "tone": "dramatic"
+  },
+  {
+   "w": "sinks",
+   "start": 8.848,
+   "end": 9.27,
+   "tone": "dramatic"
+  },
+  {
+   "w": "thirty",
+   "start": 9.27,
+   "end": 9.776,
+   "tone": "dramatic"
+  },
+  {
+   "w": "meters.",
+   "start": 9.776,
+   "end": 10.45,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Upside",
+   "start": 10.45,
+   "end": 10.957,
+   "tone": "dramatic"
+  },
+  {
+   "w": "down.",
+   "start": 10.957,
+   "end": 11.463,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Eleven",
+   "start": 11.613,
+   "end": 12.093,
+   "tone": "sad"
+  },
+  {
+   "w": "men",
+   "start": 12.093,
+   "end": 12.332,
+   "tone": "sad"
+  },
+  {
+   "w": "are",
+   "start": 12.332,
+   "end": 12.572,
+   "tone": "sad"
+  },
+  {
+   "w": "gone.",
+   "start": 12.572,
+   "end": 13.052,
+   "tone": "sad"
+  },
+  {
+   "w": "Harrison",
+   "start": 13.352,
+   "end": 13.894,
+   "tone": "serious"
+  },
+  {
+   "w": "finds",
+   "start": 13.894,
+   "end": 14.233,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 14.233,
+   "end": 14.369,
+   "tone": "serious"
+  },
+  {
+   "w": "pocket",
+   "start": 14.369,
+   "end": 14.775,
+   "tone": "serious"
+  },
+  {
+   "w": "of",
+   "start": 14.775,
+   "end": 14.911,
+   "tone": "serious"
+  },
+  {
+   "w": "air.",
+   "start": 14.911,
+   "end": 15.249,
+   "tone": "serious"
+  },
+  {
+   "w": "But",
+   "start": 15.349,
+   "end": 15.517,
+   "tone": "scared"
+  },
+  {
+   "w": "it's",
+   "start": 15.517,
+   "end": 15.685,
+   "tone": "scared"
+  },
+  {
+   "w": "running",
+   "start": 15.685,
+   "end": 16.077,
+   "tone": "scared"
+  },
+  {
+   "w": "out.",
+   "start": 16.077,
+   "end": 16.356,
+   "tone": "scared"
+  },
+  {
+   "w": "Sixty",
+   "start": 16.556,
+   "end": 16.965,
+   "tone": "whisper"
+  },
+  {
+   "w": "hours",
+   "start": 16.965,
+   "end": 17.374,
+   "tone": "whisper"
+  },
+  {
+   "w": "in",
+   "start": 17.374,
+   "end": 17.538,
+   "tone": "whisper"
+  },
+  {
+   "w": "total",
+   "start": 17.538,
+   "end": 17.947,
+   "tone": "whisper"
+  },
+  {
+   "w": "darkness.",
+   "start": 17.947,
+   "end": 18.765,
+   "tone": "whisper"
+  },
+  {
+   "w": "Then,",
+   "start": 19.015,
+   "end": 19.433,
+   "tone": "mysterious"
+  },
+  {
+   "w": "a",
+   "start": 19.433,
+   "end": 19.572,
+   "tone": "mysterious"
+  },
+  {
+   "w": "light.",
+   "start": 19.572,
+   "end": 20.06,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Divers,",
+   "start": 20.21,
+   "end": 20.767,
+   "tone": "serious"
+  },
+  {
+   "w": "sent",
+   "start": 20.767,
+   "end": 21.046,
+   "tone": "serious"
+  },
+  {
+   "w": "for",
+   "start": 21.046,
+   "end": 21.255,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 21.255,
+   "end": 21.464,
+   "tone": "serious"
+  },
+  {
+   "w": "bodies.",
+   "start": 21.464,
+   "end": 22.022,
+   "tone": "serious"
+  },
+  {
+   "w": "He",
+   "start": 22.122,
+   "end": 22.272,
+   "tone": "whisper"
+  },
+  {
+   "w": "reaches",
+   "start": 22.272,
+   "end": 22.797,
+   "tone": "whisper"
+  },
+  {
+   "w": "out.",
+   "start": 22.797,
+   "end": 23.172,
+   "tone": "whisper"
+  },
+  {
+   "w": "Would",
+   "start": 23.472,
+   "end": 23.77,
+   "tone": "dramatic"
+  },
+  {
+   "w": "you",
+   "start": 23.77,
+   "end": 23.948,
+   "tone": "dramatic"
+  },
+  {
+   "w": "have",
+   "start": 23.948,
+   "end": 24.186,
+   "tone": "dramatic"
+  },
+  {
+   "w": "held",
+   "start": 24.186,
+   "end": 24.424,
+   "tone": "dramatic"
+  },
+  {
+   "w": "on?",
+   "start": 24.424,
+   "end": 24.662,
+   "tone": "dramatic"
+  }
+ ]
+}

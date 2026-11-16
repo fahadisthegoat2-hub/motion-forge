@@ -1,4 +1,6 @@
 # Motion Forge state
+- Last video: "The Hand Grabbed Back" (Harrison Okene true story, 2013) — scenes/okene (direction.js → build.js → okene.html). Artifact: https://claude.ai/artifact/8TBqrzTJUkRpgJKjYhFuDb · star Jake, diver Marcus · good/maximum · 25.6s · VO Kokoro am_michael speed 1.05 (cloud: kokoro-js + HF model in /tmp/claude-0/kok). Review tools in scenes/okene/tools (round.sh, auto.js).
+- Sir picks the story himself: offer story options via AskUserQuestion before writing.
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
@@ -17,3 +19,4 @@
 - The review counter must count honest checks (use review_log.js --check / --status).
 - Brief replies, no summaries; time is money.
 
+- Sir wants to CHOOSE the story: always offer 3–4 crazy true story options in the question box before building.
