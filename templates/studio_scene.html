@@ -50,7 +50,7 @@ const CONFIG = {
   look: 'clean-cg',      // clean-cg · cinematic · warm-film · noir · neon-night · dreamy · horror · golden-hour (per-shot override: shot.look)
   targetDuration: null,  // ONLY when Sir named a length (seconds, e.g. 780 for 13 minutes) — without it every video is capped at 30 s (qa_check enforces both)
   effort: 'standard',    // Sir's effort answer: standard (10 checks × 2 rounds) · high (25 × 4) · maximum (35 × 6) — review_log.js enforces it
-  set: 'studio',         // studio · void · outdoor · medieval · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
+  set: 'studio',         // studio · void · outdoor · ocean (open sea, { type: 'ocean', swell, calm }) · medieval · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
   sound: { music: { mood: 'tension', drops: [] }, sfx: true, ambience: true },   // moods: tension epic mystery upbeat sad horror action lofi · track: { url } (own music) · voice: { url } (voiceover)
   captions: { style: 'pop' },   // pop · karaoke · one · box — add sync: take.words (voiceover word times) and every caption word lands on the spoken word
@@ -263,6 +263,31 @@ function plantGeo(type, n, w, h, spread = 0.7, droop = 0.35, seed = 1) {
   return BufferGeometryUtils.mergeGeometries(parts);
 }
 const ENV = {
+  ocean(g, set, spec) {   // open sea: Gerstner swell + foam + sun glint, calm patch near the origin so rafts/actors stay put (spec.calm radius, spec.swell 0..2)
+    set.skyCols = ['#5b7a96', '#c9d6de']; set.fog = ['#9fb2bf', 0.012]; set.sunCol = new THREE.Color('#fff0d0'); set.noFloor = true;
+    const SW = spec.swell ?? 1, CALM = spec.calm ?? 4.5;
+    const geo = new THREE.PlaneGeometry(260, 260, 320, 320); geo.rotateX(-Math.PI / 2);
+    const U = { uT: { value: 0 }, uSwell: { value: SW }, uCalm: { value: CALM }, uDeep: { value: new THREE.Color(spec.deep || '#0b2a3a') }, uShallow: { value: new THREE.Color(spec.shallow || '#1f6a78') } };
+    const mat = new THREE.MeshPhysicalMaterial({ color: '#174a5c', roughness: 0.12, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.2 });
+    const WAVES = 'const int NW = 6; vec4 W[6] = vec4[6](vec4(1.0,0.2,0.055,0.62), vec4(0.7,0.7,0.09,0.38), vec4(-0.4,1.0,0.14,0.22), vec4(0.95,-0.35,0.24,0.12), vec4(-0.8,0.5,0.38,0.07), vec4(0.3,-1.0,0.6,0.04));';
+    mat.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, U);
+      sh.vertexShader = 'uniform float uT, uSwell, uCalm; varying float vFoam; varying vec3 vWP;\n' + WAVES + '\n' + sh.vertexShader
+        .replace('#include <beginnormal_vertex>', `vec3 wp0 = (modelMatrix * vec4(position,1.)).xyz; float att = mix(0.06, 1.0, smoothstep(uCalm*0.6, uCalm*2.6, length(wp0.xz))) * uSwell;
+          vec3 disp = vec3(0.); vec3 tx = vec3(1.,0.,0.), tz = vec3(0.,0.,1.); float crest = 0.;
+          for (int i = 0; i < NW; i++) { vec2 d = normalize(W[i].xy); float k = W[i].z, A = W[i].w * att, w = sqrt(9.8 * k), ph = k * dot(d, wp0.xz) - w * uT, c = cos(ph), sn = sin(ph), Q = 0.55;
+            disp += vec3(Q * A * d.x * c, A * sn, Q * A * d.y * c); crest += A * k * sn;
+            tx += vec3(-Q * d.x * d.x * k * A * sn, d.x * k * A * c, -Q * d.x * d.y * k * A * sn); tz += vec3(-Q * d.x * d.y * k * A * sn, d.y * k * A * c, -Q * d.y * d.y * k * A * sn); }
+          vec3 objectNormal = normalize(cross(tz, tx)); vFoam = crest;`)
+        .replace('#include <begin_vertex>', 'vec3 transformed = position + disp; vWP = wp0 + disp;');
+      sh.fragmentShader = 'uniform vec3 uDeep, uShallow; uniform float uT; varying float vFoam; varying vec3 vWP;\n' + sh.fragmentShader
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          float hgt = clamp(vWP.y * 0.9 + 0.5, 0., 1.); diffuseColor.rgb = mix(uDeep, uShallow, hgt * 0.8);
+          float n = fract(sin(dot(floor(vWP.xz * 6.0 + uT * 0.4), vec2(12.9898,78.233))) * 43758.5453);
+          float foam = smoothstep(0.08, 0.2, vFoam) * (0.55 + 0.45 * n); diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.86, 0.9, 0.92), clamp(foam, 0., 0.85));`); };
+    const sea = new THREE.Mesh(geo, mat); sea.receiveShadow = true; sea.frustumCulled = false; g.add(sea);
+    set.tick = (t) => { U.uT.value = t + (spec.t0 ?? 7); };
+    const sun = new THREE.DirectionalLight('#fff0d0', 0.6); sun.position.set(-20, 30, -40); g.add(sun);
+  },
   jungle(g, set) {
     set.skyCols = ['#9fbf8a', '#d8e6c0']; set.fog = ['#7d9a6c', 0.055]; set.sunCol = new THREE.Color('#fff2c0');
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 120, 40, 40), new THREE.MeshStandardMaterial({ map: TEX.grass(), color: '#7a8f55', roughness: 1 }));
@@ -1944,6 +1969,7 @@ function rockGeo(seed) {
     v.multiplyScalar(k).multiply(new THREE.Vector3(1, 0.7 + hash(seed) * 0.4, 0.85)); p.setXYZ(i, v.x, v.y, v.z); }
   g.computeVertexNormals(); return g;
 }
+// model: tilt = keys([pitch, yaw, roll]) rocks/sinks a ship or raft
 // Each preset returns parts: { obj, update(lt, cam) } — everything driven by shot-local time.
 const FXP = {
   model(f, dur) {   // Model Forge / library 3D model: { type: 'model', id, pos, height, rotY, start, end, p: keys [x,y,z] offset, spin (rad/s), bob, pulse (bpm), scale: keys }
@@ -1952,13 +1978,13 @@ const FXP = {
       if (!r) { console.warn('model missing', f.id); return; }
       const m = r.scene, b = new THREE.Box3().setFromObject(m), h = (b.max.y - b.min.y) || 1, k = (f.height ?? h) / h;
       m.scale.setScalar(k); m.position.set(-(b.min.x + b.max.x) / 2 * k, -b.min.y * k, -(b.min.z + b.max.z) / 2 * k);
-      m.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (f.color && o.material) { o.material = o.material.clone(); o.material.color = new THREE.Color(f.color); } } });
+      m.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (f.color && o.material) { o.material = o.material.clone(); o.material.color = new THREE.Color(f.color); if (f.flat) o.material.map = null; } } });
       holder.add(m);
     }));
     return { parts: [{ obj: holder, update(lt) {
       holder.visible = lt >= t0 && lt <= t1; if (!holder.visible) return;
       const o = key(f.p, lt) || [0, 0, 0], sc = key(f.scale, lt) ?? 1, pl = f.pulse ? 1 + 0.06 * Math.exp(-((lt * f.pulse / 60) % 1) * 6) : 1;
-      holder.rotation.set(0, (f.rotY ?? 0) + (f.spin ?? 0) * lt, 0);
+      { const tk = key(f.tilt, lt) || [0, 0, 0]; holder.rotation.set(tk[0], (f.rotY ?? 0) + (f.spin ?? 0) * lt + tk[1], tk[2]); }
       if (f.attach) { const w = anchorWorld(f.attach); if (w) { holder.parent.updateMatrixWorld(true);
           const [cid, part = ''] = Array.isArray(f.attach) ? [] : String(f.attach).split('.'), ch = characters[cid], hb = ch && f.grip ? ch.bones[/left/i.test(part) ? 'lefthand' : 'righthand'] : null;
           if (ch) {   // a held thing turns with the body; grip: true = it also follows the hand itself (phone, torch, sword…), rot: [x, y, z] adjusts it
@@ -2416,11 +2442,14 @@ const BEDS = {
   hum(c, o, t0, t1, g) { const os = c.createOscillator(); os.frequency.value = 60; const os2 = c.createOscillator(); os2.frequency.value = 120; const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.03 * g, t0 + 0.4);
     v.gain.setValueAtTime(0.03 * g, Math.max(t0 + 0.4, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1); os.connect(v); os2.connect(v); v.connect(o); os.start(t0); os2.start(t0); os.stop(t1); os2.stop(t1); },
   fire(c, o, t0, t1, g, s) { BEDS.city(c, o, t0, t1, g * 0.5, s); const r = srng(s + 9); for (let x = t0; x < t1; x += 0.03 + r() * 0.12) SFX.tick(c, o, o, x, g * 0.35 * r(), s + x * 50, 600 + r() * 2400); },
+  sea(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700; const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0);
+    for (let x = t0; x < t1; x += 0.25) { const sw = 0.5 + 0.5 * Math.sin((x - t0) * 1.1 + s); v.gain.linearRampToValueAtTime((0.06 + 0.16 * sw) * g, x); lp.frequency.linearRampToValueAtTime(380 + 900 * sw, x); }
+    v.gain.linearRampToValueAtTime(0.0001, t1); n.connect(lp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
   wind(c, o, t0, t1, g, s) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, t1 - t0 + 0.1, s); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.8; const r = srng(s);
     for (let x = t0; x < t1; x += 0.8) bp.frequency.linearRampToValueAtTime(300 + r() * 500, x); const v = c.createGain(); v.gain.setValueAtTime(0.0001, t0); v.gain.linearRampToValueAtTime(0.18 * g, t0 + 0.6); v.gain.setValueAtTime(0.18 * g, Math.max(t0 + 0.6, t1 - 0.3)); v.gain.linearRampToValueAtTime(0.0001, t1);
     n.connect(bp).connect(v).connect(o); n.start(t0); n.stop(t1 + 0.05); },
 };
-const SET_BED = { medieval: 'wind', jungle: 'jungle', 'street-night': 'city', 'city-day': 'city', lab: 'hum', outdoor: 'wind', space: null, interior: 'hum', studio: null, void: null };
+const SET_BED = { ocean: 'sea', medieval: 'wind', jungle: 'jungle', 'street-night': 'city', 'city-day': 'city', lab: 'hum', outdoor: 'wind', space: null, interior: 'hum', studio: null, void: null };
 // original music by mood (generated, royalty-free)
 const MOODS = {
   tension: { bpm: 100, minor: true, kick: [0], hat: 16, bass: 8, pad: true, arp: false, snare: [] },
@@ -2536,9 +2565,9 @@ async function renderSoundtrack() {
     } catch (e) { console.warn('voice failed', e); }
   }
   const buf = await c.startRendering();
-  // master to short-form loudness (~-14 LUFS ≈ -15 dBFS RMS of active audio) with a soft limiter, ceiling -1 dBFS
+  // master to short-form loudness (~-14 LUFS ≈ -15 dBFS RMS of active audio) with a soft limiter, ceiling -2 dBFS (headroom for AAC true peak ≤ -1 dBTP)
   let sum = 0, cnt = 0; for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i += 4) { const x = d[i]; if (Math.abs(x) > 1e-4) { sum += x * x; cnt++; } } }
-  const rms = Math.sqrt(sum / Math.max(1, cnt)), gainK = rms > 0 ? Math.min(12, Math.pow(10, (-15 - 20 * Math.log10(rms)) / 20)) : 1, ceil = 0.89;
+  const rms = Math.sqrt(sum / Math.max(1, cnt)), gainK = rms > 0 ? Math.min(12, Math.pow(10, (-15 - 20 * Math.log10(rms)) / 20)) : 1, ceil = 0.7;
   for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) { const x = d[i] * gainK; d[i] = Math.abs(x) < 0.6 ? x : Math.sign(x) * (0.6 + (ceil - 0.6) * Math.tanh((Math.abs(x) - 0.6) / (ceil - 0.6))); } }
   return (SND.buffer = buf);
 }
@@ -2771,7 +2800,7 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         const lp = ch.root.worldToLocal(ph.clone()), sp = ch.bones.spine1 ? ch.root.worldToLocal(ch.bones.spine1.getWorldPosition(V())) : null, hp = ch.bones.hips ? ch.root.worldToLocal(ch.bones.hips.getWorldPosition(V())) : null, nk = ch.bones.neck ? ch.root.worldToLocal(ch.bones.neck.getWorldPosition(V())) : null;
         const inside = !!(sp && hp && nk && lp.y > hp.y + 0.06 && lp.y < nk.y - 0.04 && Math.abs(lp.x - sp.x) < 0.11 && lp.z - sp.z < 0.05 && lp.z - sp.z > -0.08);
         return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
-      out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+      out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length && !cast.swimming ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
     const overlaps = [], vis = Object.values(characters).filter((c) => c.root.visible && c.bones.hips);   // bodies melting into each other: two torsos / a head or hand inside someone else
     for (let i = 0; i < vis.length; i++) for (let j = 0; j < vis.length; j++) { if (i === j) continue; const A = vis[i], B = vis[j], hb = B.bones.hips.getWorldPosition(V()), nb = (B.bones.neck || B.bones.hips).getWorldPosition(V());

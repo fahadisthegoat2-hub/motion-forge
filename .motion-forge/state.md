@@ -1,4 +1,7 @@
 # Motion Forge state
+- Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
+- New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
+- Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
 - Last video: "You vs the Middle Ages" — scenes/middle-ages (direction.js → build.js → middle-ages.html). Artifact: https://claude.ai/artifact/SRtSFqeZwoowBiShFac8jP
   Quality good · effort maximum · 34s · star Jake. Voiceover: Kokoro am_michael generated in-cloud (scenes/middle-ages/vo.wav + vo.json). Artifact declares downloads capability (MP4 save button).
 - New: `medieval` set (assets/sets/medieval-village.glb, Quaternius CC0, approved by Sir), prop medieval_stake, scripts/kit_compose.js.

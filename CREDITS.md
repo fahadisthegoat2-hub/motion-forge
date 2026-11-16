@@ -26,3 +26,4 @@
 
 ## Rendering
 - mp4-muxer (Vanilagy, MIT) — vendor/mp4-muxer.mjs, writes the MP4 for on-device renders.
+- Ship, raft, barrel, crate, rowboat, palm, beach models: [Kenney Pirate Kit](https://kenney.nl) — CC0.
