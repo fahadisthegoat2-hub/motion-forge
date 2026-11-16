@@ -1480,8 +1480,8 @@ const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
   crouch: 'crouchidleloop' };
 // plain name → library key. A built-in alias wins over a name that only exists because "_Loop"/"_Fwd" was stripped (jump ≠ Jump_Loop); your own clip files always win.
 const CLIP_TUNE = { walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
-  carry: { spine: [0.1, 0, 0], spine1: [0.1, 0, 0], spine2: [0.06, 0, 0], neck: [0.1, 0, 0], head: [0.18, 0, 0] },      // the library clip leans far back and looks at the sky
-  kneel: { spine: [-0.2, 0, 0], spine1: [-0.2, 0, 0], spine2: [-0.12, 0, 0], neck: [-0.22, 0, 0], head: [-0.28, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
+  carry: { spine: [0.46, 0, 0], spine1: [0.1, 0, 0], spine2: [-0.14, 0, 0], neck: [-0.04, 0, 0], head: [0.2, 0, 0] },      // the library clip leans far back and looks at the sky
+  kneel: { spine: [-0.14, 0, 0], spine1: [-0.14, 0, 0], spine2: [-0.78, 0, 0], neck: [0.22, 0, 0], head: [-0.12, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
 function clipKey(name) { const k = normName(name), a = CLIP_ALIAS[k]; return a && clipLib[a] && (!clipLib[k] || clipLib[k].derived) ? a : k; }
 function clipFor(ch, name) {
   let k = clipKey(name); ch.actions[k] ??= (() => {
