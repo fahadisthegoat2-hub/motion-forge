@@ -1,0 +1,480 @@
+{
+ "voice": "am_michael",
+ "duration": 28.972,
+ "words": [
+  {
+   "w": "This",
+   "start": 0.05,
+   "end": 0.299,
+   "tone": "excited"
+  },
+  {
+   "w": "man",
+   "start": 0.299,
+   "end": 0.486,
+   "tone": "excited"
+  },
+  {
+   "w": "just",
+   "start": 0.486,
+   "end": 0.735,
+   "tone": "excited"
+  },
+  {
+   "w": "met",
+   "start": 0.735,
+   "end": 0.922,
+   "tone": "excited"
+  },
+  {
+   "w": "himself.",
+   "start": 0.922,
+   "end": 1.483,
+   "tone": "excited"
+  },
+  {
+   "w": "And",
+   "start": 1.603,
+   "end": 1.796,
+   "tone": "dramatic"
+  },
+  {
+   "w": "the",
+   "start": 1.796,
+   "end": 1.99,
+   "tone": "dramatic"
+  },
+  {
+   "w": "other",
+   "start": 1.99,
+   "end": 2.312,
+   "tone": "dramatic"
+  },
+  {
+   "w": "one",
+   "start": 2.312,
+   "end": 2.506,
+   "tone": "dramatic"
+  },
+  {
+   "w": "was",
+   "start": 2.506,
+   "end": 2.699,
+   "tone": "dramatic"
+  },
+  {
+   "w": "terrified.",
+   "start": 2.699,
+   "end": 3.409,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Three",
+   "start": 3.709,
+   "end": 4.018,
+   "tone": "serious"
+  },
+  {
+   "w": "nights",
+   "start": 4.018,
+   "end": 4.39,
+   "tone": "serious"
+  },
+  {
+   "w": "ago,",
+   "start": 4.39,
+   "end": 4.7,
+   "tone": "serious"
+  },
+  {
+   "w": "lightning",
+   "start": 4.7,
+   "end": 5.258,
+   "tone": "serious"
+  },
+  {
+   "w": "hit",
+   "start": 5.258,
+   "end": 5.444,
+   "tone": "serious"
+  },
+  {
+   "w": "his",
+   "start": 5.444,
+   "end": 5.63,
+   "tone": "serious"
+  },
+  {
+   "w": "street.",
+   "start": 5.63,
+   "end": 6.126,
+   "tone": "serious"
+  },
+  {
+   "w": "Since",
+   "start": 6.276,
+   "end": 6.737,
+   "tone": "mysterious"
+  },
+  {
+   "w": "then,",
+   "start": 6.737,
+   "end": 7.29,
+   "tone": "mysterious"
+  },
+  {
+   "w": "he",
+   "start": 7.29,
+   "end": 7.475,
+   "tone": "mysterious"
+  },
+  {
+   "w": "wakes",
+   "start": 7.475,
+   "end": 7.936,
+   "tone": "mysterious"
+  },
+  {
+   "w": "up",
+   "start": 7.936,
+   "end": 8.121,
+   "tone": "mysterious"
+  },
+  {
+   "w": "at",
+   "start": 8.121,
+   "end": 8.305,
+   "tone": "mysterious"
+  },
+  {
+   "w": "3:33.",
+   "start": 8.305,
+   "end": 8.766,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Same",
+   "start": 8.886,
+   "end": 9.18,
+   "tone": "mysterious"
+  },
+  {
+   "w": "street.",
+   "start": 9.18,
+   "end": 9.767,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Same",
+   "start": 9.767,
+   "end": 10.06,
+   "tone": "mysterious"
+  },
+  {
+   "w": "rain.",
+   "start": 10.06,
+   "end": 10.501,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Then",
+   "start": 10.751,
+   "end": 10.964,
+   "tone": "scared"
+  },
+  {
+   "w": "a",
+   "start": 10.964,
+   "end": 11.071,
+   "tone": "scared"
+  },
+  {
+   "w": "man",
+   "start": 11.071,
+   "end": 11.23,
+   "tone": "scared"
+  },
+  {
+   "w": "starts",
+   "start": 11.23,
+   "end": 11.55,
+   "tone": "scared"
+  },
+  {
+   "w": "following",
+   "start": 11.55,
+   "end": 12.03,
+   "tone": "scared"
+  },
+  {
+   "w": "him.",
+   "start": 12.03,
+   "end": 12.296,
+   "tone": "scared"
+  },
+  {
+   "w": "Same",
+   "start": 12.416,
+   "end": 12.725,
+   "tone": "whisper"
+  },
+  {
+   "w": "jacket.",
+   "start": 12.725,
+   "end": 13.341,
+   "tone": "whisper"
+  },
+  {
+   "w": "Same",
+   "start": 13.341,
+   "end": 13.649,
+   "tone": "whisper"
+  },
+  {
+   "w": "face.",
+   "start": 13.649,
+   "end": 14.111,
+   "tone": "whisper"
+  },
+  {
+   "w": "But",
+   "start": 14.412,
+   "end": 14.597,
+   "tone": "dramatic"
+  },
+  {
+   "w": "that's",
+   "start": 14.597,
+   "end": 14.907,
+   "tone": "dramatic"
+  },
+  {
+   "w": "not",
+   "start": 14.907,
+   "end": 15.092,
+   "tone": "dramatic"
+  },
+  {
+   "w": "the",
+   "start": 15.092,
+   "end": 15.278,
+   "tone": "dramatic"
+  },
+  {
+   "w": "worst",
+   "start": 15.278,
+   "end": 15.588,
+   "tone": "dramatic"
+  },
+  {
+   "w": "part.",
+   "start": 15.588,
+   "end": 15.959,
+   "tone": "dramatic"
+  },
+  {
+   "w": "His",
+   "start": 16.109,
+   "end": 16.282,
+   "tone": "scared"
+  },
+  {
+   "w": "double",
+   "start": 16.282,
+   "end": 16.627,
+   "tone": "scared"
+  },
+  {
+   "w": "is",
+   "start": 16.627,
+   "end": 16.742,
+   "tone": "scared"
+  },
+  {
+   "w": "screaming",
+   "start": 16.742,
+   "end": 17.26,
+   "tone": "scared"
+  },
+  {
+   "w": "one",
+   "start": 17.26,
+   "end": 17.432,
+   "tone": "scared"
+  },
+  {
+   "w": "word.",
+   "start": 17.432,
+   "end": 17.777,
+   "tone": "scared"
+  },
+  {
+   "w": "Run!",
+   "start": 17.977,
+   "end": 18.454,
+   "tone": "shout"
+  },
+  {
+   "w": "Lightning",
+   "start": 18.804,
+   "end": 19.274,
+   "tone": "excited"
+  },
+  {
+   "w": "hits",
+   "start": 19.274,
+   "end": 19.483,
+   "tone": "excited"
+  },
+  {
+   "w": "right",
+   "start": 19.483,
+   "end": 19.744,
+   "tone": "excited"
+  },
+  {
+   "w": "where",
+   "start": 19.744,
+   "end": 20.005,
+   "tone": "excited"
+  },
+  {
+   "w": "he",
+   "start": 20.005,
+   "end": 20.11,
+   "tone": "excited"
+  },
+  {
+   "w": "stood.",
+   "start": 20.11,
+   "end": 20.475,
+   "tone": "excited"
+  },
+  {
+   "w": "The",
+   "start": 20.775,
+   "end": 20.974,
+   "tone": "serious"
+  },
+  {
+   "w": "double",
+   "start": 20.974,
+   "end": 21.371,
+   "tone": "serious"
+  },
+  {
+   "w": "is",
+   "start": 21.371,
+   "end": 21.503,
+   "tone": "serious"
+  },
+  {
+   "w": "gone.",
+   "start": 21.503,
+   "end": 21.9,
+   "tone": "serious"
+  },
+  {
+   "w": "Then",
+   "start": 22.05,
+   "end": 22.359,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Jake",
+   "start": 22.359,
+   "end": 22.668,
+   "tone": "dramatic"
+  },
+  {
+   "w": "sees",
+   "start": 22.668,
+   "end": 22.977,
+   "tone": "dramatic"
+  },
+  {
+   "w": "his",
+   "start": 22.977,
+   "end": 23.208,
+   "tone": "dramatic"
+  },
+  {
+   "w": "own",
+   "start": 23.208,
+   "end": 23.44,
+   "tone": "dramatic"
+  },
+  {
+   "w": "jacket.",
+   "start": 23.44,
+   "end": 24.058,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Burnt.",
+   "start": 24.058,
+   "end": 24.599,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Tomorrow",
+   "start": 24.899,
+   "end": 25.578,
+   "tone": "whisper"
+  },
+  {
+   "w": "at",
+   "start": 25.578,
+   "end": 25.747,
+   "tone": "whisper"
+  },
+  {
+   "w": "3:33,",
+   "start": 25.747,
+   "end": 26.172,
+   "tone": "whisper"
+  },
+  {
+   "w": "he's",
+   "start": 26.172,
+   "end": 26.426,
+   "tone": "whisper"
+  },
+  {
+   "w": "the",
+   "start": 26.426,
+   "end": 26.681,
+   "tone": "whisper"
+  },
+  {
+   "w": "one",
+   "start": 26.681,
+   "end": 26.936,
+   "tone": "whisper"
+  },
+  {
+   "w": "screaming.",
+   "start": 26.936,
+   "end": 27.869,
+   "tone": "whisper"
+  },
+  {
+   "w": "Would",
+   "start": 28.069,
+   "end": 28.378,
+   "tone": "serious"
+  },
+  {
+   "w": "you",
+   "start": 28.378,
+   "end": 28.563,
+   "tone": "serious"
+  },
+  {
+   "w": "run?",
+   "start": 28.563,
+   "end": 28.872,
+   "tone": "serious"
+  }
+ ]
+}
