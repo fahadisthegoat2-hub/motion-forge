@@ -97,10 +97,10 @@ S('burst', { cut: 'flash', set: 'city-day', look: 'cinematic', afterimage: 0.5,
 // 9 · "A wave twenty-five feet high, moving thirty-five miles an hour." — the wave charges at camera
 const dW = dur('wave');
 S('wave', { cut: 'whip', set: 'city-day', look: 'cinematic', punch: [wt('twenty-five', T.wave) - T.wave],
-  camera: { pos: [[0, [1.4, 1.0, 11]], [dW, [1.4, 1.2, 9.5], 'inOutSine']], look: [[0, [0, 4, -6]], [dW, [0, 5, -2], 'inOutSine']], fov: 52, handheld: 0.9 },
-  cast: { hero: { pos: [[0, [0, 0, -3]], [dW, [0, 0, -3 + SPRINT * dW], 'linear']], rotY: [[0, 0]], clips: run(dW), bones: lookBack(0.4, 2.2), face: { scream: [[0, 0.8]], scared: [[0, 1]] }, acting: 'none' },
+  camera: { pos: [[0, [1.4, 1.0, 2]], [dW, [1.4, 1.2, 2 + SPRINT * dW], 'linear']], look: [[0, [0, 2.8, -9]], [dW, [0, 3.0, -9 + SPRINT * dW], 'linear']], fov: 64, handheld: 0.9 },
+  cast: { hero: { pos: [[0, [0, 0, -5]], [dW, [0, 0, -5 + SPRINT * dW], 'linear']], rotY: [[0, 0]], clips: run(dW), bones: lookBack(0.4, 2.2), face: { scream: [[0, 0.8]], scared: [[0, 1]] }, acting: 'none' },
     p1: { pos: [[0, [3.6, 0, -1]], [dW, [3.6, 0, -1 + 5 * dW], 'linear']], rotY: [[0, 0]], clips: run(dW), face: { scared: [[0, 1]] } } },
-  fx: [FLOOD({ front: [[0, -12], [dW, -12 + 6.2 * dW, 'linear']], crest: [[0, 7.6]] }), { type: 'dust', count: 260 }] });
+  fx: [FLOOD({ front: [[0, -13], [dW, -13 + 5.6 * dW, 'linear']], crest: [[0, 7.6]] }), { type: 'dust', count: 260 }] });
 // 10 · "It flattens buildings. It bends steel train tracks." — side-on as it sweeps through
 const dF = dur('flatten'), bends = wt('bends', T.flatten) - T.flatten;
 S('flatten', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.05, bends],
@@ -115,7 +115,7 @@ const dO = dur('outrun');
 S('outrun', { cut: 'whip', set: 'city-day', look: 'cinematic', flash: [dO - 0.12],
   camera: { pos: [[0, [2.6, 1.2, 4.2]], [dO, [2.6, 1.3, 4.2 + SPRINT * dO * 0.9], 'linear']], look: [[0, [0, 2.4, -2.5]], [dO, [0, 2.4, -2.5 + SPRINT * dO], 'linear']], fov: 64, handheld: 1.2 },
   cast: { hero: { pos: [[0, [0, 0, 0]], [dO, [0, 0, SPRINT * dO], 'linear']], rotY: [[0, 0]], clips: run(dO), bones: lookBack(0.1, dO), face: { scream: [[0, 1]] }, acting: 'none' } },
-  fx: [FLOOD({ front: [[0, -3.2], [dO, SPRINT * dO + 0.8, 'inCubic']], crest: [[0, 7.6]] })],
+  fx: [FLOOD({ front: [[0, -3.2], [dO, SPRINT * dO - 0.25, 'inCubic']], crest: [[0, 7.6]] })],
   sfx: [{ t: dO - 0.12, type: 'splash', gain: 1 }, { t: dO - 0.1, type: 'subdrop', gain: 0.8 }] });
 // 12 · "And as it cools, it turns to glue. You're stuck." — waist-deep, can't move
 const dG = dur('glue');
@@ -162,7 +162,7 @@ const titles = [
   { t: 0.05, t1: at('molasses'), style: 'slam', text: 'NOT WATER', pos: [0.5, 0.09], size: 0.1, accent: '#ffb020' },
   { t: at('molasses', 0.25), t1: at('boston'), style: 'stamp', text: 'MOLASSES', pos: [0.5, 0.12], size: 0.11, accent: '#c8742a' },
   { t: at('boston', 0.15), t1: at('gallons', -0.1), style: 'place', text: 'BOSTON, 1919', sub: 'JANUARY 15', pos: [0.08, 0.08] },
-  { t: at('boston', 2.3), t1: at('gallons', -0.05), style: 'arrow', dir: 'up', text: '50-FT TANK', pos: [0.8, 0.24] },
+  { t: at('boston', 2.3), t1: at('gallons', -0.05), style: 'arrow', dir: 'up', text: '50-FT TANK', pos: [0.74, 0.08], size: 0.045 },
   { t: at('gallons', 0.1), t1: at('leak', -0.05), style: 'counter', from: 0, to: 2300000, suffix: '', sub: 'GALLONS OF MOLASSES', pos: [0.5, 0.12], size: 0.08, dur: 1.4 },
   { t: at('leak', 0.6), t1: at('paint', -0.05), style: 'callout', at: [-0.9, 1.2, -1.2], text: 'LEAKING', sub: 'FOR MONTHS', icon: 'drop', side: -1 },
   { t: at('paint', 0.05), t1: at('rivets'), style: 'stamp', text: 'FIX: PAINT IT BROWN', pos: [0.5, 0.11], size: 0.07, accent: '#c8742a' },

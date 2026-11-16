@@ -2083,8 +2083,14 @@ const FXP = {
       if (y > 0) y += rip(x, z, lt) * Math.min(1, y * 3);
       return y;
     };
-    const parts = [{ obj: mesh, update(lt) {
-      const lev = key(f.level, lt) ?? 0, zf = f.front ? key(f.front, lt) : undefined, H = f.crest ? key(f.crest, lt) : 0;
+    const parts = [{ obj: mesh, update(lt, cam) {
+      const lev = key(f.level, lt) ?? 0, H = f.crest ? key(f.crest, lt) : 0;
+      let zf = f.front ? key(f.front, lt) : undefined;
+      // lens-safe: the wave face never sweeps over the camera (a full-frame wall of dark syrup reads as black frames)
+      if (zf !== undefined && cam && f.lensSafe !== false) {
+        const cz = cam.position.z - (f.pos?.[2] ?? 0), cy = cam.position.y;
+        if (cy < H + 0.5 && Math.abs(cam.position.x - (f.pos?.[0] ?? 0)) < (f.size?.[0] ?? 12) / 2) zf = Math.min(zf, cz - 1.2);
+      }
       for (let i = 0; i < P.count; i++) P.array[i * 3 + 1] = height(base[i * 3], base[i * 3 + 2], lt, lev, zf, H);
       P.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingSphere();
     } }];
