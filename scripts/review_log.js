@@ -20,8 +20,9 @@ const FIRST_FAILS = { standard: 3, high: 6, maximum: 10 }[effort];   // a first 
 const hash = (b) => crypto.createHash('sha1').update(b).digest('hex').slice(0, 16), fhash = (p) => hash(fs.readFileSync(p));
 const mt = (p) => fs.existsSync(p) ? fs.statSync(p).mtimeMs : 0;
 const load = () => JSON.parse(fs.readFileSync(file, 'utf8')), save = (r) => fs.writeFileSync(file, JSON.stringify(r, null, 1));
-const changed = (a, b) => {   // lines added + removed between two scene versions
-  const A = a.split('\n'), B = b.split('\n'), m = new Map(); A.forEach((l) => m.set(l, (m.get(l) || 0) + 1)); let add = 0;
+const changed = (a, b) => {   // lines added + removed between two scene versions; one-line JSON (SHOTS/TITLES built by build.js) is split per value so each edited value counts
+  const sp = (x) => x.replace(/,(?=["\[{\d-])/g, ',\n').split('\n');
+  const A = sp(a), B = sp(b), m = new Map(); A.forEach((l) => m.set(l, (m.get(l) || 0) + 1)); let add = 0;
   for (const l of B) { const n = m.get(l) || 0; if (n) m.set(l, n - 1); else add++; } return add + [...m.values()].reduce((x, y) => x + y, 0);
 };
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
