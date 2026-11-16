@@ -50,6 +50,15 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
   }
   const P = await page.evaluate(() => __mfDebug.pacing());
   for (const m of P.morphs || []) fails.push(`MORPH: ${m} blends two different postures into each other — change posture on a CUT (new shot) or use a real transition clip; never a pose blend`);
+  // TASTE gates (skills/taste): rhythm that breathes, graphics with restraint, nobody staring down the lens, words inside the safe zone
+  if (P.durs.length >= 6) { const m = P.durs.reduce((x, y) => x + y, 0) / P.durs.length, sd = Math.sqrt(P.durs.reduce((x, y) => x + (y - m) ** 2, 0) / P.durs.length);
+    if (sd / m < 0.12) fails.push(`RHYTHM: every shot is about ${m.toFixed(1)}s (a metronome) — vary the lengths on purpose: quick-quick-HOLD, a longer beat before the big moment`); }
+  const STRUCT = /^(timeline|tag|place|chapter|ticker|callout|pulse|arrow|ring|box|inset|scan|speedlines|bubble)$/, G = (P.titleSpans || []).filter((T) => !T.at && !STRUCT.test(T.style)).sort((a, b) => a.t - b.t);
+  for (let i = 1; i < G.length; i++) if (Math.min(G[i].t1, G[i - 1].t1) - G[i].t > 0.3) fails.push(`GRAPHICS: "${G[i - 1].style}" (${G[i - 1].t}s) and "${G[i].style}" (${G[i].t}s) are on screen together — one graphic at a time; end the first before the next starts`);
+  { let cov = 0, end = 0; for (const T of G) { cov += Math.max(0, T.t1 - Math.max(T.t, end)); end = Math.max(end, T.t1); } if (P.total > 8 && cov / P.total > 0.7) fails.push(`GRAPHICS: titles cover ${Math.round(cov / P.total * 100)}% of the video — restraint: let the picture carry beats too (≤ 70%)`); }
+  { const st = (P.stare || []).filter(Boolean).length; if (P.durs.length >= 4 && st / P.durs.length > 0.5) fails.push(`ACTING: characters stare at the camera in ${st}/${P.durs.length} shots — they live the story: look at what they are doing/afraid of; camera looks only for the hook or a deliberate beat`); }
+  if (P.portrait) { for (const T of P.titleSpans || []) if (T.pos && !T.at && (T.pos[1] > 0.78 || (T.pos[0] > 0.84 && T.pos[1] > 0.5))) fails.push(`SAFE ZONE: "${T.style}" title at [${T.pos}] (${T.t}s) sits under the YouTube buttons/caption area — keep words above 78% and left of 84% in the lower half`);
+    if (P.capY != null && (P.capY > 0.78 || P.capY < 0.12)) fails.push(`SAFE ZONE: captions at y=${P.capY} — keep them between 0.12 and 0.78 (0.70–0.76 is best)`); }
   const fam = (P.styles || []).filter((x) => !/^(callout|pulse|arrow|ring|box|inset|timeline|tag|place|chapter|cta)$/.test(x));
   if (fam.length > 5) fails.push(`GRAPHICS: ${fam.length} different title styles (${fam.join(', ')}) — one design system per video: keep a family of ≤ 5 (skills/motion-graphics)`);
   if ((P.accents || []).length > 3) fails.push(`GRAPHICS: ${P.accents.length} accent colours (${P.accents.join(', ')}) — one accent (CONFIG.accent) + at most two meaning colours (danger/success)`);

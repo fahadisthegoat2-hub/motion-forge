@@ -158,3 +158,5 @@ Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 
 - `CONFIG.accent` — the one accent colour of the video (captions highlight + every graphic). Captions `pop`: the phrase sits centred and dim, each word lights up as spoken.
 - Clips with `loop: false` ease into their last pose (settle).
+- Reach/IK hands ease out fast and settle; with `hand: 'both'` the left hand trails by `lag` (0.07 s) so the pair never moves mirrored.
+- qa_check taste gates: RHYTHM (metronome shot lengths), GRAPHICS (two at once / > 70% coverage / > 5 styles), ACTING (camera stare > 50% of shots), SAFE ZONE (words under the YouTube UI), MORPH, OVERLAP.

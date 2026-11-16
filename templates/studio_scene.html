@@ -1715,10 +1715,12 @@ function solveArm(ch, side, T, w, poleDir) {
 function applyReach(ch, cast, t) {
   for (const R of cast?.reach || []) {
     const s0 = R.start ?? 0, s1 = R.end ?? 1e9, bl = R.blend ?? 0.25; if (t < s0 - 1e-6 || t > s1 + bl) continue;
-    const w = Math.min(smooth((t - s0) / bl), 1 - smooth((t - s1) / bl)); if (w <= 0.001) continue;
+    // a human hand leaves fast and settles slowly (ease-out attack), and two hands never move as a mirrored pair: the left one trails by ~2 frames
+    const wAt = (lag) => Math.min(1 - (1 - clamp((t - s0 - lag) / bl)) ** 3, 1 - smooth((t - s1 - lag * 0.5) / bl)); if (wAt(0) <= 0.001) continue;
     const T = reachTarget(ch, R.to, R.offset); if (!T) continue;
     for (const side of R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']) {
       const Ts = R.hand === 'both' ? T.clone().add(new THREE.Vector3(side === 'left' ? 0.09 : -0.09, 0, 0).applyQuaternion(ch.root.quaternion)) : T;
+      const w = wAt(R.hand === 'both' && side === 'left' ? (R.lag ?? 0.07) : 0); if (w <= 0.001) continue;
       solveArm(ch, side, Ts, w);
     }
   }
@@ -2744,6 +2746,8 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
     const S0 = SHOTS[0] || {}, cam0 = S0.camera || {}, caps = typeof CAPTIONS !== "undefined" ? CAPTIONS : [];
     return { narratorLips: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).filter(([, c]) => c?.talk?.length && c.dialogue !== true).map(([id]) => (sh.name || 'shot ' + (i + 1)) + ':' + id)), payoffFirst: S0.role === "payoff", staticOpen: (!cam0.move || cam0.move === "static") && !(Array.isArray(cam0.pos) && cam0.pos.length > 1), question: caps.slice(-2).some((C) => /\?\s*$/.test(C.text || "")),
+      stare: SHOTS.map((sh) => { const L = Object.values(sh.cast || {}).map((c) => c.look).filter(Boolean); return L.length > 0 && L.every((k) => (Array.isArray(k) && Array.isArray(k[0]) ? k.map((x) => x[1]) : [k]).every((v) => v === 'camera')); }),
+      titleSpans: (typeof TITLES !== 'undefined' ? TITLES : []).map((T) => ({ t: T.t, t1: T.t1 ?? T.t + 2, style: T.style || 'slam', pos: T.pos || null, at: !!T.at })), capY: CAP.y ?? CONFIG.captionY ?? null,
       styles: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => T.style || 'slam'))], accents: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => String(T.accent || ACCENT).toLowerCase()))],
       morphs: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).flatMap(([id, c]) => (c.clips || []).slice(1).map((e, k) => { const prev = c.clips[k], low = (n) => /sit|kneel|crouch|lie|lay|sleep|fall|crawl|dead|knock/i.test(n) && !/stand|getup|situp|sitdown|kneeldown/i.test(n), tr = (n) => /standup|getup|situp|sitdown|kneeldown|to/i.test(n);
         return low(prev.clip) !== low(e.clip) && !tr(prev.clip) && !tr(e.clip) && (e.fade ?? 0.3) > 0.15 && e.start < (prev.end ?? 1e9) + 0.05 ? `shot ${i + 1} "${sh.name || ''}" ${id}: ${prev.clip} → ${e.clip}` : null; }).filter(Boolean))),
