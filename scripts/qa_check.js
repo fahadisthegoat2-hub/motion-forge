@@ -49,6 +49,10 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     }
   }
   const P = await page.evaluate(() => __mfDebug.pacing());
+  for (const m of P.morphs || []) fails.push(`MORPH: ${m} blends two different postures into each other — change posture on a CUT (new shot) or use a real transition clip; never a pose blend`);
+  const fam = (P.styles || []).filter((x) => !/^(callout|pulse|arrow|ring|box|inset|timeline|tag|place|chapter|cta)$/.test(x));
+  if (fam.length > 5) fails.push(`GRAPHICS: ${fam.length} different title styles (${fam.join(', ')}) — one design system per video: keep a family of ≤ 5 (skills/motion-graphics)`);
+  if ((P.accents || []).length > 3) fails.push(`GRAPHICS: ${P.accents.length} accent colours (${P.accents.join(', ')}) — one accent (CONFIG.accent) + at most two meaning colours (danger/success)`);
   for (const n of P.narratorLips || []) fails.push(`NARRATOR: ${n} lip-syncs to the voiceover — the narrator is never on screen. Remove talk (characters act the story out); only a real in-scene line may use dialogue: true`);
   if (P.portrait) {   // SHORTS retention rules
     const first = Math.min(P.firstCaption ?? 99, P.firstTitle ?? 99);

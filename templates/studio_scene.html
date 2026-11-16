@@ -984,7 +984,7 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
           g.fillStyle = '#0b0d14'; g.fillText(m.text, 0, size * 0.02); g.restore(); }
         g.restore(); break; }
       case 'bars': {   // comparison bars: { items: [{ label, value, color?, suffix? }], text, max }
-        const items = T.items || [], BW = (T.box?.[0] ?? 0.84) * w, rowH = size * 0.95, BH = rowH * items.length + size * (T.text ? 1.1 : 0.5), x0 = X - BW / 2, y0 = Y - BH / 2;
+        const items = (T.items || []).map((it, i) => it && typeof it === 'object' ? { label: '', value: 0, ...it } : { label: T.labels?.[i] ?? String(it), value: +it || 0 }), BW = (T.box?.[0] ?? 0.84) * w, rowH = size * 0.95, BH = rowH * items.length + size * (T.text ? 1.1 : 0.5), x0 = X - BW / 2, y0 = Y - BH / 2;
         const e0 = EASE.outCubic(clamp(lt / 0.25)), mx = T.max ?? Math.max(...items.map((it) => it.value), 1); g.globalAlpha = out * e0; glassPanel(g, x0, y0, BW, BH, acc);
         g.textAlign = 'left'; if (T.text) { g.font = `900 ${size * 0.45}px ${FONT}`; g.fillStyle = col; g.fillText(T.text, x0 + size * 0.35, y0 + size * 0.55); }
         items.forEach((it, i) => { const e = EASE.outCubic(clamp((lt - 0.2 - i * 0.18) / 0.7)), yy = y0 + size * (T.text ? 1.05 : 0.3) + i * rowH, lw = BW * 0.3, bx = x0 + size * 0.35 + lw, bw = (BW - lw - size * 1.6) * it.value / mx * e;
@@ -2744,6 +2744,9 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
     const S0 = SHOTS[0] || {}, cam0 = S0.camera || {}, caps = typeof CAPTIONS !== "undefined" ? CAPTIONS : [];
     return { narratorLips: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).filter(([, c]) => c?.talk?.length && c.dialogue !== true).map(([id]) => (sh.name || 'shot ' + (i + 1)) + ':' + id)), payoffFirst: S0.role === "payoff", staticOpen: (!cam0.move || cam0.move === "static") && !(Array.isArray(cam0.pos) && cam0.pos.length > 1), question: caps.slice(-2).some((C) => /\?\s*$/.test(C.text || "")),
+      styles: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => T.style || 'slam'))], accents: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => String(T.accent || ACCENT).toLowerCase()))],
+      morphs: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).flatMap(([id, c]) => (c.clips || []).slice(1).map((e, k) => { const prev = c.clips[k], low = (n) => /sit|kneel|crouch|lie|lay|sleep|fall|crawl|dead|knock/i.test(n) && !/stand|getup|situp|sitdown|kneeldown/i.test(n), tr = (n) => /standup|getup|situp|sitdown|kneeldown|to/i.test(n);
+        return low(prev.clip) !== low(e.clip) && !tr(prev.clip) && !tr(e.clip) && (e.fade ?? 0.3) > 0.15 && e.start < (prev.end ?? 1e9) + 0.05 ? `shot ${i + 1} "${sh.name || ''}" ${id}: ${prev.clip} → ${e.clip}` : null; }).filter(Boolean))),
       target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
       voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
   },
@@ -2854,7 +2857,7 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
   let failed;
   const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
-  enc.configure(encoderPick.cfg);
+  OPEN.push(enc); enc.configure(encoderPick.cfg);
   const total = Math.round((end - start) * p.fps), t0 = performance.now();
   for (let f = 0; f < total; f++) {
     if (failed) throw failed;
@@ -2866,14 +2869,14 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
       const pct = (f + 1) / total, eta = (performance.now() - t0) / pct * (1 - pct) / 1000;
       $('mf-bar').firstElementChild.style.width = (pct * 100).toFixed(1) + '%';
       msg(`${label} · frame ${f + 1}/${total} · ~${Math.ceil(eta)}s left`);
-      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => { requestAnimationFrame(r); setTimeout(r, 60); });   // rAF alone never fires in a background tab → the render would hang
     }
   }
-  await enc.flush(); enc.close();
+  await enc.flush(); enc.close(); if (failed) throw failed;
   if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
     msg(label + ' · mixing sound…');
-    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
-    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
+    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); OPEN.push(ae); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
+    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.numberOfChannels > 1 ? soundtrack.getChannelData(1) : L;   // mono soundtrack → both sides
     for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
       const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
     await ae.flush(); ae.close(); if (failed) throw failed;
@@ -2884,7 +2887,9 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   results.push({ label, url, file, blob });
   if (!DL) try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
 }
-const results = [];
+const results = [], OPEN = [];   // OPEN: encoders of the current render — closed on failure so a retry at a lighter quality gets a free hardware encoder
+const closeOpen = () => { for (const e of OPEN.splice(0)) try { if (e.state !== 'closed') e.close(); } catch {} };
+let wake = null; const keepAwake = async (on) => { try { if (on) wake = await navigator.wakeLock?.request('screen'); else { await wake?.release(); wake = null; } } catch {} };   // phones must not sleep mid-render
 let DL = null;   // claude.ai artifact: files are saved through the downloads capability (declare capabilities: { downloads: true })
 try { window.claude?.use?.('downloads').then((d) => { DL = d; }).catch(() => {}); } catch {}
 async function saveResult(r, btn) {
@@ -2941,7 +2946,7 @@ async function run(isAuto) {
   window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = isAuto ? 1 : .35;
   const canvas = mf.canvas || document.querySelector('canvas');
   mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
-  const t0 = performance.now();
+  const t0 = performance.now(); keepAwake(true);
   try {
     for (const j of jobs) {
       await renderRange(mf, canvas, j.start, j.end, j.label, p, w, h, Muxer, ArrayBufferTarget);
@@ -2951,9 +2956,9 @@ async function run(isAuto) {
     msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} ready.` +
       (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
     showResults(((performance.now() - t0) / 1000).toFixed(0));
-  } catch (e) { busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
+  } catch (e) { closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
     if (!lower()) msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); return; }
-  busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
+  closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
   dispatchEvent(new Event('resize'));
 }
 // AUTO-RENDER: as soon as the scene has loaded, the page renders the MP4 by itself on this device — at the quality chosen for the video
