@@ -22,3 +22,11 @@ ff(`-i ${video} -filter_complex "showwavespic=s=1600x300:split_channels=1" -fram
 ff(`-i ${video} -lavfi showspectrumpic=s=1200x400 ${rd}/spectrum.png`);
 fs.writeFileSync(`${rd}/stats.txt`, sh(`ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,sample_rate,duration -of compact ${video}`) + sh(`ffmpeg -hide_banner -i ${video} -af ebur128=peak=true -f null - 2>&1 | tail -14 || true`));
 console.log('proof ->', rd, fs.readdirSync(rd).length, 'files');
+// per-round audio measurements at round-specific offsets: momentary loudness every 1 s and a spectrum + waveform of this round's focus window
+const ml = sh(`ffmpeg -hide_banner -i ${video} -af ebur128=metadata=1,ametadata=print:key=lavfi.r128.M -f null - 2>&1 || true`).split('\n');
+const M = []; let tt = null; for (const l of ml) { const a = l.match(/pts_time:([\d.]+)/); if (a) tt = +a[1]; const b = l.match(/lavfi\.r128\.M=(-?[\d.]+)/); if (b && tt != null) M.push([tt, +b[1]]); }
+const pick = []; for (let x = 0.5 + J * 5; x < acc; x += 1) { const m = M.find((p) => p[0] >= x); if (m) pick.push(`${x.toFixed(2)}s M ${m[1].toFixed(1)} LUFS`); }
+fs.writeFileSync(`${rd}/loud_r${RN}.txt`, pick.join('\n') + '\n');
+const fw = shots[(RN * 5) % shots.length];
+ff(`-ss ${fw.t0} -t ${fw.t1 - fw.t0} -i ${video} -lavfi showspectrumpic=s=800x300 ${rd}/spectrum_${fw.name}.png`);
+ff(`-ss ${fw.t0} -t ${fw.t1 - fw.t0} -i ${video} -filter_complex "showwavespic=s=800x200" -frames:v 1 ${rd}/wave_${fw.name}.png`);
