@@ -4,3 +4,4 @@
 - New: `medieval` set (assets/sets/medieval-village.glb, Quaternius CC0, approved by Sir), prop medieval_stake, scripts/kit_compose.js.
 - Standing orders: address as sir; no summaries; ask quality+effort per video; outside assets need AskUserQuestion approval.
 - Engine 0.7: fingers posed by the engine (clips give curl only), wrist fold limit, qa_check measures every frame + hands.jpg, review gate needs qa at scene effort, title motion blur + phone sizes. Old scenes: run upgrade_scene.js before re-delivery.
+- Engine 0.8: back/neck posture guard (kneel upright, no craned heads), retention checks in qa_check (hook, shot roles, re-hooks, variety). Channel: 38% stayed → target 70%+. Every short: RETENTION ENGINE in skills/story-writing, role on every shot.

@@ -64,6 +64,7 @@ const CAST = {
   hero: { character: 'jake' },   // Casting Board id (characters/library.json) · or actor: 'jake' · urls: ['characters/x.glb']
 };
 
+// RETENTION BEAT MAP (qa_check enforces it on shorts): every shot has a role — 'payoff' (shot 1: the most extreme image, mid-action) → 'setup' (over by 6 s) → 'escalate' ×3+ (each worse) → 'climax' → 'twist' (last 30%) → 'loop' (last shot, ≤ 2.5 s, leads back into shot 1).
 // SHORTS RHYTHM (skills/viral-3d-shorts): hook on screen by 0.3 s, first shot ≤ 2 s, shots 0.8–2.2 s, a beat every ≤ 3 s.
 // Every key list is [[time, value, ease?], ...] in shot-local seconds. Clips: plain names work (idle walk run sit kneel pickup talk phone…).
 // Gestures are posed with IK + fingers (point shield shrug think stop thumbsup headhold gasp clap…); hands: { right: 'fist' } sets fingers.
@@ -73,12 +74,12 @@ const SHOTS = [
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { shock: [[0, 0.4], [0.2, 1, 'outBack']] },
       gestures: [{ type: 'headhold', start: 0.05, end: 1.5 }] } },
     sfx: [{ t: 0, type: 'impact' }] },
-  { name: 'Setup', dur: 2.0, cut: 'whip', camera: { move: 'push', target: 'hero', size: 'ms', az: -25 },
+  { name: 'Setup', role: 'setup', dur: 2.0, cut: 'whip', camera: { move: 'push', target: 'hero', size: 'ms', az: -25 },
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 2 }], look: [[0, [0.4, 0.2, 1.4]], [0.9, [0.4, 0, 1.2]]], face: { worried: [[0.2, 0], [0.8, 0.9]] }, gestures: [{ type: 'point', start: 0.5, end: 1.8, to: [0.4, 0, 1.2] }] } } },
-  { name: 'Escalation', dur: 1.8, cut: 'zoom', look: 'cinematic', camera: { move: 'orbit', target: 'hero', size: 'mls', span: 40, az: 20 },
+  { name: 'Escalation', role: 'escalate', dur: 1.8, cut: 'zoom', look: 'cinematic', camera: { move: 'orbit', target: 'hero', size: 'mls', span: 40, az: 20 },
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 0.6 }, { clip: 'run', start: 0.5, end: 1.8, fade: 0.25 }], face: { worried: [[0, 0.8]] } } },
     fx: [{ type: 'sparks', t: 0.4, pos: [0.8, 1.2, -0.6] }] },
-  { name: 'Twist', dur: 1.6, cut: 'smash', look: 'noir', punch: [0.2], camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 10 },
+  { name: 'Twist', role: 'twist', dur: 1.6, cut: 'smash', look: 'noir', punch: [0.2], camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 10 },
     cast: { hero: { clips: [{ clip: 'idle', start: 0, end: 1.6 }], look: [[0, 'camera']], face: { smirk: [[0.3, 0], [0.6, 1, 'outBack']] }, gestures: [{ type: 'think', start: 0.2, end: 1.5 }] } } },
 ];
 
@@ -1217,6 +1218,7 @@ const normName = (n) => { const k = n.replace(/^mixamorig\d*[:_]?/i, '').replace
 /* ---------- retargeting: world-space rotation transfer with rest-direction calibration ---------- */
 // Finger joints are NOT copied from clips: every rig's finger bones sit differently, so copied rotations bend fingers sideways / through the palm ("morphed hands").
 // The clip only says how curled each finger is; poseFingers() bends the character's own joints around its own knuckle axes.
+const SPINE_KEEP = !/spinecal/.test(location.search);
 const FINGER_BONE = /hand(thumb|index|middle|ring|pinky)\d/;
 function boneMap(root) { const m = {}; root.traverse((o) => { if (o.isBone && !m[normName(o.name)]) m[normName(o.name)] = o; }); return m; }
 function restData(root, map) {
@@ -1234,7 +1236,7 @@ function retargetClip(src, clip, tgt) {
   const C = {};
   for (const k of pairs) {   // calibrate rest-pose differences (T-pose vs A-pose) using bone directions
     const ck = CHILD_HINT[k]; C[k] = new THREE.Quaternion();
-    if (ck && src.rest[ck] && tgt.rest[ck] && src.rest[k] && k !== 'hips') {
+    if (ck && src.rest[ck] && tgt.rest[ck] && src.rest[k] && k !== 'hips' && !(SPINE_KEEP && /^(spine\d?|neck|head)$/.test(k))) {
       const dS = src.rest[ck].p.clone().sub(src.rest[k].p).normalize(), dT = tgt.rest[ck].p.clone().sub(tgt.rest[k].p).normalize();
       if (dS.lengthSq() > 0 && dT.lengthSq() > 0) C[k].setFromUnitVectors(dT, dS);
     }
@@ -1476,7 +1478,7 @@ const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
 const CLIP_TUNE = { idlefoldarmsloop: { leftarm: [-0.18, 0, 0], rightarm: [-0.18, 0, 0] },   // library clip is for a slimmer body: the hands sank into the arms
   walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
   carry: { spine: [0.1, 0, 0], spine1: [0.1, 0, 0], spine2: [0.06, 0, 0], neck: [0.1, 0, 0], head: [0.18, 0, 0] },      // the library clip leans far back and looks at the sky
-  kneel: { spine: [-0.2, 0, 0], spine1: [-0.2, 0, 0], spine2: [-0.12, 0, 0], neck: [-0.22, 0, 0], head: [-0.28, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
+  kneel: { lean: -9, pose: 'kneelrest', low: true } };   // lean: the back guard straightens the torso to this many degrees (− = forward) — measured, so it is upright on every body   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
 function clipKey(name) { const k = normName(name), a = CLIP_ALIAS[k]; return a && clipLib[a] && (!clipLib[k] || clipLib[k].derived) ? a : k; }
 function clipFor(ch, name) {
   let k = clipKey(name); ch.actions[k] ??= (() => {
@@ -1786,6 +1788,36 @@ function relaxWrists(ch, share = 0.55) {
     if (Math.abs(ang) < 0.05) continue;
     const tw = _tw.q.setFromAxisAngle(ax, ang * share); fo.quaternion.multiply(tw); ha.quaternion.premultiply(tw.invert()); fo.updateMatrixWorld(true); }
 }
+// Back posture guard: library clips were made for other bodies, so on our characters a standing/sitting/kneeling torso often leans BACKWARD or sideways
+// ("weird back"). While the pelvis is upright, the spine is eased forward/upright until the torso is within natural limits. Falls, hits, lying, rolls… are left alone.
+const BACK_FREE = /hit|die|death|knock|roll|jump|climb|swim|dance|fall|limbo|flip|slide|zombie|throw|punch|hook|cross|jab|melee|spell/i;
+const _bg = { a: new THREE.Vector3(), b: new THREE.Vector3(), q: new THREE.Quaternion(), u: new THREE.Vector3() };
+function backPosture(ch) {   // → { lean: ° backward (+) / forward (−), side: ° sideways, upright: pelvis upright? } in the character's own space
+  const B = ch.bones; if (!B.hips || !B.neck || !ch.rest.hips) return null;
+  const iq = ch.root.getWorldQuaternion(_bg.q).clone().invert(), v = B.neck.getWorldPosition(_bg.a).sub(B.hips.getWorldPosition(_bg.b)).applyQuaternion(iq);
+  const up = _bg.u.set(0, 1, 0).applyQuaternion(ch.rest.hips.q.clone().invert()).applyQuaternion(B.hips.getWorldQuaternion(new THREE.Quaternion())).applyQuaternion(iq);
+  // arch: how much further BACK the chest (spine1→neck) tilts than the lower back (hips→spine1), against the rest pose (+ = hollow back, belly pushed out)
+  let arch = 0; if (B.spine1 && ch.rest.spine1 && ch.rest.neck) { const m = B.spine1.getWorldPosition(new THREE.Vector3()), lo = m.clone().sub(B.hips.getWorldPosition(_bg.b)).applyQuaternion(iq), hi = B.neck.getWorldPosition(_bg.a).sub(m).applyQuaternion(iq), an = (x) => Math.atan2(-x.z, x.y);
+    const r0 = an(ch.rest.neck.p.clone().sub(ch.rest.spine1.p)) - an(ch.rest.spine1.p.clone().sub(ch.rest.hips.p)); arch = (an(hi) - an(lo) - r0) * 57.3; }
+  let neck = 0; if (B.head && B.spine2 && ch.rest.head && ch.rest.spine2) { const hq = B.head.getWorldQuaternion(new THREE.Quaternion()).multiply(ch.rest.head.q.clone().invert()), sq = B.spine2.getWorldQuaternion(new THREE.Quaternion()).multiply(ch.rest.spine2.q.clone().invert());
+    const f = new THREE.Vector3(0, 1, 0).applyQuaternion(sq.invert().multiply(hq)); neck = Math.atan2(-f.z, f.y) * 57.3; }   // head tipped back (+) / forward (−) against the chest
+  return { lean: Math.atan2(-v.z, v.y) * 57.3, side: Math.atan2(v.x, v.y) * 57.3, arch, neck, k: clamp((up.y - 0.75) / 0.15) * (v.y > 0 ? 1 : 0), upright: up.y > 0.8 && v.y > 0 };
+}
+function backGuard(ch, cast, t) {
+  if (cast?.back === false || cast?.rotX || cast?.rotZ) return;
+  if ((cast?.clips || []).some((c) => t >= c.start - 0.3 && t <= c.end + 0.3 && BACK_FREE.test(c.clip + ' ' + clipKey(c.clip)))) return;
+  for (let i = 0; i < 2; i++) { const P = backPosture(ch); if (!P || P.k < 0.02) return;
+    const dB = clamp((P.lean - 5) / 57.3, 0, 0.6) * P.k, dA = clamp((P.arch - 7) / 57.3, 0, 0.6) * P.k, dS = (Math.abs(P.side) > 7 ? clamp((Math.abs(P.side) - 7) / 57.3, 0, 0.4) * Math.sign(P.side) : 0) * P.k;
+    if (dB > 0.004 || dS) for (const [bn, k] of [['spine', 0.4], ['spine1', 0.35], ['spine2', 0.25]]) rotateInRootSpace(ch, ch.bones[bn], dB * k * 1.15, 0, dS * k * 1.15);
+    if (dA > 0.004) { rotateInRootSpace(ch, ch.bones.spine1, dA * 0.5, 0); rotateInRootSpace(ch, ch.bones.spine2, dA * 0.5, 0); }
+    let dF = 0; for (const [tn, tw] of ch._tune || []) if (typeof tn.lean === 'number' && P.lean < tn.lean) dF = Math.max(dF, clamp((tn.lean - P.lean) / 57.3, 0, 0.8) * tw * P.k);   // clips marked upright (kneel): un-hunch
+    if (dF > 0.004) for (const [bn, k] of [['spine', 0.4], ['spine1', 0.35], ['spine2', 0.25]]) rotateInRootSpace(ch, ch.bones[bn], -dF * k * 1.1, 0); }
+}
+function neckGuard(ch, cast) {   // a head can tip ~30° back / ~40° forward against the chest; look-at + clip + gestures used to stack far past that (head craned back on a hunched body)
+  if (cast?.back === false) return;
+  for (let i = 0; i < 2; i++) { const P = backPosture(ch); if (!P) return; const d = P.neck > 28 ? (P.neck - 28) / 57.3 : P.neck < -40 ? (P.neck + 40) / 57.3 : 0; if (Math.abs(d) < 0.01) return;
+    rotateInRootSpace(ch, ch.bones.neck, d * 0.45, 0); rotateInRootSpace(ch, ch.bones.head, d * 0.6, 0); }
+}
 function lookTargetAt(ch, cast, t, camPosAt) {
   const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : typeof x === 'string' ? (anchorWorld(x)?.toArray() ?? camPosAt(t)) : x));   // [x,y,z] · 'camera' · 'castId.part'
   if (!v) return null;
@@ -1811,6 +1843,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
     for (const [bn, e] of Object.entries(tn)) if (Array.isArray(e)) rotateInRootSpace(ch, B[bn], e[0] * tw, e[1] * tw, e[2] * tw);
     const lowK = tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1;
     if (tn.pose && lowK > 0.01 && POSES[tn.pose] && !(cast?.gestures || []).some((g) => t > g.start - 0.2 && t < g.end + 0.4)) applyPose(ch, POSES[tn.pose], { type: tn.pose, start: -1e6, end: 1e6, amount: tw * lowK }, t); }
+  backGuard(ch, cast, t);
   applyGestures(ch, cast, t);
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
@@ -1829,6 +1862,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   const nod = talking ? 0.03 * Math.max(0, noise(tGlobal * 3.1, seed + 7)) : 0;
   rotateInRootSpace(ch, B.head, pitch * 0.5 + 0.012 * fbm(tGlobal * 0.6, seed + 1) + nod, yaw * 0.5 + 0.015 * fbm(tGlobal * 0.5, seed + 2), 0.01 * fbm(tGlobal * 0.4, seed + 5));
   applyImpulses(ch, shotAt(tGlobal).shot, t);
+  neckGuard(ch, cast);
   relaxWrists(ch);
   // eyes: remaining angle to target + saccades (eyes move first, head catches up)
   let acc = 0, k = 0; while (acc + 0.45 + hash(k + seed) * 1.6 <= tGlobal) { acc += 0.45 + hash(k + seed) * 1.6; k++; }
@@ -2792,7 +2826,9 @@ window.__mf = {
     THUMB = T || null; if (T) render(0); },   // render one thumbnail (scripts/thumbnail.js)
 };
 window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
-  text: () => ({ captions: typeof CAPTIONS !== 'undefined' ? CAPTIONS : [], titles: typeof TITLES !== 'undefined' ? TITLES : [], captionY: CAP.y ?? CONFIG.captionY ?? (CONFIG.height > CONFIG.width ? 0.74 : 0.84), total: TOTAL, effort: CONFIG.effort || 'standard', quality: CONFIG.quality || null }),
+  text: () => ({ captions: typeof CAPTIONS !== 'undefined' ? CAPTIONS : [], titles: typeof TITLES !== 'undefined' ? TITLES : [], captionY: CAP.y ?? CONFIG.captionY ?? (CONFIG.height > CONFIG.width ? 0.74 : 0.84), total: TOTAL, effort: CONFIG.effort || 'standard', quality: CONFIG.quality || null, voiceWords: Array.isArray(CAP.sync) ? CAP.sync.length : 0,
+    shots: SHOTS.map((sh) => ({ role: sh.role || null, dur: sh.dur, set: String(setIdOf(sh)), look: sh.look || CONFIG.look, cut: sh.cut || null, move: sh.camera?.move || (Array.isArray(sh.camera?.pos) && sh.camera.pos.length > 1 ? 'manual' : 'static'), size: String(sh.camera?.size ?? ''), az: sh.camera?.az ?? 0, target: String(sh.camera?.target ?? ''),
+      fx: (sh.fx || []).length, accents: (sh.punch || []).length + (sh.freeze || []).length + (sh.impact || []).length + (sh.time ? 1 : 0) + (sh.afterimage ? 1 : 0), acts: Object.values(sh.cast || {}).reduce((n, c) => n + (c.gestures || []).length + (c.reach || []).length + Object.keys(c.face || {}).length + Math.max(0, (c.clips || []).length - 1) + (c.pos && c.pos.length > 1 ? 1 : 0) + Object.keys(c.bones || {}).length + (c.motions || []).length, 0) })) }),
   pacing() {   // beats the viewer feels: cuts, titles, caption changes, effects, punch-ins, sound hits
     const ev = collectSound().events.map((e) => e.t), beats = [...ev]; let acc = 0;
     for (const sh of SHOTS) { beats.push(acc); for (const f of sh.fx || []) beats.push(acc + (f.t ?? f.start ?? 0)); for (const p of sh.punch || []) beats.push(acc + p); acc += sh.dur; }
@@ -2829,7 +2865,9 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
       const bind = ['left', 'right'].every((sd) => [[sd + 'arm', sd + 'forearm'], [sd + 'forearm', sd + 'hand']].every(([a, b]) => { const d = dirOf(a, b), r = restDir(a, b); return d && r && d.dot(r) > 0.99; })) && !(cast.gestures || []).some((g) => /armsout/.test(g.type));
       const act = (cast.clips || [{ clip: 'idle', start: 0, end: 1e9 }]).filter((c) => local >= c.start && local <= c.end).pop(), gait = act ? (clipFor(ch, act.clip)?.getClip().rootSpeed || 0) : 0;
       const pt = (b) => ch.bones[b] ? ch.bones[b].getWorldPosition(V()).toArray().map((x) => +x.toFixed(3)) : null;
-      out.push({ bind, gait: +gait.toFixed(2), clipName: act?.clip || null, root: ch.root.position.toArray().map((x) => +x.toFixed(3)), hips: pt('hips'), headP: pt('head'), lf: pt('leftfoot'), rf: pt('rightfoot'), id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+      const bp = backPosture(ch), shl = ch.bones.leftarm && ch.bones.rightarm && ch.bones.leftupleg && ch.bones.rightupleg ? (() => { const iq = ch.root.getWorldQuaternion(new THREE.Quaternion()).invert(), s = ch.bones.leftarm.getWorldPosition(V()).sub(ch.bones.rightarm.getWorldPosition(V())).applyQuaternion(iq), h = ch.bones.leftupleg.getWorldPosition(V()).sub(ch.bones.rightupleg.getWorldPosition(V())).applyQuaternion(iq); let d = (Math.atan2(s.z, s.x) - Math.atan2(h.z, h.x)) * 57.3; if (d > 180) d -= 360; if (d < -180) d += 360; return Math.round(Math.abs(d)); })() : 0;
+      const backFree = !!(cast.rotX || cast.rotZ || cast.back === false) || (cast.clips || []).some((c) => local >= c.start - 0.3 && local <= c.end + 0.3 && BACK_FREE.test(c.clip + ' ' + clipKey(c.clip)));
+      out.push({ back: bp && bp.upright && !backFree ? { lean: Math.round(bp.lean), side: Math.round(Math.abs(bp.side)), twist: shl, arch: Math.round(bp.arch), neck: Math.round(bp.neck) } : null, bind, gait: +gait.toFixed(2), clipName: act?.clip || null, root: ch.root.position.toArray().map((x) => +x.toFixed(3)), hips: pt('hips'), headP: pt('head'), lf: pt('leftfoot'), rf: pt('rightfoot'), id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
     return { shot: shot.name, t: tg, local, chars: out, titles, cam: camera.position.toArray().map((x) => +x.toFixed(3)), boxes: (typeof HUD_BOXES !== 'undefined' ? HUD_BOXES.slice() : []) };

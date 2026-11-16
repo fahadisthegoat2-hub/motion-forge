@@ -2,11 +2,13 @@
 // Automatic QA for a scene — run it on EVERY video before showing anything to Sir. Exit code 1 = must fix.
 // It MEASURES, it does not guess. Two passes:
 //  1) MOTION pass — every single frame of the video is posed and measured (no drawing, so it is fast): wrist skin pinch/tear on the real mesh,
-//     wrist fold/twist, hands inside the body/arm/leg/head, hands off their reach targets, feet floating/sinking, bind-pose (T-pose) flashes,
+//     backs bent backward / sideways / wrung, wrist fold/twist, hands inside the body/arm/leg/head, hands off their reach targets, feet floating/sinking, bind-pose (T-pose) flashes,
 //     pops (a joint teleporting between two frames), walking on the spot, sliding without walking, characters standing inside each other,
 //     the camera inside a head or under the floor.
 //  2) PICTURE pass — rendered frames of every shot (more per shot at higher effort): light on faces, dark/blown-out shots, faces cut off,
 //     titles over faces, a shot where nothing moves, + a MACRO CROP OF EVERY HAND (hands.jpg) and the contact sheet (sheet.jpg) to look at.
+//  + RETENTION (shorts): hook words/title/motion on frame 1, 3 shots in 5 s, a role for every shot (payoff→setup→escalate×3→climax→twist→loop), re-hooks every ≤ 7 s,
+//    no repeated pictures, variety of sizes/moves, accents, effects, characters that act, no dead tail.
 //  + TEXT: caption speed/flash/overlap, titles off-frame, colliding or too short to read, doubled words · length vs asked length · hook/pacing rules.
 // Effort (CONFIG.effort or --effort): standard = 1 frame + 1 hand crop per shot · high = 3 + 2 · maximum = 5 + 3, with tighter limits.
 // Usage: node qa_check.js scene.html [--target <seconds>] [--out dir] [--effort standard|high|maximum]
@@ -53,6 +55,11 @@ const sheetOf = (files, dest, cols, cw, chh) => { if (files.length < 2) { if (fi
       for (const c of fr.chars) { const W = `${S} ${c.id}`, pc = prev?.chars.find((x) => x.id === c.id), A = (acc[c.id] ??= { spot: 0, slide: 0 });
         for (const m of c.missing) fail('CLIP' + W + m, `CLIP: ${W} uses "${m}" which doesn't exist (see SCENE_API clip list)`);
         if (c.bind) fail('BIND' + W, `T-POSE: ${W} ${at} is in the bind pose (arms straight out) — a clip is missing/has a gap, or a hold lost its pose`);
+        if (c.back) { stats.back = Math.max(stats.back || 0, c.back.lean); if (c.back.lean > 16) fail('BACKL' + W, `BACK: ${W} ${at} leans ${c.back.lean}° backward — a broken-looking back; lower the gesture's spine offsets / custom bones, or use another clip`, c.back.lean);
+          if (c.back.arch > 16) fail('BACKA' + W, `BACK: ${W} ${at} has a hollow back (chest tipped ${c.back.arch}° back over the hips, belly pushed out) — lower the spine offsets or change the clip`, c.back.arch);
+          if (c.back.neck > 42 || c.back.neck < -55) fail('NECK' + W, `BACK: ${W} ${at} head is bent ${Math.abs(c.back.neck)}° ${c.back.neck > 0 ? 'back' : 'forward'} against the chest — a broken-looking neck; lower the look target / head offsets or straighten the torso`, Math.abs(c.back.neck));
+          if (c.back.side > 24) fail('BACKS' + W, `BACK: ${W} ${at} is bent ${c.back.side}° sideways — fix the spine offsets / clip`, c.back.side);
+          if (c.back.twist > 60) fail('BACKT' + W, `BACK: ${W} ${at} shoulders are twisted ${c.back.twist}° against the hips — a wrung torso; turn the whole body (rotY) instead of the spine`, c.back.twist); }
         if (c.footY !== null && !c.airborne && c.footY > 0.14) fail('FLOAT' + W, `FEET: ${W} ${at} floats ${(c.footY * 100).toFixed(0)} cm above the ground`, c.footY);
         if (c.footY !== null && c.footY < -0.06) fail('SINK' + W, `FEET: ${W} ${at} sinks ${(-c.footY * 100).toFixed(0)} cm into the ground`, -c.footY);
         for (const R of c.reach) if (R.err > 0.08) fail('REACH' + W + JSON.stringify(R.to), `HANDS: ${W} ${at} hand is ${(R.err * 100).toFixed(0)} cm from ${JSON.stringify(R.to)} (move the target or the character closer)`, R.err);
@@ -104,6 +111,35 @@ const sheetOf = (files, dest, cols, cw, chh) => { if (files.length < 2) { if (fi
     if (T.length >= 5 && top[1] / T.length > 0.6) fail('MGVAR', `MOTION GRAPHICS: ${top[1]} of ${T.length} graphics are "${top[0]}" — vary the styles (each beat its own designed graphic)`);
     if (total > 12 && T.length < Math.floor(total / 6)) fail('MGFEW', `MOTION GRAPHICS: only ${T.length} graphics in ${total.toFixed(0)}s — at least one every ~6s`); }
 
+  /* ---------- RETENTION (shorts): the swipe is decided in the first second, the rest by stakes that keep rising ---------- */
+  if (info.text?.shots && portrait && !opt('--target') && info.dur <= 95) { const { captions: C, titles: T, shots: SH, total } = info.text, R = (k, m, sc = 0) => fail('RET' + k, 'RETENTION: ' + m, sc);
+    const starts = []; SH.reduce((a, x) => (starts.push(a), a + x.dur), 0);
+    const capIn = (a, b) => C.filter((c) => c.t >= a && c.t < b).map((c) => String(c.text)).join(' '), hook = (capIn(0, 2.6) + ' ' + T.filter((t) => t.t < 0.4).map((t) => String(t.text || '').replace(/[|\n]/g, ' ')).join(' ')).trim(), all = C.map((c) => String(c.text)).join(' ');
+    const words = (x) => x.split(/\s+/).filter(Boolean);
+    if (/^\W*(did you know|in this video|today|let'?s|have you ever|welcome|hey|hi |hello|so,? |this is the story|once upon|imagine if you will|here'?s|what if i told you|ever wonder)/i.test(capIn(0, 3).trim())) R('OPEN', `the first words are "${capIn(0, 3).slice(0, 30)}…" — an intro, not a hook. Start mid-action on the stake ("You have 60 seconds before…")`, 5);
+    if (hook && !/\byou(r|'re|'ll|'ve)?\b|\d|\?|!/i.test(hook)) R('HOOKW', `the hook "${hook.slice(0, 40)}" has no "you", no number, no question and no shock — put the viewer in danger or give a hard number`, 4);
+    if (words(capIn(0, 2.6)).length > 12) R('HOOKL', `${words(capIn(0, 2.6)).length} words in the first 2.6s — the hook line is ≤ 10 words`);
+    if (!T.some((t) => t.t <= 0.15 && words(String(t.text || '').replace(/[|\n]/g, ' ')).length <= 5 && String(t.text || '').length >= 3)) R('HOOKT', 'no stake title (≤ 5 words) on frame 1 — the scroll-stopper text states the stake, not the topic ("10 SECONDS LEFT", not "THE MIDDLE AGES")', 4);
+    if (SH[0].dur > 1.75) R('S1', `shot 1 lasts ${SH[0].dur}s — the payoff flash is ≤ 1.6s, then cut`);
+    const in5 = starts.filter((x) => x < 5).length; if (in5 < 3) R('CUT5', `only ${in5} shot(s) in the first 5s — at least 3 (a new image every ~1.5s while the viewer decides)`, 3);
+    if (!(SH[0].fx || SH[0].accents || SH[0].acts >= 2)) R('S1A', 'shot 1 has no effect, impact/punch or acting — frame 1 must be the most extreme image of the story, mid-action', 3);
+    const roles = SH.map((x) => x.role), idx = (r) => roles.indexOf(r), cnt = (r) => roles.filter((x) => x === r).length;
+    if (roles.some((r) => !r)) R('ROLE', `${roles.filter((r) => !r).length} shot(s) have no role — every shot is payoff · setup · escalate · climax · twist · loop (a shot with no job is a shot to cut)`, 2);
+    else { if (cnt('escalate') < 3) R('ESC', `${cnt('escalate')} escalation shot(s) — at least 3 steps, each worse than the last`);
+      const su = roles.lastIndexOf('setup'); if (su >= 0 && starts[su] + SH[su].dur > 6.5) R('SETUP', `setup runs until ${(starts[su] + SH[su].dur).toFixed(1)}s — it must be over by 6s (viewers left at 0:13 because the payoff came late)`);
+      if (idx('twist') < 0) R('TW', 'no twist shot (role: "twist")'); else if (starts[idx('twist')] < total * 0.62) R('TWT', `the twist lands at ${starts[idx('twist')].toFixed(1)}s — too early; it belongs in the last 30% so there is a reason to stay`);
+      if (idx('climax') < 0) R('CLX', 'no climax shot (role: "climax") before the twist');
+      if (roles.at(-1) !== 'loop') R('LOOP', 'the last shot is not role: "loop" — the final line/image must lead straight back into shot 1 (rewatches count as retention)'); else if (SH.at(-1).dur > 2.6) R('LOOPD', `the loop shot lasts ${SH.at(-1).dur}s — ≤ 2.5s, no outro`); }
+    const hooks = C.filter((c) => /\b(but|until|then|suddenly|except|worse|wait|now|instead|because|so)\b|\?|…|\.\.\./i.test(String(c.text))).map((c) => c.t); let last = 0;
+    for (const h of [...hooks, total]) { if (h - last > 8.5) { R('REHOOK' + Math.round(last), `no re-hook between ${last.toFixed(1)}s and ${h.toFixed(1)}s — every ≤ 7s a line must open a new question ("but…", "then…", "until…", a question)`, h - last); } last = h; }
+    for (const sen of all.split(/(?<=[.!?…])\s+/)) if (words(sen).length > 14) R('LINE' + sen.slice(0, 12), `line "${sen.slice(0, 40)}…" is ${words(sen).length} words — ≤ 10 words per line, one image per line`);
+    for (let i = 1; i < SH.length; i++) { const a = SH[i - 1], b = SH[i]; if (a.set === b.set && a.size === b.size && a.move === b.move && Math.abs(a.az - b.az) < 12 && a.target === b.target && !b.cut) R('SAME' + i, `shots ${i} and ${i + 1} are the same picture (same set, size, move and angle) — every cut shows something NEW (angle ≥ 30° apart, another size, or a cutaway)`); }
+    const sizes = new Set(SH.map((x) => x.size)).size, moves = new Set(SH.map((x) => x.move)).size; if (SH.length >= 8 && (sizes < 4 || moves < 4)) R('VAR', `only ${sizes} shot sizes and ${moves} camera moves in ${SH.length} shots — use ≥ 4 of each (ecu…ws, crash-zoom, orbit, low-hero, whip…)`);
+    const acc = SH.reduce((n, x) => n + x.accents, 0), fxn = SH.reduce((n, x) => n + x.fx, 0); if (acc < Math.max(3, total / 8)) R('ACC', `only ${acc} punch-ins / freezes / impacts / speed ramps — at least ${Math.ceil(Math.max(3, total / 8))} (one on every big moment)`);
+    if (fxn < Math.max(3, total / 7)) R('FX', `only ${fxn} effects/3D props in ${total.toFixed(0)}s — at least ${Math.ceil(Math.max(3, total / 7))}: every stake is SHOWN (vfx, models, x-ray, micro world), not only said`);
+    const dead = SH.map((x, i) => [x, i]).filter(([x]) => x.acts < 1 && !x.fx && x.set && !/blood|fat|neurons|artery/.test(x.set)); if (dead.length > SH.length * 0.2) R('ACT', `${dead.length} shots where the character only stands there (shots ${dead.slice(0, 6).map(([, i]) => i + 1).join(', ')}) — in every shot they DO something that shows the line`);
+    const lastCap = C.at(-1); if (lastCap) { const e = lastCap.t1 ?? total; if (total - e > 1.0) R('TAIL', `${(total - e).toFixed(1)}s of video after the last line — end ON the last word so it loops`); } }
+
   /* ---------- 2) PICTURE pass: rendered frames of every shot ---------- */
   const frames = [], handShots = [];
   fs.mkdirSync(path.join(out, 'frames'), { recursive: true }); fs.mkdirSync(path.join(out, 'hands'), { recursive: true });
@@ -129,6 +165,13 @@ const sheetOf = (files, dest, cols, cw, chh) => { if (files.length < 2) { if (fi
         await page.locator('canvas').first().screenshot({ path: p, clip: { x: 0, y: Math.max(0, (VH - VW) / 2), width: Math.min(VW, VH), height: Math.min(VW, VH) } }); handShots.push(p); } }
     await page.evaluate(() => { window.__mfCam = null; });
   }
+  if (portrait && info.dur <= 95) {   // the first second, as pixels: does anything move? is there something to look at?
+    const f0 = path.join(out, 'frames', 'hook_000.png'), f1 = path.join(out, 'frames', 'hook_045.png');
+    await page.evaluate(() => __mf.render(0.02)); await page.locator('canvas').first().screenshot({ path: f0 }); await page.evaluate(() => __mf.render(0.45)); await page.locator('canvas').first().screenshot({ path: f1 });
+    const o = spawnSync(ffmpeg(), ['-hide_banner', '-i', f0, '-i', f1, '-filter_complex', 'blend=all_mode=difference,signalstats,metadata=print', '-f', 'null', '-']).stderr.toString(), dy = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 99), y0 = luma(f0);
+    if (dy < 3.2) fail('RETSTILL', `RETENTION: the picture barely changes in the first 0.45s (difference ${dy.toFixed(1)}/255) — frame 1 needs a fast camera move AND a moving subject (crash-zoom, whip, impact, effect)`, 5);
+    if (y0 < 45) fail('RETDARK', `RETENTION: frame 1 is dark (${y0.toFixed(0)}/255) — the first frame is bright, readable and extreme`, 4);
+    notes.push(`hook motion ${dy.toFixed(1)}/255 · frame-1 luma ${y0.toFixed(0)}`); }
   const P = await page.evaluate(() => __mfDebug.pacing());
   await browser.close(); server.close();
   for (const n of P.narratorLips || []) fail('NARR' + n, `NARRATOR: ${n} lip-syncs to the voiceover — the narrator is never on screen. Remove talk (characters act the story out); only a real in-scene line may use dialogue: true`);

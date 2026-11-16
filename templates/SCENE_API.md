@@ -41,6 +41,8 @@ sneak_pose` (Xbot) · `sambadance` (Michelle) + anything in `animations/*.fbx`.
 Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
 
 ## SHOTS (play back-to-back)
+Shorts: every shot carries `role: 'payoff' | 'setup' | 'escalate' | 'climax' | 'twist' | 'loop'` (the retention beat map — qa_check enforces order, timing and counts).
+Posture: backs and necks are kept inside natural limits automatically (no backward lean/hollow back while the pelvis is upright, head ≤ 28° back / 40° forward against the chest, `kneel` upright); cast `back: false` turns the guard off for one character in a shot.
 ```js
 { name, dur, chapter?, look?, set?, cut?, fadeIn?, fadeOut?, flash?,
   camera: { move, target, size, az, height, span, side, at, with, fov, ease, handheld, roll, shakes, eye }   // eye: exact eye-line height (auto-lowered for kneel/crouch/sit)

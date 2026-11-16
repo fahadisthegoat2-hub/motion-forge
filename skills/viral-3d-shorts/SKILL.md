@@ -83,9 +83,27 @@ the hook and twist. `qa_check.js` fails any short that breaks these numbers.
 **Before building**: write 5 hooks, score each (stops the scroll? visual? curiosity gap?), keep the best. Read the script out loud in
 your head at 1.15× — if any 3 seconds would let a viewer swipe, rewrite them.
 
+## RETENTION ENGINE — 38% stayed today, the target is 70%+ (measured by qa_check, not hoped for)
+"Stayed to watch" is decided in the FIRST SECOND; the rest of the curve is decided by whether every line opens a question the next line has not answered yet.
+**The story (write it in this order, before any shot):**
+1. **The stake in 5 words** — what will happen to YOU and by when ("BURNED ALIVE BY 3 PM"). No stake a 12-year-old can repeat = no video. This is the frame-1 title.
+2. **The payoff image** — the single most extreme picture of the story, mid-action (not the start of it). It is shot 1 (`role: 'payoff'`, ≤ 1.7 s, camera + subject + an effect all moving on frame 1).
+3. **The twist** — the last 30%, set up by a clue the viewer saw in the first 6 s. Decide it before writing the middle.
+4. **The ladder** — ≥ 3 escalations, each one worse AND different in kind (discomfort → pain → danger → no way back). If two steps could swap places, one is filler: cut it.
+5. **The loop** — the last line is the first half of the first line (or its question), so the replay answers it. The video ends on that word. No outro, no "follow for more" shot.
+**Every line** (≤ 10 words, present tense, "you"): it either raises the stake or pays one off while opening the next. Join lines with BUT / SO / UNTIL — never "and then".
+A line that only describes or explains is cut or turned into a picture. Numbers beat adjectives ("411 ml", "3 PM", "9 seconds").
+**Re-hook every ≤ 7 s** — a line that makes leaving impossible ("but that's not what kills you", "then the door locks", a question). qa_check finds every gap.
+**Every shot has a job** (`role`): payoff → setup (over by 6 s) → escalate ×3+ → climax → twist → loop. A shot with no role is cut. In every shot the character DOES the line
+(acts, reaches, falls, runs — never stands and waits), every stake is SHOWN with an effect, a 3D prop, an x-ray or a micro world, and every cut is a new picture (another size, ≥ 30° another angle, or a cutaway).
+**Self-test before building** (rewrite until all are yes): Would a stranger stop on frame 1 with the sound off? · Can the story be retold in one sentence? · Is second 6 more dangerous than second 2,
+second 15 than second 6, second 25 than second 15? · Is there any 3-second stretch where nothing new is asked or shown? · Does the last word make shot 1 mean something new?
+`qa_check.js` fails the short on: intro words, a hook with no you/number/question, no ≤ 5-word stake title on frame 1, a still or dark first 0.45 s, < 3 shots in 5 s, shots without a role, < 3 escalations,
+late setup, early/missing twist, no climax, no loop, re-hook gaps, long lines, repeated pictures, < 4 sizes/moves, too few accents/effects, characters that only stand, a dead tail.
+
 ## CHANNEL DATA (from Sir's analytics — these rules override older ones)
 Best short: 43% stayed. Flops: 75–80% swiped in the first second, viewers gone by 0:13 because the payoff came too late,
-34% stayed when the twist was slow. GOAL: 80–87% stayed to watch.
+34% stayed when the twist was slow. Latest: 38% stayed. GOAL: 70%+ stayed to watch.
 1. **0.0 s = motion + shock line on screen** — never a still face, a title card or a slow push. Camera AND subject move on frame 1.
 2. **Payoff first, then rewind**: shot 1 shows the most shocking result / the twist image (mark it `role: 'payoff'`), then
    "3 days earlier…" and the story. The twist is teased in second 1 and paid off at the end.
