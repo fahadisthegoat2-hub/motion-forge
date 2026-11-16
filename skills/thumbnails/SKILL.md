@@ -3,6 +3,8 @@ name: thumbnails
 description: High-CTR thumbnails and cover frames for every finished video, rendered from the real 3D scene (scripts/thumbnail.js). Makes many variants silently, judges them at phone size and delivers ONLY the single best one. Use when a video is finished, or the user asks for a thumbnail, cover, CTR or clicks.
 ---
 
+> **Algorithm fit:** design from `youtube-algorithm` (what the feed measures, targets, length, safe zones, packaging) — its rules win over older numbers here.
+
 # Thumbnails — many drafts, one winner, zero noise
 
 **Silence rule:** make as many variants as you want, review and fix them privately. The user sees exactly ONE thumbnail:

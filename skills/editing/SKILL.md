@@ -6,6 +6,8 @@ description: Cinema-grade, hyper-engagement editing and sound design for 3D shor
 > **Tool policy:** Three.js in Chrome, Node, ffmpeg only. Never Blender/Python unless the user said "Blender/Python allowed".
 > **Efficiency:** plan the edit once in the script doc, build it in the scene, verify with one --fast render (frames + audio check).
 
+> **Algorithm fit:** design from `youtube-algorithm` (what the feed measures, targets, length, safe zones, packaging) — its rules win over older numbers here.
+
 # Editing & Sound — hyper engagement, cinema feel
 
 The scene file IS the edit: `SHOTS` are the timeline, `CONFIG.sound` the soundtrack (see templates/SCENE_API.md).

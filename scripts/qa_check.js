@@ -69,6 +69,18 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     if (P.staticOpen) fails.push('HOOK: the first second is static — camera and subject must move on frame 1');
     if (!P.question) fails.push('ENGAGEMENT: no comment question in the last captions (e.g. "Would you have survived?")');
   }
+  if (P.portrait && P.total > 180) fails.push(`LENGTH: ${P.total.toFixed(0)}s — a YouTube Short is at most 3 minutes`);
+  if (!P.portrait && P.total > 90) {   // LONG-FORM retention rules (skills/youtube-algorithm)
+    const first = Math.min(P.firstCaption ?? 99, P.firstTitle ?? 99), avg = P.durs.reduce((x, y) => x + y, 0) / P.durs.length, ch = await page.evaluate(() => (__mf.chapters || []).map((c) => c.end - c.start)).catch(() => []);
+    if (first > 3) fails.push(`HOOK: no words on screen until ${first === 99 ? 'never' : first.toFixed(1) + 's'} — the cold open must confirm the title/thumbnail promise in the first 3 s (no intro, no logo)`);
+    if (P.durs[0] > 6) fails.push(`HOOK: first shot lasts ${P.durs[0]}s — open on the most shocking moment, ≤ 6 s per shot in the cold open`);
+    if (avg > 6) fails.push(`PACING: average shot is ${avg.toFixed(1)}s — long-form needs a new shot every 3–6 s`);
+    P.durs.forEach((d, i) => { if (d > 8 && !P.holds[i]) fails.push(`PACING: shot ${i + 1} lasts ${d}s (> 8s) — cut it or mark hold: true for a deliberate hold`); });
+    for (let i = 1; i < P.beats.length; i++) if (P.beats[i] - P.beats[i - 1] > 8) fails.push(`PACING: dead stretch ${P.beats[i - 1].toFixed(1)}–${P.beats[i].toFixed(1)}s with no cut, title, caption, effect or hit (max 8s)`);
+    if (P.total > 180 && ch.length < 3) fails.push(`CHAPTERS: ${ch.length} chapter(s) — a ${Math.round(P.total / 60)}-minute video needs ≥ 3 (chapter: 'Name' on the first shot of each) for YouTube key moments`);
+    ch.forEach((d, i) => { if (d < 10) fails.push(`CHAPTERS: chapter ${i + 1} is ${d.toFixed(0)}s — YouTube needs ≥ 10 s each`); });
+    if (!P.voice && P.capCov < 0.8) fails.push(`STORY: no voiceover and captions cover only ${Math.round(P.capCov * 100)}%`);
+  }
   const snd = await page.evaluate(() => { const S = window.__mfDebug; try { return (window.collectSoundForQA?.() || null); } catch { return null; } });
   await browser.close(); server.close();
   for (const e of errs) fails.push('ERROR: ' + e);

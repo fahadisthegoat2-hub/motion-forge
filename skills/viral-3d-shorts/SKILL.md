@@ -13,6 +13,8 @@ description: Produce vertical 3D-animated story/explainer shorts (TikTok, YouTub
 > materials, colors, lighting and shapes. Clothing = plain solid colors (or a simple original
 > pattern) unless the user explicitly asks for a print.
 
+> **Algorithm fit:** design from `youtube-algorithm` (what the feed measures, targets, length, safe zones, packaging) — its rules win over older numbers here.
+
 # Viral 3D Shorts — the clean semi-real CG look
 
 Capture the **genre look**, but make original characters, names and branding. Never
@@ -33,7 +35,8 @@ copy a creator's logo, name, intro, or recurring characters onto shirts or title
   macro close-ups, slow-mo for the climax moment.
 
 ## Edit grammar
-- 9:16, 1080×1920, 30–60s, **new shot every 1.5–3s**.
+- 9:16, 1080×1920, 25–35 s by default (Shorts allow up to 3 min — only when every second earns it), **new shot every 1.5–3s**.
+- Safe zone: no words in the top 8%, the bottom 22% or the right 15% of the lower half (YouTube UI).
 - Camera: slow push-ins, orbit reveals, snap zooms on the twist, POV shots.
 - Narration: fast, clear, second person ("you"), ~2.5–3 words/sec.
 - Captions: bold sans, 1–3 words at a time, centered lower third, key word highlighted.

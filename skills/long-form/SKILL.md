@@ -13,19 +13,21 @@ description: Plan, write and produce long-form 3D animated videos (YouTube 16:9,
 > materials, colors, lighting and shapes. Clothing = plain solid colors (or a simple original
 > pattern) unless the user explicitly asks for a print.
 
+> **Algorithm fit:** design from `youtube-algorithm` (what the feed measures, targets, length, safe zones, packaging) — its rules win over older numbers here.
+
 # Long-Form 3D Videos
 
 ## Story structure (10-min example — scale proportionally)
 | Part | Time | Job |
 |---|---|---|
 | **Cold open** | 0:00–0:30 | Most shocking moment or question first. Promise the payoff ("by the end you'll see why…"). No intro/logo. |
-| **Title beat** | 0:30–0:40 | 3–5s title card, then straight in. |
+| **Title beat** | 0:30–0:35 | ≤ 3 s title sting over moving picture (never a static card), then straight in. |
 | **Ch.1 Setup** | 0:40–2:30 | Character, world, the rule/goal. Plant 2–3 clues for later twists. End on a mini-cliffhanger. |
 | **Ch.2 Escalation** | 2:30–5:00 | Stakes rise; **twist #1** at ~4:00 (midpoint shift). |
 | **Ch.3 Complication** | 5:00–7:30 | Everything gets worse; reveal hidden info; **twist #2**. |
 | **Ch.4 Climax** | 7:30–9:15 | Peak action, slow-mo, biggest set piece. |
 | **Final twist + resolution** | 9:15–9:50 | The big reveal that reframes the whole video (fair — clues planted in Ch.1). |
-| **End screen** | 9:50–10:00 | Tease the next episode; point to it on screen. |
+| **Hand-off** | 9:50–10:00 | No goodbye. The last line opens the next video; end screen (last 5–20 s) points at ONE video. |
 
 ## Retention rules (long-form specific)
 - **Open loops**: start a question every chapter and close it in a later one; never have zero open loops.

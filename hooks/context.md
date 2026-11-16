@@ -32,8 +32,8 @@ DEFAULT OUTPUT: every idea, topic, story or request becomes a finished 3D ANIMAT
 
 ROUTING (load every matching skill, in this order, before working):
 - Any video/short/long video → FIRST character-collection: the cast is on the Casting Board; ask who stars (unless already named). "new character", "improve <name>", "undo <name>", "check the casting board" → character-collection.
-- Long video / long-form / episode / documentary / anything > 90s → long-form → story-writing → voiceover → visual-clarity → art-direction → editing → realistic-humans → custom-animation → vfx → quality-review → viral-growth → thumbnails
-- Any short video / short / story / "what happens if" idea → story-writing → voiceover → visual-clarity → art-direction → editing → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth → thumbnails
+- Long video / long-form / episode / documentary / anything > 90s → youtube-algorithm → long-form → story-writing → voiceover → visual-clarity → art-direction → editing → realistic-humans → custom-animation → vfx → quality-review → viral-growth → thumbnails
+- Any short video / short / story / "what happens if" idea → youtube-algorithm → story-writing → voiceover → visual-clarity → art-direction → editing → viral-3d-shorts → realistic-humans → custom-animation → vfx → quality-review → viral-growth → thumbnails
 - 3D model / prop / asset / "make a model of" → model-forge
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
@@ -43,7 +43,7 @@ ROUTING (load every matching skill, in this order, before working):
 - "Better visuals / more detail / more style / cinematic" → art-direction + realistic-humans
 - Real/true stories, "find a story", vague themes, ideas → story-research (then story-writing)
 - Script/plot/idea only → story-writing
-- Titles, descriptions, tags, views, growth → viral-growth
+- Titles, descriptions, tags, views, growth, retention, CTR, "the algorithm", why a video flopped → youtube-algorithm + viral-growth
 - Thumbnails, covers, CTR → thumbnails (many drafts silently, deliver ONLY the single best)
 - Before delivering ANYTHING visual or written → quality-review
 
@@ -70,7 +70,8 @@ ALWAYS:
   the finished video with Save. Never ask the user to pick a quality or press a button on the page. Cloud machines have no GPU; cloud renders only for --fast QA previews.
 - ENGINE CHANGES ARE TESTED: after any edit to templates/studio_scene.html run `scripts/selftest.js` (every style/move/set/look/effect) — it must print SELFTEST PASS.
 - ENGINE FIXES REACH OLD SCENES: before re-delivering or editing an older scene run `scripts/upgrade_scene.js scene.html`, then qa_check.
-- Deliver finished videos with a publish pack (title, description, tags, hashtags).
+- BUILT FOR THE ALGORITHM: every video is designed from skills/youtube-algorithm (idea + title first, hook on frame 1, retention structure, right length, safe zones, loop/hand-off ending).
+- Deliver finished videos with a publish pack (publish.md) that passes `scripts/publish_check.js` (titles, description, ≤ 3 hashtags, pinned question, cover/thumbnail, related video/end screen, upload checklist).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".
 - LENGTH IS LAW: if the user names a length ("13 minute video", "30s short"), that is the length — set CONFIG.targetDuration (seconds);
   qa_check fails anything off by more than 5%. Never turn a long video into a short or the reverse.
