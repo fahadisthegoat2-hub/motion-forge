@@ -28,17 +28,18 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --round           # 
 #   → capture your proof into scene_qa/rN/ (hand/face crops, 12 fps strips, frame grabs, listening notes), fill every check, fix every FAIL
 node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --verify          # MUST print REVIEW PASS — pack_scene.js refuses otherwise
 ```
-## PROOF OF WORK — the gate rejects box-ticking
-- **Round 1 must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum). No first draft is that clean — look harder.
-- **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to); "minor tweaks", "polished",
-  "improved" are rejected, and the scene diff to the next round must be real (≥ 2 changed lines per FAIL). `--round` refuses while FAILs are unfixed.
-- **Every round is a fresh render**: qa_check + av_check re-run on the current scene before `--round`; the delivered scene must be the
-  last reviewed one (any edit after → another full round).
-- **Every check has its own proof**: ≥ 1 file you made in this round's `rN/` (crop, strip, grab, note) and listed in `proof`; copies of an
-  earlier round's files and files made before the round started are rejected.
-- **No copy-paste**: evidence identical to the previous round is rejected — look at THIS render and write what you see now.
+## PROOF OF WORK — the gate rejects box-ticking, and counts every honest check
+Fill checks with the tool (never hand-edit review.json): `review_log.js scene.html --check C05 --status PASS|FAIL --evidence "…" --proof rN/file.png [--fix "…"]`.
+`review_log.js scene.html --status` shows the counter (counted per round + what is still open).
+- **The review must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum) in total over all rounds.
+- **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to), and the scene must change before the
+  next round. `--round` refuses while FAILs are unfixed.
+- **Reports match the scene**: qa_check / render_video + av_check record the scene version; after any scene edit re-run them (then a new round).
+  The delivered scene must be the last reviewed one.
+- **Every check has its own proof**: ≥ 1 file in this round's `rN/` (crop, strip, grab, note), listed in `proof`. An unchanged shot may give
+  the same picture again; a check that FAILED last round must show a new one.
 - **Evidence names what, where and the value** (`"shot 3 @7.4s f222: SFX impact onset 7.41s vs fist contact 7.40s, +1f"`); "ok", "same",
-  "looks good" = FAIL.
+  "looks good" are rejected. Repeating a measurement that did not change is fine; copying a whole round after the scene changed is not.
 A check that cannot apply (e.g. no in-scene dialogue) is PASS with evidence of why (`"0 dialogue lines in SHOTS (grep dialogue:true = 0)"`).
 Long-form: wherever a check says "every shot", do every shot — chapters are reviewed one by one, never sampled.
 

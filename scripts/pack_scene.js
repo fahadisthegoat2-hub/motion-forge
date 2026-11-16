@@ -7,7 +7,7 @@
 const { launchBrowser, startStaticServer, routeAssets } = require('./lib/deps');
 const fs = require('fs'), path = require('path');
 
-const input = process.argv[2];
+const input = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!input) { console.error('usage: pack_scene.js scene.html'); process.exit(1); }
 if (!process.argv.includes('--no-review')) {   // effort gate: a final never ships without its full review (skills/quality-review)
   const r = require('child_process').spawnSync(process.execPath, [require('path').join(__dirname, 'review_log.js'), input, '--verify'], { encoding: 'utf8' });

@@ -8,7 +8,7 @@ const { ffmpeg } = require('./lib/deps');
 const { spawnSync, execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2), opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
-const input = args.find((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(out|lufs|quality|holds)$/));
+const input = args.find((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(out|lufs|quality|holds|scene)$/));
 if (!input) { console.error('usage: av_check.js video.mp4 [--out dir] [--lufs -14] [--quality good|high|epic] [--holds "a-b,c-d"]'); process.exit(1); }
 const out = opt('--out', input.replace(/\.[^.]+$/, '') + '_qa'); fs.mkdirSync(out, { recursive: true });
 const LUFS = +opt('--lufs', -14), Q = opt('--quality', null);
@@ -49,7 +49,8 @@ fs0.forEach((a, i) => { const b = fe[i] ?? dur; if (!inHold(a, b)) fails.push(`F
 const Y = [...v.matchAll(/YAVG=([\d.]+)/g)].map((m) => +m[1]); let run3 = 0;
 Y.forEach((y, i) => { run3 = y > 232 ? run3 + 1 : 0; if (run3 === 3) fails.push(`WHITE-OUT: frames around ${f(i / FPS)}s are near-white for 3+ frames — bloom/flash washing the screen`); });
 for (let i = 1; i < Y.length; i++) if (Math.abs(Y[i] - Y[i - 1]) > 90 && Y[i + 1] !== undefined && Math.abs(Y[i + 1] - Y[i - 1]) < 25) fails.push(`POP: one-frame flash at ${f(i / FPS)}s (luma ${Y[i - 1].toFixed(0)}→${Y[i].toFixed(0)}→${Y[i + 1].toFixed(0)}) — a single bad frame`);
-const rep = { video: input, duration: +dur.toFixed(2), size: [W, H], fps: FPS, audio: hasAudio, pass: fails.length === 0, fails, notes, wave: path.join(out, 'wave.png') };
+let sceneHash; try { sceneHash = opt('--scene', null) ? require('./lib/review_checks').sceneHash(opt('--scene')) : JSON.parse(fs.readFileSync(input + '.scene.json', 'utf8')).sceneHash; } catch {}
+const rep = { video: input, sceneHash, duration: +dur.toFixed(2), size: [W, H], fps: FPS, audio: hasAudio, pass: fails.length === 0, fails, notes, wave: path.join(out, 'wave.png') };
 fs.writeFileSync(path.join(out, 'av.json'), JSON.stringify(rep, null, 1));
 console.log(rep.pass ? `AV PASS · ${notes.join(' · ')} · now LOOK at ${rep.wave} against the shot times` : `AV FAIL (${fails.length}) — fix all, then re-render and run again:\n- ` + fails.slice(0, 60).join('\n- '));
 process.exit(rep.pass ? 0 : 1);

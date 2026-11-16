@@ -57,6 +57,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
     execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, ...(wav ? ['-i', wav, '-c:a', 'aac', '-b:a', '192k', '-shortest'] : []), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
     if (wav) fs.rmSync(wav, { force: true });
     console.log('video ->', output);
+    try { fs.writeFileSync(output + '.scene.json', JSON.stringify({ scene: input, sceneHash: require('./lib/review_checks').sceneHash(input) })); } catch {}   // av_check → review gate: which scene version this render is
   }
   fs.rmSync(dir, { recursive: true, force: true });
 })().catch((e) => { console.error(e); process.exit(1); });

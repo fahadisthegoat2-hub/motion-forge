@@ -17,4 +17,5 @@ const CHECKS = [
 ];
 const TIERS = { standard: { checks: 10, rounds: 2 }, high: { checks: 25, rounds: 4 }, maximum: { checks: 35, rounds: 6 } };
 const tierOf = (e) => { e = String(e || 'standard').toLowerCase(); return e.startsWith('max') ? 'maximum' : e.startsWith('high') ? 'high' : 'standard'; };
-module.exports = { CHECKS, TIERS, tierOf, checksFor: (e) => CHECKS.slice(0, TIERS[tierOf(e)].checks) };
+const sceneHash = (file) => require('crypto').createHash('sha1').update(require('fs').readFileSync(file, 'utf8')).digest('hex').slice(0, 16);
+module.exports = { sceneHash, CHECKS, TIERS, tierOf, checksFor: (e) => CHECKS.slice(0, TIERS[tierOf(e)].checks) };

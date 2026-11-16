@@ -155,3 +155,6 @@ Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 - Finals render THEMSELVES: set `CONFIG.quality` (good | high | epic), publish the page — the moment it opens it reads the device's specs and renders the MP4 on that device with sound (no buttons), then shows the finished video with Save.
   `CONFIG.autoRender = false` or `?preview` in the address turns that off. Cloud `--quality good|high|epic` only if asked (slow, no GPU).
 - Old scenes get engine fixes with `node ${CLAUDE_PLUGIN_ROOT}/scripts/upgrade_scene.js scene.html` (keeps the DIRECTION block, swaps in the current engine; re-run qa_check after).
+
+- `CONFIG.accent` — the one accent colour of the video (captions highlight + every graphic). Captions `pop`: the phrase sits centred and dim, each word lights up as spoken.
+- Clips with `loop: false` ease into their last pose (settle).

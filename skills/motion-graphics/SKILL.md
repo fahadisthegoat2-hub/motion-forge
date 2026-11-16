@@ -20,7 +20,10 @@ In the studio template use `TITLES` (see templates/SCENE_API.md). Pick the style
 - **Numbers:** `counter`, `stat` (number in a ring), `meter`, `versus` (A vs B), `countdown`, `chart`, `bars`.
 - **Structure:** `chapter`, `place` (where/when), `steps`, `timeline`, `tag` ("DAY 30"), `lower-third`/`wipe` (who), `quote`, `ticker`.
 - **Point at things:** `callout`, `ring`, `box`, `arrow`, `pulse`, `inset`.  **Ending:** `cta` (follow button that gets tapped) + the comment question.
-Every title has an entrance AND an exit (`in` / `out`: pop fade up down left right zoom drop spin blur), lands on a beat or a spoken word, and lives 1–2.5s. One graphic per beat, a different style from the previous one, never over the face.
+Every title has an entrance AND an exit (`in` / `out`: pop fade up down left right zoom drop spin blur), lands on a beat or a spoken word, and lives 1–2.5s. One graphic per beat, never over the face.
+**ONE DESIGN SYSTEM PER VIDEO (taste rule):** pick it once and keep it — one accent colour (`CONFIG.accent`, never per-title colours unless it means something: red = danger, green = success),
+one caption style, and a small family of 3–4 title styles that share shapes and motion (e.g. `kinetic` + `marker` + `stat` + `callout`). Same in/out move family for the whole video.
+No style salad: comic `burst`, `glitch`, `stamp`, speech `bubble` are special-occasion (max one, once) — never mixed in the same video. Less is more: white type, one accent, clean ease-out, small overshoot.
 Captions: `CONFIG.captions.style` = pop · karaoke · one · box, synced to the voice with `sync: take.words`.
 
 ## Design rules
