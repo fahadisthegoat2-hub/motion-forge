@@ -14,3 +14,5 @@ scenes/*/*_qa/
 scenes/*/*.pack/
 scenes/*/*_qa/
 scenes/*/*.html.bak
+scenes/*/prev*.mp4
+scenes/*/*_qa/
