@@ -126,7 +126,7 @@ S('glue', { cut: 'dip', set: 'city-day', look: 'cinematic', punch: [wt('stuck', 
   fx: [FLOOD({ level: [[0, 1.05], [dG, 1.0]], flow: 0.5, rough: [[0, 0.18], [1.4, 0.18], [2.4, 0.75, 'inOutSine']] })] });
 // 13 · "Twenty-one people died." — overhead, rescuers wading
 const dD = dur('died');
-S('died', { cut: 'dip', set: 'city-day', look: 'cinematic',
+S('died', { cut: 'dip', set: 'city-day', look: 'warm-film',
   camera: { pos: [[0, [2.6, 3.4, 4.4]], [dD, [2.3, 3.1, 3.8], 'inOutSine']], look: [[0, [0, 0.9, -0.3]]], fov: 50, handheld: 0.2 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), look: [[0, [0.9, 1.5, 0.7]], [1.0, [-0.9, 1.5, -0.6], 'inOutSine']], face: { worried: [[0, 0.9]], sad: [[0.5, 0.6]] }, acting: 'none' },
     p1: { pos: [[0, [1.8, 0, 1.6]], [1.1, [0.52, 0, 0.32], 'outSine']], rotY: [[0, -2.4]], clips: [{ clip: 'walk', start: 0, end: 1.2, speed: 0.45 }, { clip: 'idle', start: 1.0, end: 3, fade: 0.3 }], reach: [{ hand: 'right', to: 'hero.leftarm', start: 1.1, end: dD }], look: [[0, [0, 1.5, 0]]], face: { worried: [[0, 0.7]] } },
@@ -168,7 +168,7 @@ const titles = [
   { t: at('leak', 0.6), t1: at('paint', -0.05), style: 'callout', at: [-0.9, 1.2, -1.2], text: 'LEAKING', sub: 'FOR MONTHS', icon: 'drop', side: -1 },
   { t: at('paint', 0.05), t1: at('rivets'), style: 'stamp', text: 'FIX: PAINT IT BROWN', pos: [0.5, 0.11], size: 0.07, accent: '#c8742a' },
   { t: at('rivets', 0.15), t1: at('burst', -0.1), style: 'place', text: '12:30 PM', sub: 'LUNCHTIME', pos: [0.08, 0.08] },
-  { t: at('burst', 0.05), t1: at('wave'), style: 'burst', text: 'BOOM!', pos: [0.5, 0.13], size: 0.12 },
+  { t: at('burst', 0.05), t1: at('wave'), style: 'slam', text: 'IT BURSTS', pos: [0.5, 0.1], size: 0.1, accent: '#c8742a' },   // a tragedy, not a comic beat,
   { t: at('wave', 0.4), t1: at('wave', 1.9), style: 'stat', value: 25, max: 30, suffix: ' FT', text: 'HIGH', pos: [0.5, 0.13], size: 0.08 },
   { t: at('wave', 2.0), t1: at('flatten', -0.05), style: 'stat', value: 35, max: 40, suffix: ' MPH', text: 'FAST', pos: [0.5, 0.13], size: 0.08 },
   { t: at('flatten', bends + 0.05), t1: at('outrun', -0.05), style: 'tag', text: 'STEEL BENT', pos: [0.5, 0.1], accent: '#ff3b2f' },
