@@ -68,6 +68,7 @@ ALWAYS:
   Use the answers for the whole video; do not ask again before the final render. Save them in the scene (CONFIG.quality, CONFIG.effort).
 - FINALS RENDER THEMSELVES: set CONFIG.quality from the answer, publish the scene as the Artifact (pack_scene.js) — the page reads the device's specs and renders the MP4 on the user's device the moment it opens, then shows
   the finished video with Save. Never ask the user to pick a quality or press a button on the page. Cloud machines have no GPU; cloud renders only for --fast QA previews.
+- ENGINE CHANGES ARE TESTED: after any edit to templates/studio_scene.html run `scripts/selftest.js` (every style/move/set/look/effect) — it must print SELFTEST PASS.
 - ENGINE FIXES REACH OLD SCENES: before re-delivering or editing an older scene run `scripts/upgrade_scene.js scene.html`, then qa_check.
 - Deliver finished videos with a publish pack (title, description, tags, hashtags).
 - Tools: Three.js in Chrome, Node, ffmpeg (auto-installed). Never install or run Blender or Python unless the user says "Blender/Python allowed".

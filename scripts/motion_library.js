@@ -27,5 +27,5 @@ else if (cmd === 'add') {
   if (errs.length) { console.error('invalid motion: ' + errs.join('; ')); process.exit(1); }
   const prev = lib.motions[a]; lib.motions[a] = { ...m, created: prev?.created || new Date().toISOString().slice(0, 10), updated: new Date().toISOString().slice(0, 10) };
   save(); console.log((prev ? 'updated ' : 'saved ') + a);
-} else if (cmd === 'remove') { delete lib.motions[a]; save(); console.log('removed ' + a); }
+} else if (cmd === 'remove') { if (!lib.motions[a]) { console.error('no motion named ' + a); process.exit(1); } delete lib.motions[a]; save(); console.log('removed ' + a); }
 else { console.error('usage: list|show|add|remove'); process.exit(1); }

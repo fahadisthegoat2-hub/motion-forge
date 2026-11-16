@@ -8,6 +8,7 @@ const fs = require('fs'), path = require('path');
 const ROOT = process.cwd(), LIBF = path.join(ROOT, 'characters', 'library.json');
 const [cmd, id] = process.argv.slice(2);
 const lib = JSON.parse(fs.readFileSync(LIBF, 'utf8')); lib.history ??= {};
+if (!['archive', 'undo', 'list'].includes(cmd)) { console.error('usage: character_version.js archive|undo|list <id>'); process.exit(1); }
 const cur = lib.characters[id]; if (!cur && cmd !== 'list') { console.error('unknown character ' + id); process.exit(1); }
 const hdir = path.join(ROOT, 'characters', 'history', id || '_'); const save = () => fs.writeFileSync(LIBF, JSON.stringify(lib, null, 2) + '\n');
 const glbOf = (e) => e.file ? path.join(ROOT, e.file) : null, thumb = path.join(ROOT, 'characters', 'thumbs', id + '.jpg');
@@ -26,8 +27,8 @@ if (cmd === 'archive') {
   const prev = hist.pop(); const currentSnap = snapshot();   // keep the current one too (undo can be undone)
   const restored = prev.entry; restored.version = Math.max(currentSnap.version, prev.version) + 1; restored.restoredFrom = 'v' + prev.version;
   lib.characters[id] = restored;
-  if (prev.glb && restored.file) fs.copyFileSync(path.join(ROOT, prev.glb), path.join(ROOT, restored.file));
-  if (prev.thumb) fs.copyFileSync(path.join(ROOT, prev.thumb), thumb);
+  if (prev.glb && restored.file && fs.existsSync(path.join(ROOT, prev.glb))) fs.copyFileSync(path.join(ROOT, prev.glb), path.join(ROOT, restored.file));
+  if (prev.thumb && fs.existsSync(path.join(ROOT, prev.thumb))) fs.copyFileSync(path.join(ROOT, prev.thumb), thumb);
   save(); console.log(`restored ${id} to its v${prev.version} look (saved as v${restored.version}); the replaced look stays in history`);
 } else if (cmd === 'list') {
   for (const [cid, h] of Object.entries(lib.history)) if (!id || cid === id) console.log(cid + ': ' + h.map((s) => 'v' + s.version + ' (' + s.archivedAt.slice(0, 10) + ')').join(', '));

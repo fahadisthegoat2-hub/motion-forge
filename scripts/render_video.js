@@ -21,6 +21,7 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
   await page.waitForFunction(() => window.__mf && typeof window.__mf.render === 'function' && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });
   const mf = await page.evaluate(() => ({ duration: __mf.duration, fps: __mf.fps, width: __mf.width, height: __mf.height, chapters: __mf.chapters }));
   const ch = opt('--chapter') && mf.chapters ? mf.chapters[+opt('--chapter') - 1] : null;
+  if (opt('--chapter') && !ch) { await browser.close(); server.close(); console.error(`no chapter ${opt('--chapter')} (the scene has ${mf.chapters?.length || 0})`); process.exit(1); }
   const T0 = ch ? ch.start : +opt('--start', 0), T1 = ch ? ch.end : +opt('--end', mf.duration);
   const Q = { good: [1, 30, 18], high: [1, 60, 16], epic: [4 / 3, 60, 14] }[opt('--quality', '')];
   const bw = mf.width || 1920, bh = mf.height || 1080;

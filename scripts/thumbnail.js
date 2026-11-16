@@ -22,8 +22,9 @@ const [W, H] = vertical ? [1080, 1920] : [1280, 720];
   await page.goto(server.origin + path.resolve(input) + (flag('--fast') ? '?fast=1' : ''));
   await page.waitForFunction(() => window.__mf && window.__mfReady !== false, null, { timeout: 900000, polling: 1000 });
   const n = await page.evaluate(([w, h]) => { document.getElementById('mf-panel')?.remove(); window.__mfManual = true; window.__mf.setSize(w, h); return window.__mf.thumbs().length; }, [W, H]);
-  if (!n) { console.error('No THUMBS in the scene. Add: const THUMBS = [{ shot, t, text, hi, accent, face, camera, arrow, circle }];'); process.exit(1); }
+  if (!n) { await browser.close(); server.close(); console.error('No THUMBS in the scene. Add: const THUMBS = [{ shot, t, text, hi, accent, face, camera, arrow, circle }];'); process.exit(1); }
   const list = opt('--only') ? [+opt('--only')] : [...Array(n).keys()], out = [];
+  if (list.some((i) => !(i >= 0 && i < n))) { await browser.close(); server.close(); console.error(`--only must be 0–${n - 1} (the scene has ${n} THUMBS)`); process.exit(1); }
   for (const i of list) {
     await page.evaluate((i) => window.__mf.thumb(window.__mf.thumbs()[i]), i);
     const f = path.join(outDir, `thumb_${i}.png`); await page.locator('canvas').first().screenshot({ path: f }); out.push(f);

@@ -14,6 +14,7 @@ const POS = { explosion: [0.6, 0, -2], fire: [0.5, 0, -0.5], smoke: [0.5, 0, -1]
   'falling-leaves': [0, 2, 0], sandstorm: [-4, 0, -2], bubbles: [0, 0, 0], 'poison-gas': [0.6, 0, -0.5], 'dust-burst': [0.2, 0.02, 0.4], 'blood-splash': [-0.5, 1.2, 0.2], 'ice-shatter': [0.4, 1.1, 0.3], 'electric-arc': [0.6, 1.0, 0.1] };
 const args = process.argv.slice(2), only = args.includes('--only') ? (args[args.indexOf('--only') + 1] || '').split(',').filter(Boolean) : [];
 const names = [...Object.keys(BUILTIN), ...Object.keys(LIB)].filter((n) => (only.length ? only.includes(n) : args.includes('--all') || !fs.existsSync(path.join(OUT, n + '.mp4'))));
+const unknown = only.filter((n) => !(n in BUILTIN) && !(n in LIB)); if (unknown.length) { console.error('unknown effect(s): ' + unknown.join(', ') + ' — add them to fx/library.json first (vfx_library.js add)'); process.exit(1); }
 if (!names.length) { console.log('all previews exist'); process.exit(0); }
 const FPS = 30, D = 3, W = 1080, H = 720;   // HD 3:2 = the VFX Library card shape (nothing cropped), whole effect (D*FPS must be an integer → no clip drift)
 const LONG = /explosion|meteor|black-hole|portal|fireworks|lightning|teleport|ground-slam|ice-shatter/;
@@ -23,10 +24,11 @@ const shots = names.map((n) => ({ name: n, dur: LONG.test(n) ? D + 1 : D, set: /
   fx: [{ type: n, t: 0.15, start: 0, end: 99, pos: POS[n] || [0.5, 1, 0] }] }));
 let tpl = fs.readFileSync(path.join(ROOT, 'templates', 'studio_scene.html'), 'utf8').split('\n');
 const a = tpl.findIndex((l) => l.startsWith('const CAST = {')), b = tpl.findIndex((l) => l.includes('END DIRECTION'));
+if (a < 0 || b < a) { console.error('template DIRECTION block not found'); process.exit(1); }
 tpl.splice(a, b - a, "const CAST = { hero: { character: 'jake' } };\nconst SHOTS = " + JSON.stringify(shots) + ";\nconst CAPTIONS = []; const TITLES = [];");
 const scene = path.join(ROOT, 'scenes', '_vfxprev.html'); fs.mkdirSync(path.dirname(scene), { recursive: true }); fs.writeFileSync(scene, tpl.join('\n'));
 const tmp = path.join(ROOT, '.motion-forge', 'vfxprev'); fs.mkdirSync(tmp, { recursive: true });
-execFileSync('node', [path.join(__dirname, 'render_video.js'), scene, path.join(tmp, 'all.mp4'), '--fast', '--width', String(W), '--height', String(H), '--fps', String(FPS), '--frames-only'], { stdio: 'inherit' });
+execFileSync(process.execPath, [path.join(__dirname, 'render_video.js'), scene, path.join(tmp, 'all.mp4'), '--fast', '--width', String(W), '--height', String(H), '--fps', String(FPS), '--frames-only'], { stdio: 'inherit' });
 const { ffmpeg } = require('./lib/deps'), fps = FPS; let at = 0;
 names.forEach((n, i) => { const per = Math.round(shots[i].dur * fps), from = at; at += per; execFileSync(ffmpeg(), ['-y', '-loglevel', 'error', '-framerate', String(fps), '-start_number', String(from), '-i', path.join(tmp, 'all_frames', 'f%05d.png'), '-frames:v', String(per),
   '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'slow', '-movflags', '+faststart', path.join(OUT, n + '.mp4')]); });

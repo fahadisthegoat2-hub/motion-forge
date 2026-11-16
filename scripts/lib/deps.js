@@ -44,12 +44,14 @@ async function launchBrowser(opts = {}) {
 }
 
 // System ffmpeg if present, else a bundled static ffmpeg (auto-downloaded once).
+let _ff;
 function ffmpeg() {
-  try { execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' }); return 'ffmpeg'; } catch {}
+  if (_ff) return _ff;
+  try { execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' }); return (_ff = 'ffmpeg'); } catch {}
   let p = tryReq('ffmpeg-static');
   if (!p) { npmInstall(['ffmpeg-static@5']); p = tryReq('ffmpeg-static'); }
   if (!p) throw new Error('Could not set up ffmpeg.');
-  return p;
+  return (_ff = p);
 }
 
 // Local three.js copy so cloud sessions render even if the CDN is blocked.
