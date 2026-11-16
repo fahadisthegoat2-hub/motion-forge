@@ -1480,8 +1480,11 @@ const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
   crouch: 'crouchidleloop' };
 // plain name → library key. A built-in alias wins over a name that only exists because "_Loop"/"_Fwd" was stripped (jump ≠ Jump_Loop); your own clip files always win.
 const CLIP_TUNE = { walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
-  carry: { spine: [0.46, 0, 0], spine1: [0.1, 0, 0], spine2: [-0.14, 0, 0], neck: [-0.04, 0, 0], head: [0.2, 0, 0] },      // the library clip leans far back and looks at the sky
-  kneel: { spine: [-0.14, 0, 0], spine1: [-0.14, 0, 0], spine2: [-0.78, 0, 0], neck: [0.22, 0, 0], head: [-0.12, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
+  walkcarryloop: { spine: [0.46, 0, 0], spine1: [0.1, 0, 0], spine2: [-0.14, 0, 0], neck: [-0.04, 0, 0], head: [0.2, 0, 0] },      // the library clip leans far back and looks at the sky
+  kneel: { spine: [-0.3, 0, 0], spine1: [-0.1, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
+CLIP_TUNE.walkcarry = CLIP_TUNE.walkcarryloop;   // straighten() then lines the back up
+// moves that are MEANT to bend the back (crouch, fight, fall, work on the ground…): left as the clip has them. Everything else is straightened every frame (straighten()).
+const BENT = /crouch|zombie|roll|slide|swimfwd|^swim$|knockback|death|^die$|lay|^lie$|getup|wakeup|climb|harvest|plant|push|rail|ninja|jump|^land$|sword|punch|^jab$|^cross$|melee|^hook$|throw|chop|pistolaim|^fix$|fixing|chestopen|^open$|shielddash|sittingexit|standup|sadpose|pickup|^hit/i;
 function clipKey(name) { const k = normName(name), a = CLIP_ALIAS[k]; return a && clipLib[a] && (!clipLib[k] || clipLib[k].derived) ? a : k; }
 function clipFor(ch, name) {
   let k = clipKey(name); ch.actions[k] ??= (() => {
@@ -1750,6 +1753,16 @@ function applyReach(ch, cast, t) {
     }
   }
 }
+// Upright back: the library clips bake a slouch (upper back folded over the belly, head pushed forward = hunchback on every character).
+// Measured on the real skeleton each frame and taken out: lower and upper back line up (≤4° curve), neck ≤12° ahead of the chest, gaze kept.
+function straighten(ch, k) {
+  const B = ch.bones; if (!B.hips || !B.spine1 || !B.spine2 || !B.neck || !B.head) return;
+  const P = (b) => ch.root.worldToLocal(b.getWorldPosition(new THREE.Vector3())), ang = (a, b) => Math.atan2(b.z - a.z, b.y - a.y);
+  const kink = () => { const h = P(B.hips), s2 = P(B.spine2), n = P(B.neck); return ang(s2, n) - ang(h, s2) - 0.07; };
+  let ex = kink(); if (ex > 0) { rotateInRootSpace(ch, B.spine1, -ex * k * 0.45, 0); ex = kink(); if (ex > 0) rotateInRootSpace(ch, B.spine2, -ex * k, 0); }
+  const s2 = P(B.spine2), n = P(B.neck), hd = P(B.head), eh = ang(n, hd) - ang(s2, n) - 0.21;
+  if (eh > 0) { rotateInRootSpace(ch, B.neck, -eh * k, 0); rotateInRootSpace(ch, B.head, eh * k, 0); }
+}
 function rotateInRootSpace(ch, bone, pitch, yaw, roll = 0) {
   if (!bone) return;
   const rootQ = ch.root.getWorldQuaternion(_q3);
@@ -1793,6 +1806,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
     for (const [bn, e] of Object.entries(tn)) if (Array.isArray(e)) rotateInRootSpace(ch, B[bn], e[0] * tw, e[1] * tw, e[2] * tw);
     const lowK = tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1;
     if (tn.pose && lowK > 0.01 && POSES[tn.pose] && !(cast?.gestures || []).some((g) => t > g.start - 0.2 && t < g.end + 0.4)) applyPose(ch, POSES[tn.pose], { type: tn.pose, start: -1e6, end: 1e6, amount: tw * lowK }, t); }
+  if (ch._upright > 0.01) straighten(ch, ch._upright);
   applyGestures(ch, cast, t);
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
@@ -2609,7 +2623,7 @@ function applyClips(ch, cast, t) {
     if (e.loop === false && lt > d * 0.8) lt = d * (0.8 + 0.2 * (1 - (1 - Math.min(1, (lt - d * 0.8) / (d * 0.4))) ** 2));   // one-shot clips ease into their last pose (settle) instead of stopping dead
     a.time = e.loop === false ? Math.min(lt, d - 1e-4) : lt % d; a.setEffectiveWeight(Math.max(a.getEffectiveWeight(), w / sum));
   }
-  ch.mixer.update(0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[normName(e.clip)] || CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
+  ch.mixer.update(0); ch._upright = ws.reduce((s0, [e, w]) => s0 + (BENT.test(normName(e.clip)) ? 0 : w / sum), 0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[normName(e.clip)] || CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
   for (const [k, b] of Object.entries(ch.bones)) { const s = (P[k] ??= { q: new THREE.Quaternion(), p: new THREE.Vector3() }); s.q.copy(b.quaternion); s.p.copy(b.position); }
 }
 function cameraAt(shot, lt, tGlobal) {
@@ -2767,6 +2781,13 @@ window.__mf = {
     THUMB = T || null; if (T) render(0); },   // render one thumbnail (scripts/thumbnail.js)
 };
 window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
+  clips: () => Object.keys(clipLib),
+  posture(id) {   // spine shape in the character's own space (deg): lean = hips→neck from vertical (+ forward), kink = bend between lower and upper back, head = neck→head from vertical
+    const ch = characters[id], B = ch?.bones; if (!B?.hips || !B.spine1 || !B.neck || !B.head) return null; ch.root.updateMatrixWorld(true);
+    const P = (b) => ch.root.worldToLocal((b || B.spine1).getWorldPosition(new THREE.Vector3())), h = P(B.hips), s1 = P(B.spine1), s2 = P(B.spine2), n = P(B.neck), hd = P(B.head);
+    const ang = (a, b) => { const d = b.clone().sub(a); return Math.atan2(d.z, d.y) * 57.3; }, lo = ang(h, s2), up = ang(s2, n);
+    return { lean: Math.round(ang(h, n)), lower: Math.round(lo), upper: Math.round(up), kink: Math.round(up - lo), head: Math.round(ang(n, hd)), low: +(h.y / ch.rest.hips.p.y).toFixed(2) };
+  },
   pacing() {   // beats the viewer feels: cuts, titles, caption changes, effects, punch-ins, sound hits
     const ev = collectSound().events.map((e) => e.t), beats = [...ev]; let acc = 0;
     for (const sh of SHOTS) { beats.push(acc); for (const f of sh.fx || []) beats.push(acc + (f.t ?? f.start ?? 0)); for (const p of sh.punch || []) beats.push(acc + p); acc += sh.dur; }

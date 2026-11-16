@@ -69,7 +69,7 @@ ALWAYS:
   Use the answers for the whole video; do not ask again before the final render. Save them in the scene (CONFIG.quality, CONFIG.effort).
 - FINALS RENDER THEMSELVES: set CONFIG.quality from the answer, publish the scene as the Artifact (pack_scene.js) — the page reads the device's specs and renders the MP4 on the user's device the moment it opens, then shows
   the finished video with Save. Never ask the user to pick a quality or press a button on the page. Cloud machines have no GPU; cloud renders only for --fast QA previews.
-- ENGINE CHANGES ARE TESTED: after any edit to templates/studio_scene.html run `scripts/selftest.js` (every style/move/set/look/effect) — it must print SELFTEST PASS.
+- ENGINE CHANGES ARE TESTED: after any edit to templates/studio_scene.html run `scripts/selftest.js` (every style/move/set/look/effect) — it must print SELFTEST PASS. Any change to clips, CLIP_TUNE, BENT, poses, gestures or retargeting also runs `scripts/posture_check.js <character>` (every clip + gesture, measures the spine: no hunchback, no kink, no lean-back) — it must print POSTURE PASS for every character used. Never call a posture bug fixed without it.
 - ENGINE FIXES REACH OLD SCENES: before re-delivering or editing an older scene run `scripts/upgrade_scene.js scene.html`, then qa_check.
 - BUILT FOR THE ALGORITHM: every video is designed from skills/youtube-algorithm (idea + title first, hook on frame 1, retention structure, right length, safe zones, loop/hand-off ending).
 - Deliver finished videos with a publish pack (publish.md) that passes `scripts/publish_check.js` (titles, description, ≤ 3 hashtags, pinned question, cover/thumbnail, related video/end screen, upload checklist).
