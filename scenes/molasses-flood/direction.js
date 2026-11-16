@@ -126,7 +126,7 @@ S('glue', { cut: 'dip', set: 'city-day', look: 'cinematic', punch: [wt('stuck', 
   fx: [FLOOD({ level: [[0, 1.05], [dG, 1.0]], flow: 0.5, rough: [[0, 0.18], [1.4, 0.18], [2.4, 0.75, 'inOutSine']] })] });
 // 13 · "Twenty-one people died." — overhead, rescuers wading
 const dD = dur('died');
-S('died', { cut: 'dip', set: 'city-day', look: 'warm-film',
+S('died', { cut: 'dip', set: 'city-day', look: 'clean-cg',
   camera: { pos: [[0, [2.6, 3.4, 4.4]], [dD, [2.3, 3.1, 3.8], 'inOutSine']], look: [[0, [0, 0.9, -0.3]]], fov: 50, handheld: 0.2 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), look: [[0, [0.9, 1.5, 0.7]], [1.0, [-0.9, 1.5, -0.6], 'inOutSine']], face: { worried: [[0, 0.9]], sad: [[0.5, 0.6]] }, acting: 'none' },
     p1: { pos: [[0, [1.8, 0, 1.6]], [1.1, [0.52, 0, 0.32], 'outSine']], rotY: [[0, -2.4]], clips: [{ clip: 'walk', start: 0, end: 1.2, speed: 0.45 }, { clip: 'idle', start: 1.0, end: 3, fade: 0.3 }], reach: [{ hand: 'right', to: 'hero.leftarm', start: 1.1, end: dD }], look: [[0, [0, 1.5, 0]]], face: { worried: [[0, 0.7]] } },
