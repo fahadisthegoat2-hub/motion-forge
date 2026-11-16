@@ -70,7 +70,7 @@ S('leak', { set: 'city-day', look: 'warm-film', punch: [0.6],
   fx: [{ type: 'molasses-leak', start: 0, end: dur('leak'), pos: [-0.9, 4.5, -1.2] }, FLOOD({ size: [1.6, 1.6], res: [20, 20], pos: [-0.9, 0, -1.2], level: [[0, 0.015], [dur('leak'), 0.03]], flow: 0.3 })] });
 // 6 · "Paint it brown."
 S('paint', { cut: 'whip', set: 'city-day', look: 'warm-film', punch: [0.15],
-  camera: { move: 'push', target: 'boss', size: 'mcu', az: -18 },
+  camera: { move: 'push', target: 'boss', size: 'mcu', az: -38 },   // key light falls across his face from this side
   cast: { boss: { pos: [[0, [-2.4, 0, 1.6]]], rotY: [[0, 2.2]], clips: idle(dur('paint')), look: [[0, 'camera']], gestures: [{ type: 'present', start: 0.05, end: dur('paint') }], face: { smirk: [[0, 0.8]], smile: [[0.3, 0.4]] } } } });
 // 7 · "Then, at lunchtime, the rivets start popping. Like machine-gun fire."
 const tR = dur('rivets'), pop0 = wt('popping', T.rivets) - T.rivets;
@@ -92,7 +92,7 @@ S('gun', { cut: 'smash', set: 'city-day', look: 'cinematic',
 S('burst', { cut: 'flash', set: 'city-day', look: 'cinematic', afterimage: 0.5,
   camera: { pos: [[0, [1.3, 1.5, 3.4]], [dur('burst'), [1.2, 1.6, 2.9], 'outCubic']], look: [[0, [0, 3.6, -12]]], fov: 62, handheld: 1.4 },
   cast: { hero: { pos: [[0, [0.25, 0, -0.85]]], rotY: [[0, 0]], clips: idle(dur('burst')), look: [[0, [0, 6, -12]]], gestures: [{ type: 'shield', start: 0, end: dur('burst') }], face: { scream: [[0.05, 1]] }, acting: 'none' } },
-  fx: [{ type: 'molasses-burst', t: 0.05, pos: [0, 5, -12], scale: 2.6 }, FLOOD({ front: [[0, -15], [dur('burst'), -15 + 7 * dur('burst'), 'outCubic']], crest: [[0, 2], [dur('burst'), 7.6, 'outCubic']] })],
+  fx: [{ type: 'molasses-burst', t: 0.05, pos: [0, 5, -14], scale: 2.1 }, FLOOD({ front: [[0, -15], [dur('burst'), -15 + 7 * dur('burst'), 'outCubic']], crest: [[0, 2], [dur('burst'), 7.6, 'outCubic']] })],
   sfx: [{ t: 0.05, type: 'thunder', gain: 0.6 }] });
 // 9 · "A wave twenty-five feet high, moving thirty-five miles an hour." — the wave charges at camera
 const dW = dur('wave');
@@ -123,22 +123,22 @@ S('glue', { cut: 'dip', set: 'city-day', look: 'cinematic', punch: [wt('stuck', 
   camera: { move: 'push', target: 'hero', size: 'mls', az: 18, eye: 1.45, handheld: 0.5 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dG), bones: stuck(dG), gestures: [{ type: 'plead', start: 0.6, end: dG }], look: [[0, [0, 0.9, 0.6]], [1.5, 'camera', 'inOutSine']],
     face: { worried: [[0, 0.8]], scared: [[1.2, 0.9]], sad: [[1.8, 0.5]] }, acting: 'none' } },
-  fx: [FLOOD({ level: [[0, 1.05], [dG, 1.0]], flow: 0.5, rough: 0.28 })] });
+  fx: [FLOOD({ level: [[0, 1.05], [dG, 1.0]], flow: 0.5, rough: [[0, 0.18], [1.4, 0.18], [2.4, 0.75, 'inOutSine']] })] });
 // 13 · "Twenty-one people died." — overhead, rescuers wading
 const dD = dur('died');
 S('died', { cut: 'dip', set: 'city-day', look: 'cinematic',
-  camera: { pos: [[0, [3.2, 6.2, 5.4]], [dD, [2.9, 5.6, 4.8], 'inOutSine']], look: [[0, [0, 0.6, 0]]], fov: 50, handheld: 0.2 },
-  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), acting: 'none' },
-    p1: { pos: [[0, [2.5, 0, 2.5]], [dD, [1.6, 0, 1.6], 'linear']], rotY: [[0, -2.35]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] },
-    p2: { pos: [[0, [-2.8, 0, -2]], [dD, [-2.0, 0, -1.4], 'linear']], rotY: [[0, 0.95]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] } },
+  camera: { pos: [[0, [2.6, 3.4, 4.4]], [dD, [2.3, 3.1, 3.8], 'inOutSine']], look: [[0, [0, 0.9, -0.3]]], fov: 50, handheld: 0.2 },
+  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dD), bones: stuck(dD), look: [[0, [0.9, 1.5, 0.7]], [1.0, [-0.9, 1.5, -0.6], 'inOutSine']], face: { worried: [[0, 0.9]], sad: [[0.5, 0.6]] }, acting: 'none' },
+    p1: { pos: [[0, [1.8, 0, 1.6]], [1.1, [0.52, 0, 0.32], 'outSine']], rotY: [[0, -2.4]], clips: [{ clip: 'walk', start: 0, end: 1.2, speed: 0.45 }, { clip: 'idle', start: 1.0, end: 3, fade: 0.3 }], reach: [{ hand: 'right', to: 'hero.leftarm', start: 1.1, end: dD }], look: [[0, [0, 1.5, 0]]], face: { worried: [[0, 0.7]] } },
+    p2: { pos: [[0, [-1.9, 0, -1.4]], [1.2, [-0.58, 0, -0.36], 'outSine']], rotY: [[0, 0.95]], clips: [{ clip: 'walk', start: 0, end: 1.3, speed: 0.45 }, { clip: 'idle', start: 1.1, end: 3, fade: 0.3 }], reach: [{ hand: 'left', to: 'hero.rightarm', start: 1.2, end: dD }], look: [[0, [0, 1.5, 0]]], face: { worried: [[0, 0.7]] } } },
   fx: [FLOOD({ level: [[0, 0.95]], flow: 0.4, rough: 0.55 })] });
 // 14 · "The harbor stayed brown for months." — the whole street a brown lake, sun going down
 const dH = dur('harbor');
-S('harbor', { set: 'city-day', look: SUN,
-  camera: { pos: [[0, [5, 5, 12]], [dH, [5.5, 9, 14], 'inOutSine']], look: [[0, [0, 0.5, -8]], [dH, [0, 0, -14], 'inOutSine']], fov: 55 },
-  cast: { p1: { pos: [[0, [1.0, 0, 3]], [dH, [1.0, 0, 3 - 0.6 * dH], 'linear']], rotY: [[0, P]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] },
-    p2: { pos: [[0, [-1.6, 0, 1.4]], [dH, [-1.6, 0, 1.4 - 0.6 * dH], 'linear']], rotY: [[0, P]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }] } },
-  fx: [FLOOD({ level: [[0, 0.7]], flow: 0.3, rough: 0.3 })] });
+S('harbor', { set: 'city-day', look: 'warm-film',
+  camera: { pos: [[0, [1.8, 1.5, 12]], [dH, [1.6, 2.4, 13], 'inOutSine']], look: [[0, [0, 1.0, -30]], [dH, [0, 0.8, -30], 'inOutSine']], fov: 55 },
+  cast: { p1: { pos: [[0, [1.2, 0, 2]], [dH, [1.2, 0, 2 + 0.65 * dH], 'linear']], rotY: [[0, 0]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }], face: { sad: [[0, 0.6]] } },
+    p2: { pos: [[0, [-1.4, 0, -1]], [dH, [-1.4, 0, -1 + 0.65 * dH], 'linear']], rotY: [[0, 0]], clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.45 }], face: { sad: [[0, 0.5]] } } },
+  fx: [FLOOD({ level: [[0, 0.7]], flow: 0.3, rough: 0.3, color: '#331706' })] });
 // 15 · "And on hot days, locals swear Boston still smells sweet." — the same street today, a sniff
 const dS = dur('sweet');
 S('sweet', { cut: 'zoom', set: 'city-day', look: SUN,
@@ -155,7 +155,8 @@ S('smell', { set: 'city-day', look: SUN,
     look: [[0, [0, 4, 4]], [sniff + 1, 'camera', 'inOutSine']], face: { squint: [[0, 0], [sniff, 0.8]], smile: [[sniff + 0.4, 0], [sniff + 0.9, 0.7, 'outBack']] } } },
   fx: [{ type: 'dust', count: 200 }] });
 // 16 · "Would you have made it out?" — loop back to the wave
-S('question', { ...hookShot('question'), cut: 'glitch', flash: [] });
+{ const q = hookShot('question'), dq = dur('question'); q.cast.hero.bones = lookBack(0.1, dq - 0.7); q.cast.hero.look = [[dq - 0.75, 'camera']]; q.cast.hero.face = { scared: [[0, 1], [dq - 0.6, 0.6]], worried: [[dq - 0.7, 0], [dq - 0.3, 0.9, 'outBack']] };
+  S('question', { ...q, cut: 'glitch', flash: [] }); }   // ending: he snaps a look to us on the question
 
 // ---------- motion graphics ----------
 const titles = [
@@ -163,7 +164,7 @@ const titles = [
   { t: at('molasses', 0.25), t1: at('boston'), style: 'stamp', text: 'MOLASSES', pos: [0.5, 0.12], size: 0.11, accent: '#c8742a' },
   { t: at('boston', 0.15), t1: at('gallons', -0.1), style: 'place', text: 'BOSTON, 1919', sub: 'JANUARY 15', pos: [0.08, 0.08] },
   { t: at('boston', 2.3), t1: at('gallons', -0.05), style: 'arrow', dir: 'up', text: '50-FT TANK', pos: [0.74, 0.08], size: 0.045 },
-  { t: at('gallons', 0.1), t1: at('leak', -0.05), style: 'counter', from: 0, to: 2300000, suffix: '', sub: 'GALLONS OF MOLASSES', pos: [0.5, 0.12], size: 0.08, dur: 1.4 },
+  { t: at('gallons', 0.1), t1: at('leak', -0.05), style: 'counter', from: 0, to: 2000000, suffix: '+', sub: 'GALLONS OF MOLASSES', pos: [0.5, 0.12], size: 0.08, dur: 1.4 },
   { t: at('leak', 0.6), t1: at('paint', -0.05), style: 'callout', at: [-0.9, 1.2, -1.2], text: 'LEAKING', sub: 'FOR MONTHS', icon: 'drop', side: -1 },
   { t: at('paint', 0.05), t1: at('rivets'), style: 'stamp', text: 'FIX: PAINT IT BROWN', pos: [0.5, 0.11], size: 0.07, accent: '#c8742a' },
   { t: at('rivets', 0.15), t1: at('burst', -0.1), style: 'place', text: '12:30 PM', sub: 'LUNCHTIME', pos: [0.08, 0.08] },
@@ -173,8 +174,8 @@ const titles = [
   { t: at('flatten', bends + 0.05), t1: at('outrun', -0.05), style: 'tag', text: 'STEEL BENT', pos: [0.5, 0.1], accent: '#ff3b2f' },
   { t: at('glue', 1.2), t1: at('died', -0.05), style: 'callout', at: 'hero.hips', text: 'STUCK', sub: 'THICK AS GLUE', icon: 'warning', side: 1 },
   { t: at('died', 0.1), t1: at('harbor', -0.05), style: 'counter', from: 0, to: 21, sub: 'LIVES LOST', pos: [0.5, 0.085], size: 0.095, dur: 0.9 },
-  { t: at('harbor', 0.2), t1: at('sweet', -0.05), style: 'tag', text: 'BROWN FOR MONTHS', pos: [0.5, 0.1], accent: '#c8742a' },
-  { t: at('smell', sniff + 0.4), t1: at('question', -0.05), style: 'bubble', at: 'hero.head', text: 'syrup...?', thought: true },
+  { t: at('harbor', 0.2), t1: at('sweet', -0.05), style: 'tag', text: 'HARBOR: BROWN FOR MONTHS', pos: [0.5, 0.1], accent: '#c8742a' },
+  { t: at('smell', sniff + 0.4), t1: at('question', -0.05), style: 'bubble', at: 'hero.head', offset: [0.16, -0.05], text: 'syrup...?', thought: true },
   { t: at('question', 0.1), t1: END, style: 'kinetic', text: 'WOULD YOU|MAKE IT|OUT?', hi: ['OUT?'], pos: [0.5, 0.12], size: 0.1 },
 ];
 
