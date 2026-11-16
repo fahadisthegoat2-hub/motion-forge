@@ -74,7 +74,7 @@ S('face', { cut: 'whip',
       face: { worried: [[0, 0.9]] }, acting: 'none' } },
   fx: [RAIN, ...burn()] });
 // 8 · "But that's not the worst part."
-S('worst', { cut: 'glitch', punch: [0.55],
+S('worst', { cut: 'glitch', look: 'cinematic', punch: [0.55],
   camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 15 },
   cast: { hero: { pos: [[0, [-0.4, 0, 0.2]]], rotY: [[0, 1.2]], clips: idle(dur('worst')), look: [[0, [2, 1.6, 0]], [0.5, [1.5, 1.7, -2.5], 'outCubic']], face: { shock: [[0, 0.6], [0.5, 1, 'outBack']] }, acting: 'none' } },
   fx: [RAIN] });
@@ -108,7 +108,7 @@ S('jacket', { cut: 'zoom', punch: [2.0],
   cast: { dbl: { pos: [[0, [0, 0, 4.2]]], rotY: [[0, 0]], clips: idle(dur('jacket')), bones: { head: [[0, [0, 0, 0]], [0.4, [0.55, 0, 0], 'outCubic']] },
     look: [[0, [0, 1.6, 8]], [0.35, [0, 1.0, 4.5], 'outCubic']], reach: [{ hand: 'left', to: 'dbl.chest', offset: [0.08, 0, 0.12], start: 0.7, end: dur('jacket') }], hands: { left: 'soft' },
     face: { shock: [[1.9, 0], [2.1, 1, 'outBack']], worried: [[0, 0.6]] }, acting: 'none' } },
-  fx: [RAIN, ...burn()] });
+  fx: [RAIN, ...burn(), { type: 'fire', start: 0, end: 9, pos: [0.08, 1.25, 4.35], scale: 0.12 }, { type: 'smoke', start: -2, end: 9, pos: [0.08, 1.3, 4.35], scale: 0.35, color: '#3a3836', opacity: 0.8 }] });
 // 14 · "Tomorrow at 3:33, he's the one screaming." — the loop closes
 S('tomorrow', { cut: 'dip',
   camera: { move: 'crane-down', target: 'dbl', size: 'ms', az: -60, handheld: 0.6 },
@@ -119,7 +119,7 @@ S('tomorrow', { cut: 'dip',
 S('question', { cut: 'zoom', look: 'cinematic',
   camera: { pos: [[0, [-2.2, 1.55, 1.4]], [dur('question'), [-3.2, 1.75, 2.1], 'inOutSine']], look: [[0, [0, 1.45, 0]]], fov: 40, handheld: 0.4 },
   cast: FACEOFF(dur('question')),
-  fx: [RAIN, ...burn()] });
+  fx: [RAIN, burn()[1]] });
 
 const titles = [
   { t: 0.05, t1: at('other'), style: 'slam', text: 'HE MET\nHIMSELF', pos: [0.5, 0.1], size: 0.1, accent: ACC },
