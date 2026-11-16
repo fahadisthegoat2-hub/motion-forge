@@ -2766,8 +2766,13 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
       out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
+    const overlaps = [], vis = Object.values(characters).filter((c) => c.root.visible && c.bones.hips);   // bodies melting into each other: two torsos / a head or hand inside someone else
+    for (let i = 0; i < vis.length; i++) for (let j = 0; j < vis.length; j++) { if (i === j) continue; const A = vis[i], B = vis[j], hb = B.bones.hips.getWorldPosition(V()), nb = (B.bones.neck || B.bones.hips).getWorldPosition(V());
+      const near = (p, r) => { const k = clamp(p.clone().sub(hb).dot(nb.clone().sub(hb)) / Math.max(1e-6, nb.distanceToSquared(hb))); return p.distanceTo(hb.clone().lerp(nb, k)) < r; };
+      if (i < j && near(A.bones.hips.getWorldPosition(V()), 0.3)) overlaps.push({ a: A.id, b: B.id, part: 'body' });
+      for (const [bn, r] of [['head', 0.2], ['lefthand', 0.09], ['righthand', 0.09]]) if (A.bones[bn] && near(A.bones[bn].getWorldPosition(V()), r) && !(shot.cast?.[A.id]?.reach || []).some((R) => String(R.to).startsWith(B.id))) overlaps.push({ a: A.id, b: B.id, part: bn }); }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
-    return { shot: shot.name, t: tg, local, chars: out, titles };
+    return { shot: shot.name, t: tg, local, chars: out, titles, overlaps };
   } };
 const clock = new THREE.Clock();
 let _pv = { last: 0, avg: 33, scale: 1, n: 0 };

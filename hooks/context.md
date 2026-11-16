@@ -54,6 +54,8 @@ ALWAYS:
 - Every shot moves: named camera move, clips + posed gestures (hand IK + fingers) + face keys; a transition (cut) every 2–3 shots; titles/captions never cover faces.
 - ONE NARRATOR, NEVER ON SCREEN: the voiceover is an invisible narrator. The characters are the MAIN CHARACTERS of the story — they live it and act it out. They never lip-sync the narration, never explain to the camera,
   never stand there "talking". No `talk` on any character (only a real in-scene line may use `dialogue: true`). qa_check fails a character that mouths the narrator.
+- NOTHING MORPHS INTO ANYTHING: bodies, limbs, props and sets never pass through or melt into each other (qa_check fails OVERLAP / hands inside the body); a big posture change (lie ↔ stand ↔ sit ↔ kneel)
+  happens on a CUT or with a real transition clip — never as a slow blend between two clips; shots change with cuts/whips, never dissolves or shape-morphs.
 - HANDS ARE NEVER WRONG: gestures come from the posed list (SCENE_API → Gestures) and `hands:` finger poses; a clip made for a prop is only used WITH the prop (`carry` → model `attach: 'hero.hands'`; held things `grip: true`);
   look at every hand in the QA sheet. qa_check fails folded/twisted wrists, hands inside the body and hands off their targets — fix them, never ship them.
 - MOTION GRAPHICS WORK HARD: every beat gets a designed graphic with an entrance and an exit (kinetic · letters · marker · wipe · stat · versus · countdown · steps · burst · place · chapter · cta…), captions synced to the voice

@@ -31,6 +31,7 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
       if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p);
         for (const c of r.chars) if (c.face) { try { const o = require('child_process').spawnSync(ffmpeg(), ['-hide_banner', '-i', p, '-vf', `crop=iw*0.12:iw*0.12:iw*${Math.max(0, c.face[0] - 0.06)}:ih*${Math.max(0, c.face[1] - 0.04)},signalstats,metadata=print`, '-f', 'null', '-']).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
           if (y < 45) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is too dark (${y.toFixed(0)}/255) — add a key/rim light or change the look`); if (y > 225) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is blown out (${y.toFixed(0)}/255)`); } catch {} } }
+      for (const o of r.overlaps || []) fails.push(`OVERLAP: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${o.a}'s ${o.part} is inside ${o.b} — bodies must never melt into each other; move them apart (pos) or change the pose`);
       for (const c of r.chars) {
         const where = `shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id}`;
         if (c.face && c.face[1] < 0.1) fails.push(`FRAMING: ${where} face is cut off at the top of the frame — wider size or lower camera`);

@@ -100,3 +100,6 @@ Every custom motion is saved and reused: `animations/custom/motions.json` via `n
 5. Expose `window.__mf = {duration, fps, render(t)}` and render frames to check spacing
    (`scripts/render_video.js --frames-only`) — look at the frame strip like an animator's
    onion skin.
+
+## Nothing morphs
+Bodies, limbs and props never pass through each other (qa_check: OVERLAP, hands inside the body). Change posture (lie/sit/kneel ↔ stand) on a cut or with a real transition clip (`fade: 0.12` between similar poses only) — a long blend between two different poses looks like a morph. No dissolves or shape-morph transitions.
