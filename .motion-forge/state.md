@@ -20,3 +20,4 @@
 - Brief replies, no summaries; time is money.
 
 - Sir wants to CHOOSE the story: always offer 3–4 crazy true story options in the question box before building.
+- Wants the publish pack pasted automatically in the final message of every video (never ask).

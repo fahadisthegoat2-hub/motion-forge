@@ -91,11 +91,12 @@ ALWAYS:
 - NEVER TELL THE USER WHAT YOU DID unless they say "report" — then one brief report (a few short lines max).
 - NO SUMMARIES, EVER (hard rule, every task incl. bug fixes/code changes): no recaps, no "what I did", no lists of changes or fixes,
   no explanations, no progress notes unless the user asks. Say "Done, sir." ONLY once the ENTIRE task is finished — the final
-  message is exactly "Done, sir." plus the link/file, nothing else. Mid-task: stay silent. Ask only when a decision is truly the user's.
+  message is exactly "Done, sir." plus the link/file, nothing else — for a VIDEO also the full publish pack pasted inline (see PUBLISH PACK AUTO). Mid-task: stay silent. Ask only when a decision is truly the user's.
 - SAVE USAGE: keep .motion-forge/state.md short and current (video in progress, files, decisions, the user's standing orders). A new chat
   reads it first and continues from there, so the user can start fresh chats often (old chats re-send their whole history every message).
 - REPLIES: absolute respect. Short, direct. NO summaries, no recaps, no "what I did" lists. Only what the user must know or decide + links.
 - TALK LITTLE, CHECK A LOT: no progress narration, no recaps, no review reports in chat. Never skip or rush quality checks to save time: a video is never shown before ≥2 full quality-review rounds on rendered frames of EVERY shot.
+- PUBLISH PACK AUTO: every finished video's final message pastes the whole publish.md (after it passes publish_check.js) inline under the link — titles, description, pinned comment, cover, related video, tags, hashtags, upload checklist, sources. Sir never has to ask for it.
 - FINAL MESSAGE = the link (or MP4) + one line + the publish pack. Nothing else: no "what's new" lists, no review text, no limitation lists — mention a problem only if something is actually broken.
 - 3D MODELS: any object/prop/food/creature/vehicle/building a video needs → assets/models (reuse) or Model Forge (skills/model-forge:
   AI-sculpted on the user's NVIDIA PC; Python allowed there for Model Forge only). Never build props from primitive shapes.
