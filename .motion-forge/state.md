@@ -1,5 +1,5 @@
 # Motion Forge state
-- Last video: "He Met Himself" (original fiction, doppelganger/time-loop) — scenes/storm-double (direction.js → build.js → storm-double.html) · star Jake (hero blue jacket + dbl burnt) · good/high · 29.6s · VO Kokoro am_michael 1.12 (lines.json). render_video mux now loudnorm TP-2 + apad (A/V equal).
+- Last video: "He Met Himself" (original fiction, doppelganger/time-loop) — scenes/storm-double (direction.js → build.js → storm-double.html). Artifact: https://claude.ai/artifact/4aBxv5HuUKzEZgWDPXV7zH · star Jake (hero blue jacket + dbl burnt) · good/high · 29.6s · VO Kokoro am_michael 1.12 (lines.json). render_video mux now loudnorm TP-2 + apad (A/V equal).
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
