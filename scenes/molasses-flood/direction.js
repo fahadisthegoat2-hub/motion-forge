@@ -43,7 +43,7 @@ const hookShot = (id, extra = {}) => {
 };
 
 // 1 · HOOK — sprinting at camera, a 7 m brown wave right behind him
-S('hook', { ...hookShot('hook'), role: 'payoff', punch: [0.06], sfx: [{ t: 0.03, type: 'impact', gain: 1 }] });
+S('hook', { ...hookShot('hook'), role: 'payoff', punch: [0.06], sfx: [{ t: 0.03, type: 'whoosh', gain: 0.7 }] });   // rushing air, no unmotivated impact
 // 2 · "It's molasses." — close on the face, thick brown drops raining on him
 S('molasses', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.35],
   camera: { move: 'crash-zoom', target: 'hero', size: 'cu', at: 0.05, az: 12, handheld: 1 },

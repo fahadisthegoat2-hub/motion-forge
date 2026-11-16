@@ -2097,7 +2097,7 @@ const FXP = {
     } }];
     if (f.front && f.spray !== false) {   // thick droplets thrown off the crest, riding with the front
       const sp = emitter({ mode: 'liquid', count: f.sprayCount ?? 900, t0: -1, t1: dur, life: [0.4, 0.9], speed: [1.5, 4.5], dir: [0, 0.8, 0.6], spread: 0.55, gravity: 9.8, drag: 0.4,
-        size: [0.11, 0.06], shape: [W / 2, 0.15, 0.25], colA: f.sprayColor || '#3b1b07', opacity: 0.95, seed: sd + 1 });
+        size: [0.11, 0.06], shape: [W / 2, 0.15, 0.25], colA: f.sprayColor || (f.color ? '#' + new THREE.Color(f.color).multiplyScalar(1.35).getHexString() : '#3b1b07'), opacity: 0.95, seed: sd + 1 });
       parts.push({ obj: sp, update(lt) { const H = key(f.crest, lt) ?? 0; sp.visible = H > 0.2; sp.position.set(0, H * 0.92, key(f.front, lt) - 0.2); } });
     }
     return { parts };
