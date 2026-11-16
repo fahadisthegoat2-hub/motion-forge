@@ -66,7 +66,7 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
   let failed;
   const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
-  enc.configure(encoderPick.cfg);
+  OPEN.push(enc); enc.configure(encoderPick.cfg);
   const total = Math.round((end - start) * p.fps), t0 = performance.now();
   for (let f = 0; f < total; f++) {
     if (failed) throw failed;
@@ -78,14 +78,14 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
       const pct = (f + 1) / total, eta = (performance.now() - t0) / pct * (1 - pct) / 1000;
       $('mf-bar').firstElementChild.style.width = (pct * 100).toFixed(1) + '%';
       msg(`${label} · frame ${f + 1}/${total} · ~${Math.ceil(eta)}s left`);
-      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => { requestAnimationFrame(r); setTimeout(r, 60); });   // rAF alone never fires in a background tab → the render would hang
     }
   }
-  await enc.flush(); enc.close();
+  await enc.flush(); enc.close(); if (failed) throw failed;
   if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
     msg(label + ' · mixing sound…');
-    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
-    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
+    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); OPEN.push(ae); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
+    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.numberOfChannels > 1 ? soundtrack.getChannelData(1) : L;   // mono soundtrack → both sides
     for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
       const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
     await ae.flush(); ae.close(); if (failed) throw failed;
@@ -96,7 +96,9 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   results.push({ label, url, file });
   try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
 }
-const results = [];
+const results = [], OPEN = [];
+const closeOpen = () => { for (const e of OPEN.splice(0)) try { if (e.state !== 'closed') e.close(); } catch {} };
+let wake = null; const keepAwake = async (on) => { try { if (on) wake = await navigator.wakeLock?.request('screen'); else { await wake?.release(); wake = null; } } catch {} };
 function showResults(secs) {   // the finished video, playing on the page, with a save button (pages inside an app can't always download by themselves)
   $('mf-done')?.remove(); const single = results.length === 1, box = document.createElement('div'); box.id = 'mf-done';
   box.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(6,10,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;font:14px/1.4 system-ui,sans-serif;color:#fff';
@@ -146,7 +148,7 @@ async function run(isAuto) {
   window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = isAuto ? 1 : .35;
   const canvas = mf.canvas || document.querySelector('canvas');
   mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
-  const t0 = performance.now();
+  const t0 = performance.now(); keepAwake(true);
   try {
     for (const j of jobs) {
       await renderRange(mf, canvas, j.start, j.end, j.label, p, w, h, Muxer, ArrayBufferTarget);
@@ -156,9 +158,9 @@ async function run(isAuto) {
     msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} ready.` +
       (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
     showResults(((performance.now() - t0) / 1000).toFixed(0));
-  } catch (e) { busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
+  } catch (e) { closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
     if (!lower()) msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); return; }
-  busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
+  closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
   dispatchEvent(new Event('resize'));
 }
 // AUTO-RENDER: as soon as the scene has loaded, the page renders the MP4 by itself on this device — at the quality chosen for the video

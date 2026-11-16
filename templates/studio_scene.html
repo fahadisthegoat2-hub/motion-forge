@@ -46,8 +46,9 @@ const SKIN = { pale: '#f1d3c2', light: '#e3b49a', medium: '#c98e6e', tan: '#a871
 
 const CONFIG = {
   width: 1080, height: 1920, fps: 30,          // long-form: width 1920, height 1080
+  accent: '#ffe14d',     // the ONE accent colour of this video: captions highlight + every graphic (pick it from the style bible)
   look: 'clean-cg',      // clean-cg · cinematic · warm-film · noir · neon-night · dreamy · horror · golden-hour (per-shot override: shot.look)
-  targetDuration: null,  // seconds the user asked for (qa_check enforces it) — e.g. 780 for a 13-minute video
+  targetDuration: null,  // ONLY when Sir named a length (seconds, e.g. 780 for 13 minutes) — without it every video is capped at 30 s (qa_check enforces both)
   effort: 'standard',    // Sir's effort answer: standard (10 checks × 2 rounds) · high (25 × 4) · maximum (35 × 6) — review_log.js enforces it
   set: 'studio',         // studio · void · outdoor · ocean (open sea, { type: 'ocean', swell, calm }) · medieval · interior · street-night · jungle · lab · city-day · space · { url: 'sets/x.glb', scale, pos } (per-shot: shot.set)
   // bgTop / bgBottom / grain / vignette: optional overrides of the look
@@ -107,9 +108,9 @@ const EASE = {
   inOutSine: (x) => -(Math.cos(Math.PI * x) - 1) / 2, inCubic: (x) => x ** 3, outCubic: (x) => 1 - (1 - x) ** 3,
   inOutCubic: (x) => x < .5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2, outExpo: (x) => x === 1 ? 1 : 1 - 2 ** (-10 * x),
   inOutExpo: (x) => x === 0 ? 0 : x === 1 ? 1 : x < .5 ? 2 ** (20 * x - 10) / 2 : (2 - 2 ** (-20 * x + 10)) / 2,
-  outBack: (x) => 1 + 2.70158 * (x - 1) ** 3 + 1.70158 * (x - 1) ** 2,
+  outBack: (x) => 1 + 2.15 * (x - 1) ** 3 + 1.15 * (x - 1) ** 2,   // small, quick overshoot (designed, not cartoon bounce)
   outElastic: (x) => x === 0 ? 0 : x === 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1,
-  spring: (x) => 1 - Math.exp(-6 * x) * Math.cos(9 * x),
+  spring: (x) => 1 - Math.exp(-7 * x) * Math.cos(6.5 * x),
 };
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
@@ -633,7 +634,8 @@ hud.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMateria
 // CAPTIONS — CONFIG.captions = { style: 'pop' | 'karaoke' | 'one' | 'box', size, color, hi, active, y, upper, sync: take.words (voiceover word times), group }
 // pop = words pop in as they are spoken (default) · karaoke = a highlight box glides from word to word · one = one huge word at a time · box = words on a dark plate.
 // Per caption: { t, t1?, text, hi: ['WORD'], w?: [start time of every word], style?, size?, y? }.
-const CAP = Object.assign({ style: 'pop', size: 0.085, color: '#ffffff', hi: '#ffe14d' }, CONFIG.captions || {});
+const ACCENT = CONFIG.accent || '#ffe14d';   // ONE accent colour for the whole video (captions + every graphic) — CONFIG.accent
+const CAP = Object.assign({ style: 'pop', size: 0.085, color: '#ffffff', hi: ACCENT }, CONFIG.captions || {});
 (function syncCaptions() {   // word times from the voice take → captions land on the spoken word; with an empty CAPTIONS they are written automatically
   const raw = CAP.sync; if (!Array.isArray(raw) || !raw.length) return;
   const off = CONFIG.sound?.voice?.offset ?? 0, W = raw.map((x) => (Array.isArray(x) ? { w: String(x[0]), s: x[1] + off, e: x[2] + off } : { w: String(x.w ?? x.word ?? ''), s: (x.start ?? 0) + off, e: (x.end ?? 0) + off }));
@@ -675,9 +677,9 @@ function drawCaptions(t, w, h) {
           g.save(); g.globalAlpha = outA * clamp((t - c.t) / 0.08); g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = size * 0.2; g.fillStyle = CAP.active || CAP.hi; roundRect(g, bx - bw / 2, A[1] - size * 0.58, bw, size * 1.16, size * 0.2); g.fill(); g.restore();
         }
         words.forEach((wd, i) => {
-          const u = t - times[i], p = kar ? 1 : clamp(u / 0.14); if (p <= 0) return;
-          const act = i === cur && u >= 0, bump = act ? 1.02 + 0.06 * Math.exp(-u * 9) : 1, s = (kar ? 1 : 0.6 + 0.4 * EASE.outBack(p)) * bump * (0.92 + 0.08 * outA);
-          g.save(); g.globalAlpha = (kar ? (u >= 0 ? 1 : 0.62) : Math.min(p * 2, 1)) * outA; g.translate(P[i][0], P[i][1]); g.scale(s, s);
+          const u = t - times[i], p = kar ? 1 : clamp(u / 0.14), pre = !kar && style !== 'box' && u < 0; if (p <= 0 && !pre) return;   // pop: the phrase sits centred and dim, each word lights up as it is spoken
+          const act = i === cur && u >= 0, bump = act ? 1.02 + 0.05 * Math.exp(-u * 9) : 1, s = (kar || pre ? 1 : 0.9 + 0.1 * EASE.outBack(p)) * bump * (0.94 + 0.06 * outA);
+          g.save(); g.globalAlpha = (kar ? (u >= 0 ? 1 : 0.62) : pre ? 0.42 * clamp((t - c.t) / 0.1) : 0.42 + 0.58 * Math.min(p * 2, 1)) * outA; g.translate(P[i][0], P[i][1]); g.scale(s, s);
           if (kar && act) { g.fillStyle = CAP.activeText || '#10131c'; g.fillText(wd, -widths[i] / 2, 0); }
           else outlinedText(g, wd, -widths[i] / 2, 0, size, isHi(i) ? CAP.hi : act && CAP.active ? CAP.active : CAP.color, 'rgba(0,0,0,.88)');
           g.restore();
@@ -697,8 +699,8 @@ function drawCaptions(t, w, h) {
 const FONT = '"Montserrat", "Inter", "Arial Black", "Helvetica Neue", Arial, sans-serif';
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function outlinedText(g, txt, x, y, size, fill, stroke = 'rgba(0,0,0,.85)', glow = null) {
-  g.lineJoin = 'round'; g.lineWidth = size * 0.16; g.strokeStyle = stroke;
-  g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = size * 0.14; g.shadowOffsetY = size * 0.07; g.strokeText(txt, x, y); g.restore();   // soft drop shadow → the text sits above the picture
+  g.lineJoin = 'round'; g.lineWidth = size * 0.1; g.strokeStyle = stroke;   // thin edge + soft shadow: clean type, readable on any picture
+  g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = size * 0.22; g.shadowOffsetY = size * 0.05; g.strokeText(txt, x, y); g.restore();   // soft drop shadow → the text sits above the picture
   if (Array.isArray(fill)) { const gr = g.createLinearGradient(0, y - size * 0.5, 0, y + size * 0.5); gr.addColorStop(0, fill[0]); gr.addColorStop(1, fill[1]); fill = gr; }
   if (glow) { g.save(); g.shadowColor = glow; g.shadowBlur = size * 0.5; g.fillStyle = fill; g.fillText(txt, x, y); g.restore(); }
   g.fillStyle = fill; g.fillText(txt, x, y);
@@ -819,7 +821,7 @@ function drawThumb(w, h) {   // thumbnail overlay: 2–4 huge words, one accent 
     const tw = g.measureText(txt).width + sz * 0.8; g.fillStyle = col || '#ff2a2a'; roundRect(g, x * w - tw / 2, y * h - sz * 0.7, tw, sz * 1.4, sz * 0.25); g.fill(); g.fillStyle = '#ffffff'; g.fillText(txt, x * w, y * h + sz * 0.04); }); }   // e.g. a pulse on the heart, a callout
   if (!T.text && !T.arrow && !T.circle) return;
   const side = T.side || 'left';
-  const words = String(T.text || '').toUpperCase().split(/\s+/).filter(Boolean), hi = (T.hi || [words.at(-1)]).map((x) => String(x).toUpperCase()), acc = T.accent || '#ffe14d';
+  const words = String(T.text || '').toUpperCase().split(/\s+/).filter(Boolean), hi = (T.hi || [words.at(-1)]).map((x) => String(x).toUpperCase()), acc = T.accent || ACCENT;
   const lines = []; for (const wd of words) { const L = lines.at(-1); if (L && L.length < 2 && (L.join(' ') + wd).length < 11) L.push(wd); else lines.push([wd]); }
   let size = Math.min(h * (lines.length > 2 ? 0.21 : 0.27), w * 0.15); g.font = `900 ${size}px ${FONT}`; const widest = Math.max(...lines.map((L) => g.measureText(L.join(' ')).width), 1);
   size *= Math.min(1, (w * (T.textWidth ?? 0.46)) / widest); const x0 = side === 'left' ? w * 0.045 : w * 0.955, y0 = h * (T.y ?? 0.5) - (lines.length - 1) * size * 0.52;
@@ -1007,7 +1009,7 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
           g.fillStyle = '#0b0d14'; g.fillText(m.text, 0, size * 0.02); g.restore(); }
         g.restore(); break; }
       case 'bars': {   // comparison bars: { items: [{ label, value, color?, suffix? }], text, max }
-        const items = T.items || [], BW = (T.box?.[0] ?? 0.84) * w, rowH = size * 0.95, BH = rowH * items.length + size * (T.text ? 1.1 : 0.5), x0 = X - BW / 2, y0 = Y - BH / 2;
+        const items = (T.items || []).map((it, i) => it && typeof it === 'object' ? { label: '', value: 0, ...it } : { label: T.labels?.[i] ?? String(it), value: +it || 0 }), BW = (T.box?.[0] ?? 0.84) * w, rowH = size * 0.95, BH = rowH * items.length + size * (T.text ? 1.1 : 0.5), x0 = X - BW / 2, y0 = Y - BH / 2;
         const e0 = EASE.outCubic(clamp(lt / 0.25)), mx = T.max ?? Math.max(...items.map((it) => it.value), 1); g.globalAlpha = out * e0; glassPanel(g, x0, y0, BW, BH, acc);
         g.textAlign = 'left'; if (T.text) { g.font = `900 ${size * 0.45}px ${FONT}`; g.fillStyle = col; g.fillText(T.text, x0 + size * 0.35, y0 + size * 0.55); }
         items.forEach((it, i) => { const e = EASE.outCubic(clamp((lt - 0.2 - i * 0.18) / 0.7)), yy = y0 + size * (T.text ? 1.05 : 0.3) + i * rowH, lw = BW * 0.3, bx = x0 + size * 0.35 + lw, bw = (BW - lw - size * 1.6) * it.value / mx * e;
@@ -1738,10 +1740,12 @@ function solveArm(ch, side, T, w, poleDir) {
 function applyReach(ch, cast, t) {
   for (const R of cast?.reach || []) {
     const s0 = R.start ?? 0, s1 = R.end ?? 1e9, bl = R.blend ?? 0.25; if (t < s0 - 1e-6 || t > s1 + bl) continue;
-    const w = Math.min(smooth((t - s0) / bl), 1 - smooth((t - s1) / bl)); if (w <= 0.001) continue;
+    // a human hand leaves fast and settles slowly (ease-out attack), and two hands never move as a mirrored pair: the left one trails by ~2 frames
+    const wAt = (lag) => Math.min(1 - (1 - clamp((t - s0 - lag) / bl)) ** 3, 1 - smooth((t - s1 - lag * 0.5) / bl)); if (wAt(0) <= 0.001) continue;
     const T = reachTarget(ch, R.to, R.offset); if (!T) continue;
     for (const side of R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']) {
       const Ts = R.hand === 'both' ? T.clone().add(new THREE.Vector3(side === 'left' ? 0.09 : -0.09, 0, 0).applyQuaternion(ch.root.quaternion)) : T;
+      const w = wAt(R.hand === 'both' && side === 'left' ? (R.lag ?? 0.07) : 0); if (w <= 0.001) continue;
       solveArm(ch, side, Ts, w);
     }
   }
@@ -1796,10 +1800,10 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   applyReach(ch, cast, t);   // hand IK: hands land exactly on their targets
   // breathing (4s cycle, slight chest + shoulder lift)
   const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
-  rotateInRootSpace(ch, B.spine1, -0.012 * br, 0);
-  rotateInRootSpace(ch, B.leftshoulder, 0, 0, 0.012 * br); rotateInRootSpace(ch, B.rightshoulder, 0, 0, -0.012 * br);
+  rotateInRootSpace(ch, B.spine1, -0.02 * br, 0); rotateInRootSpace(ch, B.spine2, -0.008 * Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed - 0.6), 0);   // chest leads, upper spine follows (overlap)
+  rotateInRootSpace(ch, B.leftshoulder, 0, 0, 0.016 * br); rotateInRootSpace(ch, B.rightshoulder, 0, 0, -0.016 * br);
   // weight shift / sway (slow, subtle)
-  rotateInRootSpace(ch, B.hips, 0, 0.02 * fbm(tGlobal * 0.25, seed), 0.012 * fbm(tGlobal * 0.2, seed + 3));
+  rotateInRootSpace(ch, B.hips, 0, 0.03 * fbm(tGlobal * 0.25, seed), 0.018 * fbm(tGlobal * 0.2, seed + 3));
   // look distribution: spine2 15% · neck 35% · head 50% (+ micro noise), eyes lead
   rotateInRootSpace(ch, B.spine2, pitch * 0.1, yaw * 0.15);
   rotateInRootSpace(ch, B.neck, pitch * 0.35, yaw * 0.35);
@@ -2602,6 +2606,7 @@ function applyClips(ch, cast, t) {
     let lt = Math.max(0, t - e.start) * (typeof e.speed === 'number' ? e.speed : 1) + (e.offset || 0);
     if (e.speed === undefined && rs > 0.2 && cast?.pos && pathLen(cast.pos, Math.max(e.start, 0), e.end) > 0.1)
       lt = pathLen(cast.pos, Math.max(e.start, 0), t) / rs + (e.offset || 0);   // feet lock to the ground: cycle phase follows distance travelled
+    if (e.loop === false && lt > d * 0.8) lt = d * (0.8 + 0.2 * (1 - (1 - Math.min(1, (lt - d * 0.8) / (d * 0.4))) ** 2));   // one-shot clips ease into their last pose (settle) instead of stopping dead
     a.time = e.loop === false ? Math.min(lt, d - 1e-4) : lt % d; a.setEffectiveWeight(Math.max(a.getEffectiveWeight(), w / sum));
   }
   ch.mixer.update(0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[normName(e.clip)] || CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
@@ -2770,6 +2775,11 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     const capCov = (typeof CAPTIONS !== "undefined" ? CAPTIONS : []).reduce((s0, C, i, A) => s0 + Math.max(0, Math.min(C.t1 ?? A[i + 1]?.t ?? TOTAL, TOTAL) - C.t), 0) / TOTAL;
     const S0 = SHOTS[0] || {}, cam0 = S0.camera || {}, caps = typeof CAPTIONS !== "undefined" ? CAPTIONS : [];
     return { narratorLips: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).filter(([, c]) => c?.talk?.length && c.dialogue !== true).map(([id]) => (sh.name || 'shot ' + (i + 1)) + ':' + id)), payoffFirst: S0.role === "payoff", staticOpen: (!cam0.move || cam0.move === "static") && !(Array.isArray(cam0.pos) && cam0.pos.length > 1), question: caps.slice(-2).some((C) => /\?\s*$/.test(C.text || "")),
+      stare: SHOTS.map((sh) => { const L = Object.values(sh.cast || {}).map((c) => c.look).filter(Boolean); return L.length > 0 && L.every((k) => (Array.isArray(k) && Array.isArray(k[0]) ? k.map((x) => x[1]) : [k]).every((v) => v === 'camera')); }),
+      titleSpans: (typeof TITLES !== 'undefined' ? TITLES : []).map((T) => ({ t: T.t, t1: T.t1 ?? T.t + 2, style: T.style || 'slam', pos: T.pos || null, at: !!T.at })), capY: CAP.y ?? CONFIG.captionY ?? null,
+      styles: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => T.style || 'slam'))], accents: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => String(T.accent || ACCENT).toLowerCase()))],
+      morphs: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).flatMap(([id, c]) => (c.clips || []).slice(1).map((e, k) => { const prev = c.clips[k], low = (n) => /sit|kneel|crouch|lie|lay|sleep|fall|crawl|dead|knock/i.test(n) && !/stand|getup|situp|sitdown|kneeldown/i.test(n), tr = (n) => /standup|getup|situp|sitdown|kneeldown|to/i.test(n);
+        return low(prev.clip) !== low(e.clip) && !tr(prev.clip) && !tr(e.clip) && (e.fade ?? 0.3) > 0.15 && e.start < (prev.end ?? 1e9) + 0.05 ? `shot ${i + 1} "${sh.name || ''}" ${id}: ${prev.clip} → ${e.clip}` : null; }).filter(Boolean))),
       target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
       voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
   },
@@ -2792,8 +2802,13 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
       out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length && !cast.swimming ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
+    const overlaps = [], vis = Object.values(characters).filter((c) => c.root.visible && c.bones.hips);   // bodies melting into each other: two torsos / a head or hand inside someone else
+    for (let i = 0; i < vis.length; i++) for (let j = 0; j < vis.length; j++) { if (i === j) continue; const A = vis[i], B = vis[j], hb = B.bones.hips.getWorldPosition(V()), nb = (B.bones.neck || B.bones.hips).getWorldPosition(V());
+      const near = (p, r) => { const k = clamp(p.clone().sub(hb).dot(nb.clone().sub(hb)) / Math.max(1e-6, nb.distanceToSquared(hb))); return p.distanceTo(hb.clone().lerp(nb, k)) < r; };
+      if (i < j && near(A.bones.hips.getWorldPosition(V()), 0.3)) overlaps.push({ a: A.id, b: B.id, part: 'body' });
+      for (const [bn, r] of [['head', 0.2], ['lefthand', 0.09], ['righthand', 0.09]]) if (A.bones[bn] && near(A.bones[bn].getWorldPosition(V()), r) && !(shot.cast?.[A.id]?.reach || []).some((R) => String(R.to).startsWith(B.id))) overlaps.push({ a: A.id, b: B.id, part: bn }); }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
-    return { shot: shot.name, t: tg, local, chars: out, titles };
+    return { shot: shot.name, t: tg, local, chars: out, titles, overlaps };
   } };
 const clock = new THREE.Clock();
 let _pv = { last: 0, avg: 33, scale: 1, n: 0 };
@@ -2875,7 +2890,7 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   const muxer = new Muxer({ target, video: { codec: encoderPick.m, width: w, height: h, frameRate: p.fps }, ...(soundtrack && audioPick ? { audio: { codec: audioPick.m, numberOfChannels: 2, sampleRate: soundtrack.sampleRate } } : {}), fastStart: 'in-memory' });
   let failed;
   const enc = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: (e) => (failed = e) });
-  enc.configure(encoderPick.cfg);
+  OPEN.push(enc); enc.configure(encoderPick.cfg);
   const total = Math.round((end - start) * p.fps), t0 = performance.now();
   for (let f = 0; f < total; f++) {
     if (failed) throw failed;
@@ -2887,14 +2902,14 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
       const pct = (f + 1) / total, eta = (performance.now() - t0) / pct * (1 - pct) / 1000;
       $('mf-bar').firstElementChild.style.width = (pct * 100).toFixed(1) + '%';
       msg(`${label} · frame ${f + 1}/${total} · ~${Math.ceil(eta)}s left`);
-      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => { requestAnimationFrame(r); setTimeout(r, 60); });   // rAF alone never fires in a background tab → the render would hang
     }
   }
-  await enc.flush(); enc.close();
+  await enc.flush(); enc.close(); if (failed) throw failed;
   if (soundtrack && audioPick) {   // the edit's soundtrack for exactly this range
     msg(label + ' · mixing sound…');
-    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
-    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.getChannelData(1);
+    const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: (e) => (failed = e) }); OPEN.push(ae); ae.configure({ ...audioPick.cfg, sampleRate: soundtrack.sampleRate });
+    const sr = soundtrack.sampleRate, a0 = Math.floor(start * sr), a1 = Math.min(soundtrack.length, Math.ceil(end * sr)), L = soundtrack.getChannelData(0), Rr = soundtrack.numberOfChannels > 1 ? soundtrack.getChannelData(1) : L;   // mono soundtrack → both sides
     for (let i = a0; i < a1; i += 1024) { const n = Math.min(1024, a1 - i), data = new Float32Array(n * 2); data.set(L.subarray(i, i + n), 0); data.set(Rr.subarray(i, i + n), n);
       const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((i - a0) / sr * 1e6), data }); ae.encode(ad); ad.close(); }
     await ae.flush(); ae.close(); if (failed) throw failed;
@@ -2905,7 +2920,9 @@ async function renderRange(mf, canvas, start, end, label, p, w, h, Muxer, ArrayB
   results.push({ label, url, file, blob });
   if (!DL) try { const a = Object.assign(document.createElement('a'), { href: url, download: file }); document.body.appendChild(a); a.click(); a.remove(); } catch {}   // saves by itself where the browser allows it; the finished video is also shown on the page
 }
-const results = [];
+const results = [], OPEN = [];   // OPEN: encoders of the current render — closed on failure so a retry at a lighter quality gets a free hardware encoder
+const closeOpen = () => { for (const e of OPEN.splice(0)) try { if (e.state !== 'closed') e.close(); } catch {} };
+let wake = null; const keepAwake = async (on) => { try { if (on) wake = await navigator.wakeLock?.request('screen'); else { await wake?.release(); wake = null; } } catch {} };   // phones must not sleep mid-render
 let DL = null;   // claude.ai artifact: files are saved through the downloads capability (declare capabilities: { downloads: true })
 try { window.claude?.use?.('downloads').then((d) => { DL = d; }).catch(() => {}); } catch {}
 async function saveResult(r, btn) {
@@ -2962,7 +2979,7 @@ async function run(isAuto) {
   window.__mfManual = true; $('mf-go').disabled = true; $('mf-panel').style.opacity = isAuto ? 1 : .35;
   const canvas = mf.canvas || document.querySelector('canvas');
   mf.setSize ? mf.setSize(w, h) : (canvas.width = w, canvas.height = h);
-  const t0 = performance.now();
+  const t0 = performance.now(); keepAwake(true);
   try {
     for (const j of jobs) {
       await renderRange(mf, canvas, j.start, j.end, j.label, p, w, h, Muxer, ArrayBufferTarget);
@@ -2972,9 +2989,9 @@ async function run(isAuto) {
     msg(`Done in ${((performance.now() - t0) / 1000).toFixed(0)}s — ${jobs.length > 1 ? jobs.length + ' MP4 parts' : 'MP4'} ready.` +
       (jobs.length > 1 ? ' Join them in CapCut or iMovie in order.' : ''));
     showResults(((performance.now() - t0) / 1000).toFixed(0));
-  } catch (e) { busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
+  } catch (e) { closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1; dispatchEvent(new Event('resize'));
     if (!lower()) msg('Render stopped: ' + (e.message || e) + ' — try a lower quality or one part at a time.'); return; }
-  busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
+  closeOpen(); keepAwake(false); busy = false; window.__mfManual = false; $('mf-go').disabled = false; $('mf-panel').style.opacity = 1;
   dispatchEvent(new Event('resize'));
 }
 // AUTO-RENDER: as soon as the scene has loaded, the page renders the MP4 by itself on this device — at the quality chosen for the video

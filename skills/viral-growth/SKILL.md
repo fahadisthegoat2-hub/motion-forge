@@ -10,28 +10,25 @@ description: Growth expert for short-form video — maximize views, watch time, 
 ## What the algorithms reward (optimize in this order)
 1. **Swipe-away rate / first 2s** — the hook frame must be visual + the VO's first word
    must be loaded ("This", "You", a number, a shocking noun).
-2. **Average % viewed** — aim >90% on 30–45s; loops push it above 100%.
+2. **Average % viewed** — aim >90% on 20–30 s; loops push it above 100%.
 3. **Rewatches** — seamless loop, fast reveal worth re-seeing, hidden clue.
 4. **Shares & saves** — "send this to someone who…", useful/shocking facts.
 5. **Comments** — one natural debate question; pin your own comment.
 6. **Follows** — series format ("Part 3"), consistent look, recurring original character.
 
-## Publish pack (always deliver, saved as `publish.md` next to the video)
-- **Title** (YouTube ≤ 60 chars): curiosity gap + concrete noun. Give 3 options, star the
-  best. Patterns: "What Happens If You ___?", "Why You Should Never ___", "This ___ Saved
-  His Life", "He Ignored One Warning…". Honest — the video must deliver the promise.
-- **Description**: line 1 = rewrite of the hook (shows in preview), line 2 = context/
-  value, line 3 = CTA ("Follow for Part 2"), then 3–5 hashtags.
-- **Tags (YouTube)**: 10–15, mix broad (3d animation, what if) + specific (topic words)
-  + format (shorts, animated story). Comma-separated, ≤ 500 chars.
-- **Hashtags**: TikTok 3–5 (1 broad, 2 niche, 1–2 topic); Reels 3–5; Shorts: #shorts + 2.
-- **Pinned comment**: a question that splits opinions or asks "what would you do?".
-- **Cover/thumbnail frame**: timestamp of the most expressive face + clear subject;
-  add 2–4 word overlay text for TikTok/Reels covers.
-- **On-screen text first frame**: ≤ 6 words, complements (not repeats) the VO.
-- **Posting**: best times = when the user's audience is active (check analytics); default
-  12–3pm & 6–9pm local, consistent daily/every-other-day schedule; reply to first comments
-  in the first hour.
+## Publish pack (always deliver, saved as `publish.md` next to the video — must pass `node ${CLAUDE_PLUGIN_ROOT}/scripts/publish_check.js publish.md`)
+Read `youtube-algorithm` first: it says what each field is for. Use exactly these headings (`**Title options**`, `**Description**`, …):
+- **Title options**: 3, star (⭐) the best. ≤ 60 chars, topic words in the first half, curiosity gap + concrete noun/number, honest.
+  Patterns: "What Happens If You ___?", "Why You Should Never ___", "This ___ Saved His Life", "You vs ___".
+- **Description**: line 1 = the hook rewritten with the topic words (≤ 150 chars, shows in search); line 2 = context; line 3 = CTA to the next
+  part / long video; then **≤ 3 hashtags** (topic ones; `#shorts` optional). Long-form: add chapter timestamps (first `0:00`, ≥ 3, each ≥ 10 s).
+- **Pinned comment**: the ONE comment question (also the last caption).
+- **Tags**: 5–10 alternate spellings/names only (≤ 500 chars) — tags barely matter; never stuff.
+- **Cover** (Shorts: the payoff frame, picked in the app at upload) / **Thumbnail** (long-form: file + concept; completes the title, never repeats it).
+- **Related video** (Shorts): the long video / next part it links to, or "none yet". **End screen** (long-form): the ONE next video + playlist.
+- **Upload checklist**: playlist · audience: not made for kids · altered-content disclosure yes/no (stylised 3D animation: no) · language.
+- **Other platforms** (optional): TikTok/Reels caption + 3–5 hashtags; export without any watermark.
+- **Posting**: consistency beats clock time — same niche, daily or every other day; check Sir's audience-active hours if known.
 
 ## Content strategy
 - Mine winning premises: "what if", body/medical, survival, dangerous jobs, history
@@ -40,14 +37,10 @@ description: Growth expert for short-form video — maximize views, watch time, 
 - Never: fake facts presented as real, misleading thumbnails, reuse others' branding.
 
 ## Long-form (YouTube 16:9) publish pack
-- **Title** ≤ 60 chars, same curiosity rules; **thumbnail concept**: 1 face with strong
-  emotion + 1 object + ≤ 3 words, high contrast, readable at phone size. Give 3 concepts.
-- **Description**: 2-line hook, 2–3 sentence summary, **chapter timestamps** (first must be
-  0:00, each ≥ 10s), CTA to next episode, 3 hashtags.
-- **Tags**: 15–20; **pinned comment**; **end screen**: point to the next episode at the last 20s.
-- First 30 seconds decide the video — check the cold open delivers on the title + thumbnail.
+Same headings plus: title + thumbnail decided BEFORE the script (one idea, two halves) · 3 thumbnail concepts for Test & Compare ·
+chapters in the description · end screen plan · the cold open confirms the title+thumbnail promise in second 0 (check it).
 
 ## CHANNEL DATA (Sir's analytics)
 - Every publish pack has ONE comment question (also as the last caption) and a pinned comment repeating it.
-- Posting plan: one short per day, same niche (crazy true stories), 25–35 s, payoff-first hooks. Success = 80–87% stayed to watch.
+- Posting plan: one short per day, same niche (crazy true stories), 20–30 s, payoff-first hooks. Success = 80–87% stayed to watch.
 - After a flop, compare the first 2 s and the 0:13 mark against the best short (43% stayed) before making the next one.

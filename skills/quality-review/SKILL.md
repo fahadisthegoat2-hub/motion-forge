@@ -28,24 +28,25 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --round           # 
 #   → capture your proof into scene_qa/rN/ (hand/face crops, 12 fps strips, frame grabs, listening notes), fill every check, fix every FAIL
 node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --verify          # MUST print REVIEW PASS — pack_scene.js refuses otherwise
 ```
-## PROOF OF WORK — the gate rejects box-ticking
-- **Round 1 must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum). No first draft is that clean — look harder.
-- **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to); "minor tweaks", "polished",
-  "improved" are rejected, and the scene diff to the next round must be real (≥ 2 changed lines per FAIL). `--round` refuses while FAILs are unfixed.
-- **Every round is a fresh render**: qa_check + av_check re-run on the current scene before `--round`; the delivered scene must be the
-  last reviewed one (any edit after → another full round).
-- **Every check has its own proof**: ≥ 1 file you made in this round's `rN/` (crop, strip, grab, note) and listed in `proof`; copies of an
-  earlier round's files and files made before the round started are rejected.
-- **No copy-paste**: evidence identical to the previous round is rejected — look at THIS render and write what you see now.
+## PROOF OF WORK — the gate rejects box-ticking, and counts every honest check
+Fill checks with the tool (never hand-edit review.json): `review_log.js scene.html --check C05 --status PASS|FAIL --evidence "…" --proof rN/file.png [--fix "…"]`.
+`review_log.js scene.html --status` shows the counter (counted per round + what is still open).
+- **The review must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum) in total over all rounds.
+- **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to), and the scene must change before the
+  next round. `--round` refuses while FAILs are unfixed.
+- **Reports match the scene**: qa_check / render_video + av_check record the scene version; after any scene edit re-run them (then a new round).
+  The delivered scene must be the last reviewed one.
+- **Every check has its own proof**: ≥ 1 file in this round's `rN/` (crop, strip, grab, note), listed in `proof`. An unchanged shot may give
+  the same picture again; a check that FAILED last round must show a new one.
 - **Evidence names what, where and the value** (`"shot 3 @7.4s f222: SFX impact onset 7.41s vs fist contact 7.40s, +1f"`); "ok", "same",
-  "looks good" = FAIL.
+  "looks good" are rejected. Repeating a measurement that did not change is fine; copying a whole round after the scene changed is not.
 A check that cannot apply (e.g. no in-scene dialogue) is PASS with evidence of why (`"0 dialogue lines in SHOTS (grep dialogue:true = 0)"`).
 Long-form: wherever a check says "every shot", do every shot — chapters are reviewed one by one, never sampled.
 
 ## THE CHECK BANK — method + pass bar for each
 ### STANDARD (C01–C10) — the essentials across picture, narration, sound, graphics, story
 - **C01 Auto gates** — `qa_check` PASS and `av_check` PASS on the current render (both newer than the last scene edit). Zero tolerance.
-- **C02 Length & format** — duration within ±5% of what Sir asked (shorts 25–35 s if unspecified); aspect/resolution/fps = CONFIG.quality;
+- **C02 Length & format** — duration within ±5% of what Sir asked (≤ 30 s if Sir named no length); aspect/resolution/fps = CONFIG.quality;
   no letterbox/pillarbox mistakes; first and last frame are deliberate (not a half-loaded scene, not a black tail).
 - **C03 Narration ↔ picture** — build the table *VO line → time → shot → what is literally on screen*. Every line shows its subject while it is
   spoken (5-word test: describe the frame in 5 words; it must match the line). No line over an unrelated or reused shot. Visual lands on or
@@ -64,6 +65,7 @@ Long-form: wherever a check says "every shot", do every shot — chapters are re
 - **C09 Motion graphics & captions** — every title/caption/graphic eases in AND out (no linear, no pop-on/pop-off, no 1-frame flashes);
   on screen ≥ 0.4 s + 0.3 s per word; caption text = spoken words exactly (spelling, numbers, names); caption timing ±2 frames of the word;
   never two graphics fighting for the eye at once.
+- **Taste (inside C08–C10)** — no machine tells (skills/taste §3), nothing against SIR'S TASTE (.motion-forge/state.md); for a revision `improve_check.js` PASS.
 - **C10 Story, hook & pacing** — shorts: payoff image + hook words by 0.3 s, a beat every 2–3 s, escalation, fair twist (clue planted), loop
   ending, comment question. Long-form: cold-open hook ≤ 10 s, chapter promise kept, re-hook every 30–60 s, ending pays off the opening.
   Motion Forge only — no photos, no logos; publish pack honest.

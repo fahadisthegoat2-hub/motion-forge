@@ -4,7 +4,7 @@
 const { exec } = require('child_process');
 const path = require('path');
 const f = path.resolve(process.argv[2] || '');
-const url = 'file://' + (process.platform === 'win32' ? '/' : '') + f.replace(/\\/g, '/');
+const url = require('url').pathToFileURL(f).href;
 const cmd = process.platform === 'win32' ? `start "" chrome "${url}"`
   : process.platform === 'darwin' ? `open -a "Google Chrome" "${url}"`
   : `google-chrome "${url}" || chromium "${url}" || xdg-open "${url}"`;
