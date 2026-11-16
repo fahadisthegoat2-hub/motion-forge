@@ -76,7 +76,7 @@ S('face', { cut: 'whip',
 // 8 · "But that's not the worst part."
 S('worst', { cut: 'glitch', look: 'cinematic', punch: [0.55],
   camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 15 },
-  cast: { hero: { pos: [[0, [-0.4, 0, 0.2]]], rotY: [[0, 1.2]], clips: idle(dur('worst')), look: [[0, [2, 1.6, 0]], [0.5, [1.5, 1.7, -2.5], 'outCubic']], face: { shock: [[0, 0.6], [0.5, 1, 'outBack']] }, acting: 'none' } },
+  cast: { hero: { pos: [[0, [0.2, 0, 0.6]]], rotY: [[0, 0.55]], clips: idle(dur('worst')), look: [[0, [2, 1.6, 2]], [0.5, [1.6, 1.8, -1.2], 'outCubic']], face: { shock: [[0, 0.6], [0.5, 1, 'outBack']] }, acting: 'none' } },
   fx: [RAIN] });
 // 9 · "His double is screaming one word." — the double lunges into frame
 S('scream', { cut: 'smash',
