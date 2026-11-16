@@ -24,7 +24,7 @@ const cast = {
 const ST = 'street-night', RAIN = { type: 'rain', count: 6000, opacity: 0.45 };
 const idle = (d) => [{ clip: 'idle', start: 0, end: d + 1 }];
 const walk = (d, s = 1) => [{ clip: 'walk', start: 0, end: d + 1, speed: s }];
-const burn = (who = 'dbl') => [{ type: 'smoke', start: 0, end: 9, attach: who + '.chest', scale: 0.25, color: '#3a3836', opacity: 0.45 }, { type: 'embers', start: 0, end: 9, attach: who + '.chest', scale: 0.25 }];
+const burn = (who = 'dbl') => [{ type: 'smoke', start: 0, end: 9, attach: who + '.chest', scale: 0.45, color: '#3a3836', opacity: 0.7 }, { type: 'embers', start: 0, end: 9, attach: who + '.chest', scale: 0.5 }];
 const shots = [];
 const S = (id, o) => shots.push({ name: id, dur: dur(id), set: ST, look: 'neon-night', ...o });
 const FACEOFF = (d, o = {}) => ({
@@ -33,7 +33,7 @@ const FACEOFF = (d, o = {}) => ({
     gestures: [{ type: 'plead', start: 0.05, end: d }], acting: 'none' }, ...o });
 
 // 1 · PAYOFF — two Jakes face to face in the rain, lightning cracks behind
-S('payoff', { role: 'payoff', impact: [0.08], punch: [0.9],
+S('payoff', { role: 'payoff', look: 'cinematic', impact: [0.08], punch: [0.9],
   camera: { pos: [[0, [-4.2, 1.9, 2.8]], [0.4, [-2.4, 1.55, 1.5], 'outExpo'], [dur('payoff'), [-2.2, 1.55, 1.4], 'outSine']], look: [[0, [0, 1.45, 0]]], fov: 40, handheld: 0.9 },
   cast: FACEOFF(dur('payoff')),
   fx: [RAIN, { type: 'lightning', t: 0.06, pos: [-3, 14, -11], to: [-2, 0, -10], seed: 4 }], sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.05, type: 'whoosh', gain: 0.6 }] });
@@ -49,12 +49,12 @@ S('strike0', { cut: 'smash', impact: [1.05], punch: [1.1],
     look: [[0, [0, 1.6, 8]], [1.1, [1.6, 3, -3], 'outCubic']], face: { shock: [[1.05, 0], [1.25, 1, 'outBack']] }, gestures: [{ type: 'shield', start: 1.15, end: dur('strike0') }], acting: 'none' } },
   fx: [RAIN, { type: 'lightning', t: 1.0, pos: [2.5, 14, -4], to: [1.8, 4.2, -1.2], seed: 9 }, { type: 'sparks', t: 1.02, pos: [1.8, 4.2, -1.2], scale: 1.2 }, { type: 'smoke', start: 1.1, end: 6, pos: [1.8, 4.2, -1.2], scale: 0.6, color: '#4a4846', opacity: 0.6 }] });
 // 4 · "Since then, he wakes up at 3:33." — dark room, eyes snap open
-S('wake', { cut: 'dip', set: 'interior', look: 'noir',
+S('wake', { cut: 'dip', set: 'void', look: 'noir',
   camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: -20, handheld: 0.3 },
   cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(dur('wake')), bones: { head: [[0, [0.35, 0, 0.1]], [0.9, [0.35, 0, 0.1]], [1.15, [-0.05, 0.1, 0], 'outBack']] },
     look: [[0, [0, 0.4, 1]], [1.0, [0, 0.4, 1]], [1.15, [-2, 1.7, 3], 'outCubic'], [2.0, [2, 1.6, 3], 'inOutSine']], face: { squint: [[0, 1], [1.0, 1], [1.12, 0]], shock: [[1.05, 0], [1.25, 0.8, 'outBack']] }, acting: 'none' } } });
 // 5 · "Same street. Same rain."
-S('same', { cut: 'whip',
+S('same', { cut: 'whip', look: 'cinematic',
   camera: { pos: [[0, [-3.4, 1.5, 0.6]], [dur('same'), [-3.4, 1.5, 0.6 + 1.45 * dur('same')]]], look: [[0, [-1.9, 1.3, -1.6]], [dur('same'), [-1.9, 1.3, -1.6 + 1.45 * dur('same')]]], fov: 38, handheld: 0.4 },
   cast: { hero: { pos: [[0, [-1.9, 0, -2]], [dur('same'), [-1.9, 0, -2 + 1.45 * dur('same')]]], rotY: [[0, 0]], clips: walk(dur('same')), look: [[0, [0, 1.6, 6]], [0.9, [-3, 3.5, 4], 'inOutSine'], [1.5, [0, 1.6, 6], 'inOutSine']],
     face: { worried: [[0, 0.5]] }, acting: 'none' } },
@@ -64,7 +64,7 @@ S('follow', { cut: 'zoom',
   camera: { pos: [[0, [0.6, 1.5, 5.5]], [dur('follow'), [0.5, 1.5, 5.0], 'inOutSine']], look: [[0, [0, 1.3, -1]]], fov: 38, handheld: 0.4 },
   cast: { hero: { pos: [[0, [-0.3, 0, 0.8]], [dur('follow'), [-0.3, 0, 0.8 + 1.45 * dur('follow')]]], rotY: [[0, 0]], clips: walk(dur('follow')),
       look: [[0, [0, 1.6, 8]], [0.9, [1, 1.5, -4], 'outCubic']], bones: { neck: [[0.8, [0, 0, 0]], [1.05, [0, -0.5, 0], 'outCubic']] }, face: { worried: [[0.9, 0.9]] }, acting: 'none' },
-    dbl: { pos: [[0, [1.2, 0, -4.2]], [dur('follow'), [1.2, 0, -4.2 + 1.45 * dur('follow')]]], rotY: [[0, 0]], clips: walk(dur('follow')), look: [[0, 'hero.head']], acting: 'none' } },
+    dbl: { pos: [[0, [0.7, 0, -2.4]], [dur('follow'), [0.7, 0, -2.4 + 1.45 * dur('follow')]]], rotY: [[0, 0]], clips: walk(dur('follow')), look: [[0, 'hero.head']], acting: 'none' } },
   fx: [RAIN] });
 // 7 · "Same jacket. Same face." — over his shoulder: the double steps into the lamp light
 S('face', { cut: 'whip',
@@ -116,7 +116,7 @@ S('tomorrow', { cut: 'dip',
     gestures: [{ type: 'plead', start: 1.2, end: dur('tomorrow') }], acting: 'none' } },
   fx: [RAIN, ...burn(), { type: 'lightning', t: 1.25, pos: [3, 14, -11], to: [2, 0, -10], seed: 33 }] });
 // 15 · "Would you run?" — back to the opening image (loop)
-S('question', { cut: 'zoom',
+S('question', { cut: 'zoom', look: 'cinematic',
   camera: { pos: [[0, [-2.2, 1.55, 1.4]], [dur('question'), [-3.2, 1.75, 2.1], 'inOutSine']], look: [[0, [0, 1.45, 0]]], fov: 40, handheld: 0.4 },
   cast: FACEOFF(dur('question')),
   fx: [RAIN, ...burn()] });
