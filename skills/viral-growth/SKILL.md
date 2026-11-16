@@ -10,7 +10,7 @@ description: Growth expert for short-form video — maximize views, watch time, 
 ## What the algorithms reward (optimize in this order)
 1. **Swipe-away rate / first 2s** — the hook frame must be visual + the VO's first word
    must be loaded ("This", "You", a number, a shocking noun).
-2. **Average % viewed** — aim >90% on 30–45s; loops push it above 100%.
+2. **Average % viewed** — aim >90% on 20–30 s; loops push it above 100%.
 3. **Rewatches** — seamless loop, fast reveal worth re-seeing, hidden clue.
 4. **Shares & saves** — "send this to someone who…", useful/shocking facts.
 5. **Comments** — one natural debate question; pin your own comment.
@@ -42,5 +42,5 @@ chapters in the description · end screen plan · the cold open confirms the tit
 
 ## CHANNEL DATA (Sir's analytics)
 - Every publish pack has ONE comment question (also as the last caption) and a pinned comment repeating it.
-- Posting plan: one short per day, same niche (crazy true stories), 25–35 s, payoff-first hooks. Success = 80–87% stayed to watch.
+- Posting plan: one short per day, same niche (crazy true stories), 20–30 s, payoff-first hooks. Success = 80–87% stayed to watch.
 - After a flop, compare the first 2 s and the 0:13 mark against the best short (43% stayed) before making the next one.

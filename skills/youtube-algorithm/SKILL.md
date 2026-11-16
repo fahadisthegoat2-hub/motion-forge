@@ -18,9 +18,9 @@ matching audience, measures what they do, and widens or stops. So: make the firs
 | **Engagement** (likes, shares, comments, follows from the Short) | satisfaction | one honest comment question, a shareable "send this to…" fact, series hook |
 | **Negative** (swipe in 1 s, "not interested", mismatch title↔video) | kills the test | never bait; the first frame must match what the video delivers |
 
-Targets: **≥ 70% viewed-vs-swiped** is healthy, **80–87%** is the goal · **avg % viewed ≥ 90%** on 25–35 s, **> 100%** with a loop.
-- **Length:** Shorts may be up to 3 min (vertical/square). Shorter finishes better: 25–35 s default; 45–60 s only if every second earns it;
-  60 s+ only for a real story with a re-hook every 5–8 s. Never pad.
+Targets: **≥ 70% viewed-vs-swiped** is healthy, **80–87%** is the goal · **avg % viewed ≥ 90%** on 20–30 s, **> 100%** with a loop.
+- **Length:** Shorts may be up to 3 min (vertical/square). Shorter finishes better: 20–30 s default (hard cap 30 s unless Sir names a longer length); **hard cap 30 s unless Sir names a longer
+  length** (then: a re-hook every 5–8 s, never pad).
 - **Format:** 1080×1920, 9:16, 30 or 60 fps, sound on frame 1, loudness ≈ −14 LUFS (YouTube normalises to it).
 - **Safe zone (UI covers the rest):** keep words out of the top 8%, the bottom 22% and the right 15% of the lower half (buttons); captions at y ≈ 0.70–0.76.
 - **Sound-off + sound-on:** captions the whole way AND a voice/sound hit on frame 1.

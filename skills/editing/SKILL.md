@@ -17,7 +17,7 @@ saved-motion event already makes its sound, and each set has its ambience. Your 
 ## The edit plan (write it before building, in the script doc)
 `time | shot | size/move | cut-in | edit device | sound moment | caption/title` — one row per shot.
 
-## Rhythm rules (shorts 30–60s)
+## Rhythm rules (shorts ≤ 30 s)
 - **0.0–1.0s hook:** strongest visual + a sound hit at frame 1 (slam title or `impact`) + a question. No silence, no logo.
 - **Shot length 0.8–2.5s** (average ~1.5s); long-form 2–6s. Vary lengths — never 3 equal shots in a row.
 - **Pattern interrupt every 2–3s:** new angle/size, a `punch` zoom, a title, a speed ramp, a transition or a big sound.

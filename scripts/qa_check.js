@@ -64,11 +64,12 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     for (let i = 1; i < P.beats.length; i++) if (P.beats[i] - P.beats[i - 1] > 2.6) fails.push(`PACING: dead stretch ${P.beats[i - 1].toFixed(1)}–${P.beats[i].toFixed(1)}s with no cut, title, caption, effect or hit (max 3s)`);
     if (P.beats.length && P.total - P.beats.at(-1) > 3) fails.push(`PACING: last ${(P.total - P.beats.at(-1)).toFixed(1)}s have no beat`);
     if (!P.voice && P.capCov < 0.8) fails.push(`STORY: no voiceover and captions cover only ${Math.round(P.capCov * 100)}% — a short needs a voice or wall-to-wall captions`);
-    if (!target && (P.total < 25 || P.total > 35)) fails.push(`LENGTH: short is ${P.total.toFixed(1)}s — shorts are 25–35s unless Sir asked otherwise`);
     if (!P.payoffFirst) fails.push('HOOK: shot 1 must show the payoff/twist image first (mark it role: "payoff"), then rewind');
     if (P.staticOpen) fails.push('HOOK: the first second is static — camera and subject must move on frame 1');
     if (!P.question) fails.push('ENGAGEMENT: no comment question in the last captions (e.g. "Would you have survived?")');
   }
+  if (!target && P.total > 30.5) fails.push(`LENGTH: ${P.total.toFixed(1)}s — every video is capped at 30 s unless Sir named a longer length (then set CONFIG.targetDuration to it)`);
+  if (!target && P.portrait && P.total < 15) fails.push(`LENGTH: short is ${P.total.toFixed(1)}s — too short to tell a story (20–30 s)`);
   if (P.portrait && P.total > 180) fails.push(`LENGTH: ${P.total.toFixed(0)}s — a YouTube Short is at most 3 minutes`);
   if (!P.portrait && P.total > 90) {   // LONG-FORM retention rules (skills/youtube-algorithm)
     const first = Math.min(P.firstCaption ?? 99, P.firstTitle ?? 99), avg = P.durs.reduce((x, y) => x + y, 0) / P.durs.length, ch = await page.evaluate(() => (__mf.chapters || []).map((c) => c.end - c.start)).catch(() => []);

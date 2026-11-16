@@ -59,9 +59,9 @@ calm narrator facts, history lessons or slow intros. Every line ≤ 10 words, ev
 - Direct threat: "If you're reading this, don't touch the water."
 On screen by 0.3 s: hook title (slam) + caption + a hit sound + the most dramatic image. First shot ≤ 2 s.
 
-**Beat map** (45 s example): 0–2 hook · 2–6 setup + plant the twist clue · 6–30 three escalations, each WORSE, each opened by a
-re-hook line ("but that's not the worst part…", "then it moved.") · 30–38 climax (slow-mo/freeze/silence, then drop) ·
-38–43 twist (smash cut, boom) · 43–45 loop line that leads back into the first frame.
+**Beat map** (30 s): 0–2 hook (payoff image) · 2–5 setup + plant the twist clue · 5–20 three escalations, each WORSE, each opened by a
+re-hook line ("but that's not the worst part…", "then it moved.") · 20–25 climax (slow-mo/freeze/silence, then drop) ·
+25–28 twist (smash cut, boom) · 28–30 loop line + comment question that leads back into the first frame.
 
 **Rhythm**: shots 0.8–2.2 s (avg ≤ 2.4 s), a beat (cut, title, punch-in, effect, sound hit) at least every 2–3 s, speed ramps on action,
 music drops on the twist, captions word-by-word the whole way. Voiceover at Voice Studio speed 1.1–1.2 with excited/dramatic tones on
@@ -77,7 +77,7 @@ Best short: 43% stayed. Flops: 75–80% swiped in the first second, viewers gone
 2. **Payoff first, then rewind**: shot 1 shows the most shocking result / the twist image (mark it `role: 'payoff'`), then
    "3 days earlier…" and the story. The twist is teased in second 1 and paid off at the end.
 3. **New angle or zoom every 2–3 s** (cut, punch-in or a camera move) — no exceptions.
-4. **25–35 s** for shorts unless Sir asks for another length.
+4. **≤ 30 s** (20–30) for every video unless Sir names a longer length.
 5. **Ending loops into the start** (the last line/image leads straight into shot 1).
 6. **One comment question** at the end (caption + pinned comment), e.g. "Would you have survived?".
 7. **Niche: crazy TRUE stories** (story-research) — same niche every day so the algorithm learns the audience.
