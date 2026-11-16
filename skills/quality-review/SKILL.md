@@ -21,7 +21,9 @@ the tier (a fix breaks other things). The gate is mechanical — the video canno
 ```
 node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --init            # once; reads CONFIG.effort, lists the tier's checks
 # each round:
-node ${CLAUDE_PLUGIN_ROOT}/scripts/qa_check.js scene.html --target <s>        # scene gate (feet, hands, framing, light, hook, pacing…)
+node ${CLAUDE_PLUGIN_ROOT}/scripts/qa_check.js scene.html --target <s>        # MEASURES every frame at the scene's effort: wrist skin (morphed hands), hands through body/arm/leg/head,
+#   feet, pops, T-pose flashes, walk-on-the-spot, slides, overlaps, camera in heads · captions/titles (speed, overlap, off-frame, gaps, variety) · light · framing · hook · pacing
+#   → scene_qa/sheet.jpg (every shot) + scene_qa/hands.jpg (a macro crop of EVERY hand, worst moment first) + frames/ (1 · 3 · 5 per shot by effort) — LOOK at all of them
 node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 540 --height 960
 node ${CLAUDE_PLUGIN_ROOT}/scripts/av_check.js prev.mp4 --out scene_qa [--holds "a-b"]   # sound + picture forensics → av.json, wave.png
 node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --round           # snapshots THIS render into scene_qa/rN/
@@ -57,7 +59,7 @@ Long-form: wherever a check says "every shot", do every shot — chapters are re
   transition (read it off the 12 fps strip and wave.png). Every impact/whoosh/title/transition has a sound; no sound without a visible cause.
 - **C06 Feet & ground** — feet planted in every shot: no float (> 2 cm), sink, or skate (planted foot moves < 1 cm while weight is on it);
   walk ≈ 1.45 m/s, run ≈ 2.57 m/s stride matches speed; contact shadows present.
-- **C07 Hands & right action** — every touch/hold/point lands on its target (`reach` IK, ≤ 3 cm); props seated in the palm, fingers wrapped;
+- **C07 Hands & right action** — open `hands.jpg`: every crop is a perfect hand (five clean fingers, no pinched/twisted wrist, nothing through the body) or it is a FAIL; every touch/hold/point lands on its target (`reach` IK, ≤ 3 cm); props seated in the palm, fingers wrapped;
   no arm through body/prop; every clip fits the moment (sit = sit), no random moves, nobody lip-syncs the narrator.
 - **C08 Framing & readability** — focal subject + the thing discussed in frame every shot; faces never cropped/covered; eyes near the upper
   third; all text inside the safe area (shorts: top 12% / bottom 20% / sides 6% clear of UI); text ≥ 4% of frame height, legible at phone size.

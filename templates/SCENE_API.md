@@ -87,7 +87,8 @@ before and overshoot/settle after (see skills/custom-animation). New reusable po
 `point · handsup · shrug · armsout · fistpump · cheer · shield · think · facepalm · gasp · headhold · salute · wave · stop · thumbsup · scared · hips · clap · plead ·
 beat · open · explain · present · count · lean · slump`.
 They are absolute poses blended from whatever the clip is doing, so they read the same on idle, sit, walk… `point` aims with `to: 'pal.head' | [x,y,z] | 'camera'`; `count` takes `n: 1–5`;
-any gesture takes `fingers: 'fist'`. Wrists never fold or twist past real limits (qa_check fails deformed hands and hands inside the body). New poses: add to `POSES` in the scene file.
+any gesture takes `fingers: 'fist'`. Fingers are always posed by the engine on the character's own knuckle axes — clips only tell it how curled each finger is, so no clip can bend a finger sideways
+or through the palm; `hands: { right: 'grip' }` overrides the clip. Wrists fold ≤ 52° and share their twist with the forearm; qa_check measures the wrist skin on every frame and crops every hand (`hands.jpg`). Wrists never fold or twist past real limits (qa_check fails deformed hands and hands inside the body). New poses: add to `POSES` in the scene file.
 
 ### Epic action (anime / superhero)
 `shot.afterimage: 0.85` (or keys) = speed trails · `shot.impact: [t]` = anime impact frames (flash + hard B/W frames) ·
@@ -148,6 +149,9 @@ Numbers & data: `counter` · `stat` (`value`, `max`, `suffix`, `text` — big nu
 Story furniture: `lower-third` · `place` (typed location/date stamp, `sub`) · `chapter` (line opens, title drops out, `sub: 'PART 2'`) · `quote` (word by word, `sub: '— Name'`) · `ticker` (news band, `label`) · `cta` (follow/subscribe button that gets tapped: `text`, `done`, `sub`, `icon: 'bell'|'like'|'heart'`)
 · `ring` · `box` (frame draws itself around `at: 'hero.head'`, `box: [w,h]`).
 Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
+Every moving graphic gets motion-blur trails on its entrance/exit (`blur: false` on a title or `CONFIG.titleBlur = false` turns it off); in vertical video the small styles (tag, place, lower-third, steps, meter, cta, stat, quote, ticker, callout…) are drawn
+larger so they read on a phone (`boost: false` = old size); type is shaded top-to-bottom for volume. qa_check fails: a title < 0.5 s, too much text for its time, outside the 6% safe area, on top of the captions or another title,
+a doubled word, > 7 s with no graphic, one style used for > 60% of the graphics.
 
 ## Rendering
 - QA in the cloud (no GPU): `node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html prev.mp4 --fast --width 405 --height 720 --fps 4 --frames-only`

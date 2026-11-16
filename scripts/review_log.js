@@ -41,13 +41,15 @@ if (args.includes('--round')) {
     else if (mt(p) < sceneT) err.push(`${n} is older than the scene — re-render and re-run it on the current version`);
     else if (mt(p) < last) err.push(`${n} was not re-run since round ${r.rounds.length} — a round needs a fresh render`);
   }
+  if (fs.existsSync(qa)) { const q = JSON.parse(fs.readFileSync(qa, 'utf8')); if (!q.measured) err.push('qa.json was made by the old qa_check — run the current one (every-frame motion pass + hand crops)'); else if (tierOf(q.effort) !== effort) err.push(`qa_check ran at "${q.effort}" but the scene's effort is "${effort}" — run it again at the scene's effort`); }
   if (prev && prev.sceneHash === hash(src) && Object.values(prev.checks).some((c) => c.status === 'FAIL')) err.push(`round ${r.rounds.length} has FAILs but the scene is unchanged — fix them first`);
   if (prev && Object.values(prev.checks).some((c) => !/^(PASS|FAIL)$/.test(c.status))) err.push(`round ${r.rounds.length} is not filled in yet`);
   if (err.length) { console.log('ROUND REFUSED:\n- ' + err.join('\n- ')); process.exit(1); }
   const n = r.rounds.length + 1, rd = path.join(dir, 'r' + n); fs.mkdirSync(rd, { recursive: true });
   fs.copyFileSync(input, path.join(rd, 'scene.html'));
-  for (const f of ['qa.json', 'av.json', 'sheet.jpg', 'wave.png']) if (fs.existsSync(path.join(dir, f))) fs.copyFileSync(path.join(dir, f), path.join(rd, f));
-  r.rounds.push({ n, at: new Date().toISOString(), sceneHash: hash(src), qaHash: fhash(qa), avHash: fhash(av),
+  for (const f of ['qa.json', 'av.json', 'sheet.jpg', 'hands.jpg', 'wave.png']) if (fs.existsSync(path.join(dir, f))) fs.copyFileSync(path.join(dir, f), path.join(rd, f));
+  const Q = JSON.parse(fs.readFileSync(qa, 'utf8')), AVJ = JSON.parse(fs.readFileSync(av, 'utf8'));
+  r.rounds.push({ n, at: new Date().toISOString(), sceneHash: hash(src), qaHash: fhash(qa), avHash: fhash(av), measured: { ...Q.measured, qaFails: Q.fails.length, avFails: AVJ.fails.length, av: AVJ.notes },
     checks: Object.fromEntries(list.map(([id, name]) => [id, { name, status: '', evidence: '', proof: [], fix: '' }])) });
   save(r);
   console.log(`round ${n}/${r.minRounds} snapshot → ${rd}/ · put your proof files there (crops, strips, grabs), then fill round ${n} in ${file}`);
@@ -66,6 +68,9 @@ const fixWords = /(tweak|minor|small|adjust(ed)? things|various|some fixes|polis
 R.forEach((rd, i) => {
   const before = R[i - 1], rdir = path.join(dir, 'r' + (i + 1));
   if (!fs.existsSync(path.join(rdir, 'scene.html'))) fails.push(`round ${i + 1}: no snapshot — rounds must be created with --round`);
+  if (!rd.measured) fails.push(`round ${i + 1}: no measurements — it was made by the old gate; redo the round`);
+  else if (i === R.length - 1 && (rd.measured.qaFails || rd.measured.avFails)) fails.push(`round ${i + 1}: the last round still had ${rd.measured.qaFails} qa_check + ${rd.measured.avFails} av_check failures when it started — the final round must start from a clean automatic pass`);
+  if (!fs.existsSync(path.join(rdir, 'hands.jpg')) && !fs.existsSync(path.join(rdir, 'hands.png')) && rd.measured?.handCrops) fails.push(`round ${i + 1}: hands sheet missing from the snapshot`);
   if (before) {
     const nFail = Object.values(before.checks).filter((c) => c.status === 'FAIL').length;
     if (nFail) {
@@ -74,7 +79,7 @@ R.forEach((rd, i) => {
       const d = changed(a, b); if (d < nFail * 2) fails.push(`round ${i}→${i + 1}: ${nFail} FAILs but only ${d} scene line(s) changed — the fixes were not really made`);
     }
   }
-  const AUTO = /^(scene\.html|qa\.json|av\.json|sheet\.jpg|wave\.png)$/, seen = new Set();
+  const AUTO = /^(scene\.html|qa\.json|av\.json|sheet\.jpg|hands\.jpg|wave\.png)$/, seen = new Set();
   for (let k = 1; k <= i; k++) { const d = path.join(dir, 'r' + k); if (fs.existsSync(d)) for (const f of fs.readdirSync(d)) if (!AUTO.test(f)) seen.add(fhash(path.join(d, f))); }
   let nf = 0;
   for (const [id] of list) {
@@ -107,7 +112,8 @@ const lastR = R.at(-1);
 if (lastR && lastR.sceneHash !== hash(src)) fails.push('the scene changed after the last round — every edit needs a fresh render + a full round');
 for (const [p, n] of [[qa, 'qa_check'], [av, 'av_check']]) {
   if (!fs.existsSync(p)) { fails.push(`${n} report missing (${p}) — run it`); continue; }
-  if (!JSON.parse(fs.readFileSync(p, 'utf8')).pass) fails.push(`${n} last result is FAIL`);
+  const J = JSON.parse(fs.readFileSync(p, 'utf8')); if (!J.pass) fails.push(`${n} last result is FAIL`);
+  if (n === 'qa_check' && (!J.measured || tierOf(J.effort) !== effort)) fails.push(`qa_check must be the current version run at the scene's effort ("${effort}") — it measures every frame and crops every hand`);
   if (mt(p) < mt(input)) fails.push(`${n} is older than the last scene edit — run it again`);
 }
 const totalFix = R.reduce((s, x) => s + Object.values(x.checks).filter((c) => c.status === 'FAIL').length, 0);

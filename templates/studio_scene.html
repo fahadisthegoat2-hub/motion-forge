@@ -624,6 +624,8 @@ const CAP = Object.assign({ style: 'pop', size: 0.085, color: '#ffffff', hi: '#f
 function drawCaptions(t, w, h) {
   if (capCanvas.width !== w || capCanvas.height !== h) { capCanvas.width = w; capCanvas.height = h; capTex.dispose(); }   // GPU storage is immutable → re-allocate
   capCtx.clearRect(0, 0, w, h);
+  { const mv = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => titleMoving(T, t));   // motion blur: moving graphics leave two faint sub-frame trails (entrances, exits, phrase swaps)
+    if (mv.length && CONFIG.titleBlur !== false) { for (const k of [2, 1]) drawTitles(t - k * 0.013, w, h, mv); capCtx.save(); capCtx.setTransform(1, 0, 0, 1, 0, 0); capCtx.globalCompositeOperation = 'destination-out'; capCtx.globalAlpha = 0.64; capCtx.fillRect(0, 0, w, h); capCtx.restore(); } }
   const g = capCtx, idx = CAPTIONS.findLastIndex((c) => t >= c.t);
   if (idx >= 0) {
     const c = CAPTIONS[idx], end = c.t1 ?? (CAPTIONS[idx + 1]?.t ?? TOTAL);
@@ -671,10 +673,13 @@ function drawCaptions(t, w, h) {
 // explainer: callout · pulse · inset · chart · bars · list · card · timeline · arrow · icon · bubble · scan   (at: 'hero.heart' tracks a body part)
 const FONT = '"Montserrat", "Inter", "Arial Black", "Helvetica Neue", Arial, sans-serif';
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+const _shade = new Map();
+function shade(c, k) { const key = c + k; if (_shade.has(key)) return _shade.get(key); let out = c; try { const col = new THREE.Color(c); out = '#' + col.multiplyScalar(k).getHexString(); if (/^rgba?\(/.test(c)) out = c; } catch {} _shade.set(key, out); return out; }
 function outlinedText(g, txt, x, y, size, fill, stroke = 'rgba(0,0,0,.85)', glow = null) {
   g.lineJoin = 'round'; g.lineWidth = size * 0.16; g.strokeStyle = stroke;
   g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = size * 0.14; g.shadowOffsetY = size * 0.07; g.strokeText(txt, x, y); g.restore();   // soft drop shadow → the text sits above the picture
   if (Array.isArray(fill)) { const gr = g.createLinearGradient(0, y - size * 0.5, 0, y + size * 0.5); gr.addColorStop(0, fill[0]); gr.addColorStop(1, fill[1]); fill = gr; }
+  else if (typeof fill === 'string' && size > 18) { const gr = g.createLinearGradient(0, y - size * 0.5, 0, y + size * 0.5); gr.addColorStop(0, fill); gr.addColorStop(0.55, fill); gr.addColorStop(1, shade(fill, 0.8)); fill = gr; }   // lit from above → the type has volume
   if (glow) { g.save(); g.shadowColor = glow; g.shadowBlur = size * 0.5; g.fillStyle = fill; g.fillText(txt, x, y); g.restore(); }
   g.fillStyle = fill; g.fillText(txt, x, y);
 }
@@ -843,12 +848,17 @@ function renderLens(L, size) {
 }
 const ANCHORED = new Set(['callout', 'pulse', 'inset', 'arrow', 'bubble']);
 const FLAT_OUT = new Set([...ANCHORED, 'timeline', 'scan', 'speedlines', 'ticker', 'box', 'zoomthrough', 'countdown', 'kinetic']), AUTOFIT = new Set(['slam', 'stack', 'glitch', 'stamp', 'typewriter']);
+const NO_SMEAR = new Set(['inset', 'pulse', 'scan', 'timeline', 'speedlines', 'chart', 'bars', 'ticker', 'typewriter', 'glitch']), ALWAYS_SMEAR = new Set(['kinetic', 'countdown', 'zoomthrough']);
+function titleMoving(T, t) { const st = T.style || 'slam'; if (T.blur === false || NO_SMEAR.has(st)) return false; const lt = t - T.t, t1 = T.t1 ?? T.t + 2;
+  return (lt >= 0 && lt < 0.42) || (t > t1 - 0.02 && t < t1 + (T.outDur ?? 0.25)) || (ALWAYS_SMEAR.has(st) && lt >= 0 && t < t1); }
+// Phone-first sizes: the small furniture styles were unreadable on a phone at the default size → larger in vertical video (T.size still scales them).
+const MG_BOOST = { tag: 1.5, meter: 1.35, steps: 1.3, place: 1.4, 'lower-third': 1.3, quote: 1.2, cta: 1.3, stat: 1.2, countdown: 1.15, ticker: 1.2, icon: 1.15, callout: 1.15, bubble: 1.15 };
 function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : [])) {
   const g = capCtx, S = Math.min(w, h);
   for (const T of list) {
     const t0 = T.t, t1 = T.t1 ?? t0 + 2, outD = T.outDur ?? 0.25, inD = T.inDur ?? 0.3; if (t < t0 - 0.2 || t > t1 + outD + 0.05) continue;
     const st = T.style || 'slam', p = clamp((t - t0) / 0.22), po = clamp((t - t1) / outD), lt = t - t0;
-    let size = (T.size ?? 0.1) * S; const [px, py] = T.pos || [0.5, 0.3]; let X = px * w, Y = py * h;
+    let size = (T.size ?? 0.1) * S * (h > w && T.boost !== false ? MG_BOOST[st] || 1 : 1); const [px, py] = T.pos || [0.5, 0.3]; let X = px * w, Y = py * h;
     if (AUTOFIT.has(st) && T.text) size = fitSize(g, String(T.text).split('\n'), size, w * (st === 'stamp' ? 0.78 : 0.92));
     if (T.at && !ANCHORED.has(T.style)) { const A = anchorScreen(T.at, w, h); if (!A) continue; X = A[0] + (T.offset?.[0] ?? 0) * w; Y = A[1] + (T.offset?.[1] ?? 0) * h; }
     const col = T.color || '#ffffff', acc = T.accent || '#ffe14d';
@@ -1205,6 +1215,9 @@ const normName = (n) => { const k = n.replace(/^mixamorig\d*[:_]?/i, '').replace
   return UE_ALIAS[k] || k; };
 
 /* ---------- retargeting: world-space rotation transfer with rest-direction calibration ---------- */
+// Finger joints are NOT copied from clips: every rig's finger bones sit differently, so copied rotations bend fingers sideways / through the palm ("morphed hands").
+// The clip only says how curled each finger is; poseFingers() bends the character's own joints around its own knuckle axes.
+const FINGER_BONE = /hand(thumb|index|middle|ring|pinky)\d/;
 function boneMap(root) { const m = {}; root.traverse((o) => { if (o.isBone && !m[normName(o.name)]) m[normName(o.name)] = o; }); return m; }
 function restData(root, map) {
   root.updateMatrixWorld(true); const d = {};
@@ -1216,7 +1229,8 @@ const CHILD_HINT = { hips: 'spine', spine: 'spine1', spine1: 'spine2', spine2: '
   lefthand: 'lefthandmiddle1', righthand: 'righthandmiddle1' };
 function retargetClip(src, clip, tgt) {
   const sMap = boneMap(src.root), tMap = boneMap(tgt.root);
-  const pairs = Object.keys(tMap).filter((k) => sMap[k] && !/eye|end$/.test(k));
+  const pairs = Object.keys(tMap).filter((k) => sMap[k] && !/eye|end$/.test(k) && !FINGER_BONE.test(k));
+  const fingerSrc = ['left', 'right'].filter((sd) => sMap[sd + 'handindex1'] && src.rest[sd + 'handindex1']);
   const C = {};
   for (const k of pairs) {   // calibrate rest-pose differences (T-pose vs A-pose) using bone directions
     const ck = CHILD_HINT[k]; C[k] = new THREE.Quaternion();
@@ -1229,6 +1243,8 @@ function retargetClip(src, clip, tgt) {
   const fps = 30, n = Math.max(2, Math.round(clip.duration * fps) + 1), times = new Float32Array(n);
   const order = []; tgt.root.traverse((o) => { if (o.isBone) order.push(o); });
   const qv = {}; pairs.forEach((k) => (qv[k] = new Float32Array(n * 4)));
+  const curl = Object.fromEntries(fingerSrc.map((sd) => [sd, new Float32Array(n * 5)]));
+  const bendOf = (k) => { const b = sMap[k], r = src.rest[k]; if (!b || !r) return 0; return 2 * Math.acos(Math.min(1, Math.abs(tmpQ.copy(r.local).invert().multiply(b.quaternion).w))); };
   const hipsPos = new Float32Array(n * 3);
   const hS = src.rest.hips, hT = tgt.rest.hips, scale = hT && hS ? hT.p.y / Math.max(hS.p.y, 1e-6) : 1;
   const newW = new Map(), tmpQ = new THREE.Quaternion(), tmpP = new THREE.Quaternion(), prev = {};
@@ -1247,6 +1263,10 @@ function retargetClip(src, clip, tgt) {
       } else world = parentW.clone().multiply(tgt.rest[k] ? tgt.rest[k].local : b.quaternion);
       newW.set(b, world);
     }
+    for (const sd of fingerSrc) {   // curl per finger (0 = straight … 1 = fist) and thumb, from the source's own joints
+      ['index', 'middle', 'ring', 'pinky'].forEach((fn, i) => { curl[sd][f * 5 + i] = clamp((bendOf(sd + 'hand' + fn + '1') + bendOf(sd + 'hand' + fn + '2') + bendOf(sd + 'hand' + fn + '3')) / 3.7); });
+      curl[sd][f * 5 + 4] = clamp((bendOf(sd + 'handthumb1') + bendOf(sd + 'handthumb2') + bendOf(sd + 'handthumb3')) / 1.9) * 0.9;
+    }
     if (sMap.hips && sMap.leftfoot && sMap.rightfoot) {
       const hp = sMap.hips.getWorldPosition(new THREE.Vector3()), lf = sMap.leftfoot.getWorldPosition(new THREE.Vector3()), rf = sMap.rightfoot.getWorldPosition(new THREE.Vector3());
       const low = lf.y < rf.y ? 'l' : 'r', rel = (low === 'l' ? lf : rf).sub(hp).multiplyScalar(scale);
@@ -1263,6 +1283,7 @@ function retargetClip(src, clip, tgt) {
   const tracks = pairs.map((k) => new THREE.QuaternionKeyframeTrack(`${tMap[k].name}.quaternion`, times, qv[k]));
   if (tMap.hips) tracks.push(new THREE.VectorKeyframeTrack(`${tMap.hips.name}.position`, times, hipsPos));
   const out = new THREE.AnimationClip(clip.name, clip.duration, tracks);
+  out.fingers = fingerSrc.length ? { fps, n, ...curl } : null;   // applied through poseFingers → clean fingers on every rig
   out.rootSpeed = gTime > 0.2 ? gAcc / gTime : 0;   // natural ground speed in m/s (0 for idles/poses)
   return out;
 }
@@ -1452,7 +1473,8 @@ const CLIP_ALIAS = {   // plain names → real clips (UAL 1 + 2)
   zombie: 'zombiewalkfwdloop', zombieidle: 'zombieidleloop', formalwalk: 'walkformalloop', torch: 'idletorchloop', lantern: 'idlelanternloop', spell: 'spellsimpleshoot',
   crouch: 'crouchidleloop' };
 // plain name → library key. A built-in alias wins over a name that only exists because "_Loop"/"_Fwd" was stripped (jump ≠ Jump_Loop); your own clip files always win.
-const CLIP_TUNE = { walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
+const CLIP_TUNE = { idlefoldarmsloop: { leftarm: [-0.18, 0, 0], rightarm: [-0.18, 0, 0] },   // library clip is for a slimmer body: the hands sank into the arms
+  walk: { spine: [0.07, 0, 0], spine1: [0.06, 0, 0], neck: [-0.04, 0, 0] },
   carry: { spine: [0.1, 0, 0], spine1: [0.1, 0, 0], spine2: [0.06, 0, 0], neck: [0.1, 0, 0], head: [0.18, 0, 0] },      // the library clip leans far back and looks at the sky
   kneel: { spine: [-0.2, 0, 0], spine1: [-0.2, 0, 0], spine2: [-0.12, 0, 0], neck: [-0.22, 0, 0], head: [-0.28, 0, 0], pose: 'kneelrest', low: true } };   // kneel = upright on one knee ('fix' = the same clip hunched over, working on the ground)   // posture fixes layered on a clip ([pitch, yaw, roll] per joint, scaled by the clip's weight)
 function clipKey(name) { const k = normName(name), a = CLIP_ALIAS[k]; return a && clipLib[a] && (!clipLib[k] || clipLib[k].derived) ? a : k; }
@@ -1530,6 +1552,28 @@ const HANDS = { relaxed: [0.28, 0.34, 0.4, 0.46, 0.25, 0.1], open: [0.06, 0.06, 
   point: [0, 1, 1, 1, 0.85, 0], peace: [0, 0, 1, 1, 0.9, 0.7], thumbsup: [1, 1, 1, 1, -1, 0], grip: [0.62, 0.64, 0.68, 0.72, 0.5, 0], claw: [0.45, 0.45, 0.48, 0.5, 0.2, 0.8], chin: [0.2, 0.95, 1, 1, 0.3, 0],
   pinch: [0.55, 0.12, 0.1, 0.1, 0.62, 0.25], count1: [0, 1, 1, 1, 0.85, 0], count2: [0, 0, 1, 1, 0.9, 0.7], count3: [0, 0, 0, 1, 0.95, 0.5], count4: [0, 0, 0, 0, 0.95, 0.5], count5: [0, 0, 0, 0, -0.6, 0.7] };
 const handPose = (v) => (typeof v === 'string' ? HANDS[v] || HANDS.relaxed : v);
+// Wrist skin probe: the edges of the mesh ring where forearm and hand weights meet. Their length against the rest pose tells whether the skin
+// is pinched ("candy wrapper") or torn — measured on the real deformed mesh, not guessed from angles.
+function wristSkin(ch, side) {
+  const hb = ch.bones[side + 'hand']; if (!hb) return null; const out = [];
+  ch.model.updateMatrixWorld(true);
+  ch.model.traverse((o) => { if (!o.isSkinnedMesh || !o.geometry.index || !o.geometry.attributes.skinIndex) return;
+    const bi = o.skeleton.bones.indexOf(hb), fi = o.skeleton.bones.indexOf(ch.bones[side + 'forearm']); if (bi < 0 || fi < 0) return; o.skeleton.update();
+    const SI = o.geometry.attributes.skinIndex, SW = o.geometry.attributes.skinWeight, ix = o.geometry.index, inSet = new Uint8Array(SI.count);
+    for (let v = 0; v < SI.count; v++) { let wh = 0, wf = 0; for (let j = 0; j < 4; j++) { const b = SI.getComponent(v, j), w = SW.getComponent(v, j); if (b === bi) wh += w; else if (b === fi) wf += w; } if (wh > 0.1 && wf > 0.1 && wh + wf > 0.9) inSet[v] = 1; }
+    const seen = new Set(), edges = [], a = new THREE.Vector3(), b = new THREE.Vector3();
+    for (let i = 0; i + 2 < ix.count && edges.length < 500; i += 3) for (let e = 0; e < 3; e++) { const p = ix.getX(i + e), q = ix.getX(i + (e + 1) % 3); if (!inSet[p] || !inSet[q]) continue;
+      const kk = p < q ? p * 1e6 + q : q * 1e6 + p; if (seen.has(kk)) continue; seen.add(kk); const L = o.getVertexPosition(p, a).distanceTo(o.getVertexPosition(q, b)); if (L > 1e-5) edges.push(p, q, L); }
+    if (edges.length) out.push({ mesh: o, edges }); });
+  return out.length ? out : null;
+}
+const _sk = [new THREE.Vector3(), new THREE.Vector3()];
+function wristSkinNow(ch, side) {   // → { squash: shortest edge / rest (1 = perfect, < 0.5 = pinched), stretch: longest edge / rest }
+  const S = ch.hand?.[side]?.skin; if (!S) return null; let lo = 1, hi = 1, n = 0, bad = 0;
+  for (const { mesh, edges } of S) { if (!mesh.visible) continue; mesh.skeleton.update();
+    for (let i = 0; i < edges.length; i += 3) { const r = mesh.getVertexPosition(edges[i], _sk[0]).distanceTo(mesh.getVertexPosition(edges[i + 1], _sk[1])) / edges[i + 2]; n++; if (r < 0.55 || r > 1.7) bad++; if (r < lo) lo = r; if (r > hi) hi = r; } }
+  return n ? { squash: +lo.toFixed(2), stretch: +hi.toFixed(2), bad: +(bad / n).toFixed(3) } : null;
+}
 function setupHands(ch) {   // palm frame of each hand from the rest pose: f = wrist→knuckles, n = out of the palm, t = thumb side
   ch.hand = {};
   for (const side of ['left', 'right']) {
@@ -1538,7 +1582,7 @@ function setupHands(ch) {   // palm frame of each hand from the rest pose: f = w
     const n = side === 'left' ? f.clone().cross(tv) : tv.clone().cross(f); n.normalize();
     const tb = [1, 2, 3].map((j) => { const a = ch.rest[side + 'handthumb' + j], b = ch.rest[side + 'handthumb' + (j + 1)] || ch.rest[side + 'handthumb' + (j + 1) + 'end']; if (!a || !b) return n.clone();
       const ax = b.p.clone().sub(a.p).normalize().cross(tv.clone().negate()); return ax.lengthSq() > 1e-6 ? ax.normalize() : n.clone(); });   // thumb joints bend ACROSS the palm (toward the little finger)
-    ch.hand[side] = { f, n, t: tv, tb, flex: f.clone().cross(n).normalize(), spread: f.clone().cross(tv).normalize(), arm: up.p.distanceTo(fo.p) + fo.p.distanceTo(hd.p), fingers: !!m };
+    ch.hand[side] = { skin: wristSkin(ch, side), f, n, t: tv, tb, flex: f.clone().cross(n).normalize(), spread: f.clone().cross(tv).normalize(), arm: up.p.distanceTo(fo.p) + fo.p.distanceTo(hd.p), fingers: !!m };
   }
 }
 const _hq = new THREE.Quaternion(), _hq2 = new THREE.Quaternion(), _hv = new THREE.Vector3(), _hm0 = new THREE.Matrix4(), _hm1 = new THREE.Matrix4();
@@ -1734,6 +1778,9 @@ function rotateInRootSpace(ch, bone, pitch, yaw, roll = 0) {
 const _tw = { q: new THREE.Quaternion(), r: new THREE.Quaternion(), a: new THREE.Vector3() };
 function relaxWrists(ch, share = 0.55) {
   for (const s of ['left', 'right']) { const fo = ch.bones[s + 'forearm'], ha = ch.bones[s + 'hand'], r0 = ch.rest[s + 'hand']; if (!fo || !ha || !r0 || ha.position.lengthSq() < 1e-10) continue;
+    const mid = ch.bones[s + 'handmiddle1'];   // a wrist folds ~60° at most: past that the skin pinches (clips made for other bodies, pushes, hard IK targets)
+    if (mid) { const pf = fo.getWorldPosition(new THREE.Vector3()), ph = ha.getWorldPosition(new THREE.Vector3()), fa = ph.clone().sub(pf).normalize(), hf = mid.getWorldPosition(new THREE.Vector3()).sub(ph).normalize(), ang = Math.acos(clamp(fa.dot(hf), -1, 1)), MAXB = 0.9;
+      if (ang > MAXB) { const axb = hf.clone().cross(fa); if (axb.lengthSq() > 1e-8) rotateBoneWorld(ha, _tw.q.setFromAxisAngle(axb.normalize(), ang - MAXB)); } }
     const ax = _tw.a.copy(ha.position).normalize(), r = _tw.r.copy(ha.quaternion).multiply(_tw.q.copy(r0.local).invert());   // rotation from rest, in the forearm's frame
     let ang = 2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w); if (ang > Math.PI) ang -= 2 * Math.PI; if (ang < -Math.PI) ang += 2 * Math.PI;
     if (Math.abs(ang) < 0.05) continue;
@@ -2575,8 +2622,17 @@ function applyClips(ch, cast, t) {
       lt = pathLen(cast.pos, Math.max(e.start, 0), t) / rs + (e.offset || 0);   // feet lock to the ground: cycle phase follows distance travelled
     a.time = e.loop === false ? Math.min(lt, d - 1e-4) : lt % d; a.setEffectiveWeight(Math.max(a.getEffectiveWeight(), w / sum));
   }
+  const fc = { left: [0, 0, 0, 0, 0], right: [0, 0, 0, 0, 0] }; let nativeHands = false;
+  for (const [e, w] of ws) { const a = clipFor(ch, e.clip); if (!a) continue; const c = a.getClip(), Fg = c.fingers, k = w / sum; if (Fg === undefined) nativeHands = true;
+    for (const sd of ['left', 'right']) { const arr = Fg?.[sd] || Fg?.[sd === 'left' ? 'right' : 'left'];
+      if (!arr) { for (let i = 0; i < 5; i++) fc[sd][i] += HANDS.relaxed[i] * k; continue; }
+      const x = clamp(a.time * Fg.fps, 0, Fg.n - 1), i0 = Math.floor(x), i1 = Math.min(Fg.n - 1, i0 + 1), u = x - i0;
+      for (let i = 0; i < 5; i++) fc[sd][i] += (arr[i0 * 5 + i] * (1 - u) + arr[i1 * 5 + i] * u) * k; } }
   ch.mixer.update(0); ch._tune = ws.map(([e, w]) => [CLIP_TUNE[normName(e.clip)] || CLIP_TUNE[clipKey(e.clip)], w / sum]).filter((x) => x[0]);
   for (const [k, b] of Object.entries(ch.bones)) { const s = (P[k] ??= { q: new THREE.Quaternion(), p: new THREE.Vector3() }); s.q.copy(b.quaternion); s.p.copy(b.position); }
+  if (!nativeHands) for (const sd of ['left', 'right']) { const c = fc[sd], FL = [0.14, 0.18, 0.22, 0.26]; c[0] = Math.max(c[0], c[1] * 0.85); c[3] = Math.max(c[3], c[2] * 0.85); c[4] = Math.max(c[4], (c[0] + c[1] + c[2] + c[3]) / 4 * 0.95 - 0.08);   // a closing hand wraps its thumb   // clips never poke one finger out (pointing is a gesture)
+      // a living hand is never dead flat
+    poseFingers(ch, sd, [Math.max(c[0], FL[0]), Math.max(c[1], FL[1]), Math.max(c[2], FL[2]), Math.max(c[3], FL[3]), c[4], 0.14 * (1 - (c[0] + c[1] + c[2] + c[3]) / 4)], 1); }
 }
 function cameraAt(shot, lt, tGlobal) {
   const c = shot.camera || {}, mv = c.move ? cameraMove(shot, lt, c) : null;
@@ -2604,6 +2660,8 @@ function render(tGlobal) {
   const cam = cameraAt(shot, ct, shotStart + ct), te = applyTransition(transitionAt(si, local), cam, tGlobal);
   for (const p of shot.punch || []) cam.fov *= 1 - 0.13 * smooth((local - p) / 0.06);   // punch-in zooms (edit time, hold until the cut)
   camera.position.set(...cam.pos); camera.lookAt(...cam.look); if (cam.roll) camera.rotateZ(cam.roll); camera.fov = cam.fov;
+  const DBG = window.__mfCam;   // QA macro camera (scripts/hand_check.js): { pos, look, fov } replaces the shot camera and hides the HUD/transitions
+  if (DBG) { camera.position.set(...DBG.pos); camera.lookAt(...DBG.look); camera.fov = DBG.fov || 30; }
   { const B = renderer.getDrawingBufferSize(new THREE.Vector2()); if (THUMB && THUMB.shift !== 0) { const sh = THUMB.shift ?? (THUMB.side === 'right' ? -0.2 : 0.2); camera.setViewOffset(B.x, B.y, -sh * B.x, 0, B.x, B.y); } else if (camera.view?.enabled) camera.clearViewOffset(); }
   camera.updateProjectionMatrix();
   const camPosAt = (lt) => cameraAt(shot, lt, shotStart + lt).pos;
@@ -2635,9 +2693,10 @@ function render(tGlobal) {
   const fr0 = (shot.freeze || []).find(([at]) => local >= at && local < at + 0.2);
   grade.uniforms.uFlash.value = Math.max(fr0 ? 0.35 * (1 - (local - fr0[0]) / 0.2) : 0, ...(shot.impact || []).map((it) => local >= it && local < it + 0.04 ? 0.85 : 0), te.flash, shot.flash ? Math.max(0, 1 - local / 0.15) : 0, ...(shot._flashes || []).map((f) => local >= f.t ? f.amp * Math.exp(-(local - f.t) * 10) : 0), 0);
   grade.uniforms.uRes.value.copy(renderer.getDrawingBufferSize(new THREE.Vector2()));
+  if (window.__mfNoDraw) return;   // QA motion pass: pose everything, draw nothing (fast dense sampling)
   composer.render();
   const size = renderer.getDrawingBufferSize(new THREE.Vector2());
-  LENS = null; if (THUMB) drawThumb(size.x, size.y); else drawCaptions(tGlobal, size.x, size.y);
+  LENS = null; if (THUMB) drawThumb(size.x, size.y); else if (DBG) { capCtx.clearRect(0, 0, capCanvas.width, capCanvas.height); capTex.needsUpdate = true; } else drawCaptions(tGlobal, size.x, size.y);
   lensMesh.visible = !!LENS; if (LENS) renderLens(LENS, size);
   renderer.autoClear = false; renderer.clearDepth(); renderer.render(hud, hudCam); renderer.autoClear = true;
 }
@@ -2733,6 +2792,7 @@ window.__mf = {
     THUMB = T || null; if (T) render(0); },   // render one thumbnail (scripts/thumbnail.js)
 };
 window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
+  text: () => ({ captions: typeof CAPTIONS !== 'undefined' ? CAPTIONS : [], titles: typeof TITLES !== 'undefined' ? TITLES : [], captionY: CAP.y ?? CONFIG.captionY ?? (CONFIG.height > CONFIG.width ? 0.74 : 0.84), total: TOTAL, effort: CONFIG.effort || 'standard', quality: CONFIG.quality || null }),
   pacing() {   // beats the viewer feels: cuts, titles, caption changes, effects, punch-ins, sound hits
     const ev = collectSound().events.map((e) => e.t), beats = [...ev]; let acc = 0;
     for (const sh of SHOTS) { beats.push(acc); for (const f of sh.fx || []) beats.push(acc + (f.t ?? f.start ?? 0)); for (const p of sh.punch || []) beats.push(acc + p); acc += sh.dur; }
@@ -2760,11 +2820,19 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         const r = ha.quaternion.clone().multiply(ch.rest[s + 'hand'].local.clone().invert()), ax = ha.position.clone().normalize(); let tw = 2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w) * 57.3; if (tw > 180) tw -= 360; if (tw < -180) tw += 360;
         const lp = ch.root.worldToLocal(ph.clone()), sp = ch.bones.spine1 ? ch.root.worldToLocal(ch.bones.spine1.getWorldPosition(V())) : null, hp = ch.bones.hips ? ch.root.worldToLocal(ch.bones.hips.getWorldPosition(V())) : null, nk = ch.bones.neck ? ch.root.worldToLocal(ch.bones.neck.getWorldPosition(V())) : null;
         const inside = !!(sp && hp && nk && lp.y > hp.y + 0.06 && lp.y < nk.y - 0.04 && Math.abs(lp.x - sp.x) < 0.11 && lp.z - sp.z < 0.05 && lp.z - sp.z > -0.08);
-        return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
-      out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+        const tip = (mid || ha).getWorldPosition(V()), seg = (a, b) => { const A = ch.bones[a]?.getWorldPosition(V()), B = ch.bones[b]?.getWorldPosition(V()); if (!A || !B) return 9; const ab = B.clone().sub(A), k = clamp(tip.clone().sub(A).dot(ab) / Math.max(ab.lengthSq(), 1e-9)); return tip.distanceTo(A.addScaledVector(ab, k)); };
+        const o = s === 'left' ? 'right' : 'left', hd = ch.bones.head ? tip.distanceTo(ch.bones.head.getWorldPosition(V()).add(V().set(0, 0.07, 0.02).applyQuaternion(ch.root.quaternion))) : 9;
+        const clip = seg(o + 'arm', o + 'forearm') < 0.042 || seg(o + 'forearm', o + 'hand') < 0.032 ? 'the other arm' : Math.min(seg(s + 'upleg', s + 'leg'), seg(o + 'upleg', o + 'leg')) < 0.045 ? 'the leg' : hd < 0.075 ? 'the head' : null;
+        return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside, clip, skin: wristSkinNow(ch, s), p: ph.toArray().map((x) => +x.toFixed(3)) }; }).filter(Boolean);
+      const dirOf = (a, b) => { const A = ch.bones[a], B = ch.bones[b]; return A && B ? B.getWorldPosition(V()).sub(A.getWorldPosition(V())).normalize().applyQuaternion(ch.root.getWorldQuaternion(new THREE.Quaternion()).invert()) : null; };
+      const restDir = (a, b) => ch.rest[a] && ch.rest[b] ? ch.rest[b].p.clone().sub(ch.rest[a].p).normalize() : null;
+      const bind = ['left', 'right'].every((sd) => [[sd + 'arm', sd + 'forearm'], [sd + 'forearm', sd + 'hand']].every(([a, b]) => { const d = dirOf(a, b), r = restDir(a, b); return d && r && d.dot(r) > 0.99; })) && !(cast.gestures || []).some((g) => /armsout/.test(g.type));
+      const act = (cast.clips || [{ clip: 'idle', start: 0, end: 1e9 }]).filter((c) => local >= c.start && local <= c.end).pop(), gait = act ? (clipFor(ch, act.clip)?.getClip().rootSpeed || 0) : 0;
+      const pt = (b) => ch.bones[b] ? ch.bones[b].getWorldPosition(V()).toArray().map((x) => +x.toFixed(3)) : null;
+      out.push({ bind, gait: +gait.toFixed(2), clipName: act?.clip || null, root: ch.root.position.toArray().map((x) => +x.toFixed(3)), hips: pt('hips'), headP: pt('head'), lf: pt('leftfoot'), rf: pt('rightfoot'), id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
-    return { shot: shot.name, t: tg, local, chars: out, titles };
+    return { shot: shot.name, t: tg, local, chars: out, titles, cam: camera.position.toArray().map((x) => +x.toFixed(3)), boxes: (typeof HUD_BOXES !== 'undefined' ? HUD_BOXES.slice() : []) };
   } };
 const clock = new THREE.Clock();
 let _pv = { last: 0, avg: 33, scale: 1, n: 0 };
