@@ -1,0 +1,9 @@
+alt/
+*.log
+pack.err
+pack.json
+prev.mp4
+prev.mp4.scene.json
+okene_qa/
+thumbs/preview.jpg
+thumbs/thumb_0.jpg
