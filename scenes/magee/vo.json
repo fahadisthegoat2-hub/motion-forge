@@ -1,0 +1,342 @@
+{
+ "voice": "am_michael",
+ "duration": 23.972,
+ "words": [
+  {
+   "w": "He",
+   "start": 0.07,
+   "end": 0.268,
+   "tone": "shout"
+  },
+  {
+   "w": "fell",
+   "start": 0.268,
+   "end": 0.466,
+   "tone": "shout"
+  },
+  {
+   "w": "twenty",
+   "start": 0.466,
+   "end": 0.81,
+   "tone": "shout"
+  },
+  {
+   "w": "thousand",
+   "start": 0.81,
+   "end": 1.155,
+   "tone": "shout"
+  },
+  {
+   "w": "feet.",
+   "start": 1.155,
+   "end": 1.441,
+   "tone": "shout"
+  },
+  {
+   "w": "No",
+   "start": 1.621,
+   "end": 1.861,
+   "tone": "dramatic"
+  },
+  {
+   "w": "parachute.",
+   "start": 1.861,
+   "end": 2.564,
+   "tone": "dramatic"
+  },
+  {
+   "w": "And",
+   "start": 2.764,
+   "end": 2.966,
+   "tone": "whisper"
+  },
+  {
+   "w": "lived.",
+   "start": 2.966,
+   "end": 3.408,
+   "tone": "whisper"
+  },
+  {
+   "w": "January,",
+   "start": 3.788,
+   "end": 4.45,
+   "tone": "serious"
+  },
+  {
+   "w": "1943.",
+   "start": 4.618,
+   "end": 5.732,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 5.952,
+   "end": 6.16,
+   "tone": "serious"
+  },
+  {
+   "w": "bomber",
+   "start": 6.16,
+   "end": 6.522,
+   "tone": "serious"
+  },
+  {
+   "w": "over",
+   "start": 6.522,
+   "end": 6.883,
+   "tone": "serious"
+  },
+  {
+   "w": "France.",
+   "start": 6.883,
+   "end": 6.984,
+   "tone": "serious"
+  },
+  {
+   "w": "Flak",
+   "start": 7.065,
+   "end": 7.57,
+   "tone": "scared"
+  },
+  {
+   "w": "rips",
+   "start": 7.57,
+   "end": 7.756,
+   "tone": "scared"
+  },
+  {
+   "w": "it",
+   "start": 7.756,
+   "end": 7.942,
+   "tone": "scared"
+  },
+  {
+   "w": "open.",
+   "start": 7.942,
+   "end": 8.349,
+   "tone": "scared"
+  },
+  {
+   "w": "Fire",
+   "start": 8.569,
+   "end": 8.748,
+   "tone": "scared"
+  },
+  {
+   "w": "everywhere.",
+   "start": 8.748,
+   "end": 9.405,
+   "tone": "scared"
+  },
+  {
+   "w": "His",
+   "start": 9.635,
+   "end": 9.864,
+   "tone": "dramatic"
+  },
+  {
+   "w": "parachute?",
+   "start": 9.864,
+   "end": 10.531,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Shredded.",
+   "start": 10.752,
+   "end": 11.382,
+   "tone": "dramatic"
+  },
+  {
+   "w": "So",
+   "start": 11.662,
+   "end": 11.868,
+   "tone": "serious"
+  },
+  {
+   "w": "he",
+   "start": 11.868,
+   "end": 12.074,
+   "tone": "serious"
+  },
+  {
+   "w": "jumps",
+   "start": 12.074,
+   "end": 12.279,
+   "tone": "serious"
+  },
+  {
+   "w": "anyway.",
+   "start": 12.279,
+   "end": 12.881,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 13.211,
+   "end": 13.403,
+   "tone": "neutral"
+  },
+  {
+   "w": "hundred",
+   "start": 13.403,
+   "end": 13.736,
+   "tone": "neutral"
+  },
+  {
+   "w": "and",
+   "start": 13.736,
+   "end": 13.928,
+   "tone": "neutral"
+  },
+  {
+   "w": "twenty",
+   "start": 13.928,
+   "end": 14.262,
+   "tone": "neutral"
+  },
+  {
+   "w": "miles",
+   "start": 14.262,
+   "end": 14.595,
+   "tone": "neutral"
+  },
+  {
+   "w": "an",
+   "start": 14.595,
+   "end": 14.787,
+   "tone": "neutral"
+  },
+  {
+   "w": "hour.",
+   "start": 14.787,
+   "end": 15.064,
+   "tone": "neutral"
+  },
+  {
+   "w": "He",
+   "start": 15.284,
+   "end": 15.509,
+   "tone": "neutral"
+  },
+  {
+   "w": "blacks",
+   "start": 15.509,
+   "end": 15.735,
+   "tone": "neutral"
+  },
+  {
+   "w": "out.",
+   "start": 15.735,
+   "end": 16.061,
+   "tone": "neutral"
+  },
+  {
+   "w": "Then...",
+   "start": 16.441,
+   "end": 16.971,
+   "tone": "dramatic"
+  },
+  {
+   "w": "glass.",
+   "start": 17.191,
+   "end": 17.784,
+   "tone": "dramatic"
+  },
+  {
+   "w": "A",
+   "start": 18.064,
+   "end": 18.286,
+   "tone": "excited"
+  },
+  {
+   "w": "train",
+   "start": 18.286,
+   "end": 18.509,
+   "tone": "excited"
+  },
+  {
+   "w": "station",
+   "start": 18.509,
+   "end": 18.896,
+   "tone": "excited"
+  },
+  {
+   "w": "roof",
+   "start": 18.896,
+   "end": 19.118,
+   "tone": "excited"
+  },
+  {
+   "w": "breaks",
+   "start": 19.118,
+   "end": 19.341,
+   "tone": "excited"
+  },
+  {
+   "w": "his",
+   "start": 19.341,
+   "end": 19.563,
+   "tone": "excited"
+  },
+  {
+   "w": "fall.",
+   "start": 19.563,
+   "end": 19.885,
+   "tone": "excited"
+  },
+  {
+   "w": "Soldiers",
+   "start": 20.115,
+   "end": 20.57,
+   "tone": "serious"
+  },
+  {
+   "w": "cut",
+   "start": 20.57,
+   "end": 20.832,
+   "tone": "serious"
+  },
+  {
+   "w": "him",
+   "start": 20.832,
+   "end": 21.093,
+   "tone": "serious"
+  },
+  {
+   "w": "down.",
+   "start": 21.093,
+   "end": 21.471,
+   "tone": "serious"
+  },
+  {
+   "w": "Alive.",
+   "start": 21.691,
+   "end": 22.316,
+   "tone": "serious"
+  },
+  {
+   "w": "Would",
+   "start": 22.646,
+   "end": 22.833,
+   "tone": "mysterious"
+  },
+  {
+   "w": "you",
+   "start": 22.833,
+   "end": 23.019,
+   "tone": "mysterious"
+  },
+  {
+   "w": "have",
+   "start": 23.019,
+   "end": 23.205,
+   "tone": "mysterious"
+  },
+  {
+   "w": "jumped?",
+   "start": 23.205,
+   "end": 23.612,
+   "tone": "mysterious"
+  }
+ ]
+}

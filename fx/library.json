@@ -1842,6 +1842,128 @@
      "gain": 0.8
     }
    ]
+  },
+  "flak": {
+   "about": "WWII anti-aircraft flak shell burst in the sky: hot flash, black smoke puff that hangs, shrapnel streaks",
+   "layers": [
+    {
+     "mode": "glow",
+     "count": 6,
+     "burst": 0.03,
+     "life": [
+      0.08,
+      0.2
+     ],
+     "speed": [
+      0,
+      0.3
+     ],
+     "size": [
+      2.2,
+      3.4
+     ],
+     "colA": "#fff0c8",
+     "colB": "#ff8a2a",
+     "hdr": 3
+    },
+    {
+     "mode": "fire",
+     "count": 40,
+     "burst": 0.05,
+     "life": [
+      0.15,
+      0.4
+     ],
+     "speed": [
+      3,
+      7
+     ],
+     "drag": 4,
+     "spread": 1,
+     "size": [
+      0.6,
+      1.4
+     ],
+     "shape": [
+      0.3,
+      0.3,
+      0.3
+     ],
+     "colA": "#fff2c8",
+     "colB": "#ff6a10",
+     "colC": "#3a0e00",
+     "hdr": 1.4
+    },
+    {
+     "mode": "smoke",
+     "count": 70,
+     "at": 0.02,
+     "burst": 0.12,
+     "life": [
+      3.5,
+      6
+     ],
+     "speed": [
+      2.5,
+      5
+     ],
+     "drag": 2.6,
+     "buoy": 0.05,
+     "spread": 1,
+     "turb": 0.25,
+     "size": [
+      1.2,
+      4.2
+     ],
+     "shape": [
+      0.6,
+      0.6,
+      0.6
+     ],
+     "colA": "#2a2622",
+     "colB": "#0e0c0b",
+     "colC": "#ff6a1a",
+     "opacity": 0.92
+    },
+    {
+     "mode": "spark",
+     "count": 160,
+     "burst": 0.04,
+     "life": [
+      0.4,
+      1.1
+     ],
+     "speed": [
+      12,
+      28
+     ],
+     "drag": 0.6,
+     "gravity": 3,
+     "spread": 1,
+     "size": [
+      0.08,
+      0.04
+     ],
+     "colA": "#fff1c0",
+     "colB": "#ff5a10",
+     "hdr": 3,
+     "stretch": 7
+    }
+   ],
+   "light": {
+    "color": "#ffb060",
+    "intensity": 40,
+    "decay": 0.18
+   },
+   "shake": {
+    "amp": 0.5
+   },
+   "sfx": [
+    {
+     "type": "boom",
+     "gain": 0.8
+    }
+   ]
   }
  }
 }
