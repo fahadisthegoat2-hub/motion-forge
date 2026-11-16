@@ -10,6 +10,99 @@
     "pyre",
     "wood"
    ]
+  },
+  "cargo_ship": {
+   "file": "models/cargo_ship.glb",
+   "height": 10,
+   "about": "wooden ship hull with masts, sails removed (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "ship",
+    "sea",
+    "boat"
+   ]
+  },
+  "raft": {
+   "file": "models/raft.glb",
+   "height": 0.43,
+   "about": "wooden plank raft/platform (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "raft",
+    "sea",
+    "wood"
+   ]
+  },
+  "barrel": {
+   "file": "models/barrel.glb",
+   "height": 1.2,
+   "about": "wooden barrel (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "barrel",
+    "sea"
+   ]
+  },
+  "crate": {
+   "file": "models/crate.glb",
+   "height": 0.77,
+   "about": "wooden crate (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "crate"
+   ]
+  },
+  "paddle": {
+   "file": "models/paddle.glb",
+   "height": 2.3,
+   "about": "wooden paddle/oar (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "paddle",
+    "oar"
+   ]
+  },
+  "ship_wreck": {
+   "file": "models/ship_wreck.glb",
+   "height": 10,
+   "about": "broken shipwreck (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "ship",
+    "wreck"
+   ]
+  },
+  "rowboat": {
+   "file": "models/rowboat.glb",
+   "height": 0.64,
+   "about": "small wooden rowboat (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "boat",
+    "sea"
+   ]
+  },
+  "sand_patch": {
+   "file": "models/sand_patch.glb",
+   "height": 0.5,
+   "about": "sandy beach island patch (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "beach",
+    "sand",
+    "shore"
+   ]
+  },
+  "palm": {
+   "file": "models/palm.glb",
+   "height": 4,
+   "about": "bent palm tree (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "palm",
+    "tree",
+    "beach"
+   ]
+  },
+  "beach_rocks": {
+   "file": "models/beach_rocks.glb",
+   "height": 0.8,
+   "about": "rocks on sand (Kenney Pirate Kit, CC0)",
+   "tags": [
+    "rocks",
+    "beach"
+   ]
   }
  }
 }

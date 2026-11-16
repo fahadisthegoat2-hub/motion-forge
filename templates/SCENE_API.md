@@ -14,7 +14,7 @@ auto-retargeted onto every actor).
 
 **look** (`CONFIG.look` / per-shot `shot.look`): `clean-cg · cinematic · warm-film · noir · neon-night ·
 dreamy · horror · golden-hour`.
-**set** (`CONFIG.set` / per-shot `shot.set`): `studio · void · outdoor · medieval (village street, CC0 kit) · interior · street-night ·
+**set** (`CONFIG.set` / per-shot `shot.set`): `studio · void · outdoor · ocean (open sea swell + foam; `{ type: 'ocean', swell: 0..2, calm: m }` — calm patch at the origin for rafts) · medieval (village street, CC0 kit) · interior · street-night ·
 jungle · lab · city-day · space · { url, scale, pos, rotY }` (GLB).
 
 ## CAST — built-in CC0 actors (dressed, real hair, face rigs, lip-sync)
@@ -53,6 +53,7 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
     gestures: [{ type, start, end, side?: 'right'|'left'|'both', amount?, to?, fingers?, n? }],   // posed with IK + fingers (list below)
     hands: { right: 'fist' | keys, left, both },   // finger pose any time: relaxed open soft flat fist point peace thumbsup grip claw pinch count1…5
     dialogue: true, talk: [[start, end], ...], // ONLY for a real line spoken in the scene (never for the narrator's voiceover): lip-sync + talking gestures
+    swimming: true,                            // in water (ocean set): feet/ground checks off
     acting: 'auto' | 'calm' | 'big' | 'none',  // idle glances (+ gestures while in dialogue)
     bones: { <joint>: keys([pitch, yaw, roll]) }, // CUSTOM animation: any joint, layered on the clip (see below)
     rotX: keys, rotZ: keys,                    // whole-body flips, falls, tumbles (with rotY)
@@ -105,7 +106,7 @@ Sound effects are automatic for cuts, FX, titles, camera hits, footsteps and sav
 Renders (device panel and render_video.js) mux the soundtrack into the MP4.
 
 ## 3D models (Model Forge, see skills/model-forge)
-`fx: [{ type: 'model', id, pos, height, rotY, spin, bob, pulse, p: keys, scale: keys, start, end, color }]` — any model in assets/models (models.json).
+`fx: [{ type: 'model', id, pos, height, rotY, spin, bob, pulse, p: keys, scale: keys, tilt: keys([pitch,yaw,roll]), start, end, color, flat (true = drop the texture, pure color) }]` — any model in assets/models (models.json).
 Held and carried things: `attach: 'hero.righthand'` (+ `grip: true` → follows the hand itself, `rot: [x,y,z]` to seat it) · `attach: 'hero.hands'` = between both hands (with the `carry` clip). They turn with the character.
 
 ## Inside the body — real 3D (prefer these over 2D)

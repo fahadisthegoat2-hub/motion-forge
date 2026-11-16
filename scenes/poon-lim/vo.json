@@ -1,0 +1,582 @@
+{
+ "voice": "am_michael",
+ "duration": 33.872,
+ "words": [
+  {
+   "w": "He",
+   "start": 0.05,
+   "end": 0.172,
+   "tone": "excited"
+  },
+  {
+   "w": "survived",
+   "start": 0.172,
+   "end": 0.661,
+   "tone": "excited"
+  },
+  {
+   "w": "one",
+   "start": 0.661,
+   "end": 0.844,
+   "tone": "excited"
+  },
+  {
+   "w": "hundred",
+   "start": 0.844,
+   "end": 1.272,
+   "tone": "excited"
+  },
+  {
+   "w": "thirty-three",
+   "start": 1.272,
+   "end": 1.944,
+   "tone": "excited"
+  },
+  {
+   "w": "days",
+   "start": 1.944,
+   "end": 2.188,
+   "tone": "excited"
+  },
+  {
+   "w": "alone",
+   "start": 2.188,
+   "end": 2.493,
+   "tone": "excited"
+  },
+  {
+   "w": "at",
+   "start": 2.493,
+   "end": 2.616,
+   "tone": "excited"
+  },
+  {
+   "w": "sea.",
+   "start": 2.616,
+   "end": 2.921,
+   "tone": "excited"
+  },
+  {
+   "w": "Nobody",
+   "start": 3.071,
+   "end": 3.521,
+   "tone": "dramatic"
+  },
+  {
+   "w": "has",
+   "start": 3.521,
+   "end": 3.747,
+   "tone": "dramatic"
+  },
+  {
+   "w": "beaten",
+   "start": 3.747,
+   "end": 4.197,
+   "tone": "dramatic"
+  },
+  {
+   "w": "it",
+   "start": 4.197,
+   "end": 4.347,
+   "tone": "dramatic"
+  },
+  {
+   "w": "since.",
+   "start": 4.347,
+   "end": 4.873,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Nineteen",
+   "start": 5.173,
+   "end": 5.786,
+   "tone": "serious"
+  },
+  {
+   "w": "forty-two.",
+   "start": 5.786,
+   "end": 6.554,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 6.554,
+   "end": 6.707,
+   "tone": "serious"
+  },
+  {
+   "w": "torpedo",
+   "start": 6.707,
+   "end": 7.244,
+   "tone": "serious"
+  },
+  {
+   "w": "hits",
+   "start": 7.244,
+   "end": 7.551,
+   "tone": "serious"
+  },
+  {
+   "w": "his",
+   "start": 7.551,
+   "end": 7.781,
+   "tone": "serious"
+  },
+  {
+   "w": "ship.",
+   "start": 7.781,
+   "end": 8.241,
+   "tone": "serious"
+  },
+  {
+   "w": "It",
+   "start": 8.341,
+   "end": 8.462,
+   "tone": "scared"
+  },
+  {
+   "w": "sinks",
+   "start": 8.462,
+   "end": 8.765,
+   "tone": "scared"
+  },
+  {
+   "w": "in",
+   "start": 8.765,
+   "end": 8.886,
+   "tone": "scared"
+  },
+  {
+   "w": "two",
+   "start": 8.886,
+   "end": 9.068,
+   "tone": "scared"
+  },
+  {
+   "w": "minutes.",
+   "start": 9.068,
+   "end": 9.613,
+   "tone": "scared"
+  },
+  {
+   "w": "He",
+   "start": 9.763,
+   "end": 9.921,
+   "tone": "neutral"
+  },
+  {
+   "w": "jumps.",
+   "start": 9.921,
+   "end": 10.473,
+   "tone": "neutral"
+  },
+  {
+   "w": "Swims",
+   "start": 10.473,
+   "end": 10.867,
+   "tone": "neutral"
+  },
+  {
+   "w": "for",
+   "start": 10.867,
+   "end": 11.103,
+   "tone": "neutral"
+  },
+  {
+   "w": "two",
+   "start": 11.103,
+   "end": 11.339,
+   "tone": "neutral"
+  },
+  {
+   "w": "hours.",
+   "start": 11.339,
+   "end": 11.891,
+   "tone": "neutral"
+  },
+  {
+   "w": "Then",
+   "start": 11.991,
+   "end": 12.234,
+   "tone": "excited"
+  },
+  {
+   "w": "he",
+   "start": 12.234,
+   "end": 12.355,
+   "tone": "excited"
+  },
+  {
+   "w": "finds",
+   "start": 12.355,
+   "end": 12.658,
+   "tone": "excited"
+  },
+  {
+   "w": "a",
+   "start": 12.658,
+   "end": 12.78,
+   "tone": "excited"
+  },
+  {
+   "w": "raft.",
+   "start": 12.78,
+   "end": 13.144,
+   "tone": "excited"
+  },
+  {
+   "w": "Food",
+   "start": 13.294,
+   "end": 13.619,
+   "tone": "serious"
+  },
+  {
+   "w": "for",
+   "start": 13.619,
+   "end": 13.862,
+   "tone": "serious"
+  },
+  {
+   "w": "fifty",
+   "start": 13.862,
+   "end": 14.268,
+   "tone": "serious"
+  },
+  {
+   "w": "days.",
+   "start": 14.268,
+   "end": 14.756,
+   "tone": "serious"
+  },
+  {
+   "w": "But",
+   "start": 15.056,
+   "end": 15.239,
+   "tone": "serious"
+  },
+  {
+   "w": "that's",
+   "start": 15.239,
+   "end": 15.543,
+   "tone": "serious"
+  },
+  {
+   "w": "not",
+   "start": 15.543,
+   "end": 15.726,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 15.726,
+   "end": 15.909,
+   "tone": "serious"
+  },
+  {
+   "w": "worst",
+   "start": 15.909,
+   "end": 16.213,
+   "tone": "serious"
+  },
+  {
+   "w": "part.",
+   "start": 16.213,
+   "end": 16.579,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 16.629,
+   "end": 16.767,
+   "tone": "neutral"
+  },
+  {
+   "w": "ship",
+   "start": 16.767,
+   "end": 17.045,
+   "tone": "neutral"
+  },
+  {
+   "w": "sails",
+   "start": 17.045,
+   "end": 17.391,
+   "tone": "neutral"
+  },
+  {
+   "w": "right",
+   "start": 17.391,
+   "end": 17.738,
+   "tone": "neutral"
+  },
+  {
+   "w": "past",
+   "start": 17.738,
+   "end": 18.015,
+   "tone": "neutral"
+  },
+  {
+   "w": "him.",
+   "start": 18.015,
+   "end": 18.362,
+   "tone": "neutral"
+  },
+  {
+   "w": "And",
+   "start": 18.412,
+   "end": 18.631,
+   "tone": "sad"
+  },
+  {
+   "w": "keeps",
+   "start": 18.631,
+   "end": 18.995,
+   "tone": "sad"
+  },
+  {
+   "w": "going.",
+   "start": 18.995,
+   "end": 19.505,
+   "tone": "sad"
+  },
+  {
+   "w": "The",
+   "start": 19.805,
+   "end": 20.007,
+   "tone": "scared"
+  },
+  {
+   "w": "food",
+   "start": 20.007,
+   "end": 20.276,
+   "tone": "scared"
+  },
+  {
+   "w": "runs",
+   "start": 20.276,
+   "end": 20.545,
+   "tone": "scared"
+  },
+  {
+   "w": "out.",
+   "start": 20.545,
+   "end": 20.881,
+   "tone": "scared"
+  },
+  {
+   "w": "He",
+   "start": 20.981,
+   "end": 21.105,
+   "tone": "neutral"
+  },
+  {
+   "w": "bends",
+   "start": 21.105,
+   "end": 21.415,
+   "tone": "neutral"
+  },
+  {
+   "w": "a",
+   "start": 21.415,
+   "end": 21.539,
+   "tone": "neutral"
+  },
+  {
+   "w": "flashlight",
+   "start": 21.539,
+   "end": 22.158,
+   "tone": "neutral"
+  },
+  {
+   "w": "wire",
+   "start": 22.158,
+   "end": 22.405,
+   "tone": "neutral"
+  },
+  {
+   "w": "into",
+   "start": 22.405,
+   "end": 22.653,
+   "tone": "neutral"
+  },
+  {
+   "w": "a",
+   "start": 22.653,
+   "end": 22.777,
+   "tone": "neutral"
+  },
+  {
+   "w": "hook.",
+   "start": 22.777,
+   "end": 23.149,
+   "tone": "neutral"
+  },
+  {
+   "w": "He",
+   "start": 23.199,
+   "end": 23.327,
+   "tone": "neutral"
+  },
+  {
+   "w": "drinks",
+   "start": 23.327,
+   "end": 23.713,
+   "tone": "neutral"
+  },
+  {
+   "w": "the",
+   "start": 23.713,
+   "end": 23.905,
+   "tone": "neutral"
+  },
+  {
+   "w": "rain.",
+   "start": 23.905,
+   "end": 24.291,
+   "tone": "neutral"
+  },
+  {
+   "w": "Day",
+   "start": 24.591,
+   "end": 24.805,
+   "tone": "dramatic"
+  },
+  {
+   "w": "one",
+   "start": 24.805,
+   "end": 25.018,
+   "tone": "dramatic"
+  },
+  {
+   "w": "hundred",
+   "start": 25.018,
+   "end": 25.517,
+   "tone": "dramatic"
+  },
+  {
+   "w": "thirty-three.",
+   "start": 25.517,
+   "end": 26.442,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Fishermen",
+   "start": 26.642,
+   "end": 27.216,
+   "tone": "excited"
+  },
+  {
+   "w": "spot",
+   "start": 27.216,
+   "end": 27.471,
+   "tone": "excited"
+  },
+  {
+   "w": "him",
+   "start": 27.471,
+   "end": 27.663,
+   "tone": "excited"
+  },
+  {
+   "w": "off",
+   "start": 27.663,
+   "end": 27.854,
+   "tone": "excited"
+  },
+  {
+   "w": "Brazil.",
+   "start": 27.854,
+   "end": 28.364,
+   "tone": "excited"
+  },
+  {
+   "w": "He",
+   "start": 28.464,
+   "end": 28.623,
+   "tone": "dramatic"
+  },
+  {
+   "w": "walks",
+   "start": 28.623,
+   "end": 29.02,
+   "tone": "dramatic"
+  },
+  {
+   "w": "off",
+   "start": 29.02,
+   "end": 29.258,
+   "tone": "dramatic"
+  },
+  {
+   "w": "the",
+   "start": 29.258,
+   "end": 29.496,
+   "tone": "dramatic"
+  },
+  {
+   "w": "raft.",
+   "start": 29.496,
+   "end": 29.973,
+   "tone": "dramatic"
+  },
+  {
+   "w": "On",
+   "start": 29.973,
+   "end": 30.131,
+   "tone": "dramatic"
+  },
+  {
+   "w": "his",
+   "start": 30.131,
+   "end": 30.369,
+   "tone": "dramatic"
+  },
+  {
+   "w": "own.",
+   "start": 30.369,
+   "end": 30.766,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Could",
+   "start": 31.066,
+   "end": 31.381,
+   "tone": "neutral"
+  },
+  {
+   "w": "you",
+   "start": 31.381,
+   "end": 31.57,
+   "tone": "neutral"
+  },
+  {
+   "w": "last",
+   "start": 31.57,
+   "end": 31.822,
+   "tone": "neutral"
+  },
+  {
+   "w": "one",
+   "start": 31.822,
+   "end": 32.011,
+   "tone": "neutral"
+  },
+  {
+   "w": "hundred",
+   "start": 32.011,
+   "end": 32.452,
+   "tone": "neutral"
+  },
+  {
+   "w": "thirty-three",
+   "start": 32.452,
+   "end": 33.144,
+   "tone": "neutral"
+  },
+  {
+   "w": "days?",
+   "start": 33.144,
+   "end": 33.522,
+   "tone": "neutral"
+  }
+ ]
+}

@@ -54,8 +54,8 @@ if (!input) { console.error('usage: render_video.js scene.html out.mp4 [--fps N]
       `fps=${Math.min(fps, 30)},scale=${Math.min(w, 720)}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse`, gif], { stdio: 'inherit' });
     console.log('gif ->', gif);
   } else {
-    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, ...(wav ? ['-i', wav, '-c:a', 'aac', '-b:a', '192k', '-shortest'] : []), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
-    if (wav) fs.rmSync(wav, { force: true });
+    execFileSync(ffmpeg(), ['-y', '-framerate', String(fps), '-i', pattern, ...(wav ? ['-i', wav, '-af', 'aresample=48000:resampler=soxr:osr=48000,alimiter=limit=0.5:attack=0.1:release=50:level=0,volume=0.95', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest'] : []), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', crf, '-preset', 'slow', output], { stdio: 'inherit' });
+    if (wav && !process.env.KEEP_WAV) fs.rmSync(wav, { force: true });
     console.log('video ->', output);
   }
   fs.rmSync(dir, { recursive: true, force: true });
