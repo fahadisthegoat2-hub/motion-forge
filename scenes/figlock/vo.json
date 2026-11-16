@@ -1,0 +1,366 @@
+{
+ "voice": "am_michael",
+ "duration": 27.352,
+ "words": [
+  {
+   "w": "A",
+   "start": 0.05,
+   "end": 0.199,
+   "tone": "excited"
+  },
+  {
+   "w": "baby",
+   "start": 0.199,
+   "end": 0.498,
+   "tone": "excited"
+  },
+  {
+   "w": "fell",
+   "start": 0.498,
+   "end": 0.797,
+   "tone": "excited"
+  },
+  {
+   "w": "four",
+   "start": 0.797,
+   "end": 1.096,
+   "tone": "excited"
+  },
+  {
+   "w": "floors...",
+   "start": 1.096,
+   "end": 1.694,
+   "tone": "excited"
+  },
+  {
+   "w": "onto",
+   "start": 1.694,
+   "end": 1.992,
+   "tone": "excited"
+  },
+  {
+   "w": "this",
+   "start": 1.992,
+   "end": 2.291,
+   "tone": "excited"
+  },
+  {
+   "w": "man.",
+   "start": 2.291,
+   "end": 2.665,
+   "tone": "excited"
+  },
+  {
+   "w": "Twice.",
+   "start": 2.815,
+   "end": 3.523,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Detroit,",
+   "start": 3.973,
+   "end": 5.17,
+   "tone": "serious"
+  },
+  {
+   "w": "1937.",
+   "start": 5.17,
+   "end": 5.968,
+   "tone": "serious"
+  },
+  {
+   "w": "Street",
+   "start": 6.118,
+   "end": 6.521,
+   "tone": "calm"
+  },
+  {
+   "w": "sweeper",
+   "start": 6.521,
+   "end": 6.992,
+   "tone": "calm"
+  },
+  {
+   "w": "Joseph",
+   "start": 6.992,
+   "end": 7.396,
+   "tone": "calm"
+  },
+  {
+   "w": "Figlock",
+   "start": 7.396,
+   "end": 7.867,
+   "tone": "calm"
+  },
+  {
+   "w": "walks",
+   "start": 7.867,
+   "end": 8.203,
+   "tone": "calm"
+  },
+  {
+   "w": "his",
+   "start": 8.203,
+   "end": 8.405,
+   "tone": "calm"
+  },
+  {
+   "w": "alley.",
+   "start": 8.405,
+   "end": 8.876,
+   "tone": "calm"
+  },
+  {
+   "w": "Four",
+   "start": 8.976,
+   "end": 9.246,
+   "tone": "scared"
+  },
+  {
+   "w": "floors",
+   "start": 9.246,
+   "end": 9.651,
+   "tone": "scared"
+  },
+  {
+   "w": "up,",
+   "start": 9.651,
+   "end": 9.921,
+   "tone": "scared"
+  },
+  {
+   "w": "a",
+   "start": 9.921,
+   "end": 10.056,
+   "tone": "scared"
+  },
+  {
+   "w": "baby",
+   "start": 10.056,
+   "end": 10.327,
+   "tone": "scared"
+  },
+  {
+   "w": "slips",
+   "start": 10.327,
+   "end": 10.664,
+   "tone": "scared"
+  },
+  {
+   "w": "from",
+   "start": 10.664,
+   "end": 10.935,
+   "tone": "scared"
+  },
+  {
+   "w": "a",
+   "start": 10.935,
+   "end": 11.07,
+   "tone": "scared"
+  },
+  {
+   "w": "window.",
+   "start": 11.07,
+   "end": 11.61,
+   "tone": "scared"
+  },
+  {
+   "w": "It",
+   "start": 11.71,
+   "end": 11.865,
+   "tone": "dramatic"
+  },
+  {
+   "w": "lands",
+   "start": 11.865,
+   "end": 12.253,
+   "tone": "dramatic"
+  },
+  {
+   "w": "right",
+   "start": 12.253,
+   "end": 12.641,
+   "tone": "dramatic"
+  },
+  {
+   "w": "on",
+   "start": 12.641,
+   "end": 12.797,
+   "tone": "dramatic"
+  },
+  {
+   "w": "him.",
+   "start": 12.797,
+   "end": 13.185,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Both",
+   "start": 13.435,
+   "end": 13.775,
+   "tone": "calm"
+  },
+  {
+   "w": "survive.",
+   "start": 13.775,
+   "end": 14.541,
+   "tone": "calm"
+  },
+  {
+   "w": "One",
+   "start": 14.941,
+   "end": 15.152,
+   "tone": "serious"
+  },
+  {
+   "w": "year",
+   "start": 15.152,
+   "end": 15.433,
+   "tone": "serious"
+  },
+  {
+   "w": "later.",
+   "start": 15.433,
+   "end": 15.924,
+   "tone": "serious"
+  },
+  {
+   "w": "Joseph",
+   "start": 16.074,
+   "end": 16.567,
+   "tone": "calm"
+  },
+  {
+   "w": "is",
+   "start": 16.567,
+   "end": 16.731,
+   "tone": "calm"
+  },
+  {
+   "w": "working",
+   "start": 16.731,
+   "end": 17.306,
+   "tone": "calm"
+  },
+  {
+   "w": "again.",
+   "start": 17.306,
+   "end": 17.881,
+   "tone": "calm"
+  },
+  {
+   "w": "Another",
+   "start": 17.981,
+   "end": 18.451,
+   "tone": "mysterious"
+  },
+  {
+   "w": "window.",
+   "start": 18.451,
+   "end": 18.989,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Another",
+   "start": 18.989,
+   "end": 19.46,
+   "tone": "mysterious"
+  },
+  {
+   "w": "toddler.",
+   "start": 19.46,
+   "end": 20.065,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Two-year-old",
+   "start": 20.165,
+   "end": 20.833,
+   "tone": "scared"
+  },
+  {
+   "w": "David",
+   "start": 20.833,
+   "end": 21.167,
+   "tone": "scared"
+  },
+  {
+   "w": "Thomas.",
+   "start": 21.167,
+   "end": 21.702,
+   "tone": "scared"
+  },
+  {
+   "w": "Lands",
+   "start": 21.802,
+   "end": 22.246,
+   "tone": "dramatic"
+  },
+  {
+   "w": "on",
+   "start": 22.246,
+   "end": 22.423,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Joseph.",
+   "start": 22.423,
+   "end": 23.133,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Again.",
+   "start": 23.133,
+   "end": 23.755,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Both",
+   "start": 24.005,
+   "end": 24.311,
+   "tone": "calm"
+  },
+  {
+   "w": "survive.",
+   "start": 24.311,
+   "end": 25,
+   "tone": "calm"
+  },
+  {
+   "w": "Again.",
+   "start": 25,
+   "end": 25.536,
+   "tone": "calm"
+  },
+  {
+   "w": "Would",
+   "start": 25.886,
+   "end": 26.178,
+   "tone": "excited"
+  },
+  {
+   "w": "you",
+   "start": 26.178,
+   "end": 26.353,
+   "tone": "excited"
+  },
+  {
+   "w": "ever",
+   "start": 26.353,
+   "end": 26.586,
+   "tone": "excited"
+  },
+  {
+   "w": "look",
+   "start": 26.586,
+   "end": 26.819,
+   "tone": "excited"
+  },
+  {
+   "w": "up?",
+   "start": 26.819,
+   "end": 27.052,
+   "tone": "excited"
+  }
+ ]
+}

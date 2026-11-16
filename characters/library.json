@@ -202,6 +202,36 @@
     "bottom": "#3a3f2c"
    },
    "hair": "#120c08"
+  },
+  "tot": {
+   "name": "Tot",
+   "file": "characters/tot.glb",
+   "version": 1,
+   "about": "Toddler · about two · chubby cheeks · tee",
+   "height": 0.86,
+   "make": {
+    "gender": 0.7,
+    "age": 0,
+    "caucasian": 1,
+    "african": 0,
+    "asian": 0,
+    "tone": 0.2,
+    "weight": 0.7,
+    "muscle": 0.3,
+    "height": 0.5,
+    "outfit": "none",
+    "top": "elvs_crude_t-shirt_male",
+    "bottom": "toigo_wool_pants",
+    "shoes": "toigo_mj_cloth_shoes",
+    "hair": "short03",
+    "brows": "eyebrow001",
+    "irisColour": "#4a6a8a"
+   },
+   "wardrobe": {
+    "top": "#e8e2d0",
+    "bottom": "#6a7f9a"
+   },
+   "hair": "#8a5a2c"
   }
  },
  "history": {

@@ -1,4 +1,5 @@
 # Motion Forge state
+- Last video: "Twice" (Joseph Figlock, TIME Oct 17 1938) — scenes/figlock (direction.js → build.js → figlock.html). Artifact: https://claude.ai/artifact/TSVcAAoRaiYpokPkLEiFVX · star Jake + new toddler "tot" (MakeHuman, age 0) · good/high · 27.95s · VO Kokoro am_michael 1.05 (cloud, /tmp/claude-0/kok). city-day set. tot card render times out (no board photo yet).
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
