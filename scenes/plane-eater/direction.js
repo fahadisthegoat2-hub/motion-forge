@@ -23,8 +23,9 @@ const ACC = '#ffb020';
 const cast = { hero: { character: 'jake', wardrobe: { top: '#7f95ab', bottom: '#23252b', shoes: '#18140f' } } };   // stage performer: white shirt, black trousers
 
 // ---------- sets & props ----------
-const FORKUP = (d) => [{ hand: 'right', to: 'hero.chest', offset: [-0.08, 0.06, 0.3], start: 0.0, end: d }];
-const FIELD = 'outdoor', ROOM = { type: 'interior', wall: '#cfc4b0' };
+const FORKUP = (d) => [{ hand: 'right', to: 'hero.chest', offset: [-0.1, 0.2, 0.3], start: 0.0, end: d }];
+const SIP = (d) => [{ hand: 'right', to: [-0.07, 1.12, -0.32], start: 0.0, end: d }];
+const FIELD = 'outdoor', ROOM = { type: 'interior', wall: '#9a8b76' };
 const TABLE_Y = 0.756, SEAT = [0, 0, -0.62];
 const M = (id, pos, o = {}) => ({ type: 'model', id, p: [[0, pos]], end: 99, ...o });
 const PLANE = (o = {}) => M('cessna', [-1.6, 0, -6.5], { height: 2.68, rotY: 0.55, ...o });
@@ -39,10 +40,10 @@ const shots = [];
 const S = (id, o) => shots.push({ name: id, dur: dur(id), ...o });
 
 // 1 · PAYOFF — a dinner table in a field, a plane behind him, fork up. Crash-zoom in.
-S('payoff', { role: 'payoff', set: FIELD, look: 'cinematic', impact: [0.05], punch: [1.25],
-  camera: { pos: [[0, [1.6, 2.2, 6.5]], [0.45, [0.55, 1.35, 2.3], 'outExpo'], [dur('payoff'), [0.45, 1.3, 2.0], 'inOutSine']], look: [[0, [-0.4, 1.5, -2.5]], [0.45, [-0.15, 1.25, -1.2], 'outExpo']], fov: 44, handheld: 0.6 },
+S('payoff', { role: 'payoff', set: FIELD, look: 'cinematic', punch: [0.45, 1.25],
+  camera: { pos: [[0, [1.6, 2.2, 6.5]], [0.45, [0.55, 1.35, 2.3], 'outExpo'], [dur('payoff'), [0.4, 1.32, 1.75], 'inOutSine']], look: [[0, [-0.4, 1.5, -2.5]], [0.45, [-0.15, 1.25, -1.2], 'outExpo']], fov: 44, handheld: 0.6 },
   cast: { hero: seated({ reach: FORKUP(dur('payoff')),
-    look: [[0, [0, 1.0, -0.3]], [0.6, 'hero.righthand', 'inOutSine']], face: { smile: [[0.3, 0], [0.9, 0.35]], squint: [[0, 0.2]] }, acting: 'none' }) },
+    look: [[0, 'hero.righthand'], [0.9, [0.9, 1.35, 2.4], 'inOutSine']], bones: { spine: [[0, [-0.14, 0, 0]]], spine1: [[0, [-0.08, 0, 0]]] }, face: { smile: [[0.3, 0], [0.9, 0.35]], squint: [[0, 0.2]] }, acting: 'none' }) },
   fx: [PLANE(), ...TABLESET(), FORK], sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.05, type: 'whoosh', gain: 0.7 }] });
 // 2 · "Not a toy. A real Cessna." — low hero angle on the plane
 S('toy', { cut: 'whip', set: FIELD, look: 'cinematic',
@@ -56,8 +57,8 @@ S('france', { cut: 'dip', set: FIELD, look: 'warm-film',
   fx: [M('cessna', [0, 0, 0], { height: 2.68, rotY: 0.2 }), { type: 'model', id: 'hacksaw', height: 0.17, attach: 'hero.righthand', grip: true, rot: [0, P / 2, 0] }] });
 // 4 · "Michel Lotito saws it into tiny pieces." — he saws the tailplane, sparks
 const TIP = [1.62, 1.22, -3.3];
-S('saws', { cut: 'whip', set: FIELD, look: 'warm-film', punch: [1.6],
-  camera: { pos: [[0, [0.5, 1.3, -5.2]], [dur('saws'), [0.75, 1.3, -4.9], 'inOutSine']], look: [[0, [1.95, 1.45, -2.95]]], fov: 48, handheld: 0.5 },
+S('saws', { cut: 'whip', set: FIELD, look: 'cinematic', punch: [1.6],
+  camera: { pos: [[0, [1.25, 1.68, -4.7]], [dur('saws'), [1.35, 1.66, -4.45], 'inOutSine']], look: [[0, [1.9, 1.42, -3.0]]], fov: 46, handheld: 0.5 },
   cast: { hero: { pos: [[0, [2.05, 0, -2.85]]], rotY: [[0, -2.38]], clips: idle(4), look: [[0, TIP]], face: { squint: [[0, 0.7]] }, acting: 'none',
     reach: [{ hand: 'right', to: [TIP[0] + 0.16, TIP[1] + 0.06, TIP[2] + 0.2], start: 0.1, end: dur('saws') }, { hand: 'left', to: [TIP[0] + 0.02, TIP[1] + 0.08, TIP[2] + 0.02], start: 0.2, end: dur('saws') }],
     bones: { rightforearm: [[0.4, [0, 0, 0]], [0.65, [0, 0.15, 0]], [0.9, [0, -0.1, 0]], [1.15, [0, 0.15, 0]], [1.4, [0, -0.1, 0]], [1.65, [0, 0.15, 0]], [1.9, [0, -0.1, 0]], [2.15, [0, 0.15, 0]], [2.4, [0, 0, 0]]] }, hands: { left: 'grip' } } },
@@ -66,13 +67,13 @@ S('saws', { cut: 'whip', set: FIELD, look: 'warm-film', punch: [1.6],
   sfx: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25].map((t) => ({ t, type: 'scratch', gain: 0.45 })) });
 // 5 · "He swallows them with water." — at home, glass to his lips
 S('swallow', { cut: 'zoom', set: ROOM, look: 'cinematic',
-  camera: { move: 'push', target: 'hero', size: 'ms', az: 28 },
-  cast: { hero: seated({ reach: [{ hand: 'right', to: 'hero.mouth', offset: [-0.02, -0.03, 0.09], start: 0.15, end: dur('swallow') }], hands: { right: 'grip', left: 'soft' },
+  camera: { move: 'push', target: 'hero', size: 'ms', az: 22 },
+  cast: { hero: seated({ reach: SIP(dur('swallow')), look: [[0, 'hero.righthand']], hands: { right: 'grip', left: 'soft' },
     bones: { head: [[0.6, [0, 0, 0]], [1.0, [-0.25, 0, 0], 'inOutSine']] }, face: { squint: [[0.7, 0.6]] }, acting: 'none' }) },
   fx: [...TABLESET().filter((m) => m.id !== 'glass'), { type: 'model', id: 'glass', height: 0.13, attach: 'hero.righthand', grip: true, rot: [0, 0, 0] }] });
 // 6 · "About a kilo a day." — overhead on the plate of scraps
 S('kilo', { cut: 'whip', set: ROOM, look: 'cinematic',
-  camera: { pos: [[0, [0.05, 1.35, -0.25]], [dur('kilo'), [0.04, 1.15, -0.28], 'inOutSine']], look: [[0, [0, TABLE_Y, -0.3]]], fov: 40, roll: 0.25 },
+  camera: { pos: [[0, [-0.28, 1.3, 0.0]], [dur('kilo'), [-0.24, 1.15, -0.08], 'inOutSine']], look: [[0, [0, TABLE_Y, -0.3]]], fov: 40, roll: 0.2 },
   fx: [...TABLESET(), M('fork', [0.17, TABLE_Y + 0.004, -0.32], { height: 0.21, tilt: [[0, [-P / 2, 0, 0]]] })] });
 // 7 · "It takes him two years." — time-lapse: the plane shrinks behind him
 S('years', { cut: 'dip', set: FIELD, look: 'golden-hour', time: [[0, 0], [dur('years'), dur('years') * 3]],
