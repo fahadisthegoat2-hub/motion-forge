@@ -34,7 +34,7 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
       if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p);
         for (const c of r.chars) if (c.face) { try { const o = require('child_process').spawnSync(ffmpeg(), ['-hide_banner', '-i', p, '-vf', `crop=iw*0.12:iw*0.12:iw*${Math.max(0, c.face[0] - 0.06)}:ih*${Math.max(0, c.face[1] - 0.04)},signalstats,metadata=print`, '-f', 'null', '-']).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
           if (y < 45) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is too dark (${y.toFixed(0)}/255) — add a key/rim light or change the look`); if (y > 225) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is blown out (${y.toFixed(0)}/255)`); } catch {} } }
-      for (const c of await page.evaluate((t) => (__mfDebug.anatomy ? __mfDebug.anatomy(t) : []), t)) for (const p of c.problems) { const k = sh.i + c.id + p.replace(/[\d.]+°.*/, ''); if (!seenBody.has(k)) { seenBody.add(k); fails.push(`BODY: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id} — ${p} — a deformed body is never shipped: change the clip/gesture/custom keys`); } }
+      for (const c of await page.evaluate((t) => (__mfDebug.anatomy ? __mfDebug.anatomy(t, true) : []), t)) for (const p of c.problems) { const k = sh.i + c.id + p.replace(/[\d.]+°.*/, ''); if (!seenBody.has(k)) { seenBody.add(k); fails.push(`BODY: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id} — ${p} — a deformed body is never shipped: change the clip/gesture/custom keys`); } }
       for (const o of r.overlaps || []) fails.push(`OVERLAP: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${o.a}'s ${o.part} is inside ${o.b} — bodies must never melt into each other; move them apart (pos) or change the pose`);
       for (const c of r.chars) {
         const where = `shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id}`;
@@ -116,6 +116,7 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     try { const o = require("child_process").spawnSync(ffmpeg(), ["-hide_banner", "-i", f, "-vf", "signalstats,metadata=print", "-f", "null", "-"]).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
       if (y < 38) fails.push(`LIGHT: shot ${i + 1} "${info.shots[i].name}" is too dark (avg ${y.toFixed(0)}/255)`); if (y > 215) fails.push(`LIGHT: shot ${i + 1} "${info.shots[i].name}" is blown out (avg ${y.toFixed(0)}/255)`); } catch {}
   }
+  { const seen = new Set(), keep = fails.filter((x) => { const k = x.replace(/@[\d.]+s /, '').replace(/\d+ cm/g, ''); if (seen.has(k)) return false; seen.add(k); return true; }); fails.length = 0; fails.push(...keep); }   // dense scans: one line per problem per shot
   const rep = { scene: input, sceneHash: require('./lib/review_checks').sceneHash(input), duration: +info.dur.toFixed(2), shots: info.shots.length, pass: fails.length === 0, fails, notes, sheet };
   fs.writeFileSync(path.join(out, 'qa.json'), JSON.stringify(rep, null, 1));
   console.log(rep.pass ? `QA PASS · ${info.shots.length} shots · ${info.dur.toFixed(1)}s · now LOOK at ${sheet} (every shot) before delivering` : `QA FAIL (${fails.length}) — fix all, then run again:\n- ` + fails.slice(0, 60).join('\n- '));

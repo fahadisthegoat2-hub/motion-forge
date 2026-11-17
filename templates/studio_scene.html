@@ -3036,8 +3036,8 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
     return { shot: shot.name, t: tg, local, chars: out, titles, overlaps };
   },
-  anatomy(tg) {   // deformed-body detector (scripts/pose_lab.js, qa_check): crooked spine, twisted limbs, knees bending backwards, hands/forearms inside the body
-    render(tg); const res = [], V = () => new THREE.Vector3(), D = 57.2958;
+  anatomy(tg, rendered) {   // deformed-body detector (scripts/pose_lab.js, qa_check): crooked spine, twisted limbs, knees bending backwards, hands/forearms inside the body
+    if (!rendered) render(tg);   /* qa_check passes true right after probe(t) rendered the same frame */ const res = [], V = () => new THREE.Vector3(), D = 57.2958;
     for (const ch of Object.values(characters)) {
       if (!ch.root.visible || !ch.bones.hips) continue; const B = ch.bones, R = ch.rest, m = {}, problems = [], hs = (ch.def.height || 1.8) / 1.8;
       const L = (b) => ch.root.worldToLocal(b.getWorldPosition(V())), chain = ['hips', 'spine', 'spine1', 'spine2', 'neck', 'head'].filter((k) => B[k] && R[k]);
