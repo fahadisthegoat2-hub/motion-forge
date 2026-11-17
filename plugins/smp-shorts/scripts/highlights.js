@@ -32,7 +32,7 @@ function srtHits(file) {
 const median = (a) => { const b = [...a].sort((x, y) => x - y); return b[b.length >> 1] ?? -60; };
 
 async function analyze(file, opts = {}) {
-  const info = ffprobeJSON(file), target = Math.min(59, +(opts.len || 45));
+  const info = ffprobeJSON(file), target = Math.min(45, +(opts.len || 40));
   log(`analysing ${path.basename(file)} (${info.duration.toFixed(1)} s)…`);
   const [db, cuts] = await Promise.all([info.hasAudio ? loudness(file) : [], sceneCuts(file)]);
   const subs = srtHits(opts.srt);

@@ -9,7 +9,8 @@ async function renderGraphics(edit, dir, fps = 30) {
   const browser = await launchBrowser(), page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   await page.goto('file://' + path.join(__dirname, '..', 'templates', 'mograph.html'));
   for (const [i, gr] of edit.graphics.entries()) {
-    const file = path.join(dir, `${String(i).padStart(2, '0')}_${gr.type}.mov`), n = Math.max(2, Math.round(gr.dur * fps));
+    if (gr.file && fs.existsSync(gr.file)) continue; // already rendered (review rounds only re-render new graphics)
+    const file = path.join(dir, `${String(i).padStart(3, '0')}_${gr.type}_${Math.random().toString(36).slice(2, 7)}.mov`), n = Math.max(2, Math.round(gr.dur * fps));
     await page.evaluate(([g, a]) => window.setup(g, a), [gr, edit.accent]);
     const frames = [];
     for (let f = 0; f < n; f++) frames.push(Buffer.from((await page.evaluate((t) => window.frame(t), f / fps)).split(',')[1], 'base64'));
