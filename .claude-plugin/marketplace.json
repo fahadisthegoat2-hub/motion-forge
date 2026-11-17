@@ -1,11 +1,18 @@
 {
   "name": "motion-video-marketplace",
-  "owner": { "name": "motion-video" },
+  "owner": {
+    "name": "motion-video"
+  },
   "plugins": [
     {
       "name": "motion-video",
       "source": "./",
       "description": "3D visuals, reference-image style learning, custom animation and motion graphics."
+    },
+    {
+      "name": "smp-shorts",
+      "source": "./plugins/smp-shorts",
+      "description": "Unstable SMP / Minecraft footage to viral shorts: auto highlights, motion graphics first, edit last, CapCut PC projects by name."
     }
   ]
 }
