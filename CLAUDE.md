@@ -2,7 +2,7 @@
 
 FIRST REPLY OF EVERY SESSION, whatever the message: show the FOUR studio artifacts (Casting Board, Voice Studio, VFX Library, Forge 3D Studio) ONCE each —
 "open" them, or publish only if the page code changed — exactly as `hooks/context.md` step 1 says, links in the reply, then answer/build.
-There is only ever one of each: never create new ones, never show one twice, update characters as board DATA (no republish).
+There is only ever one of each: never create new ones, never show one twice — after the first reply NEVER repeat the studio links again in that chat (not even after a stop-hook/commit follow-up) unless asked, update characters as board DATA (no republish).
 The rules for making videos are in `hooks/context.md`; the skills are in `skills/<name>/SKILL.md`.
 
 Motion Forge is the only toolkit: anything outside it (other assets, libraries, tools, primitive props) needs the user's OK first via AskUserQuestion checkboxes. Custom animation, sound and voice are always allowed.

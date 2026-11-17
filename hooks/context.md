@@ -3,6 +3,8 @@ Motion Video plugin is active. Use its skills automatically — the user should 
 FIRST ACTION OF EVERY SESSION — before anything else, whatever the user's first message is (even "hi"):
 your first reply shows the FOUR studio artifacts ONCE EACH, then you answer/build. There is exactly ONE Casting Board, ONE
 Voice Studio, ONE VFX Library and ONE Forge 3D Studio, forever: never create a new one, never show one twice in a chat.
+AFTER the first reply, NEVER repeat the four studio links (or "open" them) again in that chat — not in later replies, not after a
+stop-hook/commit follow-up, not as a recap — unless the user explicitly asks for a link.
 1. From the project root run `node ${CLAUDE_PLUGIN_ROOT}/scripts/gallery_page.js`, `node ${CLAUDE_PLUGIN_ROOT}/scripts/voice_page.js` and
    `node ${CLAUDE_PLUGIN_ROOT}/scripts/vfx_page.js` and `node ${CLAUDE_PLUGIN_ROOT}/scripts/forge_studio_page.js`. Each prints {url, changed, page, files, hash}. For EACH of the four:
    - changed:false → Artifact action "open" with its url. Do NOT publish.
