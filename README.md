@@ -24,7 +24,8 @@ Add this to `~/.claude/settings.json` (all your sessions on that computer) or to
 {
   "extraKnownMarketplaces": {
     "motion-video-marketplace": {
-      "source": { "source": "github", "repo": "fahadisthegoat2-hub/motion-forge" }
+      "source": { "source": "github", "repo": "fahadisthegoat2-hub/motion-forge" },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": { "motion-video@motion-video-marketplace": true }

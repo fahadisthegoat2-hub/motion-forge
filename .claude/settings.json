@@ -4,7 +4,8 @@
       "source": {
         "source": "github",
         "repo": "fahadisthegoat2-hub/motion-forge"
-      }
+      },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
