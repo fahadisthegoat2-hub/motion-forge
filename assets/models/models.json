@@ -1,108 +1,196 @@
 {
- "models": {
-  "medieval_stake": {
-   "file": "models/medieval_stake.glb",
-   "height": 3.2,
-   "about": "wooden execution stake with a log pyre (Quaternius Medieval Village MegaKit, CC0)",
-   "tags": [
-    "medieval",
-    "stake",
-    "pyre",
-    "wood"
-   ]
-  },
-  "cargo_ship": {
-   "file": "models/cargo_ship.glb",
-   "height": 10,
-   "about": "wooden ship hull with masts, sails removed (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "ship",
-    "sea",
-    "boat"
-   ]
-  },
-  "raft": {
-   "file": "models/raft.glb",
-   "height": 0.43,
-   "about": "wooden plank raft/platform (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "raft",
-    "sea",
-    "wood"
-   ]
-  },
-  "barrel": {
-   "file": "models/barrel.glb",
-   "height": 1.2,
-   "about": "wooden barrel (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "barrel",
-    "sea"
-   ]
-  },
-  "crate": {
-   "file": "models/crate.glb",
-   "height": 0.77,
-   "about": "wooden crate (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "crate"
-   ]
-  },
-  "paddle": {
-   "file": "models/paddle.glb",
-   "height": 2.3,
-   "about": "wooden paddle/oar (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "paddle",
-    "oar"
-   ]
-  },
-  "ship_wreck": {
-   "file": "models/ship_wreck.glb",
-   "height": 10,
-   "about": "broken shipwreck (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "ship",
-    "wreck"
-   ]
-  },
-  "rowboat": {
-   "file": "models/rowboat.glb",
-   "height": 0.64,
-   "about": "small wooden rowboat (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "boat",
-    "sea"
-   ]
-  },
-  "sand_patch": {
-   "file": "models/sand_patch.glb",
-   "height": 0.5,
-   "about": "sandy beach island patch (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "beach",
-    "sand",
-    "shore"
-   ]
-  },
-  "palm": {
-   "file": "models/palm.glb",
-   "height": 4,
-   "about": "bent palm tree (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "palm",
-    "tree",
-    "beach"
-   ]
-  },
-  "beach_rocks": {
-   "file": "models/beach_rocks.glb",
-   "height": 0.8,
-   "about": "rocks on sand (Kenney Pirate Kit, CC0)",
-   "tags": [
-    "rocks",
-    "beach"
-   ]
+  "models": {
+    "medieval_stake": {
+      "file": "models/medieval_stake.glb",
+      "height": 3.2,
+      "about": "wooden execution stake with a log pyre (Quaternius Medieval Village MegaKit, CC0)",
+      "tags": [
+        "medieval",
+        "stake",
+        "pyre",
+        "wood"
+      ]
+    },
+    "cargo_ship": {
+      "file": "models/cargo_ship.glb",
+      "height": 10,
+      "about": "wooden ship hull with masts, sails removed (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "ship",
+        "sea",
+        "boat"
+      ]
+    },
+    "raft": {
+      "file": "models/raft.glb",
+      "height": 0.43,
+      "about": "wooden plank raft/platform (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "raft",
+        "sea",
+        "wood"
+      ]
+    },
+    "barrel": {
+      "file": "models/barrel.glb",
+      "height": 1.2,
+      "about": "wooden barrel (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "barrel",
+        "sea"
+      ]
+    },
+    "crate": {
+      "file": "models/crate.glb",
+      "height": 0.77,
+      "about": "wooden crate (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "crate"
+      ]
+    },
+    "paddle": {
+      "file": "models/paddle.glb",
+      "height": 2.3,
+      "about": "wooden paddle/oar (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "paddle",
+        "oar"
+      ]
+    },
+    "ship_wreck": {
+      "file": "models/ship_wreck.glb",
+      "height": 10,
+      "about": "broken shipwreck (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "ship",
+        "wreck"
+      ]
+    },
+    "rowboat": {
+      "file": "models/rowboat.glb",
+      "height": 0.64,
+      "about": "small wooden rowboat (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "boat",
+        "sea"
+      ]
+    },
+    "sand_patch": {
+      "file": "models/sand_patch.glb",
+      "height": 0.5,
+      "about": "sandy beach island patch (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "beach",
+        "sand",
+        "shore"
+      ]
+    },
+    "palm": {
+      "file": "models/palm.glb",
+      "height": 4,
+      "about": "bent palm tree (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "palm",
+        "tree",
+        "beach"
+      ]
+    },
+    "beach_rocks": {
+      "file": "models/beach_rocks.glb",
+      "height": 0.8,
+      "about": "rocks on sand (Kenney Pirate Kit, CC0)",
+      "tags": [
+        "rocks",
+        "beach"
+      ]
+    },
+    "table": {
+      "file": "models/table.glb",
+      "height": 0.76,
+      "about": "Bistro dining table (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "table"
+      ]
+    },
+    "plate": {
+      "file": "models/plate.glb",
+      "height": 0.04,
+      "about": "Dinner plate of aircraft scraps (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "plate"
+      ]
+    },
+    "fork": {
+      "file": "models/fork.glb",
+      "height": 0.2,
+      "about": "Steel fork (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "fork"
+      ]
+    },
+    "glass": {
+      "file": "models/glass.glb",
+      "height": 0.13,
+      "about": "Water tumbler (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "glass"
+      ]
+    },
+    "hacksaw": {
+      "file": "models/hacksaw.glb",
+      "height": 0.11,
+      "about": "Hacksaw (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "hacksaw"
+      ]
+    },
+    "bicycle": {
+      "file": "models/bicycle.glb",
+      "height": 1,
+      "about": "1970s French city bicycle (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "bicycle"
+      ]
+    },
+    "tv": {
+      "file": "models/tv.glb",
+      "height": 0.62,
+      "about": "1970s CRT television (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "tv"
+      ]
+    },
+    "coffin": {
+      "file": "models/coffin.glb",
+      "height": 0.55,
+      "about": "Varnished wooden coffin (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "coffin"
+      ]
+    },
+    "plaque": {
+      "file": "models/plaque.glb",
+      "height": 0.3,
+      "about": "Brass record plaque on walnut (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "plaque"
+      ]
+    },
+    "cessna": {
+      "file": "models/cessna.glb",
+      "height": 2.6,
+      "about": "Cessna 150 light aircraft (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "cessna"
+      ]
+    },
+    "chair": {
+      "file": "models/chair.glb",
+      "height": 0.95,
+      "about": "French bistro chair (ultra) (Forge 3D Studio spec, own work)",
+      "tags": [
+        "chair"
+      ]
+    }
   }
- }
 }

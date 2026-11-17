@@ -8,6 +8,7 @@
 - Standing orders: address as sir; no summaries; ask quality+effort per video; outside assets need AskUserQuestion approval.
 
 ## SIR'S TASTE (standing orders for every video — add a line for every reaction)
+- Props/assets: Forge 3D on ULTRA (110–170 parts, render → critique → enhance); if Forge results aren't good, download real free assets (Sir approved), else back to Forge ultra. Improve freely.
 - Every video ≤ 30 s unless Sir names a longer length.
 - Hates things morphing into each other: no bodies/limbs through each other, no pose-blend "morphs", no dissolves — change posture on a cut.
 - Hates the mixed "old AI + new AI" look: one design system per video (one accent, one caption style, 3–4 title styles), clean type, small overshoot.
