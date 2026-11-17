@@ -1455,7 +1455,7 @@ function setupCharacter(id, data, def) {
   ch.hasMorph = (name) => morphMeshes.some((m) => m.morphTargetDictionary[name] !== undefined);
   ch.setMorph = (name, v) => morphMeshes.forEach((m) => { const i = m.morphTargetDictionary[name]; if (i !== undefined) m.morphTargetInfluences[i] = Math.max(m.morphTargetInfluences[i], clamp(v)); });
   data.animations.forEach((c) => (clipLib[normName(c.name || 'clip')] ??= { clip: c, src: { root: model, rest } }));
-  setupHands(ch); characters[id] = ch;
+  setupHands(ch); measureBody(ch); characters[id] = ch;
 }
 function setXray(ch, x) {   // hologram x-ray: fresnel glow shell + scanlines (pair with a 'scan' title and 'pulse' on organs)
   if (!ch.xray) { if (x <= 0.01) return;
@@ -1720,8 +1720,8 @@ function solveArm(ch, side, T, w, poleDir) {
   ch.root.updateMatrixWorld(true);
   up.getWorldPosition(_ik.a); fo.getWorldPosition(_ik.b); ha.getWorldPosition(_ik.c);
   const l1 = _ik.a.distanceTo(_ik.b), l2 = _ik.b.distanceTo(_ik.c), rq = ch.root.getWorldQuaternion(new THREE.Quaternion());
-  const pv = poleDir || [0.55, -1, -0.35], pole = new THREE.Vector3(side === 'right' ? -pv[0] : pv[0], pv[1], pv[2]).applyQuaternion(rq);   // elbow points down/out/back (natural), not up or into the body
-  const d = clamp(_ik.t.copy(T).sub(_ik.a).length(), Math.abs(l1 - l2) + 1e-3, (l1 + l2) * 0.999);
+  const pv = Array.isArray(poleDir) ? poleDir : [0.55, -1, -0.35], pole = new THREE.Vector3(side === 'right' ? -pv[0] : pv[0], pv[1], pv[2]).applyQuaternion(rq);   // elbow points down/out/back (natural), not up or into the body
+  const d = clamp(_ik.t.copy(T).sub(_ik.a).length(), Math.sqrt(l1 * l1 + l2 * l2 - 2 * l1 * l2 * Math.cos(0.5)), (l1 + l2) * 0.999);   // the elbow never folds shut (≥ ~29°) or locks dead straight
   // 1) elbow: interior angle from the law of cosines
   const ba = _ik.a.clone().sub(_ik.b).normalize(), bc = _ik.c.clone().sub(_ik.b).normalize(), cur = Math.acos(clamp(ba.dot(bc), -1, 1)), want = Math.acos(clamp((l1 * l1 + l2 * l2 - d * d) / (2 * l1 * l2), -1, 1));
   let ax = ba.clone().cross(bc); if (ax.lengthSq() < 1e-6) ax = ba.clone().cross(pole).negate(); ax.normalize();
@@ -1731,9 +1731,10 @@ function solveArm(ch, side, T, w, poleDir) {
   rotateBoneWorld(up, _ik.q.setFromUnitVectors(_ik.u.copy(_ik.c).sub(_ik.a).normalize(), _ik.v.copy(T).sub(_ik.a).normalize()));
   // 3) swing the elbow around the shoulder→wrist axis toward the pole
   fo.getWorldPosition(_ik.b); ha.getWorldPosition(_ik.c);
+  if (poleDir !== false) {
   const axis = _ik.c.clone().sub(_ik.a).normalize(), e = _ik.b.clone().sub(_ik.a), eP = e.sub(axis.clone().multiplyScalar(e.dot(axis))), pP = pole.sub(axis.clone().multiplyScalar(pole.dot(axis)));
   if (eP.lengthSq() > 1e-8 && pP.lengthSq() > 1e-8) { eP.normalize(); pP.normalize(); let ang = Math.acos(clamp(eP.dot(pP), -1, 1)); if (axis.dot(eP.clone().cross(pP)) < 0) ang = -ang;
-    rotateBoneWorld(up, _ik.q.setFromAxisAngle(axis, ang)); }
+    rotateBoneWorld(up, _ik.q.setFromAxisAngle(axis, ang)); } }
   // 4) blend from the clip pose (rotations → the hand travels on an arc, not a straight line)
   if (w < 0.999) { up.quaternion.copy(q0u.slerp(up.quaternion, w)); fo.quaternion.copy(q0f.slerp(fo.quaternion, w)); up.updateMatrixWorld(true); }
 }
@@ -1766,7 +1767,77 @@ function relaxWrists(ch, share = 0.55) {
     const ax = _tw.a.copy(ha.position).normalize(), r = _tw.r.copy(ha.quaternion).multiply(_tw.q.copy(r0.local).invert());   // rotation from rest, in the forearm's frame
     let ang = 2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w); if (ang > Math.PI) ang -= 2 * Math.PI; if (ang < -Math.PI) ang += 2 * Math.PI;
     if (Math.abs(ang) < 0.05) continue;
-    const tw = _tw.q.setFromAxisAngle(ax, ang * share); fo.quaternion.multiply(tw); ha.quaternion.premultiply(tw.invert()); fo.updateMatrixWorld(true); }
+    const sh = Math.max(share, 1 - 0.87 / Math.abs(ang)), tw = _tw.q.setFromAxisAngle(ax, ang * sh); fo.quaternion.multiply(tw); ha.quaternion.premultiply(tw.invert()); fo.updateMatrixWorld(true); }
+}
+/* ---------- body guards: anatomy that can never break, whatever the clip / gesture / custom keys do ---------- */
+// measureBody: the real torso cross-section (half-width, front, back) at 8 heights between hips and neck, from the skinned mesh in its rest pose.
+function measureBody(ch) {
+  const R = ch.rest; ch.body = null; if (!R.hips || !R.neck || !R.spine) return;
+  const y0 = R.hips.p.y, y1 = R.neck.p.y, N = 8, bins = Array.from({ length: N }, () => ({ x: [], zf: [], zb: [] })), v = new THREE.Vector3(), hs = (y1 - y0) / 0.5;
+  const torso = (b) => { for (let o = b; o && o.isBone; o = o.parent) { const k = normName(o.name); if (/shoulder|arm|hand|upleg|leg|foot|toe|neck|head|clavicle/.test(k)) return false; if (/^(hips|spine\d?)$/.test(k)) return true; } return false; };
+  try { ch.model.updateMatrixWorld(true);
+    ch.model.traverse((o) => { if (!o.isSkinnedMesh || !o.geometry.attributes.skinIndex || /eye|brow|lash|hair|teeth|tongue/i.test(o.name)) return;
+      const G = o.geometry, n = G.attributes.position.count, step = Math.max(1, Math.floor(n / 5000)), si = G.attributes.skinIndex, sw = G.attributes.skinWeight, ok = o.skeleton.bones.map(torso);
+      for (let i = 0; i < n; i += step) { let bi = 0, bw = -1; for (let j = 0; j < 4; j++) { const w = sw.getComponent(i, j); if (w > bw) { bw = w; bi = si.getComponent(i, j); } } if (!ok[bi]) continue;
+        o.getVertexPosition(i, v).applyMatrix4(o.matrixWorld); const s = (v.y - y0) / (y1 - y0); if (s < 0 || s >= 1) continue; const B = bins[Math.floor(s * N)]; B.x.push(Math.abs(v.x - R.hips.p.x)); (v.z >= R.hips.p.z ? B.zf : B.zb).push(Math.abs(v.z - R.hips.p.z)); } });
+  } catch (e) { console.log('[mf] body measure skipped: ' + e.message); }
+  const pct = (a, d) => { if (a.length < 6) return d; a.sort((p, q) => p - q); return a[Math.floor(a.length * 0.93)]; };
+  ch.body = { y0, y1, N, x: bins.map((B) => clamp(pct(B.x, 0.15 * hs), 0.09 * hs, 0.24 * hs)), zf: bins.map((B) => clamp(pct(B.zf, 0.1 * hs), 0.06 * hs, 0.2 * hs)), zb: bins.map((B) => clamp(pct(B.zb, 0.1 * hs), 0.05 * hs, 0.18 * hs)), cx: R.hips.p.x, cz: R.hips.p.z, hs };
+}
+const _bg = { q: new THREE.Quaternion(), q2: new THREE.Quaternion(), d: new THREE.Quaternion(), id: new THREE.Quaternion(), p: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), c: new THREE.Vector3() };
+// Straight backs: the bend between hips and chest is shared evenly by the spine joints (no kink at one vertebra, no S-shaped "broken" back).
+// The chest keeps its exact orientation, so shoulders, arms and the head do not turn.
+function smoothSpine(ch, k = 0.92) {
+  const B = ch.bones, R = ch.rest, names = ['spine', 'spine1', 'spine2'].filter((n) => B[n] && R[n]); if (names.length < 2 || !B.hips) return;
+  const top = B[names.at(-1)], Qh = B.hips.getWorldQuaternion(new THREE.Quaternion()), Q2 = top.getWorldQuaternion(new THREE.Quaternion());
+  const relNow = Qh.clone().invert().multiply(Q2), rel0 = R.hips.q.clone().invert().multiply(R[names.at(-1)].q), D = relNow.clone().multiply(rel0.clone().invert()); if (D.w < 0) D.set(-D.x, -D.y, -D.z, -D.w);
+  const ang = 2 * Math.acos(clamp(D.w, -1, 1)); if (ang < 0.02) return;
+  let prevRel = new THREE.Quaternion();
+  for (let i = 0; i < names.length - 1; i++) { const b = B[names[i]], A = R.hips.q.clone().invert().multiply(R[names[i]].q), rel = _bg.id.identity().clone().slerp(D, (i + 1) / names.length).multiply(A);
+    const local = prevRel.clone().invert().multiply(rel); b.quaternion.slerp(local, k); b.updateMatrixWorld(true); prevRel = Qh.clone().invert().multiply(b.getWorldQuaternion(_bg.q)); }
+  top.quaternion.copy(top.parent.getWorldQuaternion(_bg.q).invert().multiply(Q2)); top.updateMatrixWorld(true);
+}
+// Necks: head + neck never bend further than a real neck (≈ 50° back / 55° forward / 60° turn); the bend is shared by the two joints.
+function limitNeck(ch) {
+  const B = ch.bones, R = ch.rest, base = B.spine2 || B.spine1 || B.spine; if (!B.head || !B.neck || !base || !R.head || !R.neck) return;
+  const bn = normName(base.name), Qb = base.getWorldQuaternion(new THREE.Quaternion()), Qh = B.head.getWorldQuaternion(new THREE.Quaternion());
+  const rel0 = R[bn].q.clone().invert().multiply(R.head.q), D = Qb.clone().invert().multiply(Qh).multiply(rel0.clone().invert()); if (D.w < 0) D.set(-D.x, -D.y, -D.z, -D.w);
+  const ang = 2 * Math.acos(clamp(D.w, -1, 1)), MAX = 0.9; if (ang <= MAX) return;
+  const lim = MAX + (1 - Math.exp(-(ang - MAX) * 2)) * 0.12, Dl = new THREE.Quaternion().slerp(D, lim / ang), An = R[bn].q.clone().invert().multiply(R.neck.q);
+  B.neck.quaternion.copy(new THREE.Quaternion().slerp(Dl, 0.45).multiply(An)); B.neck.updateMatrixWorld(true);
+  B.head.quaternion.copy(B.neck.getWorldQuaternion(_bg.q).invert().multiply(Qb.clone().multiply(Dl).multiply(rel0))); B.head.updateMatrixWorld(true);
+}
+// How far a point is inside the torso / head, as the world-space push that takes it back to the surface (null = outside).
+function bodyPush(ch, p, margin) {
+  const M = ch.body, B = ch.bones, R = ch.rest; if (!M) return null; let best = null;
+  for (const bn of ['hips', 'spine', 'spine1', 'spine2']) { const b = B[bn], r = R[bn]; if (!b || !r) continue;
+    const dq = b.getWorldQuaternion(_bg.q).multiply(_bg.q2.copy(r.q).invert()), bp = b.getWorldPosition(_bg.a), pr = _bg.b.copy(p).sub(bp).applyQuaternion(_bg.d.copy(dq).invert()).add(r.p);   // the point, un-posed into the rest pose of this bone
+    const s = (pr.y - M.y0) / (M.y1 - M.y0); if (s < 0.1 || s > 0.97) continue;
+    const kids = { hips: 'spine', spine: 'spine1', spine1: 'spine2', spine2: 'neck' }[bn], yTop = R[kids] ? R[kids].p.y : M.y1; if (pr.y < r.p.y - 0.03 * M.hs || pr.y > yTop + 0.03 * M.hs) continue;
+    const i = Math.min(M.N - 1, Math.floor(s * M.N)), taper = s > 0.85 ? 1 - (s - 0.85) / 0.12 * 0.45 : 1, rx = M.x[i] * taper + margin, zf = M.zf[i] * taper + margin, zb = M.zb[i] * taper + margin, cz = M.cz + (zf - zb) / 2, rz = (zf + zb) / 2;
+    const dx = pr.x - M.cx, dz = pr.z - cz, val = (dx / rx) ** 2 + (dz / rz) ** 2; if (val >= 1) continue;
+    const kq = val < 1e-4 ? null : 1 / Math.sqrt(val), out = kq ? new THREE.Vector3(dx * (kq - 1), 0, dz * (kq - 1)) : new THREE.Vector3(0, 0, rz);
+    if (Math.abs(dx) > rx * 0.55 && out.z < 0 && dz > -rz * 0.5) { out.z = 0; out.x = Math.sign(dx) * (rx * Math.sqrt(Math.max(0, 1 - (dz / rz) ** 2)) - Math.abs(dx)); }   // at the flanks go sideways, never through to the back
+    out.applyQuaternion(dq); if (!best || out.lengthSq() > best.lengthSq()) best = out; }
+  if (B.head && R.head) { const hc = B.head.getWorldPosition(_bg.a).add(_bg.b.set(0, 0.09 * M.hs, 0.015 * M.hs).applyQuaternion(B.head.getWorldQuaternion(_bg.q))), rr = 0.095 * M.hs + margin, d = _bg.c.copy(p).sub(hc), L = d.length();
+    if (L < rr) { const out = L < 1e-4 ? new THREE.Vector3(0, 0, rr).applyQuaternion(ch.root.getWorldQuaternion(_bg.q)) : d.clone().multiplyScalar(rr / L - 1); if (!best || out.lengthSq() > best.lengthSq()) best = out; } }
+  return best;
+}
+// Arms never sink into the body: a wrist, palm or forearm inside the torso/head is moved back to the surface (the elbow keeps its swing — nothing pops).
+function guardArms(ch) {
+  if (!ch.body) return; const hs = ch.body.hs;
+  for (const s of ['left', 'right']) { const fo = ch.bones[s + 'forearm'], ha = ch.bones[s + 'hand'], mid = ch.bones[s + 'handmiddle1'], up = ch.bones[s + 'arm']; if (!fo || !ha || !up) continue;
+    for (let it = 0; it < 3; it++) {
+      const pw = ha.getWorldPosition(new THREE.Vector3()), pe = fo.getWorldPosition(new THREE.Vector3()), move = new THREE.Vector3(); let hit = false;
+      const pts = [[pw, 0.032, 1], [mid ? mid.getWorldPosition(new THREE.Vector3()) : pw, 0.022, 1], [pe.clone().lerp(pw, 0.6), 0.036, 1.4]];
+      for (const [p, m, lever] of pts) { const o = bodyPush(ch, p, m * hs); if (o && o.lengthSq() > 1e-8) { hit = true; o.multiplyScalar(lever); if (o.lengthSq() > move.lengthSq()) move.copy(o); } }
+      if (!hit) break; if (move.length() > 0.16 * hs) move.setLength(0.16 * hs);
+      solveArm(ch, s, pw.add(move), 1, false);
+    }
+    // wrists: never folded past ~75°
+    if (mid) { const pw = ha.getWorldPosition(_bg.a), fa = _bg.b.copy(pw).sub(fo.getWorldPosition(_bg.c)).normalize(), hd = mid.getWorldPosition(new THREE.Vector3()).sub(pw).normalize(), ang = Math.acos(clamp(fa.dot(hd), -1, 1)), MAX = 1.3;
+      if (ang > MAX) { const ax = hd.clone().cross(fa); if (ax.lengthSq() > 1e-8) rotateBoneWorld(ha, _bg.q.setFromAxisAngle(ax.normalize(), ang - MAX)); } }
+  }
 }
 function lookTargetAt(ch, cast, t, camPosAt) {
   const v = key(cast?.look, t, (x) => (x === 'camera' ? camPosAt(t) : typeof x === 'string' ? (anchorWorld(x)?.toArray() ?? camPosAt(t)) : x));   // [x,y,z] · 'camera' · 'castId.part'
@@ -1792,11 +1863,13 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   for (const [tn, tw0] of ch._tune || []) { const tw = tw0 * (tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1);   // low: only while the body is actually down
     for (const [bn, e] of Object.entries(tn)) if (Array.isArray(e)) rotateInRootSpace(ch, B[bn], e[0] * tw, e[1] * tw, e[2] * tw);
     const lowK = tn.low ? clamp((ch.rest.hips.p.y - (B.hips.getWorldPosition(_v).y - ch.root.position.y)) / (0.3 * ch.rest.hips.p.y)) : 1;
-    if (tn.pose && lowK > 0.01 && POSES[tn.pose] && !(cast?.gestures || []).some((g) => t > g.start - 0.2 && t < g.end + 0.4)) applyPose(ch, POSES[tn.pose], { type: tn.pose, start: -1e6, end: 1e6, amount: tw * lowK }, t); }
+    if (tn.pose && lowK > 0.01 && POSES[tn.pose]) applyPose(ch, POSES[tn.pose], { type: tn.pose, start: -1e6, end: 1e6, amount: tw * lowK }, t); }
+  smoothSpine(ch);
   applyGestures(ch, cast, t);
   // custom keyframed animation: any joint, root-space [pitch, yaw, roll] radians, layered on the clip (bones: { rightarm: keys, spine2: keys, ... })
   for (const [bn, keys] of Object.entries(cast?.bones || {})) { const b = ch.bones[normName(bn)]; const e = b ? key(keys, t) : null; if (e) rotateInRootSpace(ch, b, e[0] || 0, e[1] || 0, e[2] || 0); }
   for (const [M, lt, k] of activeMotions(cast, t)) for (const [bn, keys] of Object.entries(M.bones || {})) { const b = ch.bones[normName(bn)], e = b ? key(keys, lt) : null; if (e) rotateInRootSpace(ch, b, (e[0] || 0) * k, (e[1] || 0) * k, (e[2] || 0) * k); }
+  smoothSpine(ch);   // again after gestures/custom keys, before the hands are placed (the chest keeps its orientation → gestures stay put)
   applyReach(ch, cast, t);   // hand IK: hands land exactly on their targets
   // breathing (4s cycle, slight chest + shoulder lift)
   const br = Math.sin(tGlobal * Math.PI * 2 / 3.8 + seed);
@@ -1811,6 +1884,7 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   const nod = talking ? 0.03 * Math.max(0, noise(tGlobal * 3.1, seed + 7)) : 0;
   rotateInRootSpace(ch, B.head, pitch * 0.5 + 0.012 * fbm(tGlobal * 0.6, seed + 1) + nod, yaw * 0.5 + 0.015 * fbm(tGlobal * 0.5, seed + 2), 0.01 * fbm(tGlobal * 0.4, seed + 5));
   applyImpulses(ch, shotAt(tGlobal).shot, t);
+  limitNeck(ch); guardArms(ch);
   relaxWrists(ch);
   // eyes: remaining angle to target + saccades (eyes move first, head catches up)
   let acc = 0, k = 0; while (acc + 0.45 + hash(k + seed) * 1.6 <= tGlobal) { acc += 0.45 + hash(k + seed) * 1.6; k++; }
@@ -2603,7 +2677,7 @@ function applyClips(ch, cast, t) {
   for (const [e, w] of ws) {
     const a = clipFor(ch, e.clip); if (!a) continue;
     const d = a.getClip().duration, rs = a.getClip().rootSpeed || 0;
-    let lt = Math.max(0, t - e.start) * (typeof e.speed === 'number' ? e.speed : 1) + (e.offset || 0);
+    let lt = Math.max(0, t - e.start) * (typeof e.speed === 'number' ? e.speed : normName(e.clip) === 'lie' ? 0 : 1) + (e.offset || 0);   // lie = lying still (first frame of the get-up clip); getup/wakeup play it
     if (e.speed === undefined && rs > 0.2 && cast?.pos && pathLen(cast.pos, Math.max(e.start, 0), e.end) > 0.1)
       lt = pathLen(cast.pos, Math.max(e.start, 0), t) / rs + (e.offset || 0);   // feet lock to the ground: cycle phase follows distance travelled
     if (e.loop === false && lt > d * 0.8) lt = d * (0.8 + 0.2 * (1 - (1 - Math.min(1, (lt - d * 0.8) / (d * 0.4))) ** 2));   // one-shot clips ease into their last pose (settle) instead of stopping dead
@@ -2644,7 +2718,7 @@ function render(tGlobal) {
   const local0 = local; { const local = ct;   // animation runs on content time
   for (const ch of Object.values(characters)) {
     const cast = shot.cast?.[ch.id];
-    ch.root.visible = !!cast || (shot.cast === undefined && !set.micro);
+    ch.root.visible = !!cast || (shot.cast === undefined && !set.micro && Object.keys(characters).length === 1);   // a shot with no cast shows nobody (a one-person scene keeps its default idle hero) — never the whole cast stacked on one spot
     if (!ch.root.visible) continue;
     ch.root.position.set(...(key(cast?.pos, local) || [0, 0, 0])); ch.root.rotation.set(key(cast?.rotX, local) || 0, key(cast?.rotY, local) || 0, key(cast?.rotZ, local) || 0, 'YXZ');   // rotX/rotZ: flips, falls, tumbles
     for (const [M, lt, k] of activeMotions(cast, local)) {   // saved motions: position/rotation offsets relative to the character
@@ -2791,7 +2865,8 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
       const feet = ['leftfoot', 'rightfoot', 'lefttoebase', 'righttoebase'].map((b) => ch.bones[b]?.getWorldPosition(V()).y).filter((v) => v !== undefined);
       const airborne = !!cast.pos && Array.isArray(cast.pos[0]) && cast.pos.some((k) => Array.isArray(k[1]) && k[1][1] > 0.05);
       const reach = (cast.reach || []).filter((R) => local >= (R.start ?? 0) + (R.blend ?? 0.25) && local <= (R.end ?? 1e9)).map((R) => { const T = reachTarget(ch, R.to, R.offset); if (!T) return null;
-        return { to: R.to, err: Math.max(...(R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']).map((h) => ch.bones[h + 'hand'] ? ch.bones[h + 'hand'].getWorldPosition(V()).distanceTo(T) : 0)) }; }).filter(Boolean);
+        const own = typeof R.to === 'string' && R.to.startsWith(ch.id + '.') ? 0.2 : 0;   // a hand on your own body rests on the surface, not at the anchor inside it
+        return { to: R.to, err: Math.max(0, Math.max(...(R.hand === 'both' ? ['left', 'right'] : [R.hand || 'right']).map((h) => ch.bones[h + 'hand'] ? ch.bones[h + 'hand'].getWorldPosition(V()).distanceTo(T) : 0)) - own) }; }).filter(Boolean);
       const missing = (cast.clips || []).map((c) => c.clip).filter((c) => !clipLib[clipKey(c)]);
       const fc = anchorScreen(ch.id + '.face', 1, 1);
       const hands = ['left', 'right'].map((s) => { const fo = ch.bones[s + 'forearm'], ha = ch.bones[s + 'hand'], mid = ch.bones[s + 'handmiddle1']; if (!fo || !ha) return null;
@@ -2809,6 +2884,47 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
       for (const [bn, r] of [['head', 0.2], ['lefthand', 0.09], ['righthand', 0.09]]) if (A.bones[bn] && near(A.bones[bn].getWorldPosition(V()), r) && !(shot.cast?.[A.id]?.reach || []).some((R) => String(R.to).startsWith(B.id))) overlaps.push({ a: A.id, b: B.id, part: bn }); }
     const titles = (typeof TITLES !== 'undefined' ? TITLES : []).filter((T) => tg >= T.t && tg <= (T.t1 ?? T.t + 2) && !T.at && T.pos).map((T) => ({ style: T.style, pos: T.pos }));
     return { shot: shot.name, t: tg, local, chars: out, titles, overlaps };
+  },
+  anatomy(tg) {   // deformed-body detector (scripts/pose_lab.js, qa_check): crooked spine, twisted limbs, knees bending backwards, hands/forearms inside the body
+    render(tg); const res = [], V = () => new THREE.Vector3(), D = 57.2958;
+    for (const ch of Object.values(characters)) {
+      if (!ch.root.visible || !ch.bones.hips) continue; const B = ch.bones, R = ch.rest, m = {}, problems = [], hs = (ch.def.height || 1.8) / 1.8;
+      const L = (b) => ch.root.worldToLocal(b.getWorldPosition(V())), chain = ['hips', 'spine', 'spine1', 'spine2', 'neck', 'head'].filter((k) => B[k] && R[k]);
+      const wrap = (a) => (a > Math.PI ? a - 2 * Math.PI : a < -Math.PI ? a + 2 * Math.PI : a);
+      const P = chain.map((k) => L(B[k])), P0 = chain.map((k) => R[k].p), ang = (a, b) => Math.atan2(b.z - a.z, b.y - a.y), bends = [];
+      for (let i = 1; i < chain.length - 1; i++) bends.push(wrap(ang(P[i], P[i + 1]) - ang(P[i - 1], P[i]) - (ang(P0[i], P0[i + 1]) - ang(P0[i - 1], P0[i]))) * D);
+      const up = B.neck ? L(B.neck).sub(P[0]) : P.at(-1).clone().sub(P[0]), standing = P[0].y > 0.8 * R.hips.p.y && Math.abs(ch.root.rotation.x) + Math.abs(ch.root.rotation.z) < 0.1;
+      m.lean = Math.atan2(up.z, up.y) * D; m.side = Math.abs(Math.asin(clamp(up.x / Math.max(1e-6, up.length()), -1, 1))) * D; m.kink = Math.max(0, ...bends.slice(0, 3).map(Math.abs)); m.neck = Math.max(0, ...bends.slice(3).map(Math.abs));
+      let sc = 0; for (let i = 0; i < Math.min(3, bends.length); i++) for (let j = i + 1; j < Math.min(3, bends.length); j++) if (bends[i] * bends[j] < 0) sc = Math.max(sc, Math.min(Math.abs(bends[i]), Math.abs(bends[j]))); m.scurve = sc;
+      if (m.kink > 48) problems.push(`BACK: spine folds ${m.kink.toFixed(0)}° at one joint (bends ${bends.map((b) => b.toFixed(0))})`);
+      if (m.scurve > 22) problems.push(`BACK: crooked S-shaped spine (bends ${bends.map((b) => b.toFixed(0))})`);
+      if (standing && m.lean < -13) problems.push(`BACK: leans back ${(-m.lean).toFixed(0)}° while standing`);
+      if (standing && m.side > 22) problems.push(`BACK: bends sideways ${m.side.toFixed(0)}°`);
+      if (m.neck > 62) problems.push(`NECK: bent ${m.neck.toFixed(0)}°`);
+      const twist = (bn, child) => { const b = B[bn], c = B[child], r0 = R[bn]; if (!b || !c || !r0 || c.position.lengthSq() < 1e-10) return 0; const ax = c.position.clone().normalize(), r = b.quaternion.clone().multiply(r0.local.clone().invert());
+        return Math.abs(wrap(2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w))) * D; };
+      const sp = B.spine1 ? L(B.spine1) : null, nk = B.neck ? L(B.neck) : null, hd = B.head ? L(B.head) : null;
+      for (const s of ['left', 'right']) {
+        const fo = B[s + 'forearm'], ha = B[s + 'hand'], mid = B[s + 'handmiddle1'], ua = B[s + 'arm'];
+        if (fo && ha && ua) { const pu = L(ua), pf = L(fo), ph = L(ha), fa = ph.clone().sub(pf).normalize(), bend = mid ? Math.acos(clamp(L(mid).sub(ph).normalize().dot(fa), -1, 1)) * D : 0, ftw = twist(s + 'forearm', s + 'hand');
+          const r = ha.quaternion.clone().multiply(R[s + 'hand'].local.clone().invert()), ax = ha.position.clone().normalize(), wt = Math.abs(wrap(2 * Math.atan2(r.x * ax.x + r.y * ax.y + r.z * ax.z, r.w))) * D;
+          m[s + 'Wrist'] = bend; m[s + 'WristTwist'] = wt; m[s + 'ForearmTwist'] = ftw;
+          if (bend > 88) problems.push(`HANDS: ${s} wrist folded ${bend.toFixed(0)}°`); if (wt > 100) problems.push(`HANDS: ${s} wrist twisted ${wt.toFixed(0)}°`);
+          const el = Math.acos(clamp(pu.clone().sub(pf).normalize().dot(fa), -1, 1)) * D; m[s + 'Elbow'] = 180 - el;
+          if (el < 22) problems.push(`ARMS: ${s} elbow folded shut (${el.toFixed(0)}° — forearm inside the upper arm)`);
+          if (sp && nk) for (const [nm, p] of [['hand', ph], ['forearm', pf.clone().lerp(ph, 0.55)]]) { const x = Math.abs(p.x - sp.x) / hs, z = (p.z - sp.z) / hs;
+            if (p.y > P[0].y + 0.05 * hs && p.y < nk.y - 0.03 * hs && x < 0.12 && z < 0.06 && z > -0.09 && (x / 0.12) ** 2 + ((z + 0.015) / 0.075) ** 2 < 1) problems.push(`HANDS: ${s} ${nm} is inside the torso`); }
+          if (hd && ph.distanceTo(hd.clone().add(new THREE.Vector3(0, 0.09 * hs, 0.02 * hs))) < 0.07 * hs) problems.push(`HANDS: ${s} hand is inside the head`);
+        }
+        const th = B[s + 'upleg'], sh = B[s + 'leg'], ft = B[s + 'foot'];
+        if (th && sh && ft) { const a = th.getWorldPosition(V()), b = sh.getWorldPosition(V()), c = ft.getWorldPosition(V()), kn = Math.acos(clamp(a.clone().sub(b).normalize().dot(c.clone().sub(b).normalize()), -1, 1)) * D;
+          const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(th.getWorldQuaternion(new THREE.Quaternion()).multiply(R[s + 'upleg'].q.clone().invert())), back = b.clone().sub(a.clone().lerp(c, 0.5)).dot(fwd);
+          m[s + 'Knee'] = 180 - kn; if (kn < 165 && back < -0.03 * hs) problems.push(`LEGS: ${s} knee bends backwards`);
+          if (kn < 18) problems.push(`LEGS: ${s} knee folded shut (${kn.toFixed(0)}°)`); }
+      }
+      res.push({ id: ch.id, m: Object.fromEntries(Object.entries(m).map(([k, v]) => [k, +v.toFixed(1)])), bends: bends.map((b) => +b.toFixed(0)), problems });
+    }
+    return res;
   } };
 const clock = new THREE.Clock();
 let _pv = { last: 0, avg: 33, scale: 1, n: 0 };

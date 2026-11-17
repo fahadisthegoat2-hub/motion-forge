@@ -69,6 +69,7 @@ ALWAYS:
   Use the answers for the whole video; do not ask again before the final render. Save them in the scene (CONFIG.quality, CONFIG.effort).
 - FINALS RENDER THEMSELVES: set CONFIG.quality from the answer, publish the scene as the Artifact (pack_scene.js) — the page reads the device's specs and renders the MP4 on the user's device the moment it opens, then shows
   the finished video with Save. Never ask the user to pick a quality or press a button on the page. Cloud machines have no GPU; cloud renders only for --fast QA previews.
+- BODIES NEVER BREAK: the engine keeps every body anatomical on its own (even spine — no kinked/S-shaped backs, neck limits, arms pushed out of the torso/head, wrist limits, elbows never folded shut). qa_check fails any BODY: line; after editing poses, clips, IK or retargeting run `scripts/pose_lab.js <character>` (every clip + gesture) — it must print POSE LAB PASS.
 - ENGINE CHANGES ARE TESTED: after any edit to templates/studio_scene.html run `scripts/selftest.js` (every style/move/set/look/effect) — it must print SELFTEST PASS.
 - ENGINE FIXES REACH OLD SCENES: before re-delivering or editing an older scene run `scripts/upgrade_scene.js scene.html`, then qa_check.
 - BUILT FOR THE ALGORITHM: every video is designed from skills/youtube-algorithm (idea + title first, hook on frame 1, retention structure, right length, safe zones, loop/hand-off ending).

@@ -24,13 +24,14 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
   const info = await page.evaluate(() => ({ dur: __mf.duration, target: __mfDebug.pacing().target, shots: __mfDebug.shots() }));
   const target = +(opt('--target') || info.target || 0);
   if (target && Math.abs(info.dur - target) / target > 0.05) fails.push(`LENGTH: video is ${info.dur.toFixed(1)}s but ${target}s was asked (must be within 5%)`);
-  const frames = [];
+  const frames = [], seenBody = new Set();
   for (const sh of info.shots) {
     for (const f of [0.2, 0.5, 0.85]) {
       const t = sh.start + sh.dur * f, r = await page.evaluate((t) => __mfDebug.probe(t), t);
       if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p);
         for (const c of r.chars) if (c.face) { try { const o = require('child_process').spawnSync(ffmpeg(), ['-hide_banner', '-i', p, '-vf', `crop=iw*0.12:iw*0.12:iw*${Math.max(0, c.face[0] - 0.06)}:ih*${Math.max(0, c.face[1] - 0.04)},signalstats,metadata=print`, '-f', 'null', '-']).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
           if (y < 45) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is too dark (${y.toFixed(0)}/255) — add a key/rim light or change the look`); if (y > 225) fails.push(`LIGHT: shot ${sh.i + 1} "${sh.name}" ${c.id}'s face is blown out (${y.toFixed(0)}/255)`); } catch {} } }
+      for (const c of await page.evaluate((t) => (__mfDebug.anatomy ? __mfDebug.anatomy(t) : []), t)) for (const p of c.problems) { const k = sh.i + c.id + p.replace(/[\d.]+°.*/, ''); if (!seenBody.has(k)) { seenBody.add(k); fails.push(`BODY: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id} — ${p} — a deformed body is never shipped: change the clip/gesture/custom keys`); } }
       for (const o of r.overlaps || []) fails.push(`OVERLAP: shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${o.a}'s ${o.part} is inside ${o.b} — bodies must never melt into each other; move them apart (pos) or change the pose`);
       for (const c of r.chars) {
         const where = `shot ${sh.i + 1} "${sh.name}" @${t.toFixed(1)}s ${c.id}`;

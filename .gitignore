@@ -13,3 +13,5 @@ modelforge/cache/
 scenes/*/*_qa/
 scenes/*/*.pack/
 scenes/*/*_qa/
+scenes/_poselab_*
+scenes/*/_scan.html*
