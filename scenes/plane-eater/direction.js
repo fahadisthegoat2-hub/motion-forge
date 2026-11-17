@@ -88,7 +88,7 @@ S('worst', { cut: 'zoom', set: ROOM, look: 'cinematic', punch: [0.5],
 // 9 · "Before the plane, he ate eighteen bicycles." — a row of bikes, he walks past
 const BIKES = Array.from({ length: 7 }, (_, i) => M('bicycle', [-3.0 + i * 0.85, 0, -0.9], { height: 1.07, rotY: 0.95 + (i % 2 ? 0.06 : -0.05) }));
 S('bikes', { cut: 'whip', set: { type: 'studio' }, look: 'clean-cg',
-  camera: { pos: [[0, [-3.4, 1.35, 3.4]], [dur('bikes'), [-0.9, 1.35, 3.2], 'linear']], look: [[0, [-2.4, 0.85, -0.5]], [dur('bikes'), [0.1, 0.85, -0.5], 'linear']], fov: 46 },
+  camera: { pos: [[0, [-2.5, 1.35, 3.3]], [dur('bikes'), [-2.5 + 1.3 * dur('bikes'), 1.35, 3.3], 'linear']], look: [[0, [-3.1, 0.9, -0.2]], [dur('bikes'), [-3.1 + 1.3 * dur('bikes'), 0.9, -0.2], 'linear']], fov: 46 },
   cast: { hero: { pos: [[0, [-3.3, 0, 0.35]], [dur('bikes'), [-3.3 + 1.3 * dur('bikes'), 0, 0.35]]], rotY: [[0, P / 2]], clips: [{ clip: 'walk', start: 0, end: 4, speed: 0.9 }], look: [[0, [0, 0.9, -0.9]]] } },
   fx: BIKES });
 // 10 · "Seven TVs. A coffin." — the pile
@@ -128,9 +128,9 @@ const titles = [
   { t: at('france', 0.1), t1: at('saws'), style: 'place', text: 'GRENOBLE, FRANCE', sub: '1978', pos: [0.08, 0.08] },
   { t: at('saws', 0.05), t1: at('swallow', -0.1), style: 'wipe', text: 'MICHEL LOTITO', sub: '"MONSIEUR MANGETOUT"', pos: [0.5, 0.07] },
   { t: at('kilo', 0.1), t1: at('years'), style: 'counter', from: 0, to: 1, suffix: ' KG', sub: 'OF METAL · EVERY DAY', pos: [0.5, 0.13], dur: 0.5 },
-  { t: at('years', 0.1), t1: at('worst'), style: 'counter', from: 1, to: 2, suffix: ' YEARS', sub: '1978 → 1980', pos: [0.5, 0.12], dur: 0.6 },
-  { t: at('bikes', 0.9), t1: at('tvs', -0.55), style: 'counter', from: 0, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
-  { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 1, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.4 },
+  { t: at('years', 0.1), t1: at('worst'), style: 'slam', text: '2 YEARS\n1978 → 1980', pos: [0.5, 0.1], size: 0.08, accent: ACC },
+  { t: at('bikes', 0.9), t1: at('tvs', -0.55), style: 'counter', from: 3, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
+  { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 3, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.4 },
   { t: at('stomach', 0.2), t1: at('guinness'), style: 'callout', at: 'hero.stomach', text: 'STOMACH LINING', sub: '2× THICKER', icon: 'warning', side: 1 },
   { t: at('stomach', 0.1), t1: at('guinness'), style: 'pulse', at: 'hero.stomach', beat: 70 },
   { t: at('guinness', 0.1), t1: at('ate'), style: 'wipe', text: 'GUINNESS RECORD', sub: 'STRANGEST DIET', pos: [0.5, 0.12] },
