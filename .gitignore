@@ -16,3 +16,4 @@ scenes/*/*_qa/
 scenes/_poselab_*
 scenes/*/_scan.html*
 .motion-forge/forge-studio/
+scenes/*/prev.mp4
