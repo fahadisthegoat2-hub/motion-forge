@@ -1,0 +1,474 @@
+{
+ "voice": "am_michael",
+ "duration": 28.199,
+ "words": [
+  {
+   "w": "This",
+   "start": 0.05,
+   "end": 0.317,
+   "tone": "excited"
+  },
+  {
+   "w": "man",
+   "start": 0.317,
+   "end": 0.517,
+   "tone": "excited"
+  },
+  {
+   "w": "ate",
+   "start": 0.517,
+   "end": 0.717,
+   "tone": "excited"
+  },
+  {
+   "w": "an",
+   "start": 0.717,
+   "end": 0.85,
+   "tone": "excited"
+  },
+  {
+   "w": "entire",
+   "start": 0.85,
+   "end": 1.25,
+   "tone": "excited"
+  },
+  {
+   "w": "airplane.",
+   "start": 1.25,
+   "end": 1.917,
+   "tone": "excited"
+  },
+  {
+   "w": "Not",
+   "start": 2.167,
+   "end": 2.398,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 2.398,
+   "end": 2.552,
+   "tone": "serious"
+  },
+  {
+   "w": "toy.",
+   "start": 2.552,
+   "end": 2.937,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 2.937,
+   "end": 3.091,
+   "tone": "serious"
+  },
+  {
+   "w": "real",
+   "start": 3.091,
+   "end": 3.399,
+   "tone": "serious"
+  },
+  {
+   "w": "Cessna.",
+   "start": 3.399,
+   "end": 4.015,
+   "tone": "serious"
+  },
+  {
+   "w": "France,",
+   "start": 4.215,
+   "end": 4.642,
+   "tone": "neutral"
+  },
+  {
+   "w": "nineteen",
+   "start": 4.642,
+   "end": 5.068,
+   "tone": "neutral"
+  },
+  {
+   "w": "seventy-eight.",
+   "start": 5.068,
+   "end": 5.815,
+   "tone": "neutral"
+  },
+  {
+   "w": "Michel",
+   "start": 5.865,
+   "end": 6.322,
+   "tone": "neutral"
+  },
+  {
+   "w": "Lotito",
+   "start": 6.322,
+   "end": 6.778,
+   "tone": "neutral"
+  },
+  {
+   "w": "saws",
+   "start": 6.778,
+   "end": 7.083,
+   "tone": "neutral"
+  },
+  {
+   "w": "it",
+   "start": 7.083,
+   "end": 7.235,
+   "tone": "neutral"
+  },
+  {
+   "w": "into",
+   "start": 7.235,
+   "end": 7.54,
+   "tone": "neutral"
+  },
+  {
+   "w": "tiny",
+   "start": 7.54,
+   "end": 7.844,
+   "tone": "neutral"
+  },
+  {
+   "w": "pieces.",
+   "start": 7.844,
+   "end": 8.453,
+   "tone": "neutral"
+  },
+  {
+   "w": "He",
+   "start": 8.553,
+   "end": 8.672,
+   "tone": "neutral"
+  },
+  {
+   "w": "swallows",
+   "start": 8.672,
+   "end": 9.147,
+   "tone": "neutral"
+  },
+  {
+   "w": "them",
+   "start": 9.147,
+   "end": 9.385,
+   "tone": "neutral"
+  },
+  {
+   "w": "with",
+   "start": 9.385,
+   "end": 9.623,
+   "tone": "neutral"
+  },
+  {
+   "w": "water.",
+   "start": 9.623,
+   "end": 10.039,
+   "tone": "neutral"
+  },
+  {
+   "w": "About",
+   "start": 10.089,
+   "end": 10.433,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 10.433,
+   "end": 10.571,
+   "tone": "serious"
+  },
+  {
+   "w": "kilo",
+   "start": 10.571,
+   "end": 10.846,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 10.846,
+   "end": 10.984,
+   "tone": "serious"
+  },
+  {
+   "w": "day.",
+   "start": 10.984,
+   "end": 11.328,
+   "tone": "serious"
+  },
+  {
+   "w": "It",
+   "start": 11.428,
+   "end": 11.577,
+   "tone": "dramatic"
+  },
+  {
+   "w": "takes",
+   "start": 11.577,
+   "end": 11.95,
+   "tone": "dramatic"
+  },
+  {
+   "w": "him",
+   "start": 11.95,
+   "end": 12.173,
+   "tone": "dramatic"
+  },
+  {
+   "w": "two",
+   "start": 12.173,
+   "end": 12.397,
+   "tone": "dramatic"
+  },
+  {
+   "w": "years.",
+   "start": 12.397,
+   "end": 12.918,
+   "tone": "dramatic"
+  },
+  {
+   "w": "But",
+   "start": 13.218,
+   "end": 13.408,
+   "tone": "mysterious"
+  },
+  {
+   "w": "that's",
+   "start": 13.408,
+   "end": 13.725,
+   "tone": "mysterious"
+  },
+  {
+   "w": "not",
+   "start": 13.725,
+   "end": 13.915,
+   "tone": "mysterious"
+  },
+  {
+   "w": "the",
+   "start": 13.915,
+   "end": 14.105,
+   "tone": "mysterious"
+  },
+  {
+   "w": "worst",
+   "start": 14.105,
+   "end": 14.422,
+   "tone": "mysterious"
+  },
+  {
+   "w": "part.",
+   "start": 14.422,
+   "end": 14.802,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Before",
+   "start": 15.002,
+   "end": 15.403,
+   "tone": "neutral"
+  },
+  {
+   "w": "the",
+   "start": 15.403,
+   "end": 15.604,
+   "tone": "neutral"
+  },
+  {
+   "w": "plane,",
+   "start": 15.604,
+   "end": 16.073,
+   "tone": "neutral"
+  },
+  {
+   "w": "he",
+   "start": 16.073,
+   "end": 16.207,
+   "tone": "neutral"
+  },
+  {
+   "w": "ate",
+   "start": 16.207,
+   "end": 16.408,
+   "tone": "neutral"
+  },
+  {
+   "w": "eighteen",
+   "start": 16.408,
+   "end": 16.943,
+   "tone": "neutral"
+  },
+  {
+   "w": "bicycles.",
+   "start": 16.943,
+   "end": 17.613,
+   "tone": "neutral"
+  },
+  {
+   "w": "Seven",
+   "start": 17.663,
+   "end": 18.141,
+   "tone": "serious"
+  },
+  {
+   "w": "TVs.",
+   "start": 18.141,
+   "end": 18.62,
+   "tone": "serious"
+  },
+  {
+   "w": "A",
+   "start": 18.62,
+   "end": 18.811,
+   "tone": "serious"
+  },
+  {
+   "w": "coffin.",
+   "start": 18.811,
+   "end": 19.577,
+   "tone": "serious"
+  },
+  {
+   "w": "Doctors",
+   "start": 19.727,
+   "end": 20.183,
+   "tone": "neutral"
+  },
+  {
+   "w": "found",
+   "start": 20.183,
+   "end": 20.509,
+   "tone": "neutral"
+  },
+  {
+   "w": "his",
+   "start": 20.509,
+   "end": 20.705,
+   "tone": "neutral"
+  },
+  {
+   "w": "stomach",
+   "start": 20.705,
+   "end": 21.162,
+   "tone": "neutral"
+  },
+  {
+   "w": "lining",
+   "start": 21.162,
+   "end": 21.553,
+   "tone": "neutral"
+  },
+  {
+   "w": "was",
+   "start": 21.553,
+   "end": 21.749,
+   "tone": "neutral"
+  },
+  {
+   "w": "twice",
+   "start": 21.749,
+   "end": 22.075,
+   "tone": "neutral"
+  },
+  {
+   "w": "as",
+   "start": 22.075,
+   "end": 22.205,
+   "tone": "neutral"
+  },
+  {
+   "w": "thick.",
+   "start": 22.205,
+   "end": 22.662,
+   "tone": "neutral"
+  },
+  {
+   "w": "Guinness",
+   "start": 22.912,
+   "end": 23.365,
+   "tone": "neutral"
+  },
+  {
+   "w": "gave",
+   "start": 23.365,
+   "end": 23.591,
+   "tone": "neutral"
+  },
+  {
+   "w": "him",
+   "start": 23.591,
+   "end": 23.761,
+   "tone": "neutral"
+  },
+  {
+   "w": "a",
+   "start": 23.761,
+   "end": 23.875,
+   "tone": "neutral"
+  },
+  {
+   "w": "plaque.",
+   "start": 23.875,
+   "end": 24.328,
+   "tone": "neutral"
+  },
+  {
+   "w": "He",
+   "start": 24.778,
+   "end": 24.943,
+   "tone": "dramatic"
+  },
+  {
+   "w": "ate",
+   "start": 24.943,
+   "end": 25.191,
+   "tone": "dramatic"
+  },
+  {
+   "w": "that",
+   "start": 25.191,
+   "end": 25.522,
+   "tone": "dramatic"
+  },
+  {
+   "w": "too.",
+   "start": 25.522,
+   "end": 25.935,
+   "tone": "dramatic"
+  },
+  {
+   "w": "What's",
+   "start": 26.235,
+   "end": 26.472,
+   "tone": "excited"
+  },
+  {
+   "w": "the",
+   "start": 26.472,
+   "end": 26.615,
+   "tone": "excited"
+  },
+  {
+   "w": "weirdest",
+   "start": 26.615,
+   "end": 26.994,
+   "tone": "excited"
+  },
+  {
+   "w": "thing",
+   "start": 26.994,
+   "end": 27.231,
+   "tone": "excited"
+  },
+  {
+   "w": "you've",
+   "start": 27.231,
+   "end": 27.468,
+   "tone": "excited"
+  },
+  {
+   "w": "eaten?",
+   "start": 27.468,
+   "end": 27.799,
+   "tone": "excited"
+  }
+ ]
+}

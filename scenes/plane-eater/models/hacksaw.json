@@ -1,0 +1,8 @@
+{"name":"Hacksaw (ultra)","materials":{"frame":{"preset":"paint","color":"#2f5d8a","rough":0.35,"clearcoat":0.4},"blade":{"preset":"metal","color":"#c9ccd0","rough":0.28,"tex":"brushed"},"grip":{"preset":"rubber","color":"#1c1c1e","rough":0.8},"wing":{"preset":"chrome","color":"#cfd2d5","metal":1,"rough":0.2}},
+"parts":[{"n":"blade","t":"box","m":"blade","s":[0.3,0.012,0.0015]},
+{"n":"tooth","t":"cone","m":"blade","p":[-0.148,-0.007,0],"r":[0,0,180],"s":[0.0015,0.003],"repeat":{"n":40,"step":[0.0074,0,0]}},
+{"n":"frame","t":"tube","m":"frame","radius":0.0065,"path":[[-0.16,0,0],[-0.175,0.06,0],[-0.15,0.105,0],[0.15,0.105,0],[0.175,0.06,0],[0.16,0,0]]},
+{"n":"wingnut","t":"cyl","m":"wing","p":[0.168,0,0],"r":[0,0,90],"s":[0.006,0.006,0.02],"children":[{"n":"wings","t":"box","m":"wing","s":[0.03,0.004,0.006]}]},
+{"n":"pin","t":"cyl","m":"wing","p":[-0.165,0,0],"r":[90,0,0],"s":[0.004,0.004,0.012]},
+{"n":"grip","t":"lathe","m":"grip","p":[-0.2,0.0,0],"r":[0,0,70],"pts":[[0,-0.06],[0.016,-0.055],[0.018,0],[0.016,0.05],[0,0.055]]},
+{"n":"grip ridge","t":"torus","m":"frame","p":[-0.2,0.0,0],"r":[90,0,-20],"s":[0.017,0.002],"repeat":{"n":4,"step":[-0.012,-0.006,0]}}]}

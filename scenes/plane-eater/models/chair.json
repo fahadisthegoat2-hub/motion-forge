@@ -1,0 +1,11 @@
+{"name":"French bistro chair (ultra)","materials":{"wood":{"preset":"wood","color":"#4a2e1c","tex":"wood","rough":0.45,"clearcoat":0.4},"cane":{"preset":"fabric","color":"#c9a46a","tex":"fabric","texScale":3,"rough":0.8},"brass":{"preset":"gold","color":"#a88a4a","metal":1,"rough":0.4}},
+"parts":[{"n":"seat ring","t":"torus","m":"wood","p":[0,0.46,0],"r":[90,0,0],"s":[0.2,0.018]},
+{"n":"seat","t":"cyl","m":"cane","p":[0,0.462,0],"s":[0.195,0.195,0.012]},
+{"n":"front leg","t":"tube","m":"wood","radii":[0.016,0.014,0.012],"path":[[0.15,0.45,0.12],[0.17,0.22,0.15],[0.19,0,0.17]],"mirror":"x"},
+{"n":"back leg","t":"tube","m":"wood","radii":[0.016,0.016,0.014,0.012],"path":[[0.15,0.95,-0.2],[0.15,0.62,-0.16],[0.15,0.45,-0.13],[0.18,0,-0.19]],"mirror":"x"},
+{"n":"back hoop","t":"torus","m":"wood","p":[0,0.86,-0.185],"r":[-8,0,0],"s":[0.15,0.014],"arc":180},
+{"n":"back hoop inner","t":"torus","m":"wood","p":[0,0.8,-0.18],"r":[-8,0,0],"s":[0.11,0.011],"arc":180},
+{"n":"leg ring","t":"torus","m":"wood","p":[0,0.18,0],"r":[90,0,0],"s":[0.19,0.011]},
+{"n":"foot cap","t":"cyl","m":"brass","p":[0.19,0.01,0.17],"s":[0.014,0.014,0.02],"mirror":"x"},
+{"n":"foot cap b","t":"cyl","m":"brass","p":[0.18,0.01,-0.19],"s":[0.014,0.014,0.02],"mirror":"x"},
+{"n":"cane weave","t":"box","m":"wood","p":[-0.15,0.469,0],"s":[0.004,0.002,0.36],"repeat":{"n":16,"step":[0.02,0,0]}}]}

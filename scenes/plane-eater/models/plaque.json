@@ -1,0 +1,9 @@
+{"name":"Brass record plaque on walnut (ultra)","materials":{"wood":{"preset":"wood","color":"#4a2c1a","tex":"wood","rough":0.35,"clearcoat":0.7},"brass":{"preset":"gold","color":"#c9a24a","metal":1,"rough":0.2,"tex":"brushed"},"ink":{"preset":"paint","color":"#2e2210","rough":0.6},"black":{"preset":"paint","color":"#1a1a1a","rough":0.5}},
+"parts":[{"n":"board","t":"extrude","m":"wood","p":[0,0,0],"smooth":false,"pts":[[-0.12,0],[0.12,0],[0.12,0.27],[0.09,0.3],[-0.09,0.3],[-0.12,0.27]],"depth":0.022,"bevel":0.006},
+{"n":"plate","t":"box","m":"brass","p":[0,0.15,0.013],"s":[0.19,0.23,0.004],"bevel":0.003},
+{"n":"border","t":"box","m":"black","p":[0,0.15,0.0152],"s":[0.175,0.215,0.0008],"children":[{"n":"inner","t":"box","m":"brass","p":[0,0,0.0005],"s":[0.168,0.208,0.001]}]},
+{"n":"crest","t":"sphere","m":"ink","p":[0,0.235,0.0165],"sc":[1,1,0.1],"s":[0.018]},
+{"n":"title line","t":"box","m":"ink","p":[0,0.205,0.0165],"s":[0.13,0.012,0.001]},
+{"n":"text line","t":"box","m":"ink","p":[0,0.18,0.0165],"s":[0.11,0.006,0.001],"repeat":{"n":7,"step":[0,-0.016,0]}},
+{"n":"screw","t":"cyl","m":"brass","p":[0.085,0.275,0.012],"r":[90,0,0],"s":[0.006,0.006,0.004],"mirror":"x","repeat":{"n":2,"step":[0,-0.25,0]}},
+{"n":"stand","t":"box","m":"wood","p":[0,0.06,-0.04],"r":[-20,0,0],"s":[0.05,0.13,0.012]}]}
