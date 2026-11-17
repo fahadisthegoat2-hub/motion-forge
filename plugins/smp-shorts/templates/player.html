@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{--bg:#0b0d12;--fg:#f4f4f5;--muted:#a1a1aa;--accent:__ACCENT__}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#0b0d12;--fg:#f4f4f5}}
+:root[data-theme="dark"]{--bg:#0b0d12;--fg:#f4f4f5}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:12px}
+canvas#view{height:min(100%,calc((100vw - 24px) * 16 / 9));aspect-ratio:9/16;border-radius:14px;background:#000;box-shadow:0 10px 40px #0008;cursor:pointer}
+#hint{position:fixed;left:16px;top:12px;color:var(--muted);font-size:12px}
+video{display:none}
+</style></head><body>
+<div id="stage"><canvas id="view" width="1080" height="1920"></canvas></div>
+<div id="hint">Tap the video to preview · renders on your device</div>
+<script src="mg.js"></script>
+<script>
+const EDIT = __EDIT__;
+const cv = document.getElementById('view'), ctx = cv.getContext('2d');
+const vids = EDIT.chunks.map((c) => { const v = document.createElement('video'); v.src = c.file; v.muted = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous'; document.body.appendChild(v); return v; });
+const CH = EDIT.chunkDur;
+function seek(t) {
+  const i = Math.min(vids.length - 1, Math.floor(t / CH)), v = vids[i], lt = Math.min(t - i * CH, (EDIT.chunks[i].dur || CH) - 0.02);
+  if (Math.abs(v.currentTime - lt) < 0.004 && v.readyState >= 2) return Promise.resolve(v);
+  return new Promise((res) => { const done = () => { v.removeEventListener('seeked', done); res(v); }; v.addEventListener('seeked', done); v.currentTime = Math.max(0, lt); setTimeout(done, 1500); });
+}
+function compose(v, t) {
+  const W = cv.width, H = cv.height, s = W / 1080;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  if (v && v.readyState >= 2) ctx.drawImage(v, 0, 0, W, H);
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  for (const g of EDIT.graphics) if (t >= g.at && t < g.at + g.dur) MG.draw(ctx, g, t - g.at, EDIT.accent);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+let ready = false;
+Promise.all(vids.map((v) => new Promise((r) => { if (v.readyState >= 2) r(); else { v.addEventListener('loadeddata', r, { once: true }); setTimeout(r, 20000); } }))).then(async () => { ready = true; compose(await seek(0.05), 0.05); window.__mfReady = true; });
+window.__mfReady = false;
+let audioBuf = null;
+async function soundtrack() { if (!audioBuf) { const ab = await (await fetch(EDIT.mix)).arrayBuffer(); audioBuf = await new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, 48000, 48000).decodeAudioData(ab); } return audioBuf; }
+// live preview (tap): real-time playback synced to the soundtrack
+let live = null;
+cv.onclick = async () => {
+  if (window.__mfManual) return;
+  if (live) { live.ctx.close(); vids.forEach((v) => v.pause()); live = null; return; }
+  const buf = await soundtrack(), ac = new AudioContext(), src = ac.createBufferSource(); src.buffer = buf; src.connect(ac.destination); src.start();
+  live = { ctx: ac, t0: ac.currentTime }; let cur = -1;
+  const loop = () => { if (!live || window.__mfManual) return; const t = ac.currentTime - live.t0; if (t >= EDIT.duration) { cv.onclick(); return; }
+    const i = Math.min(vids.length - 1, Math.floor(t / CH)), v = vids[i];
+    if (i !== cur) { vids.forEach((x) => x.pause()); v.currentTime = t - i * CH; v.play().catch(() => {}); cur = i; }
+    else if (Math.abs(v.currentTime - (t - i * CH)) > 0.25) v.currentTime = t - i * CH;
+    compose(v, t); requestAnimationFrame(loop); };
+  loop();
+};
+window.__mf = {
+  duration: EDIT.duration, width: 1080, height: 1920, fps: 30, canvas: cv, quality: EDIT.quality, autoRender: EDIT.autoRender !== false,
+  setSize(w, h) { cv.width = w; cv.height = h; },
+  async render(t) { if (live) cv.onclick(); compose(await seek(t), t); },
+  soundtrack, restart() { // panel "Preview with sound": it plays the soundtrack, we play the picture on the same clock
+    if (live) cv.onclick(); const t0 = performance.now(); let cur = -1; vids.forEach((x) => x.pause()); const me = Symbol(); window.__pv = me;
+    const loop = () => { if (window.__pv !== me || window.__mfManual || live) return; const t = ((performance.now() - t0) / 1000) % EDIT.duration, i = Math.min(vids.length - 1, Math.floor(t / CH)), v = vids[i];
+      if (i !== cur) { vids.forEach((x) => x.pause()); v.currentTime = t - i * CH; v.play().catch(() => {}); cur = i; } else if (Math.abs(v.currentTime - (t - i * CH)) > 0.25) v.currentTime = t - i * CH;
+      compose(v, t); requestAnimationFrame(loop); };
+    loop(); },
+};
+</script>
+__PANEL__
+</body></html>

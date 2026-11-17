@@ -1,6 +1,7 @@
 ---
-description: Edit SMP footage into a short with motion graphics and send it to CapCut
-argument-hint: <video path or CapCut project name> [project:<CapCut name>] [title:<hook>]
+description: Send an SMP video, get back a finished short (real lore, voice, captions, motion graphics, CapCut, device render)
+argument-hint: <video path or CapCut project name> [project:<CapCut name>]
 ---
-Use the `smp-shorts` skill. Input: $ARGUMENTS
-Write a punchy curiosity-gap hook title if none is given, run `smp.js` (graphics first, edit last, CapCut project), look at 3 frames of short.mp4, fix anything off, then deliver.
+Use the `smp-shorts` skill on: $ARGUMENTS
+Run all 5 steps without asking anything: plan + read every sheet → research real Unstable SMP lore (web, sources) → script.json
+with LORE PASS → smp.js finish → check frames → publish the device-render artifact. Reply only with the link.

@@ -57,12 +57,18 @@ function buildDraft(edit, name, layout) {
   const fill = (edit.info.width / edit.info.height) / (9 / 16);
   const base = layout === 'crop' ? fill : 1.25;
   const vt = { id: uid(), type: 'video', attribute: 0, flag: 0, is_default_name: true, name: '', segments: [] };
-  for (const s of edit.segments) vt.segments.push(segment(main.id, speed(), s.in, s.at, s.out - s.in, +(base * (s.zoom || (s.role === 'hook' ? 1.15 : 1))).toFixed(4)));
+  for (const s of edit.segments) vt.segments.push(segment(main.id, speed(), s.in, s.at, s.out - s.in, +(base * (s.zoom || (s.role === 'hook' ? 1.15 : 1))).toFixed(4), { volume: edit.mix ? 0 : 1 }));
   const tracks = [vt];
+  if (edit.mix && fs.existsSync(edit.mix)) { // final soundtrack (voice + ducked game + SFX) on its own audio track
+    const d = ffprobeJSON(edit.mix).duration || edit.duration;
+    const am = { id: uid(), type: 'extract_music', name: 'SMP mix', path: edit.mix.replace(/\\/g, '/'), duration: Math.round(d * US), music_id: uid(), category_name: 'local', check_flag: 1, source_platform: 0, wave_points: [] };
+    mats.audios.push(am); const seg = segment(am.id, speed(), 0, 0, Math.min(d, edit.duration), 1); delete seg.clip; delete seg.uniform_scale;
+    tracks.push({ id: uid(), type: 'audio', attribute: 0, flag: 0, is_default_name: true, name: '', segments: [seg] });
+  }
   edit.graphics.filter((g) => g.file).forEach((g, k) => {
     const info = ffprobeJSON(g.file), m = videoMat(g.file, { ...info, hasAudio: false }); mats.videos.push(m);
     // Graphics stack on their own tracks so overlapping ones never collide.
-    let t = tracks.slice(1).find((x) => !x.segments.some((s) => g.at * US < s.target_timerange.start + s.target_timerange.duration && (g.at + g.dur) * US > s.target_timerange.start));
+    let t = tracks.slice(1).find((x) => x.type === 'video' && !x.segments.some((s) => g.at * US < s.target_timerange.start + s.target_timerange.duration && (g.at + g.dur) * US > s.target_timerange.start));
     if (!t) { t = { id: uid(), type: 'video', attribute: 0, flag: 0, is_default_name: true, name: '', segments: [] }; tracks.push(t); }
     const ri = 10 + tracks.indexOf(t);
     t.segments.push(segment(m.id, speed(), 0, g.at, Math.min(g.dur, info.duration || g.dur), 1, { volume: 0, render_index: ri, track_render_index: ri }));

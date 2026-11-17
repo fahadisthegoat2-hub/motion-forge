@@ -41,6 +41,7 @@ ROUTING (load every matching skill, in this order, before working):
 - 3D model / prop / asset / "make a model of" → model-forge
 - 3D scene, model, render → 3d-visuals (+ realistic-humans for people/backgrounds, + custom-animation if it moves)
 - Animation of anything → custom-animation
+- Unstable SMP / Minecraft SMP footage, "edit this clip", CapCut project → plugins/smp-shorts/skills/smp-shorts/SKILL.md (the whole flow; it replaces the 3D-short routing for real footage)
 - Motion graphics, titles, intros, logos → motion-graphics (+ 3d-visuals if 3D)
 - Reference images or videos (chat or references/ folder) → reference-learning first (scripts/analyze_video.js for videos), then apply the saved style everywhere
 - Effects, action, destruction, weather, magic, "epic" → vfx (+ art-direction)

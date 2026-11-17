@@ -82,13 +82,19 @@ async function analyze(file, opts = {}) {
     .concat(picked.map((c, k) => ({ ...c, role: c === best ? 'payoff' : 'beat', zoom: k % 2 ? 1.12 : 1 })));
   segments.forEach((s) => { s.in = +s.in.toFixed(3); s.out = +s.out.toFixed(3); });
 
+  const { duration: dur, graphics } = buildGraphics(segments, subs, opts.title);
+  return { source: path.resolve(file), info, duration: dur, accent: opts.accent || '#FFD23F', segments, graphics, subs: subs.filter((s) => segments.some((g) => s.start < g.out && s.end > g.in)) };
+}
+
+function buildGraphics(segments, subs = [], titleIn, vo) {
   // Edit timeline positions + auto motion-graphics plan (graphics are rendered BEFORE the cut).
   let t = 0;
   for (const s of segments) { s.at = +t.toFixed(3); t += s.out - s.in; }
-  const dur = +t.toFixed(3), title = (opts.title || 'THIS WENT WRONG…').toUpperCase();
+  const dur = +t.toFixed(3), title = (titleIn || 'THIS WENT WRONG…').toUpperCase();
   const graphics = [{ type: 'hook', text: title, at: 0, dur: 2.2 }];
   segments.forEach((s, k) => {
     if (k === 0) return;
+    graphics.push({ type: k % 2 ? 'glitch' : 'flash', at: Math.max(0, s.at - 0.06), dur: 0.32 }); // cut transition
     const pk = s.at + (s.peak - s.in);
     graphics.push({ type: 'flash', at: Math.max(0, pk - 0.12), dur: 0.5 });
     const line = subs.find((x) => x.hype && x.start <= s.peak + 1 && x.end >= s.peak - 1);
@@ -96,6 +102,7 @@ async function analyze(file, opts = {}) {
     if (s.role === 'payoff') graphics.push({ type: 'marker', at: pk + 0.2, dur: 1.6, x: 0.5, y: 0.46 });
     if (k > 1 && k % 3 === 0) graphics.push({ type: 'chapter', text: 'MEANWHILE…', at: s.at, dur: 1.2 });
   });
+  if (!vo) // voiceover captions replace subtitle captions
   // Captions from subtitles, mapped into edit time.
   for (const sg of segments) for (const sb of subs) {
     if (sb.end <= sg.in || sb.start >= sg.out) continue;
@@ -103,7 +110,7 @@ async function analyze(file, opts = {}) {
     if (b - a > 0.2) graphics.push({ type: 'caption', text: sb.text.toUpperCase().slice(0, 42), at: +a.toFixed(3), dur: +(b - a).toFixed(3) });
   }
   graphics.push({ type: 'cta', text: 'FOLLOW FOR PART 2', at: Math.max(0, dur - 2.4), dur: 2.4 });
-  return { source: path.resolve(file), info, duration: dur, accent: opts.accent || '#FFD23F', segments, graphics, subs: subs.filter((s) => segments.some((g) => s.start < g.out && s.end > g.in)) };
+  return { duration: dur, graphics };
 }
 
 if (require.main === module) {
@@ -114,4 +121,4 @@ if (require.main === module) {
     console.log(JSON.stringify({ out, duration: e.duration, segments: e.segments.length, graphics: e.graphics.length }));
   }).catch((e) => { console.error(e.message); process.exit(1); });
 }
-module.exports = { analyze };
+module.exports = { analyze, buildGraphics };
