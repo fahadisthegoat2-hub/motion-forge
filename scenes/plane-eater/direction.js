@@ -88,8 +88,8 @@ S('worst', { cut: 'zoom', set: ROOM, look: 'cinematic', punch: [0.5],
 // 9 · "Before the plane, he ate eighteen bicycles." — a row of bikes, he walks past
 const BIKES = Array.from({ length: 7 }, (_, i) => M('bicycle', [-3.0 + i * 0.85, 0, -0.9], { height: 1.07, rotY: 0.95 + (i % 2 ? 0.06 : -0.05) }));
 S('bikes', { cut: 'whip', set: { type: 'studio' }, look: 'clean-cg',
-  camera: { pos: [[0, [-2.5, 1.35, 3.3]], [dur('bikes'), [-2.5 + 1.3 * dur('bikes'), 1.35, 3.3], 'linear']], look: [[0, [-3.1, 0.9, -0.2]], [dur('bikes'), [-3.1 + 1.3 * dur('bikes'), 0.9, -0.2], 'linear']], fov: 46 },
-  cast: { hero: { pos: [[0, [-3.3, 0, 0.35]], [dur('bikes'), [-3.3 + 1.3 * dur('bikes'), 0, 0.35]]], rotY: [[0, P / 2]], clips: [{ clip: 'walk', start: 0, end: 4, speed: 0.9 }], look: [[0, [0, 0.9, -0.9]]] } },
+  camera: { pos: [[0, [-1.4, 1.45, 4.6]], [dur('bikes'), [0.3, 1.4, 4.3], 'linear']], look: [[0, [-1.4, 0.75, -0.5]], [dur('bikes'), [0.3, 0.75, -0.5], 'linear']], fov: 50 },
+  cast: { hero: { pos: [[0, [-2.0, 0, 0.35]], [dur('bikes'), [-2.0 + 1.3 * dur('bikes'), 0, 0.35]]], rotY: [[0, P / 2]], clips: [{ clip: 'walk', start: 0, end: 4, speed: 0.9 }], look: [[0, [0, 0.9, -0.9]]] } },
   fx: BIKES });
 // 10 · "Seven TVs. A coffin." — the pile
 const TVS = [[-1.9, -1.0], [-1.2, -1.35], [-0.45, -1.5], [-1.55, -0.2], [-0.8, -0.55], [0.25, -1.6], [1.5, -1.0, 0.55]].map((p, i) => M('tv', [p[0], p[2] || 0, p[1]], { height: 0.88, rotY: [0.5, 0.25, 0.05, 0.7, 0.35, -0.1, -0.2][i] }));
