@@ -15,7 +15,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1
 #title{font-weight:700;text-shadow:0 1px 4px #000}
 #stats{font-size:12px;color:var(--dim);text-shadow:0 1px 3px #000}
 #tools{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.chip{background:#0009;border:1px solid #fff2;color:var(--txt);border-radius:999px;padding:7px 12px;font-size:13px;backdrop-filter:blur(6px);cursor:pointer}
+.chip{background:#000b;border:1px solid #fff2;color:var(--txt);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
 .chip.on{border-color:var(--acc);color:var(--acc2)}
 #busy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#0b0c0fcc;text-align:center;padding:20px}
 #busy.show{display:flex}
@@ -351,7 +351,7 @@ const view = $('view');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
 view.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; pm.dispose();
@@ -368,7 +368,11 @@ let model = null, home = null, until = 0, raf = 0, cur = null;
 function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, HIGH ? 1.5 : 1)); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); wake(); }
 new ResizeObserver(resize).observe(view);
 function wake(ms = 1500) { until = performance.now() + ms; if (!raf) raf = requestAnimationFrame(loop); }
-function loop() { raf = 0; controls.update(); renderer.render(scene, camera); if (!document.hidden && (controls.autoRotate || performance.now() < until)) raf = requestAnimationFrame(loop); }
+let typing = false;
+const isField = el => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type === 'text') || el.isContentEditable);
+document.addEventListener('focusin', e => { if (isField(e.target)) typing = true; });
+document.addEventListener('focusout', e => { if (isField(e.target)) { typing = false; wake(); } });
+function loop() { raf = 0; controls.update(); renderer.render(scene, camera); if (!document.hidden && ((controls.autoRotate && !typing) || performance.now() < until)) raf = requestAnimationFrame(loop); }
 controls.addEventListener('change', () => wake()); controls.addEventListener('start', () => wake(4000));
 document.addEventListener('visibilitychange', () => wake());
 
@@ -386,10 +390,11 @@ function showSpec(spec) {
   if (box.isEmpty()) { note('That model came back empty — try again.'); return false; }
   const c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()), R = Math.max(1e-4, size.length() / 2);
   const k = 1 / R; root.scale.setScalar(k); root.position.set(-c.x * k, -box.min.y * k, -c.z * k); // normalise to radius 1
+  root.updateMatrixWorld(true); root.traverse(o => { o.matrixAutoUpdate = false; });
   model = root; scene.add(root);
   const h = size.y * k;
   ground.scale.setScalar(6); key.position.set(2.2, h + 3, 2.6); key.target.position.set(0, h / 2, 0); rim.position.set(-3, h + 1.5, -3);
-  const sc = key.shadow.camera; sc.left = sc.bottom = -1.6; sc.right = sc.top = 1.6; sc.near = .1; sc.far = 12; sc.updateProjectionMatrix();
+  const sc = key.shadow.camera; sc.left = sc.bottom = -1.6; sc.right = sc.top = 1.6; sc.near = .1; sc.far = 12; sc.updateProjectionMatrix(); renderer.shadowMap.needsUpdate = true;
   const dist = 1.15 / Math.sin(camera.fov * D2R / 2) / Math.min(1, camera.aspect);
   home = { pos: new THREE.Vector3(dist * .62, h / 2 + dist * .32, dist * .72), tgt: new THREE.Vector3(0, h / 2, 0) };
   resetView();
@@ -403,7 +408,7 @@ function resetView() { if (!home) return; camera.position.copy(home.pos); contro
 $('bReset').onclick = resetView;
 $('bRot').onclick = e => { controls.autoRotate = !controls.autoRotate; e.target.classList.toggle('on', controls.autoRotate); wake(); };
 $('bQ').onclick = e => { HIGH = !HIGH; e.target.textContent = 'Quality: ' + (HIGH ? 'High' : 'Low'); e.target.classList.toggle('on', HIGH);
-  renderer.shadowMap.enabled = HIGH; key.castShadow = HIGH; glassMats.forEach(setGlass); scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); resize(); };
+  renderer.shadowMap.enabled = HIGH; key.castShadow = HIGH; glassMats.forEach(setGlass); scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); renderer.shadowMap.needsUpdate = true; resize(); };
 if ((navigator.deviceMemory && navigator.deviceMemory <= 3) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)) $('bQ').click();
 
 // ---------- generation ----------
@@ -447,10 +452,10 @@ function parseSpec(text) {
 }
 async function run(input, images, tier, label, promptText) {
   if (!sample || ctl) return;
-  ctl = new AbortController(); $('busy').classList.add('show'); $('busyTxt').textContent = label + '\nThinking…'; $('go').disabled = true; note('');
+  let lastN = -1; ctl = new AbortController(); $('busy').classList.add('show'); $('busyTxt').textContent = label + '\nThinking…'; $('go').disabled = true; note('');
   try {
     const { text, truncated } = await sample(input, { signal: ctl.signal, modelTier: tier, cache: false, ...(images ? { images } : {}),
-      onText: ({ text }) => { $('busyTxt').textContent = label + '\n' + ((text.match(/"t":/g) || []).length) + ' parts sculpted'; } });
+      onText: ({ text }) => { const n = (text.match(/"t":/g) || []).length; if (n !== lastN) { lastN = n; $('busyTxt').textContent = label + '\n' + n + ' parts sculpted'; } } });
     let spec;
     try { spec = parseSpec(text); } catch (e) { note(truncated ? 'The model was too big and got cut off — try a lower Detail level.' : 'Claude returned something unreadable — tap Generate again.'); return; }
     if (showSpec(spec)) await saveModel(spec, promptText);
