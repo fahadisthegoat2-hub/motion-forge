@@ -23,6 +23,7 @@ const LAB = { top: '#e4e6e1', bottom: '#3a3f47', shoes: '#1d1b19' };      // lig
 const GOWN = { top: '#a9bccb', bottom: '#a9bccb', shoes: '#cfcfcf' };
 const cast = {
   hero: { character: 'jake', wardrobe: LAB },
+  patient: { character: 'jake', wardrobe: GOWN },
   doc1: { character: 'walt', wardrobe: { top: '#f1f1ec', bottom: '#e3e3dd', shoes: '#3a3a3a' } },
   doc2: { character: 'marcus', wardrobe: { top: '#f1f1ec', bottom: '#e3e3dd', shoes: '#3a3a3a' } },
 };
@@ -36,9 +37,9 @@ const TUNNEL = [-12, -8, -4, 0, 4, 8, 12, 16, 20].map((x) => ({ type: 'model', i
 const MAGNETS = [-4, 4, 10.4, 16.8].map((x) => ({ type: 'model', id: 'accel_magnet', height: MAG_H, p: [[0, [x, 0.004, -1.3]]] }));
 const ACCEL = [...TUNNEL, ...MAGNETS];
 const CONSOLE = { type: 'model', id: 'control_console', height: 1.94, p: [[0, [-10.0, 0.004, -1.75]]] };
-const beamHead = (t0, t1, o = {}) => ({ type: 'beam', attach: 'hero.head', start: t0, end: t1, pos: [-1.6, -0.1, 0], to: [1.6, -0.1, 0], radius: 0.09, color: '#9fe4ff', intensity: 1.3, ...o });
+const beamHead = (t0, t1, o = {}) => ({ type: 'beam', attach: 'hero.head', start: t0, end: t1, pos: [-1.6, -0.1, 0], to: [1.6, -0.1, 0], radius: 0.045, color: '#9fe4ff', intensity: 0.85, motes: false, ...o });
 const beamFx = (t0, t1, o = {}) => ({ type: 'beam', start: t0, end: t1, pos: [-PIPE_END, BEAM_Y, BEAM_Z], to: [PIPE_END, BEAM_Y, BEAM_Z], radius: 0.07, color: '#9fe4ff', intensity: 1.6, ...o });
-const HOSP = { type: 'interior', id: 'clinic', wall: '#cfd8d2' };
+const HOSP = { type: 'interior', id: 'clinic', wall: '#93a59e' };
 const BED = { type: 'model', id: 'hospital_bed', height: 1.95, p: [[0, [0.6, 0, -1.6]]] };
 const HEAD_Z = BEAM_Z;           // kneels ON the beam line facing +X: the beam enters the back of his skull and exits by the nose                          // where he kneels so the lean puts his head on the beam line
 const kneel = (d) => [{ clip: 'kneel', start: -2, end: d + 1, loop: false }];
@@ -73,13 +74,13 @@ S('year', { cut: 'dip', set: VOID, look: 'noir',
   fx: [...ACCEL], sfx: [{ t: 0.2, type: 'swell', gain: 0.5 }] });
 // 4 · "Anatoli Bugorski is fixing…" — kneeling at the open beam section, working
 S('fix', { cut: 'whip', set: VOID, look: 'cinematic',
-  camera: { pos: [[0, [1.7, 1.35, 0.8]], [dur('fix'), [1.0, 1.3, 1.15], 'inOutSine']], look: [[0, [0.2, 0.95, -0.85]]], fov: 46 },
-  cast: { hero: { pos: [[0, [0, 0.004, HEAD_Z]]], rotY: [[0, P / 2]], clips: [{ clip: 'fix', start: 0, end: dur('fix') + 1 }], hands: { both: 'pinch' }, look: [[0, [0.7, BEAM_Y - 0.5, BEAM_Z]]], face: { squint: [[0, 0.6]] } } },
+  camera: { pos: [[0, [-2.6, 1.3, 0.9]], [dur('fix'), [-2.35, 1.25, 0.5], 'inOutSine']], look: [[0, [-1.5, 1.0, -0.8]]], fov: 44 },
+  cast: { hero: { pos: [[0, [-1.42, 0.004, BEAM_Z + 0.1]]], rotY: [[0, -P / 2]], clips: kneel(4), reach: [{ hand: 'right', to: [-1.95, BEAM_Y - 0.05, BEAM_Z + 0.07], start: 0, end: 9 }], hands: { right: 'grip' }, look: [[0, [-1.9, BEAM_Y, BEAM_Z]]], face: { squint: [[0, 0.6]] } } },
   fx: [...ACCEL], sfx: [{ t: 0.5, type: 'tick', gain: 0.5 }, { t: 1.1, type: 'tick', gain: 0.5 }] });
 // 5 · "…a giant particle accelerator." — crane up and out: the machine dwarfs him
 S('ring', { set: VOID, look: 'cinematic',
-  camera: { pos: [[0, [1.2, 1.4, 2.4]], [dur('ring'), [3.5, 3.1, 4.8], 'inOutCubic']], look: [[0, [0, 0.9, -0.8]], [dur('ring'), [0.5, 0.8, -1], 'inOutCubic']], fov: 46 },
-  cast: { hero: { pos: [[0, [0, 0.004, HEAD_Z]]], rotY: [[0, P / 2]], clips: [{ clip: 'fix', start: 0, end: dur('ring') + 1 }], hands: { both: 'pinch' }, acting: 'none' } },
+  camera: { pos: [[0, [1.2, 1.4, 2.4]], [dur('ring'), [3.5, 3.1, 4.8], 'inOutCubic']], look: [[0, [-1.3, 0.9, -0.8]], [dur('ring'), [-0.6, 0.8, -1], 'inOutCubic']], fov: 46 },
+  cast: { hero: { pos: [[0, [-1.42, 0.004, BEAM_Z + 0.1]]], rotY: [[0, -P / 2]], clips: kneel(4), reach: [{ hand: 'right', to: [-1.95, BEAM_Y - 0.05, BEAM_Z + 0.07], start: 0, end: 9 }], hands: { right: 'grip' }, acting: 'none' } },
   fx: [...ACCEL] });
 // 6 · "The safety system has failed." — the console, warning lamps, nobody there
 S('failed', { cut: 'glitch', set: VOID, look: 'horror', punch: [0.9],
@@ -93,9 +94,9 @@ S('leans', { cut: 'zoom', set: VOID, look: 'cinematic',
 // 8 · "He sees a flash brighter than a thousand suns." — eye ECU, white-out, slow motion
 const tFlash = +(wordAt('flash') - T.flash).toFixed(3);
 S('flash', { cut: 'smash', set: VOID, look: 'clean-cg', flash: tFlash, punch: [tFlash], time: [[0, 0], [tFlash, tFlash], [dur('flash'), tFlash + (dur('flash') - tFlash) * 0.35, 'outCubic']],
-  camera: { pos: [[0, [1.15, 1.1, -0.62]], [dur('flash'), [1.02, 1.09, -0.68], 'inOutSine']], look: [[0, [0.4, 1.07, -0.88]]], fov: 26, handheld: 0.5, shakes: [tFlash] },
+  camera: { pos: [[0, [1.15, 1.1, -0.62]], [dur('flash'), [1.02, 1.09, -0.68], 'inOutSine']], look: [[0, [0.4, 0.97, -0.88]]], fov: 28, handheld: 0.5, shakes: [tFlash] },
   cast: { hero: { pos: [[0, [0, 0.004, HEAD_Z]]], rotY: [[0, P / 2]], clips: kneel(4), bones: leaned(), look: [[0, [2, 1.35, BEAM_Z]]], face: { squint: [[0, 0.3], [tFlash, 1, 'outBack']], shock: [[tFlash, 0], [tFlash + 0.3, 0.5]] }, acting: 'none' } },
-  fx: [...ACCEL, beamHead(tFlash - 0.05, 9, { intensity: 1.2 }), { type: 'sparks', t: tFlash, attach: 'hero.head', pos: [0.14, -0.1, 0], scale: 0.4 }],
+  fx: [...ACCEL, beamHead(tFlash - 0.05, 9, { intensity: 0.9 }), { type: 'sparks', t: tFlash, attach: 'hero.head', pos: [0.14, -0.1, 0], scale: 0.4 }],
   sfx: [{ t: tFlash, type: 'zap', gain: 1 }, { t: tFlash + 0.05, type: 'riser', gain: 0.5 }] });
 // 9 · "No pain at all." — x-ray: the beam's path, back of the skull → nose
 S('nopain', { cut: 'flash', set: VOID, look: 'neon-night',
@@ -104,20 +105,20 @@ S('nopain', { cut: 'flash', set: VOID, look: 'neon-night',
   fx: [...ACCEL] });
 // 10 · "Doctors give him days to live." — Moscow clinic
 S('doctors', { cut: 'dip', set: HOSP, look: 'warm-film',
-  camera: { pos: [[0, [2.7, 1.75, 0.7]], [dur('doctors'), [2.4, 1.65, 0.3], 'inOutSine']], look: [[0, [0.6, 0.85, -1.9]]], fov: 42 },
-  cast: { hero: { pos: [[0, [0.6, 0.66, -1.75]]], rotY: [[0, 0]], clips: [{ clip: 'lie', start: 0, end: dur('doctors') + 1 }], wardrobe: GOWN, face: { sad: [[0, 0.3]] }, acting: 'none' },
-    doc1: { pos: [[0, [-0.45, 0, -1.5]]], rotY: [[0, P / 2]], clips: idle(3), gestures: [{ type: 'think', start: 0.3, end: dur('doctors') }], look: [[0, 'hero']], face: { worried: [[0, 0.6]] } },
-    doc2: { pos: [[0, [1.55, 0, -2.45]]], rotY: [[0, -P / 2 + 0.2]], clips: idle(3), gestures: [{ type: 'headhold', start: 0.6, end: dur('doctors') }], look: [[0, 'hero']], face: { sad: [[0, 0.5]] } } },
+  camera: { pos: [[0, [0.62, 1.85, 1.5]], [dur('doctors'), [0.6, 1.78, 1.15], 'inOutSine']], look: [[0, [0.6, 1.0, -1.9]]], fov: 46 },
+  cast: { patient: { pos: [[0, [0.6, 0.66, -1.75]]], rotY: [[0, 0]], clips: [{ clip: 'lie', start: 0, end: dur('doctors') + 1 }], face: { sad: [[0, 0.3]] }, acting: 'none' },
+    doc1: { pos: [[0, [-0.08, 0, -1.45]]], rotY: [[0, P / 2]], clips: idle(3), gestures: [{ type: 'think', start: 0.3, end: dur('doctors') }], look: [[0, 'patient']], face: { worried: [[0, 0.6]] } },
+    doc2: { pos: [[0, [1.28, 0, -2.3]]], rotY: [[0, -P / 2 + 0.2]], clips: idle(3), gestures: [{ type: 'headhold', start: 0.6, end: dur('doctors') }], look: [[0, 'patient']], face: { sad: [[0, 0.5]] } } },
   fx: [BED] });
 // 11 · "His face swells. His skin peels off." — close on his face, burned side glowing
 S('swells', { cut: 'whip', set: HOSP, look: 'warm-film', punch: [+(wordAt('peels') - T.swells).toFixed(3)],
-  camera: { pos: [[0, [1.55, 1.3, -1.75]], [dur('swells'), [1.4, 1.22, -1.95], 'inOutSine']], look: [[0, [0.6, 0.79, -2.36]]], fov: 34, handheld: 0.3 },
-  cast: { hero: { pos: [[0, [0.6, 0.66, -1.75]]], rotY: [[0, 0]], clips: [{ clip: 'lie', start: 0, end: dur('swells') + 1 }], wardrobe: GOWN, face: { squint: [[0, 0.7]], sad: [[0, 0.4], [1, 0.8]], worried: [[0.5, 0.6]] }, acting: 'none' } },
+  camera: { pos: [[0, [1.55, 1.3, -1.75]], [dur('swells'), [1.4, 1.22, -1.95], 'inOutSine']], look: [[0, [0.66, 0.8, -2.3]]], fov: 36, handheld: 0.3 },
+  cast: { patient: { pos: [[0, [0.6, 0.66, -1.75]]], rotY: [[0, 0]], clips: [{ clip: 'lie', start: 0, end: dur('swells') + 1 }], face: { squint: [[0, 0.7]], sad: [[0, 0.4], [1, 0.8]], worried: [[0.5, 0.6]] }, acting: 'none' } },
   fx: [BED] });
 // 12 · "Then… he survives." — he sits up, light through the window
 S('survives', { cut: 'dip', set: HOSP, look: 'warm-film', punch: [+(wordAt('survives') - T.survives + 0.05).toFixed(3)],
-  camera: { move: 'crane-up', target: 'hero', size: 'ms', az: 45 },
-  cast: { hero: { pos: [[0, [0.6, 0.66, -1.95]]], rotY: [[0, 0]], clips: [{ clip: 'sit', start: -2, end: dur('survives') + 1, loop: false }], wardrobe: GOWN, look: [[0, [-3.5, 1.6, -0.6]]], face: { smile: [[0.6, 0], [1.3, 0.35]] }, acting: 'none' } },
+  camera: { move: 'crane-up', target: 'patient', size: 'ms', az: 45 },
+  cast: { patient: { pos: [[0, [0.6, 0.66, -1.95]]], rotY: [[0, 0]], clips: [{ clip: 'sit', start: -2, end: dur('survives') + 1, loop: false }], look: [[0, [-3.5, 1.6, -0.6]]], face: { smile: [[0.6, 0], [1.3, 0.35]] }, acting: 'none' } },
   fx: [BED] });
 // 13 · "He finishes his PhD." — back in his work clothes, a quiet win
 S('phd', { cut: 'whip', set: HOSP, look: 'warm-film',
@@ -148,7 +149,7 @@ const titles = [
   { t: at('flash', tFlash + 0.1), t1: at('nopain'), style: 'kinetic', text: 'BRIGHTER THAN|1,000 SUNS', hi: ['1,000', 'SUNS'], pos: [0.5, 0.1], size: 0.085 },
   { t: at('nopain', 0.15), t1: at('doctors'), style: 'callout', at: 'hero.head', text: 'BACK OF SKULL → NOSE', sub: '2,000+ GRAY · 5 CAN KILL', side: 1 },
   { t: at('doctors', 0.3), t1: at('swells'), style: 'stamp', text: 'DAYS TO LIVE', pos: [0.5, 0.12], size: 0.08, accent: '#ff3b2f' },
-  { t: at('swells', 0.3), t1: at('survives'), style: 'callout', at: 'hero.face', text: 'LEFT SIDE', sub: 'SWELLS · PEELS · PARALYSED', side: 1 },
+  { t: at('swells', 0.3), t1: at('survives'), style: 'callout', at: 'patient.face', text: 'LEFT SIDE', sub: 'SWELLS · PEELS · PARALYSED', side: 1 },
   { t: at('survives', 0.65), t1: at('phd'), style: 'slam', text: 'HE\nSURVIVED', pos: [0.5, 0.1], size: 0.11, accent: A },
   { t: at('phd', 0.35), t1: at('back'), style: 'stamp', text: 'PhD ✓', pos: [0.5, 0.12], size: 0.09, accent: A },
   { t: at('back', 0.3), t1: at('question'), style: 'wipe', text: 'SAME MACHINE', sub: 'KEPT WORKING THERE FOR DECADES', pos: [0.5, 0.12] },

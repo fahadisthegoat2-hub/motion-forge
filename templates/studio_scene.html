@@ -2196,6 +2196,7 @@ const FXP = {
           float streak = .55 + .45 * vn(vec2(atan(lp.x, lp.y) * 6., along * 3. - uT * .15));
           float a = edge * (1. - along) * streak * uI; gl_FragColor = vec4(uC * a, 0.); }` }));
     m.position.copy(from); m.lookAt(to);
+    if (f.motes === false) return { parts: [{ obj: m, update(lt) { m.material.uniforms.uT.value = lt; } }], absolute: true };   // thin beams (lasers, particle beams): no dust motes
     const motes = emitter({ mode: 'mote', count: 160, t0: -20, t1: 999, life: [14, 22], speed: [0.01, 0.04], turb: 0.03, turbF: 0.5, size: [0.012, 0.016], shape: [R * 0.7, len * 0.45, R * 0.7],
       colA: '#fff6e0', opacity: 0.75, seed: 11 });
     motes.position.copy(from.clone().lerp(to, 0.55));
