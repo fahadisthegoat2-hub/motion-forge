@@ -157,7 +157,7 @@ const titles = [
 
 module.exports = {
   title: 'The Beam Through His Head', T, END, BEAM_Y, BEAM_Z, HEAD_Z,
-  config: { targetDuration: END, set: VOID, look: 'cinematic', quality: 'good', effort: 'standard', fps: 30, accent: A,
+  config: { targetDuration: END, set: VOID, look: 'cinematic', quality: 'good', effort: 'maximum', fps: 30, accent: A,
     sound: { music: { mood: 'tension', bpm: 96, drops: [tHit, at('flash', tFlash), at('survives', 0.65)] }, sfx: true, ambience: true, voice: { url: 'vo.wav' } },
     captions: { style: 'pop', sync: VO.words.map((w) => [w.w, w.start, w.end]) }, letterbox: 0 },
   thumbs: [

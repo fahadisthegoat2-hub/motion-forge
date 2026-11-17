@@ -16,6 +16,7 @@
 - Wants human taste and a clearly visible upgrade EVERY time he asks to improve — never a near-identical redo.
 - The review counter must count honest checks (use review_log.js --check / --status).
 - Brief replies, no summaries; time is money.
+- Bugorski short: quality good · effort MAXIMUM (35 checks × 6 rounds).
 - Props/assets: Forge 3D on ULTRA first; if not good enough download CC0 ones; else back to Forge 3D ultra. Add improvements freely.
 - Hates crooked backs, morphing hands/limbs: engine body guards + qa BODY check + pose_lab must stay green; never ship a deformed body.
 
