@@ -56,11 +56,11 @@ S('france', { cut: 'dip', set: FIELD, look: 'warm-film',
     clips: [{ clip: 'walk', start: 0, end: 3, speed: 0.9 }], look: [[0, [0, 1.2, 0]]] } },
   fx: [M('cessna', [0, 0, 0], { height: 2.68, rotY: 0.2 }), { type: 'model', id: 'hacksaw', height: 0.17, attach: 'hero.righthand', grip: true, rot: [0, P / 2, 0] }] });
 // 4 · "Michel Lotito saws it into tiny pieces." — he saws the tailplane, sparks
-const TIP = [1.62, 1.22, -3.3];
+const TIP = [1.66, 1.21, -3.8];
 S('saws', { cut: 'whip', set: FIELD, look: 'cinematic', punch: [1.6],
-  camera: { pos: [[0, [1.25, 1.68, -4.7]], [dur('saws'), [1.35, 1.66, -4.45], 'inOutSine']], look: [[0, [1.9, 1.42, -3.0]]], fov: 46, handheld: 0.5 },
-  cast: { hero: { pos: [[0, [2.05, 0, -2.85]]], rotY: [[0, -2.38]], clips: idle(4), look: [[0, TIP]], face: { squint: [[0, 0.7]] }, acting: 'none',
-    reach: [{ hand: 'right', to: [TIP[0] + 0.16, TIP[1] + 0.06, TIP[2] + 0.2], start: 0.1, end: dur('saws') }, { hand: 'left', to: [TIP[0] + 0.02, TIP[1] + 0.08, TIP[2] + 0.02], start: 0.2, end: dur('saws') }],
+  camera: { pos: [[0, [2.25, 1.72, -2.25]], [dur('saws'), [2.1, 1.7, -2.5], 'inOutSine']], look: [[0, [1.74, 1.42, -4.15]]], fov: 46, handheld: 0.5 },
+  cast: { hero: { pos: [[0, [1.74, 0, -4.32]]], rotY: [[0, 0]], clips: idle(4), look: [[0, TIP]], face: { squint: [[0, 0.7]] }, acting: 'none',
+    reach: [{ hand: 'right', to: [TIP[0] - 0.02, TIP[1] + 0.07, TIP[2] - 0.08], start: 0.1, end: dur('saws') }, { hand: 'left', to: [TIP[0] + 0.2, TIP[1] + 0.06, TIP[2] - 0.02], start: 0.2, end: dur('saws') }],
     bones: { rightforearm: [[0.4, [0, 0, 0]], [0.65, [0, 0.15, 0]], [0.9, [0, -0.1, 0]], [1.15, [0, 0.15, 0]], [1.4, [0, -0.1, 0]], [1.65, [0, 0.15, 0]], [1.9, [0, -0.1, 0]], [2.15, [0, 0.15, 0]], [2.4, [0, 0, 0]]] }, hands: { left: 'grip' } } },
   fx: [M('cessna', [0, 0, 0], { height: 2.68 }), { type: 'model', id: 'hacksaw', height: 0.17, attach: 'hero.righthand', grip: true, rot: [0, P / 2, 0] },
     { type: 'sparks', start: 0.5, end: dur('saws'), pos: TIP, scale: 0.4 }],
@@ -128,9 +128,9 @@ const titles = [
   { t: at('france', 0.1), t1: at('saws'), style: 'place', text: 'GRENOBLE, FRANCE', sub: '1978', pos: [0.08, 0.08] },
   { t: at('saws', 0.05), t1: at('swallow', -0.1), style: 'wipe', text: 'MICHEL LOTITO', sub: '"MONSIEUR MANGETOUT"', pos: [0.5, 0.07] },
   { t: at('kilo', 0.1), t1: at('years'), style: 'counter', from: 0, to: 1, suffix: ' KG', sub: 'OF METAL · EVERY DAY', pos: [0.5, 0.13], dur: 0.5 },
-  { t: at('years', 0.1), t1: at('worst'), style: 'counter', from: 0, to: 2, suffix: ' YEARS', sub: '1978 → 1980', pos: [0.5, 0.12], dur: 1.2 },
+  { t: at('years', 0.1), t1: at('worst'), style: 'counter', from: 1, to: 2, suffix: ' YEARS', sub: '1978 → 1980', pos: [0.5, 0.12], dur: 0.6 },
   { t: at('bikes', 0.9), t1: at('tvs', -0.55), style: 'counter', from: 0, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
-  { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 0, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.5 },
+  { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 1, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.4 },
   { t: at('stomach', 0.2), t1: at('guinness'), style: 'callout', at: 'hero.stomach', text: 'STOMACH LINING', sub: '2× THICKER', icon: 'warning', side: 1 },
   { t: at('stomach', 0.1), t1: at('guinness'), style: 'pulse', at: 'hero.stomach', beat: 70 },
   { t: at('guinness', 0.1), t1: at('ate'), style: 'wipe', text: 'GUINNESS RECORD', sub: 'STRANGEST DIET', pos: [0.5, 0.12] },
