@@ -65,15 +65,17 @@ Walk ≈ 1.45 m/s, jog/run ≈ 2.6 m/s — feet lock to distance travelled.
 inCubic outCubic inOutCubic outExpo inOutExpo outBack outElastic spring`.
 
 ### Camera moves (auto-framed on the target's eye line; `az` is relative to the target's facing, 0 = their face)
-`static · dolly-in · push · dolly-out · orbit (span°) · crane-up · crane-down · low-hero · overhead ·
+`arc (orbit + push, span°; the default when a shot has no camera) · push · dolly-in · dolly-out · orbit (span°) · rise · push-tilt · crane-up · crane-down · low-hero · overhead ·
 crash-zoom (at) · reveal · track/follow (rides beside a walking character, side: left|right) ·
-over-shoulder · dutch`.
+over-shoulder · dutch · static (still drifts ~5° + 7% push unless `lock: true`)`.
+Default ease is `cine`: the camera is already moving on the cut, then overshoots a hair and settles (follow-through). Keyed `pos/look` cameras that never move get the same slow push + drift unless `lock: true`. qa_check fails a shot whose camera moves < 4° (mark `hold: true` for a deliberate still).
 **size**: `ecu · cu · mcu · ms · mls · ws · ews` (or metres = exact frame height). `with: [x,y,z]` pans toward a second
 subject (e.g. an explosion) while keeping the actor in frame. In vertical video the eyes sit about a third down at every size, so the top fifth is free for titles.
 `crash-zoom` starts wide and lands on the asked size · `reveal` slides the subject in from the frame edge · `over-shoulder` sits behind the other person's shoulder (`over: 'castId'`, default the nearest other cast member).
 
 ### Transitions (`shot.cut` = how this shot comes in)
 `whip · zoom · spin · glitch · flash · dip · smash · blur` — motion-blurred camera moves across the cut.
+`bars` — motion-graphic wipe: accent / dark / white slanted bars sweep across and cover the cut (great on chapter turns, reveals, before/after). Use 1–3 per short.
 Use one every 2–3 cuts; hard cuts are fine in between.
 
 ### Custom animation (not limited to the library)
@@ -161,3 +163,12 @@ Keep titles in the top 25% and captions in the bottom 30%; never cover the face.
 - Clips with `loop: false` ease into their last pose (settle).
 - Reach/IK hands ease out fast and settle; with `hand: 'both'` the left hand trails by `lag` (0.07 s) so the pair never moves mirrored.
 - qa_check taste gates: RHYTHM (metronome shot lengths), GRAPHICS (two at once / > 70% coverage / > 5 styles), ACTING (camera stare > 50% of shots), SAFE ZONE (words under the YouTube UI), MORPH, OVERLAP.
+
+### Solid props (automatic)
+Every unattached `model` fx is SOLID: at load the engine samples each shot and moves an actor's mark out of any crate, barrel, rock or furniture their knees, shins, feet, hips or torso would sink into (smooth, frame-perfect; named camera moves follow). Standing/sitting ON a prop is fine; wide low props (rafts, decks, stages) are floor; big hollow props that hold the actor (boats, trees) are containers. `solid: false` on the fx opts a prop out; `solid: false` on a cast entry opts an actor out. qa_check fails `SOLID:` anything that still pokes into a prop (hands included).
+
+### Secondary motion (automatic, 12 principles)
+Actors with keyed `pos` get drag + follow-through from their own path: starting to move the upper body lags back, stopping carries it forward and settles (underdamped spring), turning makes the head lead and the chest/arms trail. `secondary: 0..2` on a cast entry scales it (`acting: 'none'` turns it off).
+
+### Motion-graphic accents (automatic)
+Every designed title (slam, stamp, burst, glitch, kinetic, letters, stat, counter, countdown, versus, steps…) gets a shape-animation layer in its accent: ring burst + speed dashes for big words, sliding corner brackets for data, an accent bar that draws on and retracts on exit. `accents: false` on a title (or `CONFIG.mgAccents = false`) turns it off. qa_check fails a short with no designed graphic for > 5 s.

@@ -5,14 +5,14 @@
 //   node review_log.js scene.html --round    → snapshots the CURRENT render into <scene>_qa/rN/ (scene + qa.json + av.json + sheet + wave);
 //                                               refuses unless qa_check + av_check were re-run on the current scene after the last round.
 //                                               Then put your own proof in rN/ (crops, motion strips, frame grabs, notes) and fill the round.
-//   node review_log.js scene.html --check C05 --status PASS|FAIL --evidence "…" --proof r1/a.png [--fix "…"]   → fill one check (safe: valid JSON, normalised ids/paths)
+//   node review_log.js scene.html --check C05 --status PASS|FAIL --evidence "…" --proof r1/a.png [--fix "…" --severity critical|major|minor]   → fill one check (safe: valid JSON, normalised ids/paths)
 //   node review_log.js scene.html --status   → the counter: what is counted per round and what is still open
 //   node review_log.js scene.html --verify   → exit 1 unless every rule below holds
 // Per check, per round: status PASS/FAIL · evidence (what + where + value) · proof: ["rN/file.png", …] (files that exist in THIS round's
 // folder and differ from last round's) · fix (what you changed, for every FAIL).
 const { TIERS, tierOf, checksFor, sceneHash } = require('./lib/review_checks');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
-const args = process.argv.slice(2), VAL = /^--(effort|check|status|evidence|proof|fix|round-n)$/;
+const args = process.argv.slice(2), VAL = /^--(effort|check|status|evidence|proof|fix|severity|round-n)$/;
 const input = args.find((a, i) => !a.startsWith('--') && !VAL.test(args[i - 1] || ''));
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined; };
 if (!input) { console.error('usage: review_log.js scene.html --init | --round | --check C05 --status PASS|FAIL --evidence "…" --proof r1/a.png[,r1/b.png] [--fix "…"] | --status | --verify [--effort standard|high|maximum]'); process.exit(1); }
@@ -23,7 +23,10 @@ const src = fs.readFileSync(input, 'utf8');
 const cfg = (() => { const a = src.indexOf('const CONFIG = {'), b = src.indexOf('END DIRECTION'); return a >= 0 ? src.slice(a, b > a ? b : a + 6000) : src; })();
 const effort = tierOf(opt('--effort') || (cfg.match(/\beffort['"]?\s*[:=]\s*['"`]([^'"`]+)['"`]/) || [])[1]);
 const T = TIERS[effort], list = checksFor(effort);
-const MIN_FOUND = { standard: 3, high: 6, maximum: 10 }[effort];   // a real review finds real problems — counted over ALL rounds, so it is never unreachable
+const MIN_FOUND = { standard: 3, high: 6, maximum: 10 }[effort];   // counts CRITICAL + MAJOR problems only — a pixel or a shoe colour is minor and never fills the quota
+const SEV = /^(critical|major|minor)$/, BODY_IDS = new Set(['C01', 'C02', 'C03', 'C04', 'C05', 'C06']);
+const QA_CAT = { C01: /^(BODY|MORPH):/, C02: /^HANDS:/, C03: /^(SOLID|OVERLAP|FEET):/, C05: /^CAMERA:/, C06: /^(MOTION GRAPHICS|GRAPHICS):/ };
+const PER_SHOT = { standard: 0, high: 0.5, maximum: 1 }[effort];   // High: a body strip for every 2nd shot · Maximum: every shot   // a real review finds real problems — counted over ALL rounds, so it is never unreachable
 const hash = (b) => crypto.createHash('sha1').update(b).digest('hex').slice(0, 16), fhash = (p) => hash(fs.readFileSync(p));
 const mt = (p) => fs.existsSync(p) ? fs.statSync(p).mtimeMs : 0;
 const load = () => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.log(`REVIEW FAIL — ${file} is not valid JSON (${e.message}). Fix the syntax, or fill checks with --check so the file is always valid.`); process.exit(1); } };
@@ -82,6 +85,8 @@ if (args.includes('--check')) {   // fill one check of the current (or --round-n
   if (opt('--evidence') !== undefined) c.evidence = opt('--evidence');
   if (opt('--proof') !== undefined) c.proof = opt('--proof').split(',').map((p) => proofRel(p.trim(), n)).filter(Boolean);
   if (opt('--fix') !== undefined) c.fix = opt('--fix');
+  if (opt('--severity') !== undefined) c.severity = String(opt('--severity')).toLowerCase();
+  if (st === 'FAIL' && !SEV.test(c.severity || '')) { c.severity = BODY_IDS.has(id) ? 'critical' : ''; if (!c.severity) { console.log('a FAIL needs --severity critical|major|minor (body, limbs, hands, props, animation, camera and motion graphics are never minor)'); process.exit(1); } }
   save(r); const done = list.filter(([x]) => statusOf(getCheck(rd, x))).length;
   console.log(`round ${n} ${id} ${st} saved · ${done}/${list.length} checks filled`);
   process.exit(0);
@@ -116,7 +121,7 @@ R.forEach((rd, i) => {
     const pb = before && getCheck(before, id);
     if (pb && norm(pb.evidence) === norm(ev)) copied++;
     const proof = proofsOf(c).map((p) => proofRel(p, n));
-    if (!proof.some((p) => !AUTO.test(path.basename(p))) && id !== 'C01') fails.push(`${where}: no proof file listed — save the crop/strip/frame grab/listening note you judged from into r${n}/ and list it (the auto snapshot files don't count)`);
+    if (!proof.some((p) => !AUTO.test(path.basename(p))) && id !== 'C07') fails.push(`${where}: no proof file listed — save the crop/strip/frame grab/listening note you judged from into r${n}/ and list it (the auto snapshot files don't count)`);
     for (const p of proof) {
       const fp = path.join(dir, p);
       if (!p.startsWith('r' + n + '/')) { fails.push(`${where}: proof "${p}" is not in this round's folder r${n}/`); continue; }
@@ -126,6 +131,10 @@ R.forEach((rd, i) => {
       if (pb && statusOf(pb) === 'FAIL' && seen.has(fhash(fp))) fails.push(`${where}: this check failed in round ${i} but proof "${p}" is identical to an earlier file — capture it again from the fixed render`);
       if (sinceT && fs.statSync(fp).mtimeMs < sinceT - 1000) fails.push(`${where}: proof "${p}" is older than round ${i} — capture it from this round's render`);
     }
+    if (st === 'FAIL' && !SEV.test(String(c.severity || '').toLowerCase())) fails.push(`${where}: FAIL without --severity critical|major|minor`);
+    if (st === 'FAIL' && BODY_IDS.has(id) && /minor/i.test(c.severity || '')) fails.push(`${where}: body/limb/hand/prop/animation/camera/motion-graphics problems are never "minor" — mark it critical or major and fix it properly`);
+    if (st === 'PASS' && QA_CAT[id]) { try { const q = JSON.parse(fs.readFileSync(path.join(rdir, 'qa.json'), 'utf8')), bad = (q.fails || []).filter((x) => QA_CAT[id].test(x)); if (bad.length) fails.push(`${where}: PASS, but this round's qa_check found ${bad.length} problem(s) for it ("${bad[0].slice(0, 90)}…") — that is a FAIL: fix the body/hands/props/camera/graphics first, tiny polish later`); } catch {} }
+    if ((id === 'C01' || id === 'C02') && PER_SHOT) { let ns = 0; try { ns = JSON.parse(fs.readFileSync(path.join(rdir, 'qa.json'), 'utf8')).shots || 0; } catch {} const need = Math.ceil(ns * PER_SHOT), have = proof.filter((p) => !AUTO.test(path.basename(p))).length; if (have < need) fails.push(`${where}: ${effort} inspects bodies/hands shot by shot — ${have} proof file(s) for ${ns} shots, need ≥ ${need} (a 12 fps strip or crop per shot)`); }
     if (st === 'FAIL') {
       const fx = String(c.fix || '').trim();
       if (fx.length < 15 || vagueFix.test(fx)) fails.push(`${where}: fix "${fx.slice(0, 40)}" is not a fix — name exactly what changed (which shot/key/value, from → to)`);
@@ -137,7 +146,7 @@ R.forEach((rd, i) => {
   if (before && rd.sceneHash !== before.sceneHash && copied > list.length * 0.6) fails.push(`round ${n}: ${copied}/${list.length} evidence texts are copied from round ${i} although the scene changed — look at THIS render`);
   tally.push(`round ${n}: ${counted}/${list.length} counted${nf ? ` · ${nf} FAIL` : ''}${fails.length > startFails ? ` · ${fails.length - startFails} issue(s)` : ''}`);
 });
-const totalFix = R.reduce((s, x) => s + list.filter(([id]) => statusOf(getCheck(x, id)) === 'FAIL').length, 0);
+const totalFix = R.reduce((s, x) => s + list.filter(([id]) => statusOf(getCheck(x, id)) === 'FAIL' && /critical|major/i.test(getCheck(x, id)?.severity || '')).length, 0);   // minor polish does not count as a found problem
 if (args.includes('--status') && !args.includes('--check')) {
   console.log(`${effort.toUpperCase()} · ${list.length} checks × ≥${T.rounds} rounds · ${R.length} round(s) logged · ${totalFix}/${MIN_FOUND} problems found\n${tally.join('\n') || 'no rounds yet'}` + (fails.length ? '\nopen:\n- ' + fails.slice(0, 60).join('\n- ') : ''));
   process.exit(0);

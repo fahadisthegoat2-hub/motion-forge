@@ -57,3 +57,9 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/render_video.js scene.html out.mp4
 ```
 Deterministic: renderer calls `__mf.render(t)` per frame — no `requestAnimationFrame`
 or `Date.now()` drift. Then check 4–6 key frames with Read before delivering.
+
+## Quantity Sir expects (he saw "not one" motion graphic)
+- A designed, ANIMATED graphic every ≤ 4–5 s of a short (qa_check MOTION GRAPHICS fails longer gaps): kinetic words, stat counters, markers, versus, countdowns, steps, callouts on the 3D world.
+- Every title automatically gets its accent shape layer (ring burst, speed dashes, data brackets, accent bar) — keep `accents` on.
+- 1–3 graphic wipes per short (`cut: 'bars'`) on chapter turns / reveals / before→after.
+- Still ONE design system (one accent, one caption style, 3–4 title styles) — more graphics, never a style salad.

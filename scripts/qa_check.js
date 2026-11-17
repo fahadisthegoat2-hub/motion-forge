@@ -2,12 +2,12 @@
 // Automatic QA for a scene — run it on EVERY video before showing anything to the user. Exit code 1 = must fix.
 // Checks: page errors · missing clips/effects/models · length vs the requested length · feet floating/sinking · hands missing their
 // reach targets · deformed wrists / hands inside the body · characters lip-syncing the narrator · sound effects with nothing on screen / too dense · a contact sheet of every shot to look at.
-// Usage: node qa_check.js scene.html [--target <seconds>] [--out dir]
+// Usage: node qa_check.js scene.html [--target <seconds>] [--out dir] [--effort standard|high|maximum]  (default: CONFIG.effort)
 const { launchBrowser, ffmpeg, startStaticServer, routeAssets } = require('./lib/deps');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2), opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
-const input = args.find((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(target|out)$/));
+const input = args.find((a, i) => !a.startsWith('--') && !(args[i - 1] || '').match(/^--(target|out|effort)$/));
 if (!input) { console.error('usage: qa_check.js scene.html [--target seconds] [--out dir]'); process.exit(1); }
 const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(out, { recursive: true });
 (async () => {
@@ -21,12 +21,15 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
   const VW = await page.evaluate(() => ((__mf.width || 1080) >= (__mf.height || 1920) ? [480, 270] : [270, 480])), CW = VW[0] > VW[1] ? 320 : 180, CH = VW[0] > VW[1] ? 180 : 320;
   await page.setViewportSize({ width: VW[0], height: VW[1] });
   await page.evaluate(([w, h]) => { document.getElementById('mf-panel')?.remove(); window.__mfManual = true; window.__mf.setSize(w, h); }, VW);
-  const info = await page.evaluate(() => ({ dur: __mf.duration, target: __mfDebug.pacing().target, shots: __mfDebug.shots() }));
+  const info = await page.evaluate(() => ({ dur: __mf.duration, target: __mfDebug.pacing().target, effort: __mfDebug.pacing().effort, shots: __mfDebug.shots(), cam: __mfDebug.camMotion ? __mfDebug.camMotion() : [] }));
+  // EFFORT = how hard the body/limb/hand/prop scan looks: standard every 0.25 s · high every 0.1 s · maximum EVERY FRAME (30 fps). Never 3 samples a shot.
+  const STEP = { standard: 0.25, good: 0.25, high: 0.1, maximum: 1 / 30, max: 1 / 30 }[opt('--effort') || info.effort] ?? 0.25;
   const target = +(opt('--target') || info.target || 0);
   if (target && Math.abs(info.dur - target) / target > 0.05) fails.push(`LENGTH: video is ${info.dur.toFixed(1)}s but ${target}s was asked (must be within 5%)`);
   const frames = [], seenBody = new Set();
   for (const sh of info.shots) {
-    for (const f of [0.2, 0.5, 0.85]) {
+    const fs0 = [...new Set([0.5, ...Array.from({ length: Math.max(3, Math.ceil(sh.dur / STEP)) }, (_, k) => (k + 0.5) / Math.max(3, Math.ceil(sh.dur / STEP)))])].sort((a, b) => a - b);
+    for (const f of fs0) {
       const t = sh.start + sh.dur * f, r = await page.evaluate((t) => __mfDebug.probe(t), t);
       if (f === 0.5) { const p = path.join(out, `shot${String(sh.i).padStart(3, '0')}.png`); await page.locator('canvas').first().screenshot({ path: p }); frames.push(p);
         for (const c of r.chars) if (c.face) { try { const o = require('child_process').spawnSync(ffmpeg(), ['-hide_banner', '-i', p, '-vf', `crop=iw*0.12:iw*0.12:iw*${Math.max(0, c.face[0] - 0.06)}:ih*${Math.max(0, c.face[1] - 0.04)},signalstats,metadata=print`, '-f', 'null', '-']).stderr.toString(), y = +((o.match(/YAVG=([\d.]+)/) || [])[1] || 128);
@@ -40,6 +43,7 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
         for (const m of c.missing) fails.push(`CLIP: ${where} uses "${m}" which doesn't exist (see SCENE_API clip list)`);
         if (c.footY !== null && !c.airborne && c.footY > 0.14) fails.push(`FEET: ${where} floats ${(c.footY * 100).toFixed(0)} cm above the ground`);
         if (c.footY !== null && c.footY < -0.06) fails.push(`FEET: ${where} sinks ${(-c.footY * 100).toFixed(0)} cm into the ground`);
+        for (const x of c.solids || []) { const k = 'S' + sh.i + c.id + x.replace(/\d+ cm/, ''); if (!seenBody.has(k)) { seenBody.add(k); fails.push(`SOLID: ${where} ${x} — limbs never go through props: move the mark, the prop or change the clip`); } }
         for (const R of c.reach) if (R.err > 0.08) fails.push(`HANDS: ${where} hand is ${(R.err * 100).toFixed(0)} cm from ${JSON.stringify(R.to)} (move the target or the character closer)`);
         for (const H of c.hands || []) {   // deformed ("morphed") hands: a wrist folded or twisted past what a real one can do, or a hand sunk into the body
           if (H.bend > 88) fails.push(`HANDS: ${where} ${H.side} wrist is folded ${H.bend}° (max ~80°) — change the gesture/clip or the hand direction`);
@@ -50,6 +54,10 @@ const out = opt('--out') || input.replace(/\.html?$/, '') + '_qa'; fs.mkdirSync(
     }
   }
   const P = await page.evaluate(() => __mfDebug.pacing());
+  for (const c of info.cam || []) if (!c.lock && c.score < 4) fails.push(`CAMERA: shot ${c.i + 1} "${c.name}" — the camera barely moves (${c.score}°): every shot needs a named move (push, arc, orbit, dolly-in, crane, track, crash-zoom…) or hold: true for a deliberate still`);
+  { const G2 = (P.titleSpans || []).filter((T) => !/^(timeline|tag|ticker)$/.test(T.style)).map((T) => T.t).sort((a, b) => a - b), gaps = [0, ...G2, P.total]; let worst = 0, at = 0; for (let i = 1; i < gaps.length; i++) if (gaps[i] - gaps[i - 1] > worst) { worst = gaps[i] - gaps[i - 1]; at = gaps[i - 1]; }
+    if (P.portrait && P.total <= 90 && worst > 5) fails.push(`MOTION GRAPHICS: no designed graphic for ${worst.toFixed(1)}s from ${at.toFixed(1)}s — a short gets an animated graphic (kinetic · stat · marker · burst · countdown · steps · versus · callout…) at least every 4–5 s`);
+    if (P.portrait && P.total <= 90 && G2.length < Math.floor(P.total / 5)) fails.push(`MOTION GRAPHICS: only ${G2.length} graphics in ${P.total.toFixed(0)}s — at least ${Math.floor(P.total / 5)} (one per beat)`); }
   for (const m of P.morphs || []) fails.push(`MORPH: ${m} blends two different postures into each other — change posture on a CUT (new shot) or use a real transition clip; never a pose blend`);
   // TASTE gates (skills/taste): rhythm that breathes, graphics with restraint, nobody staring down the lens, words inside the safe zone
   if (P.durs.length >= 6) { const m = P.durs.reduce((x, y) => x + y, 0) / P.durs.length, sd = Math.sqrt(P.durs.reduce((x, y) => x + (y - m) ** 2, 0) / P.durs.length);

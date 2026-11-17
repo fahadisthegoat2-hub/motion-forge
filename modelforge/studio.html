@@ -237,11 +237,12 @@ function makeGeo(p) {
 function buildPart(p, ctx, depth) {
   if (!p || typeof p !== 'object' || depth > 6 || ctx.count >= ctx.max) return null;
   let obj;
-  const made = p.t && p.t !== 'group' ? makeGeo(p) : null;
-  if (made) { obj = new THREE.Mesh(made.g, ctx.mat(p.m, made.open)); obj.castShadow = obj.receiveShadow = true; ctx.count++; }
+  const sc = p.t === 'sculpt' ? sculptMesh(p, ctx) : null, made = !sc && p.t && p.t !== 'group' && p.t !== 'sculpt' ? makeGeo(p) : null;
+  if (sc) obj = sc;
+  else if (made) { obj = new THREE.Mesh(made.g, ctx.mat(p.m, made.open)); obj.castShadow = obj.receiveShadow = true; ctx.count++; }
   else obj = new THREE.Group();
   if (typeof p.n === 'string') obj.name = p.n.slice(0, 60);
-  for (const c of (Array.isArray(p.children) ? p.children : [])) { const o = buildPart(c, ctx, depth + 1); if (o) obj.add(o); }
+  for (const c of (p.t !== 'sculpt' && Array.isArray(p.children) ? p.children : [])) { const o = buildPart(c, ctx, depth + 1); if (o) obj.add(o); }
   if (!made && !obj.children.length) return null;
   obj.position.set(...vec(p.p, [0, 0, 0]));
   const r = vec(p.r, [0, 0, 0]); obj.rotation.set(r[0] * D2R, r[1] * D2R, r[2] * D2R);
@@ -264,6 +265,181 @@ function buildPart(p, ctx, depth) {
     out = g;
   }
   return out;
+}
+// ---------- SCULPT: signed-distance modelling → ONE fused, smooth, carved mesh (like clay / ZBrush DynaMesh) ----------
+// {"t":"sculpt","m":"skin","res":110,"detail":{"amp":0.002,"freq":60},"children":[ primitives with "blend" (smooth-union radius, m),
+//   "op":"add"|"sub"|"int" (carve / intersect), "noise", "m" ]}. Forms melt into each other with soft creases, carving makes real
+//   sockets, mouths, grooves and holes — the result never reads as a pile of spheres and boxes.
+const _sv = new THREE.Vector3(), _m4 = new THREE.Matrix4();
+const L2 = (x, y) => Math.sqrt(x * x + y * y);
+function sdPoly(px, py, P) {   // signed distance to a closed 2D polygon (inside < 0)
+  let d = Infinity, s = 1;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const ax = P[j][0], ay = P[j][1], ex = P[i][0] - ax, ey = P[i][1] - ay, wx = px - ax, wy = py - ay;
+    const t = Math.max(0, Math.min(1, (wx * ex + wy * ey) / (ex * ex + ey * ey || 1e-12))), bx = wx - ex * t, by = wy - ey * t;
+    d = Math.min(d, bx * bx + by * by);
+    const c1 = py >= ay, c2 = py < P[i][1], c3 = ex * wy > ey * wx;
+    if ((c1 && c2 && c3) || (!c1 && !c2 && !c3)) s = -s;
+  }
+  return s * Math.sqrt(d);
+}
+function sdCappedCone(x, y, z, h, r1, r2) {   // bottom radius r1 at y=-h, top r2 at y=+h
+  const qx = L2(x, z), qy = y, k2x = r2 - r1, k2y = 2 * h;
+  const cax = qx - Math.min(qx, qy < 0 ? r1 : r2), cay = Math.abs(qy) - h;
+  const t = Math.max(0, Math.min(1, ((r2 - qx) * k2x + (h - qy) * k2y) / (k2x * k2x + k2y * k2y)));
+  const cbx = qx - r2 + k2x * t, cby = qy - h + k2y * t, s = cbx < 0 && cay < 0 ? -1 : 1;
+  return s * Math.sqrt(Math.min(cax * cax + cay * cay, cbx * cbx + cby * cby));
+}
+function sculptPrim(p) {   // → { f(x,y,z) local SDF, box: local AABB [min,max] } or null
+  const s = Array.isArray(p.s) ? p.s : (typeof p.s === 'number' ? [p.s] : []);
+  switch (p.t) {
+    case 'sphere': { const r = num(s[0], .5, 1e-4); return { f: (x, y, z) => Math.sqrt(x * x + y * y + z * z) - r, box: [[-r, -r, -r], [r, r, r]] }; }
+    case 'box': { const hx = num(s[0], 1, 1e-4) / 2, hy = num(s[1], hx * 2, 1e-4) / 2, hz = num(s[2], hx * 2, 1e-4) / 2, b = Math.min(num(p.bevel, Math.min(hx, hy, hz) * .2, 0), Math.min(hx, hy, hz) * .99);
+      return { f: (x, y, z) => { const qx = Math.abs(x) - hx + b, qy = Math.abs(y) - hy + b, qz = Math.abs(z) - hz + b; return Math.sqrt(Math.max(qx, 0) ** 2 + Math.max(qy, 0) ** 2 + Math.max(qz, 0) ** 2) + Math.min(Math.max(qx, qy, qz), 0) - b; }, box: [[-hx, -hy, -hz], [hx, hy, hz]] }; }
+    case 'cyl': case 'cone': { const cone = p.t === 'cone', rt = cone ? 0 : num(s[0], .5, 0), rb = cone ? num(s[0], .5, 0) : num(s[1], rt, 0), h = num(cone ? s[1] : s[2], 1, 1e-4) / 2, R = Math.max(rt, rb);
+      const b = Math.min(num(p.bevel, Math.min(R, h) * .12, 0), h * .9, Math.max(rt, rb) * .9);
+      return { f: (x, y, z) => sdCappedCone(x, y, z, h - b, Math.max(0, rb - b), Math.max(0, rt - b)) - b, box: [[-R, -h, -R], [R, h, R]] }; }
+    case 'capsule': { const r = num(s[0], .25, 1e-4), hl = num(s[1], 1, 0) / 2;
+      return { f: (x, y, z) => { const yy = y - Math.max(-hl, Math.min(hl, y)); return Math.sqrt(x * x + yy * yy + z * z) - r; }, box: [[-r, -hl - r, -r], [r, hl + r, r]] }; }
+    case 'torus': { const R = num(s[0], .5, 1e-4), r = num(s[1], .1, 1e-4); return { f: (x, y, z) => L2(L2(x, y) - R, z) - r, box: [[-R - r, -R - r, -r], [R + r, R + r, r]] }; }
+    case 'lathe': { let pts = pts2(p.pts); if (pts.length < 2) return null; if (pts[0][1] > pts.at(-1)[1]) pts = pts.reverse();
+      if (p.smooth !== false) pts = spline2(pts, false, 5);
+      const P = [[0, pts[0][1]], ...pts.map((q) => [Math.max(0, q[0]), q[1]]), [0, pts.at(-1)[1]]], R = Math.max(...P.map((q) => q[0])), y0 = Math.min(...P.map((q) => q[1])), y1 = Math.max(...P.map((q) => q[1]));
+      return { f: (x, y, z) => sdPoly(L2(x, z), y, P), box: [[-R, y0, -R], [R, y1, R]] }; }
+    case 'extrude': { let o = pts2(p.pts); if (o.length < 3) return null; if (p.smooth) o = spline2(o, true, 5);
+      const holes = (Array.isArray(p.holes) ? p.holes : []).slice(0, 8).map((hh) => { let q = pts2(hh); if (q.length < 3) return null; return p.smooth ? spline2(q, true, 5) : q; }).filter(Boolean);
+      const hd = num(p.depth, .1, 1e-4) / 2, b = Math.min(num(p.bevel, hd * .25, 0), hd * .9), xs = o.map((q) => q[0]), ys = o.map((q) => q[1]);
+      return { f: (x, y, z) => { let d2 = sdPoly(x, y, o); for (const hp of holes) d2 = Math.max(d2, -sdPoly(x, y, hp)); const wx = d2 + b, wy = Math.abs(z) - hd + b; return Math.min(Math.max(wx, wy), 0) + L2(Math.max(wx, 0), Math.max(wy, 0)) - b; },
+        box: [[Math.min(...xs), Math.min(...ys), -hd], [Math.max(...xs), Math.max(...ys), hd]] }; }
+    case 'tube': { const raw = (Array.isArray(p.path) ? p.path : []).slice(0, 64).filter(Array.isArray).map((a) => new THREE.Vector3(...vec(a, [0, 0, 0]))); if (raw.length < 2) return null;
+      const curve = new THREE.CatmullRomCurve3(raw, !!p.closed, 'centripetal'), N = Math.min(96, Math.max(6, raw.length * 6)), Q = curve.getSpacedPoints(N);
+      const radii = Array.isArray(p.radii) && p.radii.length ? p.radii.map((v) => num(v, .05, 0)) : [num(p.radius, .05, 0)];
+      const rad = (t) => { if (radii.length === 1) return radii[0]; const f = t * (radii.length - 1), i = Math.min(radii.length - 2, Math.floor(f)); return radii[i] + (radii[i + 1] - radii[i]) * (f - i); };
+      const S = []; for (let i = 0; i < N; i++) { const a = Q[i], c = Q[i + 1], ra = rad(i / N), rc = rad((i + 1) / N), m = Math.max(ra, rc);
+        S.push([a.x, a.y, a.z, c.x - a.x, c.y - a.y, c.z - a.z, ra, rc, Math.min(a.x, c.x) - m, Math.min(a.y, c.y) - m, Math.min(a.z, c.z) - m, Math.max(a.x, c.x) + m, Math.max(a.y, c.y) + m, Math.max(a.z, c.z) + m]); }
+      const Rm = Math.max(...radii), mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity]; Q.forEach((q) => { mn[0] = Math.min(mn[0], q.x - Rm); mn[1] = Math.min(mn[1], q.y - Rm); mn[2] = Math.min(mn[2], q.z - Rm); mx[0] = Math.max(mx[0], q.x + Rm); mx[1] = Math.max(mx[1], q.y + Rm); mx[2] = Math.max(mx[2], q.z + Rm); });
+      return { f: (x, y, z) => { let d = Infinity;
+        for (const g of S) { const ex = Math.max(g[8] - x, 0, x - g[11]), ey = Math.max(g[9] - y, 0, y - g[12]), ez = Math.max(g[10] - z, 0, z - g[13]); if (ex * ex + ey * ey + ez * ez > d * d) continue;
+          const wx = x - g[0], wy = y - g[1], wz = z - g[2], bb = g[3] * g[3] + g[4] * g[4] + g[5] * g[5] || 1e-12, t = Math.max(0, Math.min(1, (wx * g[3] + wy * g[4] + wz * g[5]) / bb));
+          const dx = wx - g[3] * t, dy = wy - g[4] * t, dz = wz - g[5] * t, v = Math.sqrt(dx * dx + dy * dy + dz * dz) - (g[6] + (g[7] - g[6]) * t); if (v < d) d = v; }
+        return d; }, box: [mn, mx] }; }
+  }
+  return null;
+}
+function sculptFlatten(list, parentM, out, depth) {   // children → flat primitive list with sculpt-space matrices (mirror / repeat / nesting)
+  for (const p of (Array.isArray(list) ? list : [])) {
+    if (!p || typeof p !== 'object' || depth > 5 || out.length > 400) continue;
+    const r = vec(p.r, [0, 0, 0]), M = new THREE.Matrix4().compose(new THREE.Vector3(...vec(p.p, [0, 0, 0])), new THREE.Quaternion().setFromEuler(new THREE.Euler(r[0] * D2R, r[1] * D2R, r[2] * D2R)), new THREE.Vector3(...vec(p.sc, [1, 1, 1]).map((v) => Math.abs(v) < 1e-4 ? 1e-4 : v)));
+    const copies = [new THREE.Matrix4()], rp = p.repeat;
+    if (rp && typeof rp === 'object') { const n = Math.round(num(rp.n, 1, 1, 48));
+      for (let i = 1; i < n; i++) { if (Array.isArray(rp.step)) { const st = vec(rp.step, [0, 0, 0]); copies.push(new THREE.Matrix4().makeTranslation(st[0] * i, st[1] * i, st[2] * i)); }
+        else { const ax = rp.axis === 'x' || rp.axis === 'z' ? rp.axis : 'y', a = num(rp.angle, 360, -360, 360) * D2R * i / (rp.angle && Math.abs(rp.angle) < 360 ? Math.max(1, n - 1) : n);
+          copies.push(ax === 'x' ? new THREE.Matrix4().makeRotationX(a) : ax === 'z' ? new THREE.Matrix4().makeRotationZ(a) : new THREE.Matrix4().makeRotationY(a)); } } }
+    const mir = p.mirror === 'x' || p.mirror === 'y' || p.mirror === 'z' ? [new THREE.Matrix4(), new THREE.Matrix4().makeScale(p.mirror === 'x' ? -1 : 1, p.mirror === 'y' ? -1 : 1, p.mirror === 'z' ? -1 : 1)] : [new THREE.Matrix4()];
+    for (const C of copies) for (const Mi of mir) {
+      const W = parentM.clone().multiply(Mi).multiply(C).multiply(M);
+      const prim = p.t && p.t !== 'group' ? sculptPrim(p) : null;
+      if (prim) { const inv = W.clone().invert(), e = W.elements, sc = Math.min(Math.hypot(e[0], e[1], e[2]), Math.hypot(e[4], e[5], e[6]), Math.hypot(e[8], e[9], e[10]));
+        const bb = new THREE.Box3(new THREE.Vector3(...prim.box[0]), new THREE.Vector3(...prim.box[1])), size = bb.getSize(new THREE.Vector3()).length() / 2;
+        const nz = p.noise && typeof p.noise === 'object' ? { amp: num(p.noise.amp, .03, 0, .5) * size * sc, f: num(p.noise.freq, 3, .1, 60) / Math.max(1e-4, size * sc), seed: num(p.noise.seed, 0) } : null;
+        const op = p.op === 'sub' || p.op === 'int' ? p.op : 'add', k = num(p.blend, op === 'add' ? .012 : .004, 0, 1);
+        bb.applyMatrix4(W); bb.expandByScalar(k + (nz ? nz.amp * 1.2 : 0));
+        out.push({ f: prim.f, ie: inv.elements, sc, op, k, m: typeof p.m === 'string' ? p.m : null, nz, bb: [bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z] }); }
+      if (Array.isArray(p.children)) sculptFlatten(p.children, W, out, depth + 1);
+    }
+  }
+  return out;
+}
+function sculptField(prims, det) {
+  const nAdd = prims.filter((q) => q.op === 'add').length;
+  const local = (q, x, y, z) => { const e = q.ie, lx = e[0] * x + e[4] * y + e[8] * z + e[12], ly = e[1] * x + e[5] * y + e[9] * z + e[13], lz = e[2] * x + e[6] * y + e[10] * z + e[14];
+    let d = q.f(lx, ly, lz) * q.sc; if (q.nz) d += (fbm(x * q.nz.f + q.nz.seed, y * q.nz.f + q.nz.seed * 1.7, z * q.nz.f - q.nz.seed) * 2 - 1) * q.nz.amp; return d; };
+  const boxD = (q, x, y, z) => { const b = q.bb, dx = Math.max(b[0] - x, 0, x - b[3]), dy = Math.max(b[1] - y, 0, y - b[4]), dz = Math.max(b[2] - z, 0, z - b[5]); return Math.sqrt(dx * dx + dy * dy + dz * dz); };
+  const F = (x, y, z, wantMat) => {
+    let d = 1e9, best = null, bestD = 1e9, carve = null;
+    for (const q of prims) {
+      if (q.op === 'add') { const bd = boxD(q, x, y, z); if (bd > d + q.k && bd > 0) { continue; }
+        const di = local(q, x, y, z); if (di < bestD) { bestD = di; best = q; }
+        const k = q.k; if (k > 1e-6) { const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (d - di) / k)); d = d + (di - d) * h - k * h * (1 - h); } else d = Math.min(d, di);
+      } else { const bd = boxD(q, x, y, z); if (q.op === 'sub' && bd > q.k - d && bd > 0) continue;
+        const di = local(q, x, y, z), k = q.k, a = q.op === 'sub' ? -di : di;
+        if (k > 1e-6) { const h = Math.max(0, Math.min(1, 0.5 - 0.5 * (a - d) / k)); const nd = a + (d - a) * h + k * h * (1 - h); if (wantMat && q.op === 'sub' && q.m && nd > d + 1e-6 && Math.abs(di) < k + 1e-3) carve = q; d = nd; }
+        else { if (wantMat && q.op === 'sub' && q.m && a > d) carve = q; d = Math.max(d, a); } }
+    }
+    if (det) d += (fbm(x * det.f + 3.1, y * det.f + 7.7, z * det.f + 1.3) * 2 - 1) * det.amp;
+    return wantMat ? [d, (carve || best || {}).m] : d;
+  };
+  F.nAdd = nAdd;
+  F.weights = (x, y, z, h) => {   // soft material mix at a surface point: nearby primitives blend their colours over their blend radius
+    const W = new Map(); let dmin = 1e9; const ds = [];
+    for (const q of prims) { if (!q.m && q.op !== 'add') continue; if (q.op === 'int') continue; const bd = boxD(q, x, y, z); if (bd > dmin + q.k * 3 + h * 2) continue; const di = Math.abs(local(q, x, y, z)); ds.push([q, di]); if (q.op === 'add') dmin = Math.min(dmin, di); }
+    for (const [q, di] of ds) { const r = Math.max(h * 0.9, q.k * 0.4), u = Math.max(0, di - (q.op === 'add' ? dmin : 0)) / r, w = Math.exp(-u * u) * (q.op === 'sub' ? 12 : 1); if (w < 1e-3) continue; W.set(q.m, (W.get(q.m) || 0) + w); }
+    return W; };
+  return F;
+}
+function sculptMesh(p, ctx) {   // → THREE.Group of fused meshes (one per material), vertex AO baked into colours
+  const prims = sculptFlatten(p.children, new THREE.Matrix4(), [], 0); if (!prims.some((q) => q.op === 'add')) return null;
+  const bb = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+  for (const q of prims) if (q.op === 'add') for (let i = 0; i < 3; i++) { bb[i] = Math.min(bb[i], q.bb[i]); bb[i + 3] = Math.max(bb[i + 3], q.bb[i + 3]); }
+  const ext = Math.max(bb[3] - bb[0], bb[4] - bb[1], bb[5] - bb[2]);
+  const det = p.detail && typeof p.detail === 'object' ? { amp: num(p.detail.amp, .002, 0, .2) , f: num(p.detail.freq, 40, 1, 400) } : null;
+  const F = sculptField(prims, det);
+  const res = Math.round(Math.min(200, Math.max(40, num(p.res, 110, 40, 200) * (ctx.res || 1)))), h = ext / res, pad = 2;
+  const nx = Math.ceil((bb[3] - bb[0]) / h) + pad * 2 + 1, ny = Math.ceil((bb[4] - bb[1]) / h) + pad * 2 + 1, nz = Math.ceil((bb[5] - bb[2]) / h) + pad * 2 + 1;
+  const ox = bb[0] - pad * h, oy = bb[1] - pad * h, oz = bb[2] - pad * h, V = new Float32Array(nx * ny * nz), id = (i, j, k) => i + nx * (j + ny * k);
+  // sparse evaluation: 4×4×4 blocks far from the surface are filled with their centre sign
+  const B = 4, rB = h * B * 0.9 * 1.5;
+  for (let bk = 0; bk < nz; bk += B) for (let bj = 0; bj < ny; bj += B) for (let bi = 0; bi < nx; bi += B) {
+    const cx = ox + (bi + B / 2) * h, cy = oy + (bj + B / 2) * h, cz = oz + (bk + B / 2) * h, dc = F(cx, cy, cz), far = Math.abs(dc) > rB;
+    for (let k = bk; k < Math.min(nz, bk + B); k++) for (let j = bj; j < Math.min(ny, bj + B); j++) for (let i = bi; i < Math.min(nx, bi + B); i++)
+      V[id(i, j, k)] = far ? dc : F(ox + i * h, oy + j * h, oz + k * h);
+  }
+  // naive surface nets: one vertex per sign-changing cell (edge-crossing average, then projected onto the surface), quads across edges
+  const vidx = new Int32Array(nx * ny * nz).fill(-1), pos = [], E = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+  const co = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1]], cv = new Float32Array(8);
+  for (let k = 0; k < nz - 1; k++) for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+    let m = 0; for (let c = 0; c < 8; c++) { cv[c] = V[id(i + co[c][0], j + co[c][1], k + co[c][2])]; if (cv[c] < 0) m |= 1 << c; }
+    if (m === 0 || m === 255) continue;
+    let sx = 0, sy = 0, sz = 0, n = 0;
+    for (const [a, b] of E) { const va = cv[a], vb = cv[b]; if ((va < 0) === (vb < 0)) continue; const t = va / (va - vb);
+      sx += co[a][0] + (co[b][0] - co[a][0]) * t; sy += co[a][1] + (co[b][1] - co[a][1]) * t; sz += co[a][2] + (co[b][2] - co[a][2]) * t; n++; }
+    vidx[id(i, j, k)] = pos.length / 3; pos.push(ox + (i + sx / n) * h, oy + (j + sy / n) * h, oz + (k + sz / n) * h);
+  }
+  const idx = [];
+  for (let k = 1; k < nz - 1; k++) for (let j = 1; j < ny - 1; j++) for (let i = 1; i < nx - 1; i++) {
+    const v0 = V[id(i, j, k)] < 0;
+    if (i < nx - 1 && v0 !== (V[id(i + 1, j, k)] < 0)) { const a = vidx[id(i, j - 1, k - 1)], b = vidx[id(i, j, k - 1)], c = vidx[id(i, j, k)], d = vidx[id(i, j - 1, k)]; if (a >= 0 && b >= 0 && c >= 0 && d >= 0) v0 ? idx.push(a, b, c, a, c, d) : idx.push(a, c, b, a, d, c); }
+    if (j < ny - 1 && v0 !== (V[id(i, j + 1, k)] < 0)) { const a = vidx[id(i - 1, j, k - 1)], b = vidx[id(i, j, k - 1)], c = vidx[id(i, j, k)], d = vidx[id(i - 1, j, k)]; if (a >= 0 && b >= 0 && c >= 0 && d >= 0) v0 ? idx.push(a, c, b, a, d, c) : idx.push(a, b, c, a, c, d); }
+    if (k < nz - 1 && v0 !== (V[id(i, j, k + 1)] < 0)) { const a = vidx[id(i - 1, j - 1, k)], b = vidx[id(i, j - 1, k)], c = vidx[id(i, j, k)], d = vidx[id(i - 1, j, k)]; if (a >= 0 && b >= 0 && c >= 0 && d >= 0) v0 ? idx.push(a, b, c, a, c, d) : idx.push(a, c, b, a, d, c); }
+  }
+  if (!idx.length) return null;
+  // project onto the true surface, normals from the field gradient, cavity AO + material per vertex
+  const nv = pos.length / 3, nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3), mats = new Array(nv), e = h * 0.5;
+  for (let v = 0; v < nv; v++) {
+    let x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
+    for (let it = 0; it < 2; it++) { const d = F(x, y, z), gx = F(x + e, y, z) - F(x - e, y, z), gy = F(x, y + e, z) - F(x, y - e, z), gz = F(x, y, z + e) - F(x, y, z - e), gl = Math.hypot(gx, gy, gz) / (2 * e) || 1;
+      const st = Math.max(-h, Math.min(h, d / gl)); x -= gx / (2 * e) / gl * st; y -= gy / (2 * e) / gl * st; z -= gz / (2 * e) / gl * st; }
+    pos[v * 3] = x; pos[v * 3 + 1] = y; pos[v * 3 + 2] = z;
+    let gx = F(x + e, y, z) - F(x - e, y, z), gy = F(x, y + e, z) - F(x, y - e, z), gz = F(x, y, z + e) - F(x, y, z - e); const gl = Math.hypot(gx, gy, gz) || 1; gx /= gl; gy /= gl; gz /= gl;
+    nor[v * 3] = gx; nor[v * 3 + 1] = gy; nor[v * 3 + 2] = gz;
+    let ao = 0, w = 0.5; for (let s = 1; s <= 5; s++) { const dd = s * h * 1.6; ao += w * Math.max(0, dd - F(x + gx * dd, y + gy * dd, z + gz * dd)) / dd; w *= 0.6; }
+    const a = Math.max(0.35, 1 - ao * 1.1); mats[v] = F(x, y, z, true)[1] || p.m;
+    let cr = 0, cg = 0, cb = 0, tw = 0; for (const [m, w] of F.weights(x, y, z, h)) { const c = ctx.mat(m || p.m, false).color; cr += c.r * w; cg += c.g * w; cb += c.b * w; tw += w; }
+    if (!tw) { const c = ctx.mat(mats[v], false).color; cr = c.r; cg = c.g; cb = c.b; tw = 1; }
+    col[v * 3] = cr / tw * a; col[v * 3 + 1] = cg / tw * a; col[v * 3 + 2] = cb / tw * a;
+  }
+  const groups = new Map();
+  for (let t = 0; t < idx.length; t += 3) { const a = idx[t], b = idx[t + 1], c = idx[t + 2], m = mats[a] === mats[b] || mats[a] === mats[c] ? mats[a] : mats[b] === mats[c] ? mats[b] : mats[a];
+    (groups.get(m) || groups.set(m, []).get(m)).push(a, b, c); }
+  const G = new THREE.Group(), P32 = new THREE.Float32BufferAttribute(pos, 3), N32 = new THREE.BufferAttribute(nor, 3), C32 = new THREE.BufferAttribute(col, 3);
+  for (const [m, list] of groups) {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', P32); g.setAttribute('normal', N32); g.setAttribute('color', C32); g.setIndex(list);
+    boxUV(g);
+    const base = ctx.mat(m || p.m, false), mat = base.clone(); mat.vertexColors = true; mat.color.set(0xffffff);   // albedo lives in the blended vertex colours
+    const mesh = new THREE.Mesh(g, mat); mesh.castShadow = mesh.receiveShadow = true; mesh.name = (p.n || 'sculpt') + ':' + (m || ''); G.add(mesh); ctx.count++;
+  }
+  G.userData.tris = idx.length / 3;
+  return G;
 }
 function buildModel(spec, ctx) {
   const root = new THREE.Group(); ctx.count = 0; ctx.max = ctx.max || 600;
@@ -383,7 +559,7 @@ function disposeModel() {
 }
 function showSpec(spec) {
   disposeModel(); cur = spec;
-  const ctx = { mat: matFactory(spec.materials), max: 600 };
+  const ctx = { mat: matFactory(spec.materials), max: 600, res: { draft: .7, std: 1, high: 1.45 }[typeof detail === 'string' ? detail : 'std'] || 1 };
   const root = buildModel(spec, ctx);
   root.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(root);
@@ -432,17 +608,20 @@ TYPES:
  lathe    "pts":[[radius,y],...] bottom to top, revolved around Y; "smooth":true (default, spline) or false (hard edges). Start and end at radius 0 for a closed solid. USE THIS for anything round: bottles, vases, wheels, pommels, barrels, lamp shades, heads, bowls, bells, nozzles.
  extrude  "pts":[[x,y],...] closed 2D outline in the XY plane, "depth" along Z (centred), "bevel", "smooth":true for curvy outlines, "holes":[[[x,y],...]]. USE THIS for blades, plates, gears, brackets, wings, fins, leaves, letters-as-shapes, any flat profiled part.
  tube     "path":[[x,y,z],...] smooth curve, "radius" or "radii":[r0,r1,...] along the path (taper to 0 for pointed/rounded tips), "closed":true for loops. USE THIS for handles, cables, pipes, limbs, tails, horns, straps, branches, rails.
+ sculpt   THE MAIN TOOL for real models. "children":[primitives] are fused into ONE smooth mesh (signed-distance sculpting, like clay/ZBrush): each child adds "blend" (smooth-union radius in metres, e.g. 0.005-0.04: how softly it melts into what came before), "op":"add"(default)|"sub"(carve: sockets, mouths, nostrils, grooves, holes, panel lines, cut-outs)|"int"(intersect), its own "m" (colours blend smoothly across the surface), "noise". Sculpt fields: "m" default material, "res" 60-160 (voxel resolution; 110 default, 140+ for fine faces), "detail":{"amp":0.0005-0.004,"freq":40-200} (skin pores, hammered metal, stone grain). Children can be sphere/box/cyl/cone/capsule/torus/lathe/extrude/tube with p/r/sc/mirror/repeat/nested children. Details smaller than ~1/150 of the model vanish inside a sculpt: put tiny crisp parts (screws, rivets, glass eyes, text plates, thin wires) as normal parts outside it.
  group    only "children" (plus transform/mirror/repeat).
 
 QUALITY BAR:
+- REAL MODELS, NOT PRIMITIVE STACKS: every main form is a "sculpt" group — creatures, people, food, plants, rocks, furniture, shoes, bags, vehicle bodies, weapons' grips and blades, buildings' organic parts. Overlap children generously with blend 0.5-3 cm so they melt into one surface; then CARVE (op:"sub") the secondary forms: eye sockets, mouth line, nostrils, finger separations, panel gaps, grooves, vents, wear dents. A sculpt with only "add" children is unfinished.
+- Build like a 3D artist: big form → secondary forms (muscle masses, folds, bevels, rims) → carved detail → crisp separate small parts. Anatomy and proportion from real reference. Asymmetry and wear where real things have them.
 - Prefer lathe/extrude/tube with 8-20 well-placed points over stacks of boxes. Boxes only for genuinely boxy parts.
 - Parts must touch or slightly overlap their neighbours (no floating gaps, no z-fighting: never put two faces exactly coplanar; offset by 1-2 mm).
 - Add the details that sell realism: rims, lips, seams, rivets/screws (repeat), bands, grooves (thin dark rings), buttons, vents, stitching, feet, wear plates, fasteners, labels as plain shapes.
 - Thickness everywhere: edges of plates, glass walls, rims.
-- Organic subjects: build from tapered tubes, scaled spheres and smooth lathes with gentle noise; overlap forms generously so they read as one body.
+- Organic subjects: ALWAYS one sculpt (never loose spheres/tubes), with carved features and a detail texture.
 - No real brand logos, no text.
 - Every "m" must exist in "materials". Numbers only (no expressions). Max 3 decimals.`;
-const DETAIL = { draft: { parts: '25-45', tier: 'default' }, std: { parts: '60-100', tier: 'default' }, high: { parts: '110-170', tier: 'complex' } };
+const DETAIL = { draft: { parts: '25-45', tier: 'default' }, std: { parts: '60-100', tier: 'complex' }, high: { parts: '110-170', tier: 'complex' } };
 let detail = 'std', refFile = null, sample = null, db = null, downloads = null, ctl = null, selId = null;
 const note = t => { $('note').textContent = t || ''; };
 const ERR = { not_granted: 'Allow this page to use Claude to generate models.', rate_limited: 'Usage limit reached — try again in a bit.', refused: 'Claude declined that request. Try a different description.', session_expired: 'Please sign in again.', image_rejected: 'That image could not be used — try another file.', images_unavailable: 'Images are not available here — try text only.', prompt_too_large: 'Too much text — shorten the description.' };
@@ -472,15 +651,26 @@ $('go').onclick = () => {
     (refFile ? '\n\nA reference image is attached: match its shape, proportions, colours and materials as closely as the part types allow. Model only the main subject, not the background.' : '');
   run(ask, refFile ? [refFile] : null, d.tier, 'Forging your model…', txt || 'From image');
 };
-function refineRun(instr, withRender) {
+// How much a new spec really differs from the old one (0..1): parts added/removed/changed, by value. Improvements must be VISIBLE.
+function specChange(a, b) {
+  const flat = (sp) => { const out = []; const walk = (L) => (Array.isArray(L) ? L : []).forEach((p) => { if (!p || typeof p !== 'object') return; const { children, ...rest } = p; out.push(JSON.stringify(rest, (k, v) => typeof v === 'number' ? Math.round(v * 200) / 200 : v)); walk(children); }); walk(sp && sp.parts); return out; };
+  const A = flat(a), B = flat(b), m = new Map(); A.forEach((x) => m.set(x, (m.get(x) || 0) + 1)); let same = 0; for (const x of B) { const n = m.get(x) || 0; if (n) { m.set(x, n - 1); same++; } }
+  return 1 - same / Math.max(1, Math.max(A.length, B.length));
+}
+const UPGRADE = 'This is an UPGRADE, not a tweak: the result must look clearly better at first glance. Find the 3 weakest areas (blobby or primitive-looking forms, missing carved detail, wrong proportions, flat materials) and REBUILD them — convert loose primitive stacks into fused "sculpt" groups with carved (op:"sub") secondary forms, add the real-world details a 3D artist would, improve materials. Change or add at least 35% of the parts. Keep the subject and what already works.';
+function snap(az) { const p0 = camera.position.clone(), t = controls.target.clone(), r = p0.clone().sub(t); r.applyAxisAngle(new THREE.Vector3(0, 1, 0), az); camera.position.copy(t).add(r); camera.lookAt(t); renderer.render(scene, camera);
+  return new Promise((res) => renderer.domElement.toBlob((b) => { camera.position.copy(p0); camera.lookAt(t); renderer.render(scene, camera); res(b); }, 'image/jpeg', .85)); }
+async function refineRun(instr, withRender) {
   if (!cur) return;
-  const ask = RULES + '\n\nCURRENT MODEL SPEC:\n' + JSON.stringify(cur).slice(0, 120000) + '\n\nTASK: ' + instr + '\nReturn the COMPLETE updated spec (all parts, not a diff).';
-  if (!withRender) return run(ask, null, 'default', 'Applying changes…', instr);
-  renderer.render(scene, camera);
-  renderer.domElement.toBlob(b => run(ask, b ? [b] : null, DETAIL.high.tier, 'Enhancing…', 'Auto-enhance'), 'image/jpeg', .85);
+  const before = cur, ask = (extra) => RULES + '\n\nCURRENT MODEL SPEC:\n' + JSON.stringify(cur).slice(0, 120000) + '\n\nTASK: ' + instr + '\n' + UPGRADE + (extra || '') + '\nReturn the COMPLETE updated spec (all parts, not a diff).';
+  const imgs = withRender ? (await Promise.all([snap(0), snap(Math.PI / 2)])).filter(Boolean) : null;
+  await run(ask(withRender ? '\nTwo renders of the current model are attached (front three-quarter and side).' : ''), imgs, withRender ? DETAIL.high.tier : 'complex', withRender ? 'Enhancing…' : 'Upgrading…', withRender ? 'Auto-enhance' : instr);
+  if (cur !== before) { const ch = specChange(before, cur);
+    if (ch < 0.25) { const mid = cur; await run(ask(`\nYOUR LAST ATTEMPT CHANGED ONLY ${Math.round(ch * 100)}% OF THE MODEL — that is invisible to the user. Go much further this time.`), imgs, 'complex', 'Pushing the upgrade further…', withRender ? 'Auto-enhance+' : instr + ' +');
+      if (cur === mid) note('Upgrade was small (' + Math.round(ch * 100) + '% changed) — tap Auto-enhance again for a bigger rebuild.'); } }
 }
 $('bRefine').onclick = () => { const t = $('refine').value.trim(); if (t) { refineRun(t, false); $('refine').value = ''; } };
-$('bEnh').onclick = () => refineRun('The attached image is a render of the current spec. Critique it like an art director, then fix it: correct wrong proportions, floating or intersecting parts, flat or boxy forms (replace with lathe/extrude/tube), and add 20-40 more realistic detail parts and better material variety. Keep what already works.', true);
+$('bEnh').onclick = () => refineRun('Critique the attached renders like a senior art director at a AAA studio, then fix everything: wrong proportions or anatomy, floating or intersecting parts, anything that still reads as stacked spheres/boxes/cylinders (rebuild it as a fused sculpt with carved detail), missing secondary forms and wear, flat or unrealistic materials. Add 20-40 meaningful detail parts or carves.', true);
 $('detail').onclick = e => { const b = e.target.closest('button'); if (!b) return; detail = b.dataset.d; [...$('detail').children].forEach(x => x.classList.toggle('on', x === b)); };
 
 // reference image

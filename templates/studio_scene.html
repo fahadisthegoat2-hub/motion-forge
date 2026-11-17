@@ -111,6 +111,7 @@ const EASE = {
   outBack: (x) => 1 + 2.15 * (x - 1) ** 3 + 1.15 * (x - 1) ** 2,   // small, quick overshoot (designed, not cartoon bounce)
   outElastic: (x) => x === 0 ? 0 : x === 1 ? 1 : 2 ** (-10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI / 3)) + 1,
   spring: (x) => 1 - Math.exp(-7 * x) * Math.cos(6.5 * x),
+  cine: (x) => 0.5 * (-(Math.cos(Math.PI * x) - 1) / 2) + 0.5 * (1 + 1.6 * (x - 1) ** 3 + 0.6 * (x - 1) ** 2),   // camera default: already moving on the cut, small overshoot + settle (follow-through)
 };
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
@@ -689,6 +690,7 @@ function drawCaptions(t, w, h) {
     }
   }
   drawTitles(t, w, h);
+  drawWipes(g, t, w, h);
   capTex.needsUpdate = true;
 }
 
@@ -1213,7 +1215,43 @@ function drawTitles(t, w, h, list = (typeof TITLES !== 'undefined' ? TITLES : []
         for (let x = 0; x < w; x += w / 18) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, yy); g.stroke(); } for (let y = 0; y < yy; y += w / 18) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
         g.restore(); break; }
     }
+    if (T.accents !== false && CONFIG.mgAccents !== false && !MG_SKIP.has(st) && lt >= 0) mgAccents(g, T, X, Y, size, acc, lt, po, w, h);
     g.restore();
+  }
+}
+/* motion-graphics ACCENTS: every designed title gets a shape-animation layer in the video accent — ring burst + speed dashes for
+   big words, sliding corner brackets for data, an accent bar that draws on and retracts on exit. One family, timed to the entrance. */
+const MG_SKIP = new Set([...ANCHORED, 'timeline', 'tag', 'ticker', 'scan', 'speedlines', 'box', 'zoomthrough', 'place', 'chapter', 'lower-third', 'cta', 'quote', 'inset', 'chart', 'bars', 'list', 'card', 'underline', 'marker', 'wipe']);
+const MG_DATA = new Set(['stat', 'counter', 'countdown', 'versus', 'steps', 'meter', 'ring', 'icon']);
+function mgAccents(g, T, X, Y, size, acc, lt, po, w, h) {
+  const lines = String(T.text || T.value || '').split('\n'); g.save(); g.font = `900 ${size}px ${FONT}`;
+  const tw = Math.min(w * 0.9, Math.max(size * 2, ...lines.map((l) => g.measureText(l).width))), th = size * 1.1 * lines.length, seed = hash(T.t * 7.31), data = MG_DATA.has(T.style);
+  g.strokeStyle = acc; g.fillStyle = acc; g.lineCap = 'round';
+  if (!data) {
+    const k = clamp(lt / 0.5); if (k < 1) { const e = EASE.outExpo(k);   // ring burst
+      g.save(); g.globalAlpha *= (1 - k) * 0.9; g.lineWidth = Math.max(1.5, size * 0.07 * (1 - k)); g.beginPath(); g.ellipse(X, Y, tw * 0.35 + tw * 0.45 * e, th * 0.6 + size * 1.6 * e, 0, 0, Math.PI * 2); g.stroke(); g.restore(); }
+    const d = clamp((lt - 0.03) / 0.42); if (d < 1) { const e = EASE.outExpo(d);   // speed dashes
+      g.save(); g.globalAlpha *= 1 - d * d; g.lineWidth = Math.max(2, size * 0.06);
+      for (let i = 0; i < 9; i++) { const a = seed * 6.28 + i * 6.28 / 9 + (hash(i + seed * 13) - 0.5) * 0.4, r0 = tw * 0.42 + size * 0.5 * e, r1 = r0 + size * (0.35 + 0.6 * hash(i * 3.3 + seed)) * (1 - d);
+        g.beginPath(); g.moveTo(X + Math.cos(a) * r0, Y + Math.sin(a) * r0 * 0.55); g.lineTo(X + Math.cos(a) * r1, Y + Math.sin(a) * r1 * 0.55); g.stroke(); } g.restore(); }
+  } else {   // brackets slide in to frame the number
+    const e = EASE.outBack(clamp((lt - 0.05) / 0.35)), bw = tw / 2 + size * (0.25 + 0.5 * (1 - e)), bh = th / 2 + size * 0.2, L = size * 0.32;
+    g.save(); g.globalAlpha *= clamp((lt - 0.05) / 0.12); g.lineWidth = Math.max(2, size * 0.06);
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) { g.beginPath(); g.moveTo(X + sx * bw, Y + sy * (bh - L)); g.lineTo(X + sx * bw, Y + sy * bh); g.lineTo(X + sx * (bw - L), Y + sy * bh); g.stroke(); }
+    g.restore();
+  }
+  const b = EASE.outExpo(clamp((lt - 0.12) / 0.4)) * (1 - EASE.inCubic(po)), bw2 = tw * 0.62 * b;   // accent bar draws on, retracts on exit
+  if (bw2 > 1) { g.save(); g.fillRect(X - bw2 / 2, Y + th / 2 + size * 0.18, bw2, Math.max(3, size * 0.07)); g.restore(); }
+  g.restore();
+}
+/* graphic WIPE transition (shot.cut: 'bars'): accent + dark + white bars sweep across and cover the cut */
+function drawWipes(g, t, w, h) {
+  let acc0 = 0;
+  for (let i = 0; i < SHOTS.length; i++) { const tb = acc0; acc0 += SHOTS[i].dur; if (!i || !/^(bars|mg)$/.test(SHOTS[i].cut || '')) continue;
+    const u = (t - (tb - 0.3)) / 0.6; if (u <= 0 || u >= 1) continue;
+    const cols = [ACCENT, '#0d0f14', '#f4f4f2', ACCENT], sk = w * 0.15, bw = w * 2.2, E0 = -0.18 + 1.18 * EASE.inOutSine(u);   // at the cut (u = 0.5) the top bar covers the whole frame
+    cols.forEach((c, k) => { const E = Math.max(0, E0 + 0.135 + (3 - k) * 0.045), x = (w + sk) - E * (w + sk + bw);
+      g.save(); g.fillStyle = c; g.beginPath(); g.moveTo(x + sk, 0); g.lineTo(x + bw + sk, 0); g.lineTo(x + bw, h); g.lineTo(x, h); g.closePath(); g.fill(); g.restore(); });
   }
 }
 
@@ -1877,6 +1915,21 @@ function life(ch, cast, t, tGlobal, camPosAt) {
   rotateInRootSpace(ch, B.leftshoulder, 0, 0, 0.016 * br); rotateInRootSpace(ch, B.rightshoulder, 0, 0, -0.016 * br);
   // weight shift / sway (slow, subtle)
   rotateInRootSpace(ch, B.hips, 0, 0.03 * fbm(tGlobal * 0.25, seed), 0.018 * fbm(tGlobal * 0.2, seed + 3));
+  // 12 PRINCIPLES layer (deterministic, from the keyed path): drag + follow-through + overlapping action + anticipation.
+  // Starting to move → the upper body lags back; stopping → it carries forward, overshoots and settles (underdamped spring);
+  // turning → the head leads (anticipation), the chest follows late (drag). acting: 'none' or cast.secondary: 0 turns it off.
+  if (cast?.pos && cast.acting !== 'none' && (cast.secondary ?? 1) > 0 && Array.isArray(cast.pos[0])) {
+    const Pk = (tt) => key(cast.pos, tt) || [0, 0, 0], Yk = (tt) => key(cast.rotY, tt) || 0, h = 1 / 30, w = 8.5, z = 0.38, wd = w * Math.sqrt(1 - z * z), amt = cast.secondary ?? 1;
+    let lean = 0, side = 0;
+    for (let k = 1; k <= 30; k++) { const tau = k * h, tt = t - tau; if (tt < -h) break;
+      const v0 = Pk(tt - h), v1 = Pk(tt), v2 = Pk(tt + h), ax = (v2[0] - 2 * v1[0] + v0[0]) / (h * h), az = (v2[2] - 2 * v1[2] + v0[2]) / (h * h), yr = Yk(tt);
+      const gk = Math.exp(-z * w * tau) * Math.sin(wd * tau) * h * w; lean += (ax * Math.sin(yr) + az * Math.cos(yr)) * gk; side += (ax * Math.cos(yr) - az * Math.sin(yr)) * gk; }
+    lean = clamp(-lean * 0.03 * amt, -0.16, 0.16); side = clamp(side * 0.02 * amt, -0.09, 0.09);
+    const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a)), lead = clamp(wrap(Yk(t + 0.18) - Yk(t)) * 0.55 * amt, -0.45, 0.45), drag = clamp(wrap(Yk(t) - Yk(t - 0.12)) * 0.35 * amt, -0.25, 0.25);
+    rotateInRootSpace(ch, B.spine, lean * 0.35, -drag * 0.3, side * 0.35); rotateInRootSpace(ch, B.spine2, lean * 0.45, -drag * 0.5, side * 0.45);
+    rotateInRootSpace(ch, B.neck, -lean * 0.2, lead * 0.4, 0); rotateInRootSpace(ch, B.head, -lean * 0.25, lead * 0.6, -side * 0.3);
+    for (const s of ['left', 'right']) rotateInRootSpace(ch, B[s + 'arm'], -lean * 0.9, 0, (s === 'left' ? 1 : -1) * Math.abs(side) * 0.4);   // arms trail the body
+  }
   // look distribution: spine2 15% · neck 35% · head 50% (+ micro noise), eyes lead
   rotateInRootSpace(ch, B.spine2, pitch * 0.1, yaw * 0.15);
   rotateInRootSpace(ch, B.neck, pitch * 0.35, yaw * 0.35);
@@ -2047,7 +2100,7 @@ function rockGeo(seed) {
 // Each preset returns parts: { obj, update(lt, cam) } — everything driven by shot-local time.
 const FXP = {
   model(f, dur) {   // Model Forge / library 3D model: { type: 'model', id, pos, height, rotY, start, end, p: keys [x,y,z] offset, spin (rad/s), bob, pulse (bpm), scale: keys }
-    const holder = new THREE.Group(), t0 = f.start ?? 0, t1 = f.end ?? dur;
+    const holder = new THREE.Group(), t0 = f.start ?? 0, t1 = f.end ?? dur; holder.userData.fxId = f.id;
     ASSET_LOADS.push(loadFirst(f.url ? [f.url] : kit('models/' + f.id + '.glb')).then((r) => {
       if (!r) { console.warn('model missing', f.id); return; }
       const m = r.scene, b = new THREE.Box3().setFromObject(m), h = (b.max.y - b.min.y) || 1, k = (f.height ?? h) / h;
@@ -2313,7 +2366,7 @@ function buildFX() {
       const r = P(f, shot.dur), g = new THREE.Group(); g.visible = false;
       if (!r.absolute) { g.position.set(...(f.pos || [0, 0, 0])); if (r.offsetY) g.position.y += r.offsetY; }
       r.parts.forEach((p) => { const o = p.obj ?? p; if (o.isLight) { o.userData.fxShot = si; if (r.absolute) LIGHTS.add(o); else { const h = new THREE.Group(); h.position.copy(g.position); h.add(o); LIGHTS.add(h); } } else g.add(o); }); scene.add(g);
-      FX.push({ shot: si, group: g, attach: f.attach && f.type !== 'model' ? f.attach : null, parts: r.parts.map((p) => (p.isPoints ? { obj: p } : p)), follow: f.followCamera ?? (f.type === 'rain' || f.type === 'snow') });
+      FX.push({ shot: si, group: g, solid: f.type === 'model' && !f.attach && f.solid !== false ? (r.parts[0].obj ?? r.parts[0]) : null, attach: f.attach && f.type !== 'model' ? f.attach : null, parts: r.parts.map((p) => (p.isPoints ? { obj: p } : p)), follow: f.followCamera ?? (f.type === 'rain' || f.type === 'snow') });
       (r.shakes || []).forEach((x) => shot._shakes.push({ ...x, _fromFx: true })); (r.impulses || []).forEach((x) => shot._impulses.push(x)); (r.flashes || []).forEach((x) => shot._flashes.push(x));
     }
   });
@@ -2333,24 +2386,105 @@ function updateFX(si, lt) {
   }
 }
 
+/* ---------- solid props: bodies never sink into crates, barrels, rocks, furniture (fx models) ----------
+   Every unattached fx model is SOLID (solid: false opts out). At boot each shot is sampled: if a knee, shin, foot, hip or torso would end
+   up inside a prop, the actor's mark is moved out of it (horizontally, along the cheapest exit side) — a smooth, precomputed offset, so
+   renders stay frame-perfect. Standing/sitting ON a prop is fine (points near the top), and big hollow things (boats, trees) that hold the
+   actor are treated as containers. qa_check fails anything that still pokes into a prop. */
+const SOLID_PTS = [['hips', 0.1], ['spine1', 0.11], ['spine2', 0.11], ['head', 0.09], ['leftleg', 0.06], ['rightleg', 0.06], ['leftfoot', 0.05], ['rightfoot', 0.05], ['lefttoebase', 0.04], ['righttoebase', 0.04],
+  ['leftupleg>leftleg', 0.075], ['rightupleg>rightleg', 0.075], ['leftleg>leftfoot', 0.055], ['rightleg>rightfoot', 0.055]];
+let SOLVING = false;
+function solidLocalBox(h) {
+  if (h.userData.lbox) return h.userData.lbox; if (!h.children.length) return null;
+  h.updateMatrixWorld(true); const inv = h.matrixWorld.clone().invert(), b = new THREE.Box3(), tb = new THREE.Box3(), M = new THREE.Matrix4();
+  h.traverse((o) => { if (o.isMesh && o.geometry) { o.geometry.computeBoundingBox(); tb.copy(o.geometry.boundingBox).applyMatrix4(M.multiplyMatrices(inv, o.matrixWorld)); b.union(tb); } });
+  return b.isEmpty() ? null : (h.userData.lbox = b);
+}
+function solidsOf(si) { return FX.filter((f) => f.shot === si && f.solid && f.solid.visible && f.solid.children.length).map((f) => f.solid); }
+function bodyPoints(ch) {
+  const V = () => new THREE.Vector3(), hs = (ch.def.height || 1.8) / 1.8;
+  return SOLID_PTS.map(([n, r]) => { const [a, b] = n.split('>'); if (!ch.bones[a] || (b && !ch.bones[b])) return null;
+    const p = ch.bones[a].getWorldPosition(V()); if (b) p.lerp(ch.bones[b].getWorldPosition(V()), 0.5); return { n, p, r: r * hs }; }).filter(Boolean);
+}
+function solidPen(h, pts, shift) {   // → { push: world Vector3 (horizontal), depth } to clear these points out of prop h
+  const B = solidLocalBox(h); if (!B) return null; h.updateMatrixWorld(true);
+  const sz = B.getSize(new THREE.Vector3()).multiply(h.getWorldScale(new THREE.Vector3())); if (sz.y < 0.2 || (sz.y < 0.65 && sz.x > 1.2 && sz.z > 1.2)) return null;   // flat mats, rafts, decks, stages are floor (walkable)
+  const need = [0, 0, 0, 0]; let any = false;
+  for (const P of pts) {
+    const w = P.p.clone().add(shift), q = h.worldToLocal(w.clone()), s = h.getWorldScale(new THREE.Vector3()), r = P.r / Math.max(1e-6, s.x);
+    if (q.y > B.max.y - 0.06 / s.y || q.y < B.min.y - r) continue;   // resting on top / below
+    const e = [q.x - (B.min.x - r), B.max.x + r - q.x, q.z - (B.min.z - r), B.max.z + r - q.z];
+    if (e.some((v) => v <= 0)) continue;
+    any = true; e.forEach((v, i) => (need[i] = Math.max(need[i], v)));
+  }
+  if (!any) return null;
+  const i = need.indexOf(Math.min(...need)), d = need[i], dir = [[-1, 0, 0], [1, 0, 0], [0, 0, -1], [0, 0, 1]][i];
+  const o = h.localToWorld(new THREE.Vector3()), push = h.localToWorld(new THREE.Vector3(dir[0] * d, 0, dir[2] * d)).sub(o); push.y = 0;
+  return { push, depth: push.length() };
+}
+function isContainer(h, ch) {   // a boat / tree / hut that holds the actor: footprint bigger than a person and the hips are inside it
+  const B = solidLocalBox(h); if (!B || !ch.bones.hips) return false; const s = h.getWorldScale(new THREE.Vector3()), sz = B.getSize(new THREE.Vector3()).multiply(s);
+  if (sz.x < 0.9 || sz.z < 0.9) return false;
+  const mark = ch.root.position.clone(); mark.y += 0.05; const q = h.worldToLocal(mark), qh = h.worldToLocal(ch.bones.hips.getWorldPosition(new THREE.Vector3()));
+  const inXZ = (p) => p.x > B.min.x && p.x < B.max.x && p.z > B.min.z && p.z < B.max.z;
+  return (inXZ(q) && q.y > B.min.y && q.y < B.max.y) || B.containsPoint(qh);
+}
+function solveSolids() {   // precompute each actor's mark offset per shot (boot)
+  SOLVING = true; let acc = 0;
+  try {
+    SHOTS.forEach((sh, si) => {
+      const start = acc; acc += sh.dur; if (!sh.cast || !(sh.fx || []).some((f) => f.type === 'model' && !f.attach && f.solid !== false)) return;
+      const n = Math.max(4, Math.ceil(sh.dur * 6)), raw = {}, cont = {};
+      for (let k = 0; k <= n; k++) {
+        const tg = Math.min(start + sh.dur * k / n, start + sh.dur - 1e-3); render(tg);
+        const local = contentTime(sh, tg - start), hs = solidsOf(si);
+        for (const ch of Object.values(characters)) { if (!ch.root.visible || !sh.cast[ch.id]) continue; ch.root.updateMatrixWorld(true);
+          const pts = bodyPoints(ch), shift = new THREE.Vector3(), C = (cont[ch.id] ??= new Set());
+          if (k === 0) hs.forEach((h) => isContainer(h, ch) && C.add(h));
+          for (let it = 0; it < 3; it++) { let moved = false; for (const h of hs) { if (C.has(h) || (sh.cast[ch.id].solid === false)) continue; const r = solidPen(h, pts, shift); if (r && r.depth > 0.004) { shift.add(r.push.multiplyScalar(1.04)); moved = true; } } if (!moved) break; }
+          (raw[ch.id] ??= []).push([local, shift.clone()]);
+        }
+      }
+      for (const [id, L] of Object.entries(raw)) {   // dilate (hold the move a beat before/after) → smooth
+        if (!L.some(([, v]) => v.lengthSq() > 1e-6)) continue;
+        const D = L.map(([t], i) => [t, [L[i - 1], L[i], L[i + 1]].filter(Boolean).map((x) => x[1]).reduce((a, b) => (b.lengthSq() > a.lengthSq() ? b : a))]);
+        (characters[id]._solid ??= {})[si] = D; console.log(`[mf] solid: shot ${si + 1} ${id} moved ${(Math.max(...D.map((x) => x[1].length())) * 100).toFixed(0)} cm out of a prop`);
+      }
+    });
+  } finally { SOLVING = false; }
+}
+function solidOffset(ch, si, local) {
+  const D = ch._solid?.[si]; if (!D || SOLVING) return null;
+  if (local <= D[0][0]) return D[0][1].clone(); if (local >= D.at(-1)[0]) return D.at(-1)[1].clone();
+  let i = 0; while (i < D.length - 2 && D[i + 1][0] < local) i++;
+  const [t0, a] = D[i], [t1, b] = D[i + 1]; return a.clone().lerp(b, smooth((local - t0) / Math.max(1e-6, t1 - t0)));
+}
+function solidProblems(ch, si) {   // QA: body points / hands still inside a prop
+  const out = [], hs = solidsOf(si), V = () => new THREE.Vector3(), hands = ['lefthand', 'righthand'].filter((b) => ch.bones[b]).map((b) => ({ n: b, p: ch.bones[b].getWorldPosition(V()), r: 0.02 }));
+  for (const h of hs) { if (isContainer(h, ch)) continue;
+    const r = solidPen(h, bodyPoints(ch), new THREE.Vector3()); if (r && r.depth > 0.03) out.push(`body is ${(r.depth * 100).toFixed(0)} cm inside a prop (${h.userData.fxId || 'model'})`);
+    for (const H of hands) { const q = solidPen(h, [H], new THREE.Vector3()); if (q && q.depth > 0.05) out.push(`${H.n.replace('hand', '')} hand is ${(q.depth * 100).toFixed(0)} cm inside a prop (${h.userData.fxId || 'model'})`); } }
+  return out;
+}
+
 const setIdOf = (shot) => { const sp = shot.set ?? CONFIG.set ?? 'studio'; return typeof sp === 'string' ? sp : (sp.id || sp.url || sp.type); };
 
 /* ---------- camera language: named moves auto-framed on a character (or a point) ---------- */
 // shot.camera = { move, target, size, az, height, span, at, fov, ease, handheld, roll }   (pos/look keys still work when no move)
 const SIZES = { ecu: 0.24, cu: 0.42, mcu: 0.62, ms: 0.95, mls: 1.4, ws: 2.5, ews: 6 };
-const MOVE_SIZE = { 'dolly-in': 'mcu', push: 'cu', 'dolly-out': 'mcu', orbit: 'ms', 'crane-up': 'ws', 'crane-down': 'ws', 'crash-zoom': 'ms', follow: 'ws', track: 'ws',
+const MOVE_SIZE = { arc: 'ms', rise: 'mls', 'push-tilt': 'mcu', 'dolly-in': 'mcu', push: 'cu', 'dolly-out': 'mcu', orbit: 'ms', 'crane-up': 'ws', 'crane-down': 'ws', 'crash-zoom': 'ms', follow: 'ws', track: 'ws',
   'low-hero': 'ms', overhead: 'ws', reveal: 'ms', static: 'ms', handheld: 'mcu', 'over-shoulder': 'mcu', 'dutch': 'mcu' };
 function targetAt(shot, id, lt) {
   if (Array.isArray(id)) return new THREE.Vector3(...id);
   const cid = id || Object.keys(shot.cast || {})[0] || Object.keys(CAST)[0], ch = characters[cid], cast = shot.cast?.[cid];
-  const p = key(cast?.pos, lt) || [0, 0, 0];
+  const p = [...(key(cast?.pos, lt) || [0, 0, 0])]; { const so = ch && solidOffset(ch, SHOTS.indexOf(shot), lt); if (so) { p[0] += so.x; p[2] += so.z; } }
   let eye = ch ? ch.eyeY : (CAST[cid]?.height || 1.75) * 0.94;
   const cl = (cast?.clips || []).filter((c) => lt >= c.start - 0.2 && lt <= (c.end ?? 1e9)).pop();   // low poses (kneel, crouch, sit) frame on the lowered eye line
   if (cl && /^(kneel|fix|crouch|crouchidle|crouchwalk|sit|sittalk|sitdown)$/.test(cl.clip)) eye *= /^sit/.test(cl.clip) ? 0.7 : /^crouch/.test(cl.clip) ? 0.66 : 0.64;
   return new THREE.Vector3(p[0], eye + (p[1] || 0), p[2]);
 }
 function cameraMove(shot, lt, c) {
-  const m = c.move, d = shot.dur, e = (EASE[c.ease] || EASE.inOutSine)(clamp(lt / d));
+  const m = c.move, d = shot.dur, e = (EASE[c.ease] || EASE.cine)(clamp(lt / d));
   const T = targetAt(shot, c.target, lt); if (c.eye != null) T.y = key(c.eye, lt);   // camera.eye: exact eye-line height (m) to frame on
   const fov0 = typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 30;
   const tid = Array.isArray(c.target) ? null : (c.target || Object.keys(shot.cast || {})[0]), tc = tid ? shot.cast?.[tid] : null;
@@ -2367,7 +2501,10 @@ function cameraMove(shot, lt, c) {
   let a = face + THREE.MathUtils.degToRad(c.az ?? 0), h = (size >= 1.3 ? lookY + 0.3 : T.y) + (c.height ?? 0), fov = fov0, lx = 0, roll = c.roll ?? 0;   // wide shots: chest-height camera
   switch (m) {
     case 'dolly-in': dist *= 1.5 - 0.5 * e; break;
-    case 'push': dist *= 1.18 - 0.18 * e; break;
+    case 'push': dist *= 1.34 - 0.34 * e; break;
+    case 'arc': a += THREE.MathUtils.degToRad((c.span ?? 34) * (e - 0.5)); dist *= 1.24 - 0.24 * e; break;   // orbit + push: the default "alive" move
+    case 'rise': h += -0.45 + 0.9 * e; dist *= 1.12 - 0.12 * e; break;
+    case 'push-tilt': dist *= 1.3 - 0.3 * e; h += 0.35 - 0.35 * e; roll = roll || 0.06 * (1 - e); break;
     case 'dolly-out': dist *= 1 + 0.7 * e; break;
     case 'orbit': a += THREE.MathUtils.degToRad((c.span ?? 50) * (e - 0.5)); break;
     case 'crane-up': h = lookY - 0.6 + 1.9 * e; break;
@@ -2376,7 +2513,7 @@ function cameraMove(shot, lt, c) {
     case 'overhead': h = T.y + dist * 1.15; dist *= 0.22; a += 0.5 * e; break;
     case 'crash-zoom': { const k = EASE.outExpo(clamp((lt - (c.at ?? 0.3 * d)) / 0.2)); fov = fov0 * (1.6 - 0.6 * k) * (1 - 0.03 * e); break; }   // starts wide, LANDS on the asked size (never crops the head)
     case 'reveal': { const k = EASE.outCubic(clamp(lt / (d * 0.55))); lx = (1 - k) * size * Math.min(1, camera.aspect) * 0.8; dist *= 1.1 - 0.1 * e; break; }   // subject slides in from the frame edge within the first half, then a slow push
-    case 'static': break;
+    case 'static': if (!c.lock) { dist *= 1.07 - 0.07 * e; a += THREE.MathUtils.degToRad(5 * (e - 0.5)); } break;   // never a dead camera: slow drift unless lock: true
     case 'track': case 'follow': a += THREE.MathUtils.degToRad(c.side === 'right' ? -90 : 90); dist *= c.move === 'follow' ? 1 : 1.1; break;   // rides beside the walking path
     case 'over-shoulder': {   // target = the face we see; camera sits behind the OTHER person's shoulder (over: 'castId', default = nearest other cast member)
       const oid = typeof c.over === 'string' ? c.over : Object.keys(shot.cast || {}).filter((id) => id !== tid && characters[id]).sort((x, y) => { const px = key(shot.cast[x].pos, lt) || [0, 0, 0], py = key(shot.cast[y].pos, lt) || [0, 0, 0]; return Math.hypot(px[0] - T.x, px[2] - T.z) - Math.hypot(py[0] - T.x, py[2] - T.z); })[0];
@@ -2687,10 +2824,14 @@ function applyClips(ch, cast, t) {
   for (const [k, b] of Object.entries(ch.bones)) { const s = (P[k] ??= { q: new THREE.Quaternion(), p: new THREE.Vector3() }); s.q.copy(b.quaternion); s.p.copy(b.position); }
 }
 function cameraAt(shot, lt, tGlobal) {
-  const c = shot.camera || {}, mv = c.move ? cameraMove(shot, lt, c) : null;
-  const p = mv ? mv.pos : key(c.pos, lt) || [0, 1.6, 3], l = mv ? mv.look : key(c.look, lt) || [0, 1.4, 0];
-  const hh = (c.handheld ?? 1) * 0.012;
+  const c0 = shot.camera || {}, auto = !c0.move && !c0.pos && (shot.cast || Object.keys(characters).length), c = auto ? { move: 'arc', ...c0 } : c0, mv = c.move ? cameraMove(shot, lt, c) : null;   // no camera given → an arc, never a frozen frame
+  let p = mv ? mv.pos : key(c.pos, lt) || [0, 1.6, 3], l = mv ? mv.look : key(c.look, lt) || [0, 1.4, 0];
+  if (!mv && !c.lock && !(Array.isArray(c.pos) && Array.isArray(c.pos[0]) && c.pos.length > 1 && JSON.stringify(c.pos[0][1]) !== JSON.stringify(c.pos.at(-1)[1]))) {   // keyed camera that never moves → slow push toward the look point + drift
+    const e = EASE.cine(clamp(lt / shot.dur)), k = 0.09 * e, dx = l[0] - p[0], dz = l[2] - p[2], L = Math.hypot(dx, dz) || 1;
+    p = [p[0] + dx * k + (-dz / L) * 0.05 * L * (e - 0.5), p[1] + (l[1] - p[1]) * k * 0.5, p[2] + dz * k + (dx / L) * 0.05 * L * (e - 0.5)]; }
+  const hh = (c.handheld ?? 1) * 0.018;
   const pos = [p[0] + hh * fbm(tGlobal * 0.7, 21), p[1] + hh * fbm(tGlobal * 0.6, 22), p[2] + hh * 0.5 * fbm(tGlobal * 0.5, 23)];
+  l = [l[0] + hh * 0.7 * fbm(tGlobal * 0.9, 24), l[1] + hh * 0.5 * fbm(tGlobal * 0.8, 25), l[2]];
   let sx = 0, sy = 0;
   for (const s of shot._shakes || c.shakes || []) { const d = lt - s.t; if (d >= 0) { const e = s.amp * 0.035 * Math.exp(-d / (s.decay || 0.4)); sx += e * noise(tGlobal * 38, 31); sy += e * noise(tGlobal * 41, 32); } }
   return { pos, look: [l[0] + sx, l[1] + sy, l[2]], fov: mv ? mv.fov : (typeof c.fov === 'number' ? c.fov : key(c.fov, lt) || 32), roll: mv ? mv.roll : (c.roll || 0) };
@@ -2725,10 +2866,12 @@ function render(tGlobal) {
       const p = key(M.pos, lt); if (p) ch.root.position.add(new THREE.Vector3(p[0] * k, p[1] * k, p[2] * k).applyEuler(new THREE.Euler(0, ch.root.rotation.y, 0)));
       ch.root.rotation.x += (key(M.rotX, lt) || 0) * k; ch.root.rotation.y += (key(M.rotY, lt) || 0) * k; ch.root.rotation.z += (key(M.rotZ, lt) || 0) * k;
     }
+    { const so = solidOffset(ch, si, local); if (so) ch.root.position.add(so); }
     applyClips(ch, cast, local); setXray(ch, clamp(key(cast?.xray, local) ?? 0)); ch.root.updateMatrixWorld(true);
     life(ch, cast, local, shotStart + local, camPosAt);
   }
   camera.updateMatrixWorld(); updateFX(si, local); }
+  if (SOLVING) return;   // pose-only pass (prop blocking solver)
   const local1 = local0;
   const hero = Object.values(characters)[0];
   if (hero) { key1.target.position.copy(hero.root.position); key1.position.copy(hero.root.position).add(new THREE.Vector3(2.6, 3.8, 2.9)); key1.target.updateMatrixWorld(); }
@@ -2810,7 +2953,8 @@ SHOTS.forEach((s) => { const st = buildSet(s.set ?? CONFIG.set ?? 'studio');
   const hidden = []; scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
   if (!FAST) { try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); } }
   hidden.forEach((o) => (o.visible = false));
-  try { render(0); render(0); } catch (e) { console.warn('warm-up', e); }   // bind every clip/material once so frame 0 is never a bind pose
+  try { render(0); render(0); } catch (e) { console.warn('warm-up', e); }
+  status('Blocking actors…'); try { solveSolids(); render(0); } catch (e) { console.warn('solids', e); }   // bind every clip/material once so frame 0 is never a bind pose
   status('');
   window.__mfReady = true;
   window.__mfClips = () => Object.fromEntries(Object.entries(characters).flatMap(([id, ch]) => Object.entries(clipLib).map(([k]) => { const a = clipFor(ch, k); return [id + ':' + k, +(a?.getClip().rootSpeed || 0).toFixed(2)]; })));
@@ -2854,9 +2998,16 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
       styles: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => T.style || 'slam'))], accents: [...new Set((typeof TITLES !== 'undefined' ? TITLES : []).map((T) => String(T.accent || ACCENT).toLowerCase()))],
       morphs: SHOTS.flatMap((sh, i) => Object.entries(sh.cast || {}).flatMap(([id, c]) => (c.clips || []).slice(1).map((e, k) => { const prev = c.clips[k], low = (n) => /sit|kneel|crouch|lie|lay|sleep|fall|crawl|dead|knock/i.test(n) && !/stand|getup|situp|sitdown|kneeldown/i.test(n), tr = (n) => /standup|getup|situp|sitdown|kneeldown|to/i.test(n);
         return low(prev.clip) !== low(e.clip) && !tr(prev.clip) && !tr(e.clip) && (e.fade ?? 0.3) > 0.15 && e.start < (prev.end ?? 1e9) + 0.05 ? `shot ${i + 1} "${sh.name || ''}" ${id}: ${prev.clip} → ${e.clip}` : null; }).filter(Boolean))),
-      target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
+      effort: String(CONFIG.effort || 'standard').toLowerCase(), target: CONFIG.targetDuration || 0, portrait: CONFIG.height > CONFIG.width, total: TOTAL, durs: SHOTS.map((x) => x.dur), holds: SHOTS.map((x) => !!x.hold), beats: [...new Set(beats.map((b) => +b.toFixed(2)))].sort((x, y) => x - y),
       voice: !!CONFIG.sound?.voice, capCov, firstCaption: (typeof CAPTIONS !== "undefined" && CAPTIONS[0]) ? CAPTIONS[0].t : null, firstTitle: (typeof TITLES !== "undefined" && TITLES.length) ? Math.min(...TITLES.map((T) => T.t)) : null };
   },
+  camMotion() {   // QA: how much each shot's camera actually moves (degrees of view change; handheld noise excluded)
+    let acc = 0; return SHOTS.map((sh, i) => { const st = acc; acc += sh.dur; const S = { ...sh, camera: { ...(sh.camera || {}), handheld: 0, shakes: [] }, _shakes: [] }, N = 12, smp = [];
+      for (let k = 0; k <= N; k++) { const lt = contentTime(sh, sh.dur * k / N), c = cameraAt(S, lt, st + lt); smp.push(c); }
+      const a = smp[0], b = smp.at(-1), v = (x, y) => new THREE.Vector3(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
+      const da = v(a.pos, a.look), db = v(b.pos, b.look), orbit = da.angleTo(db) * 57.3, dist = Math.abs(Math.log(db.length() / Math.max(1e-6, da.length()))) * 100 / 1.5,
+        look = v(b.look, a.look).length() / Math.max(0.3, da.length()) * 57.3, fov = Math.abs(Math.log(b.fov / a.fov)) * 100 / 1.5, travel = v(b.pos, a.pos).length() / Math.max(0.3, da.length()) * 57.3;
+      return { i, name: sh.name || 'shot ' + (i + 1), score: +Math.max(orbit + dist + fov, travel, look).toFixed(1), lock: !!(sh.hold || sh.camera?.lock) }; }); },
   shots: () => { let acc = 0; return SHOTS.map((sh, i) => { const r = { i, name: sh.name || 'shot ' + (i + 1), start: acc, dur: sh.dur, set: setIdOf(sh), cast: Object.keys(sh.cast || {}) }; acc += sh.dur; return r; }); },
   probe(tg) {   // automatic QA: feet on the ground, hands on their targets, clips that exist
     render(tg); const { shot, local } = shotAt(clamp(tg, 0, TOTAL - 1e-4)), out = [], V = () => new THREE.Vector3();
@@ -2875,7 +3026,7 @@ window.__mfDebug = { FX, bloom, grade, scene, SETS, characters, key1,
         const lp = ch.root.worldToLocal(ph.clone()), sp = ch.bones.spine1 ? ch.root.worldToLocal(ch.bones.spine1.getWorldPosition(V())) : null, hp = ch.bones.hips ? ch.root.worldToLocal(ch.bones.hips.getWorldPosition(V())) : null, nk = ch.bones.neck ? ch.root.worldToLocal(ch.bones.neck.getWorldPosition(V())) : null;
         const inside = !!(sp && hp && nk && lp.y > hp.y + 0.06 && lp.y < nk.y - 0.04 && Math.abs(lp.x - sp.x) < 0.11 && lp.z - sp.z < 0.05 && lp.z - sp.z > -0.08);
         return { side: s, bend: Math.round(bend), twist: Math.round(Math.abs(tw)), inside }; }).filter(Boolean);
-      out.push({ id: ch.id, hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length && !cast.swimming ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
+      out.push({ id: ch.id, solids: solidProblems(ch, SHOTS.indexOf(shot)), hands, face: fc && fc[0] > 0.05 && fc[0] < 0.95 && fc[1] > 0.05 && fc[1] < 0.95 ? fc : null, footY: feet.length && !cast.swimming ? Math.min(...feet) : null, airborne, reach, missing, sitting: (cast.clips || []).some((c) => /sit|lie|lay|kneel|crouch/i.test(c.clip)) });
     }
     const overlaps = [], vis = Object.values(characters).filter((c) => c.root.visible && c.bones.hips);   // bodies melting into each other: two torsos / a head or hand inside someone else
     for (let i = 0; i < vis.length; i++) for (let j = 0; j < vis.length; j++) { if (i === j) continue; const A = vis[i], B = vis[j], hb = B.bones.hips.getWorldPosition(V()), nb = (B.bones.neck || B.bones.hips).getWorldPosition(V());

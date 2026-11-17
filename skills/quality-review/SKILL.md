@@ -31,7 +31,8 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/review_log.js scene.html --verify          # 
 ## PROOF OF WORK — the gate rejects box-ticking, and counts every honest check
 Fill checks with the tool (never hand-edit review.json): `review_log.js scene.html --check C05 --status PASS|FAIL --evidence "…" --proof rN/file.png [--fix "…"]`.
 `review_log.js scene.html --status` shows the counter (counted per round + what is still open).
-- **The review must find real problems**: ≥ 3 FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum) in total over all rounds.
+- **The review must find real problems**: ≥ 3 critical/major FAILs (Standard) · ≥ 6 (High) · ≥ 10 (Maximum) over all rounds — minor polish never counts.
+- **What differs by effort**: Standard scans bodies every 0.25 s; High every 0.1 s + a body/hand strip for every 2nd shot; Maximum EVERY frame + a strip for EVERY shot + C26–C35 forensics. Higher effort = more real fixes to bodies, hands, animation and camera, not more polish notes.
 - **Every FAIL needs a real fix**: the `fix` names exactly what changed (shot, key, value from → to), and the scene must change before the
   next round. `--round` refuses while FAILs are unfixed.
 - **Reports match the scene**: qa_check / render_video + av_check record the scene version; after any scene edit re-run them (then a new round).
@@ -44,31 +45,36 @@ A check that cannot apply (e.g. no in-scene dialogue) is PASS with evidence of w
 Long-form: wherever a check says "every shot", do every shot — chapters are reviewed one by one, never sampled.
 
 ## THE CHECK BANK — method + pass bar for each
-### STANDARD (C01–C10) — the essentials across picture, narration, sound, graphics, story
-- **C01 Auto gates** — `qa_check` PASS and `av_check` PASS on the current render (both newer than the last scene edit). Zero tolerance.
-- **C02 Length & format** — duration within ±5% of what Sir asked (≤ 30 s if Sir named no length); aspect/resolution/fps = CONFIG.quality;
-  no letterbox/pillarbox mistakes; first and last frame are deliberate (not a half-loaded scene, not a black tail).
-- **C03 Narration ↔ picture** — build the table *VO line → time → shot → what is literally on screen*. Every line shows its subject while it is
-  spoken (5-word test: describe the frame in 5 words; it must match the line). No line over an unrelated or reused shot. Visual lands on or
-  ≤ 0.2 s before the key word, never after.
-- **C04 Narration audio** — every word intelligible on phone speakers; no clipped first/last syllables, no breaths cut mid-word, no double
-  words or TTS glitches (listen to every line); pace 145–175 wpm shorts, 130–160 wpm long-form; voice sits on top: music ≥ 8 dB under the
-  voice while it speaks (ducking), sfx never mask a word.
-- **C05 SFX sync** — list every SFX with its time and the on-screen event it belongs to; onset within ±1 frame of the visible contact/hit/
-  transition (read it off the 12 fps strip and wave.png). Every impact/whoosh/title/transition has a sound; no sound without a visible cause.
-- **C06 Feet & ground** — feet planted in every shot: no float (> 2 cm), sink, or skate (planted foot moves < 1 cm while weight is on it);
-  walk ≈ 1.45 m/s, run ≈ 2.57 m/s stride matches speed; contact shadows present.
-- **C07 Hands & right action** — every touch/hold/point lands on its target (`reach` IK, ≤ 3 cm); props seated in the palm, fingers wrapped;
-  no arm through body/prop; every clip fits the moment (sit = sit), no random moves, nobody lip-syncs the narrator.
-- **C08 Framing & readability** — focal subject + the thing discussed in frame every shot; faces never cropped/covered; eyes near the upper
-  third; all text inside the safe area (shorts: top 12% / bottom 20% / sides 6% clear of UI); text ≥ 4% of frame height, legible at phone size.
-- **C09 Motion graphics & captions** — every title/caption/graphic eases in AND out (no linear, no pop-on/pop-off, no 1-frame flashes);
-  on screen ≥ 0.4 s + 0.3 s per word; caption text = spoken words exactly (spelling, numbers, names); caption timing ±2 frames of the word;
-  never two graphics fighting for the eye at once.
-- **Taste (inside C08–C10)** — no machine tells (skills/taste §3), nothing against SIR'S TASTE (.motion-forge/state.md); for a revision `improve_check.js` PASS.
-- **C10 Story, hook & pacing** — shorts: payoff image + hook words by 0.3 s, a beat every 2–3 s, escalation, fair twist (clue planted), loop
-  ending, comment question. Long-form: cold-open hook ≤ 10 s, chapter promise kept, re-hook every 30–60 s, ending pays off the opening.
-  Motion Forge only — no photos, no logos; publish pack honest.
+### STANDARD (C01–C10) — what Sir sees first comes first: bodies, hands, props, animation, camera, motion graphics
+SEVERITY: every FAIL is logged `--severity critical|major|minor`. Only critical + major count toward the "problems found" quota — a pixel,
+a shoe colour or a 1-frame caption nudge is MINOR and never fills it. C01–C06 problems are never minor. Fix the worst first: a crooked
+back or a hand inside a crate outranks every polish note. A check that says PASS while this round's qa_check lists a problem for it is
+rejected by the gate.
+- **C01 Bodies & limbs** — qa_check BODY/MORPH clean (it scans every 0.25 s on Standard, 0.1 s on High, EVERY frame on Maximum). Then LOOK:
+  a 12 fps strip of every shot with a person (High: every 2nd shot as proof, Maximum: every shot). Fail anything that reads wrong even if
+  the numbers pass: kinked/S-shaped back, limbs that bend, stretch, twist or swap during a blend, knees through the floor, a pose that
+  "morphs" into the next. Fix with a cut, a different clip, a transition clip, custom keys — never ship it.
+- **C02 Hands & fingers** — crop every visible hand: 5 fingers, natural curl, wrist ≤ 80°, the hand pose fits the action (holding = `grip`,
+  pointing = point pose, resting = soft), held props seated in the palm, never melted into the prop or the body; touches land (`reach` ≤ 3 cm).
+- **C03 Nothing passes through anything** — qa_check SOLID/OVERLAP/FEET clean; the engine pushes actors out of props, but LOOK at every
+  contact: feet on the floor, knees on the deck, hands on (not in) the crate, two people never melt together.
+- **C04 Animation life (12 principles)** — anticipation before every big action, follow-through + settle after, slow-in/slow-out, arcs,
+  overlapping action (head leads a turn, chest and arms drag), weight on landings, no robotic holds (breathing, glances, micro-shifts in
+  every hold), timing varies (fast-out, slow settle). Robotic = FAIL.
+- **C05 Camera life** — qa_check CAMERA clean (every shot moves ≥ 4° unless `hold: true`). Each move is named and motivated (push for
+  tension, arc for reveal, crash-zoom for shock, dolly-out for loneliness), starts moving on the cut, settles at the end. A still or
+  "barely bobbing" camera on a non-hold shot = FAIL.
+- **C06 Motion graphics** — qa_check MOTION GRAPHICS clean (a designed graphic every ≤ 5 s in a short, ≥ 1 per 5 s overall); every graphic
+  animates in AND out with its accent shapes (ring burst / brackets / accent bar), at least one graphic wipe (`cut: 'bars'`) or kinetic
+  moment per short; one design system (one accent, one caption style, 3–4 title styles).
+- **C07 Auto gates + length & format** — `qa_check` PASS and `av_check` PASS on the current render (both newer than the last scene edit);
+  duration within ±5% (≤ 30 s if Sir named no length); aspect/resolution/fps = CONFIG.quality; deliberate first and last frame.
+- **C08 Narration ↔ picture + audio** — table *VO line → time → shot → what is on screen*; every line shows its subject while spoken
+  (5-word test); visual lands on or ≤ 0.2 s before the key word. Every word intelligible on phone speakers, no clipped syllables, music
+  ≥ 8 dB under the voice.
+- **C09 SFX & sound** — every impact/whoosh/title/transition has a sound with onset ±1 frame of its visible cause; no sound without a cause.
+- **C10 Story, hook, pacing & framing** — payoff image + hook words by 0.3 s, a beat every 2–3 s, escalation, fair twist, loop ending,
+  comment question; faces never cropped/covered, text in the safe area. No machine tells (skills/taste §3), nothing against SIR'S TASTE.
 
 ### HIGH adds (C11–C25) — every department, every shot, deeper
 - **C11 Lighting & color** — face luma 70–200 and readable in every shot; key/fill ratio fits mood; light direction consistent within a
@@ -81,15 +87,15 @@ Long-form: wherever a check says "every shot", do every shot — chapters are re
   size + angle; shot lengths vary (not a metronome); transitions serve the story, max one transition style per section.
 - **C15 Acting, face & eyes** — expression matches each line's emotion; blinks 8–20/min; look targets change every 1–3 s (no dead stare);
   breathing/idle micro-motion in every hold; mouth closed when not speaking.
-- **C16 Weight & secondary motion** — anticipation before big actions, follow-through and settle after; landings compress; hair/cloth/props
-  overlap and lag; heavy things move heavy, light things light.
+- **C16 Feet & ground** — feet planted in every shot: no float (> 2 cm), sink, or skate (planted foot moves < 1 cm while weight is on it);
+  walk ≈ 1.45 m/s, run ≈ 2.57 m/s stride matches speed; contact shadows present.
 - **C17 Mix balance** — av_check: integrated -14 LUFS ±1.5, true peak ≤ -1 dBTP, LRA ≤ 15 LU. By ear: voice > sfx > music in dialogue;
   low end not muddy, no harsh highs, nothing louder than the climax hit.
 - **C18 Dead air & room tone** — no hole below -50 dB > 0.4 s unless a marked deliberate silence (`--holds`); ambience/room tone under every
   scene; scene changes change the ambience with the picture.
 - **C19 Music structure** — music on frame 1 (or a deliberate silence-then-hit); drop/accent lands on the twist/climax within ±2 frames;
   big cuts on bar lines; mood changes follow the story beats; ending resolves (final hit or clean loop), never a hard cut-off (fade ≥ 0.3 s).
-- **C20 Motion-graphics design system** — ≤ 2 typefaces, consistent sizes/weights/colors from the style bible; graphics aligned to one grid;
+- **C20 Motion-graphics design system + caption timing** — captions = spoken words exactly, ±2 frames of the word, on screen ≥ 0.4 s; ≤ 2 typefaces, consistent sizes/weights/colors from the style bible; graphics aligned to one grid;
   consistent animation language (same ease family, same in/out style); graphics never cover faces or the focal action; icons/arrows point
   at the right thing.
 - **C21 VFX quality** — every effect layered (core + smoke/sparks/debris + light on the scene + shake + character reaction); timed with

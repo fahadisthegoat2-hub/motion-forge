@@ -103,3 +103,13 @@ Every custom motion is saved and reused: `animations/custom/motions.json` via `n
 
 ## Nothing morphs
 Bodies, limbs and props never pass through each other (qa_check: OVERLAP, hands inside the body). Change posture (lie/sit/kneel ↔ stand) on a cut or with a real transition clip (`fade: 0.12` between similar poses only) — a long blend between two different poses looks like a morph. No dissolves or shape-morph transitions.
+
+## The 12 principles are a GATE, not a suggestion (Sir: "robotic, doesn't follow the 12 principles")
+Every action in every shot, before delivery:
+- **Anticipation** — a small opposite move before every big one (crouch before a jump, wind-up before a throw, a breath + glance before a turn): 0.1–0.3 s, `bones` keys or a transition clip.
+- **Follow-through & overlap** — automatic from the keyed path (engine secondary motion: drag on start, carry + settle on stop, head leads turns). Add `bones` keys for arms/head after hits, stops and gestures; nothing stops on one frame.
+- **Slow in / slow out + arcs** — eased keys only (never `linear` on bodies); hands and heads travel on arcs, not straight lines.
+- **Timing & spacing** — fast-out, slow settle; vary it (no two gestures with the same timing); holds keep breathing + glances.
+- **Squash/stretch & exaggeration (for 3D humans: weight)** — landings compress the knees, impacts push the body, reactions are 20–30 % bigger than real.
+- **Staging & solid drawing** — readable silhouette from the camera, weight over the feet, no limb through a prop (engine SOLID check) or the body (BODY check).
+A shot that fails any of these is C04 FAIL (critical/major) in the review — fix it, never ship it.
