@@ -1,6 +1,6 @@
 ---
 name: model-forge
-description: Model Forge — Claude's own AI 3D model generator (Tencent Hunyuan3D-2, runs free and unlimited on the user's NVIDIA PC). Creates real sculpted, textured 3D models of any prop, food, object, creature, vehicle or building from text or a reference image, saves them to assets/models and places them in scenes. Use whenever a video needs an object that isn't a Casting Board character or a real place, or the user asks for a 3D model, prop or asset.
+description: Model Forge + Forge 3D Studio — Claude's own AI 3D model generator (Tencent Hunyuan3D-2, runs free and unlimited on the user's NVIDIA PC). Creates real sculpted, textured 3D models of any prop, food, object, creature, vehicle or building from text or a reference image, saves them to assets/models and places them in scenes. Use whenever a video needs an object that isn't a Casting Board character or a real place, or the user asks for a 3D model, prop or asset.
 ---
 
 # Model Forge — unlimited AI 3D models
@@ -35,3 +35,14 @@ Everything else still follows the Motion Forge rules.
 ## Use it in a scene
 `fx: [{ type: 'model', id: 'cheeseburger', pos: [x, y, z], height: 0.12, rotY, spin, bob, pulse, p: keys, scale: keys, start, end, color }]`
 Props sit on the ground at `pos` (y = surface height, e.g. 0.75 for a table). Pair with the 3D sets.
+
+## Forge 3D Studio (any device, no GPU)
+The studio artifact (url in `characters/forge-studio.json`, page `modelforge/studio.html`) is a prompt / reference-image → realistic
+procedural 3D model generator with a library and .glb export. It runs on any phone with 3 GB RAM. Use it when no NVIDIA PC is
+reachable, for quick hard-surface props, or whenever the user works in the studio.
+- Sir generates inside the page (Generate / Improve / Auto-enhance). Claude adds models as DATA: follow `modelforge/model-spec.md`
+  exactly, then one db write on the studio: op `set`, path `models/c<epoch ms>`, data
+  `{"name","prompt","by":"claude","at":<epoch ms number>,"spec":{...}}` (epoch ms from `date +%s%3N`). The open page shows it live.
+- Improving a model: read its doc, edit the spec, write a NEW doc (new id + `at`) so the old version stays.
+- To use a studio model in a video: Download .glb from the page (zip), unzip into `assets/models/<id>.glb`, register it in
+  `assets/models/models.json` like any Model Forge model.

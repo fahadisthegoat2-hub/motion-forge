@@ -1,7 +1,7 @@
 {
   "name": "motion-video",
-  "version": "0.7.2",
-  "description": "Turns any idea into a finished 3D animated short or long video: twist scripts, living semi-real characters, cinema-grade VFX, film looks, real sets, reference image/video study, QA, on-device rendering and growth packs.",
+  "version": "0.8.0",
+  "description": "Turns any idea into a finished 3D animated short or long video: twist scripts, living semi-real characters, cinema-grade VFX, film looks, real sets, reference image/video study, Forge 3D Studio (prompt or image to realistic 3D models on any device), QA, on-device rendering and growth packs.",
   "keywords": [
     "3d",
     "threejs",

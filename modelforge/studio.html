@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forge 3D Studio</title>
+<style>
+:root{--bg:#0d0e11;--panel:#16181d;--line:#272a32;--txt:#e9eaee;--dim:#8d93a1;--acc:#ff7a1a;--acc2:#ffb347}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#app{display:flex;flex-direction:column;min-height:100%}
+#view{position:relative;height:52vh;min-height:280px;background:radial-gradient(ellipse at 50% 35%,#2b2f3a 0%,#14161b 60%,#0b0c0f 100%)}
+#view canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:absolute;left:10px;top:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+#title{font-weight:700;text-shadow:0 1px 4px #000}
+#stats{font-size:12px;color:var(--dim);text-shadow:0 1px 3px #000}
+#tools{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.chip{background:#0009;border:1px solid #fff2;color:var(--txt);border-radius:999px;padding:7px 12px;font-size:13px;backdrop-filter:blur(6px);cursor:pointer}
+.chip.on{border-color:var(--acc);color:var(--acc2)}
+#busy{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#0b0c0fcc;text-align:center;padding:20px}
+#busy.show{display:flex}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid #fff2;border-top-color:var(--acc);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#panel{flex:1;background:var(--panel);border-top:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:12px}
+h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+textarea,input[type=text]{width:100%;background:#0e1014;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font:inherit;resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:var(--acc)}
+#drop{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line);border-radius:10px;padding:10px;cursor:pointer;color:var(--dim)}
+#drop.over{border-color:var(--acc);color:var(--txt)}
+#thumb{width:54px;height:54px;border-radius:8px;object-fit:cover;display:none}
+#clr{margin-left:auto;display:none}
+.seg{display:flex;background:#0e1014;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;background:none;border:0;color:var(--dim);padding:9px 4px;font:inherit;cursor:pointer}
+.seg button.on{background:#262a33;color:var(--txt)}
+.btn{background:linear-gradient(180deg,var(--acc2),var(--acc));border:0;color:#1a0d00;font-weight:800;font-size:16px;border-radius:12px;padding:13px;cursor:pointer;width:100%}
+.btn:disabled{filter:grayscale(1);opacity:.5}
+.btn2{background:#262a33;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px;font:inherit;cursor:pointer;white-space:nowrap}
+.row{display:flex;gap:8px}
+#note{font-size:13px;color:var(--acc2);min-height:18px}
+#lib{display:flex;flex-direction:column;gap:6px}
+.item{display:flex;align-items:center;gap:8px;background:#0e1014;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer}
+.item.sel{border-color:var(--acc)}
+.item b{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:1px 7px}
+.del{background:none;border:0;color:var(--dim);font-size:16px;cursor:pointer;padding:2px 6px}
+.hide{display:none!important}
+@media(min-width:860px){
+ #app{flex-direction:row-reverse;height:100%}
+ #view{flex:1;height:auto}
+ #panel{flex:0 0 380px;border-top:0;border-right:1px solid var(--line);overflow:auto}
+}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="app">
+  <div id="view">
+    <div id="hud"><div id="title">Forge 3D</div><div id="stats"></div></div>
+    <div id="tools">
+      <button class="chip on" id="bRot">Rotate</button>
+      <button class="chip on" id="bQ">Quality: High</button>
+      <button class="chip" id="bReset">Reset view</button>
+      <button class="chip hide" id="bGlb">Download .glb</button>
+      <button class="chip hide" id="bPng">Save image</button>
+    </div>
+    <div id="busy"><div class="spin"></div><div id="busyTxt">Forging…</div><button class="chip" id="bStop">Stop</button></div>
+  </div>
+  <div id="panel">
+    <div>
+      <h2>Describe your model</h2>
+      <textarea id="prompt" rows="3" placeholder="e.g. a weathered medieval longsword with a leather-wrapped grip"></textarea>
+    </div>
+    <div>
+      <h2>Reference image (optional)</h2>
+      <label id="drop"><img id="thumb" alt=""><span id="dropTxt">Tap to add an image</span>
+        <button class="btn2" id="clr" type="button">Remove</button>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+    </div>
+    <div>
+      <h2>Detail</h2>
+      <div class="seg" id="detail"><button data-d="draft">Draft</button><button data-d="std" class="on">Standard</button><button data-d="high">Ultra</button></div>
+    </div>
+    <button class="btn" id="go">Generate 3D model</button>
+    <div id="refineBox" class="hide">
+      <h2>Improve this model</h2>
+      <div class="row"><input type="text" id="refine" placeholder="e.g. make the blade longer, add rust"><button class="btn2" id="bRefine">Apply</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn2" id="bEnh" style="flex:1">✨ Auto-enhance (Claude looks at the render and fixes it)</button></div>
+    </div>
+    <div id="note"></div>
+    <div>
+      <h2>Library</h2>
+      <div id="lib"><div style="color:var(--dim);font-size:13px" id="libEmpty">Models you or Claude generate appear here.</div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+
+/*CORE-START*/
+// Pure spec -> THREE.Group builder. No DOM access. ctx: {mat(id,double), max}
+const D2R = Math.PI / 180;
+const num = (v, d, lo = -1e4, hi = 1e4) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+const vec = (a, d) => Array.isArray(a) ? [num(a[0], d[0]), num(a[1], d[1]), num(a[2], d[2])] : (typeof a === 'number' ? [a, a, a] : d);
+const hash3 = (x, y, z) => { const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return n - Math.floor(n); };
+function vnoise(x, y, z) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  let xf = x - xi, yf = y - yi, zf = z - zi;
+  xf = xf * xf * (3 - 2 * xf); yf = yf * yf * (3 - 2 * yf); zf = zf * zf * (3 - 2 * zf);
+  const L = (a, b, t) => a + (b - a) * t, h = hash3;
+  return L(L(L(h(xi, yi, zi), h(xi + 1, yi, zi), xf), L(h(xi, yi + 1, zi), h(xi + 1, yi + 1, zi), xf), yf),
+           L(L(h(xi, yi, zi + 1), h(xi + 1, yi, zi + 1), xf), L(h(xi, yi + 1, zi + 1), h(xi + 1, yi + 1, zi + 1), xf), yf), zf);
+}
+const fbm = (x, y, z) => vnoise(x, y, z) * .55 + vnoise(x * 2.1, y * 2.1, z * 2.1) * .3 + vnoise(x * 4.3, y * 4.3, z * 4.3) * .15;
+
+function boxUV(geo) {
+  geo.computeBoundingSphere();
+  const k = 1 / Math.max(1e-6, geo.boundingSphere.radius * 2);
+  const p = geo.attributes.position, n = geo.attributes.normal, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) {
+    const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
+    let u, v;
+    if (ax >= ay && ax >= az) { u = p.getZ(i); v = p.getY(i); }
+    else if (ay >= az) { u = p.getX(i); v = p.getZ(i); }
+    else { u = p.getX(i); v = p.getY(i); }
+    uv[i * 2] = u * k; uv[i * 2 + 1] = v * k;
+  }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  return geo;
+}
+function weld(geo) {
+  geo.deleteAttribute('uv'); geo.deleteAttribute('normal');
+  geo = BGU.mergeVertices(geo, 1e-5); geo.computeVertexNormals(); return geo;
+}
+function displace(geo, nz) {
+  geo = weld(geo); geo.computeBoundingSphere();
+  const R = Math.max(1e-6, geo.boundingSphere.radius);
+  const amp = num(nz.amp, .03, 0, 1) * R, f = num(nz.freq, 3, .1, 40) / R, seed = num(nz.seed, 0);
+  const p = geo.attributes.position, n = geo.attributes.normal;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+    const d = (fbm(x * f + seed, y * f + seed * 1.7, z * f - seed) * 2 - 1) * amp;
+    p.setXYZ(i, x + n.getX(i) * d, y + n.getY(i) * d, z + n.getZ(i) * d);
+  }
+  geo.computeVertexNormals(); return boxUV(geo);
+}
+function spline2(pts, closed, mult) {
+  if (pts.length < 3) return pts;
+  const c = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], 0)), closed, 'centripetal');
+  return c.getPoints(Math.min(120, pts.length * mult)).map(v => [v.x, v.y]);
+}
+const pts2 = (a, max = 48) => (Array.isArray(a) ? a : []).slice(0, max).filter(Array.isArray).map(p => [num(p[0], 0), num(p[1], 0)]);
+
+function latheGeo(pts, smooth, seg) {
+  if (pts.length < 2) return null;
+  if (pts[0][1] > pts[pts.length - 1][1]) pts = pts.slice().reverse();
+  if (smooth) pts = spline2(pts, false, 6);
+  const v = pts.map(p => new THREE.Vector2(Math.max(0, p[0]), p[1]));
+  let g = new THREE.LatheGeometry(v, seg);
+  if (!smooth) { g = BGU.toCreasedNormals(g, 35 * D2R); }
+  return g;
+}
+function cylProfile(rt, rb, h, b) {
+  const P = [[0, -h / 2]], arc = (cx, cy, r, a0, a1) => { for (let i = 0; i <= 3; i++) { const a = (a0 + (a1 - a0) * i / 3) * D2R; P.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } };
+  const bb = Math.min(b, rb * .9, h * .45), bt = Math.min(b, rt * .9, h * .45);
+  if (rb > 1e-5) { if (bb > 1e-5) arc(rb - bb, -h / 2 + bb, bb, -90, 0); else P.push([rb, -h / 2]); }
+  if (rt > 1e-5) { if (bt > 1e-5) arc(rt - bt, h / 2 - bt, bt, 0, 90); else P.push([rt, h / 2]); }
+  P.push([0, h / 2]); return P;
+}
+function tubeGeo(p) {
+  const pts = (Array.isArray(p.path) ? p.path : []).slice(0, 64).filter(Array.isArray).map(a => new THREE.Vector3(...vec(a, [0, 0, 0])));
+  if (pts.length < 2) return null;
+  const closed = !!p.closed, curve = new THREE.CatmullRomCurve3(pts, closed, 'centripetal');
+  const N = Math.min(160, Math.max(8, pts.length * 8)), R = 14, fr = curve.computeFrenetFrames(N, closed);
+  const radii = Array.isArray(p.radii) && p.radii.length ? p.radii.map(v => num(v, .05, 0)) : [num(p.radius, .05, 0)];
+  const rad = t => { if (radii.length === 1) return radii[0]; const f = t * (radii.length - 1), i = Math.min(radii.length - 2, Math.floor(f)); return radii[i] + (radii[i + 1] - radii[i]) * (f - i); };
+  const pos = [], nor = [], uv = [], idx = [], P = new THREE.Vector3();
+  for (let i = 0; i <= N; i++) {
+    const t = i / N; curve.getPointAt(t, P); const r = rad(t), A = fr.normals[i], B = fr.binormals[i];
+    for (let j = 0; j <= R; j++) {
+      const a = j / R * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+      const nx = c * A.x + s * B.x, ny = c * A.y + s * B.y, nz = c * A.z + s * B.z;
+      pos.push(P.x + r * nx, P.y + r * ny, P.z + r * nz); nor.push(nx, ny, nz); uv.push(j / R, t * 4);
+    }
+  }
+  for (let i = 0; i < N; i++) for (let j = 0; j < R; j++) { const a = i * (R + 1) + j, b = a + R + 1; idx.push(a, a + 1, b, b, a + 1, b + 1); }
+  if (!closed) for (const e of [0, N]) {
+    const r = rad(e / N); if (r < 1e-5) continue;
+    const T = fr.tangents[e], sg = e ? 1 : -1, base = pos.length / 3; curve.getPointAt(e / N, P);
+    pos.push(P.x, P.y, P.z); nor.push(T.x * sg, T.y * sg, T.z * sg); uv.push(.5, .5);
+    for (let j = 0; j <= R; j++) { const k = (e * (R + 1) + j) * 3; pos.push(pos[k], pos[k + 1], pos[k + 2]); nor.push(T.x * sg, T.y * sg, T.z * sg); uv.push(.5, .5); }
+    for (let j = 0; j < R; j++) { if (e) idx.push(base, base + 1 + j, base + 2 + j); else idx.push(base, base + 2 + j, base + 1 + j); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); return g;
+}
+function extrudeGeo(p) {
+  let o = pts2(p.pts); if (o.length < 3) return null;
+  const mk = (a, sm) => (sm ? spline2(a, true, 6) : a).map(q => new THREE.Vector2(q[0], q[1]));
+  const sh = new THREE.Shape(mk(o, !!p.smooth));
+  for (const h of (Array.isArray(p.holes) ? p.holes : []).slice(0, 8)) { const hp = pts2(h); if (hp.length >= 3) sh.holes.push(new THREE.Path(mk(hp, !!p.smooth))); }
+  const depth = num(p.depth, .1, 1e-4), bv = Math.min(num(p.bevel, depth * .12, 0), depth * .49);
+  let g = new THREE.ExtrudeGeometry(sh, { depth: depth - 2 * bv, bevelEnabled: bv > 1e-5, bevelSize: bv, bevelThickness: bv, bevelSegments: 3, curveSegments: 10, steps: 1 });
+  g.translate(0, 0, -(depth - 2 * bv) / 2);
+  g = BGU.toCreasedNormals(weld(g), 40 * D2R);
+  return boxUV(g);
+}
+function makeGeo(p) {
+  const s = Array.isArray(p.s) ? p.s : (typeof p.s === 'number' ? [p.s] : []), nz = p.noise && typeof p.noise === 'object';
+  let g = null, open = false;
+  switch (p.t) {
+    case 'box': { const w = num(s[0], 1, 1e-4), h = num(s[1], w, 1e-4), d = num(s[2], w, 1e-4), m = Math.min(w, h, d);
+      const b = Math.min(num(p.bevel, m * .08, 0), m * .49);
+      g = nz ? new THREE.BoxGeometry(w, h, d, 14, 14, 14) : (b > 1e-5 ? new RoundedBoxGeometry(w, h, d, 4, b) : new THREE.BoxGeometry(w, h, d)); break; }
+    case 'sphere': g = new THREE.SphereGeometry(num(s[0], .5, 1e-4), nz ? 56 : 36, nz ? 40 : 24); break;
+    case 'cone': case 'cyl': { const cone = p.t === 'cone';
+      const rt = cone ? 0 : num(s[0], .5, 0), rb = cone ? num(s[0], .5, 0) : num(s[1], rt, 0), h = num(cone ? s[1] : s[2], 1, 1e-4);
+      g = latheGeo(cylProfile(rt, rb, h, num(p.bevel, Math.min(Math.max(rt, rb), h) * .06, 0)), false, 40); break; }
+    case 'capsule': g = new THREE.CapsuleGeometry(num(s[0], .25, 1e-4), num(s[1], 1, 0), 8, 28); break;
+    case 'torus': g = new THREE.TorusGeometry(num(s[0], .5, 1e-4), num(s[1], .1, 1e-4), 16, 56, num(p.arc, 360, 1, 360) * D2R); break;
+    case 'lathe': { const pts = pts2(p.pts); g = latheGeo(pts, p.smooth !== false, 44);
+      if (pts.length) { const ys = pts.slice().sort((a, b) => a[1] - b[1]); open = ys[0][0] > 1e-4 || ys[ys.length - 1][0] > 1e-4; } break; }
+    case 'extrude': g = extrudeGeo(p); break;
+    case 'tube': g = tubeGeo(p); break;
+  }
+  if (g && nz) g = displace(g, p.noise);
+  return g ? { g, open } : null;
+}
+function buildPart(p, ctx, depth) {
+  if (!p || typeof p !== 'object' || depth > 6 || ctx.count >= ctx.max) return null;
+  let obj;
+  const made = p.t && p.t !== 'group' ? makeGeo(p) : null;
+  if (made) { obj = new THREE.Mesh(made.g, ctx.mat(p.m, made.open)); obj.castShadow = obj.receiveShadow = true; ctx.count++; }
+  else obj = new THREE.Group();
+  if (typeof p.n === 'string') obj.name = p.n.slice(0, 60);
+  for (const c of (Array.isArray(p.children) ? p.children : [])) { const o = buildPart(c, ctx, depth + 1); if (o) obj.add(o); }
+  if (!made && !obj.children.length) return null;
+  obj.position.set(...vec(p.p, [0, 0, 0]));
+  const r = vec(p.r, [0, 0, 0]); obj.rotation.set(r[0] * D2R, r[1] * D2R, r[2] * D2R);
+  obj.scale.set(...vec(p.sc, [1, 1, 1]).map(v => Math.abs(v) < 1e-4 ? 1e-4 : v));
+  const count = o => { let n = 0; o.traverse(m => { if (m.isMesh) n++; }); return n; };
+  let out = obj;
+  if (p.mirror === 'x' || p.mirror === 'y' || p.mirror === 'z') {
+    const g = new THREE.Group(), mg = new THREE.Group(); mg.scale[p.mirror] = -1; mg.add(obj.clone());
+    g.add(obj, mg); ctx.count += count(obj); out = g;
+  }
+  const rp = p.repeat;
+  if (rp && typeof rp === 'object') {
+    const n = Math.round(num(rp.n, 1, 1, 64)), per = count(out), g = new THREE.Group(); g.add(out);
+    for (let i = 1; i < n && ctx.count + per <= ctx.max; i++) {
+      const w = new THREE.Group(), c = out.clone();
+      if (Array.isArray(rp.step)) { const st = vec(rp.step, [0, 0, 0]); w.position.set(st[0] * i, st[1] * i, st[2] * i); }
+      else { const ax = rp.axis === 'x' || rp.axis === 'z' ? rp.axis : 'y'; w.rotation[ax] = num(rp.angle, 360, -360, 360) * D2R * i / (rp.angle && Math.abs(rp.angle) < 360 ? Math.max(1, n - 1) : n); }
+      w.add(c); g.add(w); ctx.count += per;
+    }
+    out = g;
+  }
+  return out;
+}
+function buildModel(spec, ctx) {
+  const root = new THREE.Group(); ctx.count = 0; ctx.max = ctx.max || 600;
+  for (const p of (Array.isArray(spec && spec.parts) ? spec.parts : [])) {
+    try { const o = buildPart(p, ctx, 0); if (o) root.add(o); } catch (e) { ctx.errors = (ctx.errors || 0) + 1; }
+  }
+  return root;
+}
+/*CORE-END*/
+
+// ---------- procedural textures ----------
+function pnoise(x, y, per) { // tileable value noise
+  const xi = Math.floor(x), yi = Math.floor(y); let xf = x - xi, yf = y - yi;
+  xf = xf * xf * (3 - 2 * xf); yf = yf * yf * (3 - 2 * yf);
+  const h = (a, b) => hash3(((a % per) + per) % per, ((b % per) + per) % per, per);
+  return (h(xi, yi) * (1 - xf) + h(xi + 1, yi) * xf) * (1 - yf) + (h(xi, yi + 1) * (1 - xf) + h(xi + 1, yi + 1) * xf) * yf;
+}
+const pfbm = (u, v, f) => pnoise(u * f, v * f, f) * .5 + pnoise(u * f * 2, v * f * 2, f * 2) * .3 + pnoise(u * f * 4, v * f * 4, f * 4) * .2;
+const PAT = {
+  noise: (u, v) => pfbm(u, v, 8),
+  stone: (u, v) => pfbm(u, v, 5) * .7 + pfbm(u, v, 24) * .3,
+  brushed: (u, v) => pnoise(u * 3, v * 200, 200) * .7 + pfbm(u, v, 6) * .3,
+  scratched: (u, v) => { const a = pnoise(u * 2 + v * 3, v * 160, 160), b = pnoise(u * 140, v * 2 - u * 3, 140); return pfbm(u, v, 10) * .6 + (a > .9 ? .16 : 0) + (b > .93 ? .12 : 0); },
+  wood: (u, v) => { const w = pfbm(u, v, 3) * 1.2; return (Math.sin((u * 8 + w) * Math.PI * 2) * .5 + .5) * .5 + pnoise(u * 6, v * 200, 200) * .5; },
+  fabric: (u, v) => (Math.sin(u * Math.PI * 2 * 48) * .5 + .5) * (Math.sin(v * Math.PI * 2 * 48) * .5 + .5) * .8 + pfbm(u, v, 16) * .2,
+  leather: (u, v) => { const n = pfbm(u, v, 22); return Math.min(1, Math.abs(n - .5) * 4) * .7 + pfbm(u, v, 6) * .3; },
+};
+const REPEAT = { noise: 2, stone: 2, brushed: 2, scratched: 2, wood: 1, fabric: 6, leather: 3 };
+const COLORED = { wood: 1, stone: 1, leather: 1, fabric: 1 };
+const texCache = new Map();
+function makeTex(type, hex, scale) {
+  const f = PAT[type]; if (!f) return null;
+  const key = type + hex + scale; if (texCache.has(key)) return texCache.get(key);
+  const S = 256, mkc = () => { const c = document.createElement('canvas'); c.width = c.height = S; return c; };
+  const cg = mkc(), xg = cg.getContext('2d'), ig = xg.createImageData(S, S);
+  const col = COLORED[type] ? new THREE.Color(hex) : null, cc = col && mkc(), xc = cc && cc.getContext('2d'), ic = cc && xc.createImageData(S, S);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const v = f(x / S, y / S), i = (y * S + x) * 4, g = Math.round((.55 + .45 * v) * 255);
+    ig.data[i] = ig.data[i + 1] = ig.data[i + 2] = g; ig.data[i + 3] = 255;
+    if (ic) { const k = .62 + .5 * v; ic.data[i] = Math.min(255, col.r * 255 * k); ic.data[i + 1] = Math.min(255, col.g * 255 * k); ic.data[i + 2] = Math.min(255, col.b * 255 * k); ic.data[i + 3] = 255; }
+  }
+  xg.putImageData(ig, 0, 0); if (ic) xc.putImageData(ic, 0, 0);
+  const wrap = (c, srgb) => { const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; const r = REPEAT[type] * scale; t.repeat.set(r, r); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+  const out = { gray: wrap(cg, false), map: cc ? wrap(cc, true) : null };
+  texCache.set(key, out); return out;
+}
+
+// ---------- materials ----------
+const PRESET = {
+  metal: { metal: 1, rough: .38, color: '#b9bdc4', tex: 'scratched' }, chrome: { metal: 1, rough: .06, color: '#e8eaee' },
+  gold: { metal: 1, rough: .24, color: '#d9a441', tex: 'noise' }, iron: { metal: 1, rough: .62, color: '#3a3c42', tex: 'noise' },
+  plastic: { metal: 0, rough: .42, color: '#d0d0d0' }, rubber: { metal: 0, rough: .95, color: '#1b1b1d', tex: 'noise' },
+  glass: { metal: 0, rough: .04, color: '#ffffff', glass: 1 }, paint: { metal: .35, rough: .38, color: '#b3121c', clearcoat: 1 },
+  wood: { metal: 0, rough: .68, color: '#8a5a33', tex: 'wood' }, fabric: { metal: 0, rough: .96, color: '#566a8c', tex: 'fabric', sheen: .6 },
+  leather: { metal: 0, rough: .58, color: '#5a3520', tex: 'leather' }, stone: { metal: 0, rough: .92, color: '#8b8b86', tex: 'stone' },
+  ceramic: { metal: 0, rough: .14, color: '#f2efe8', clearcoat: .7 }, skin: { metal: 0, rough: .55, color: '#d8a583', tex: 'noise' },
+  emissive: { metal: 0, rough: .5, color: '#ffb347', glow: 2.5 },
+};
+let HIGH = true; const glassMats = new Set();
+function matFactory(defs) {
+  const cache = new Map(); defs = defs && typeof defs === 'object' ? defs : {};
+  return (id, dbl) => {
+    const key = id + (dbl ? '|d' : ''); if (cache.has(key)) return cache.get(key);
+    const d = defs[id] && typeof defs[id] === 'object' ? defs[id] : {}, P = { ...(PRESET[d.preset] || PRESET.plastic), ...d };
+    let hex = '#cccccc'; try { hex = '#' + new THREE.Color(String(P.color)).getHexString(); } catch (e) {}
+    const phys = P.clearcoat || P.sheen || P.glass;
+    const m = phys ? new THREE.MeshPhysicalMaterial() : new THREE.MeshStandardMaterial();
+    m.color.set(hex); m.metalness = num(P.metal, 0, 0, 1); m.roughness = num(P.rough, .5, .02, 1);
+    if (P.clearcoat) { m.clearcoat = num(P.clearcoat, 1, 0, 1); m.clearcoatRoughness = .08; }
+    if (P.sheen) { m.sheen = num(P.sheen, .5, 0, 1); m.sheenRoughness = .6; m.sheenColor.set(hex); }
+    if (P.glow || P.emissive) { try { m.emissive.set(String(P.emissive || hex)); } catch (e) {} m.emissiveIntensity = num(P.glow, 2, 0, 20); }
+    if (P.glass) { m.ior = 1.5; m.thickness = .02; glassMats.add(m); dbl = true; setGlass(m); }
+    else if (P.opacity != null && P.opacity < 1) { m.transparent = true; m.opacity = num(P.opacity, 1, .05, 1); }
+    const t = P.tex && P.tex !== 'none' ? makeTex(P.tex, hex, num(P.texScale, 1, .1, 20)) : null;
+    if (t) { m.roughnessMap = t.gray; m.bumpMap = t.gray; m.bumpScale = P.tex === 'fabric' || P.tex === 'leather' ? 1.5 : .8; if (t.map) { m.map = t.map; m.color.set('#ffffff'); } }
+    if (dbl) m.side = THREE.DoubleSide;
+    cache.set(key, m); return m;
+  };
+}
+function setGlass(m) { m.transmission = HIGH ? 1 : 0; m.transparent = !HIGH; m.opacity = HIGH ? 1 : .28; m.needsUpdate = true; }
+
+// ---------- viewer ----------
+const $ = id => document.getElementById(id);
+const view = $('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+view.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; pm.dispose();
+const camera = new THREE.PerspectiveCamera(35, 1, .01, 1000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = .08; controls.autoRotate = true; controls.autoRotateSpeed = 1.2;
+const key = new THREE.DirectionalLight(0xfff1e0, 2.6); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0005; key.shadow.normalBias = .02; key.shadow.radius = 4;
+const rim = new THREE.DirectionalLight(0x9fc4ff, 1.4), fill = new THREE.HemisphereLight(0xffffff, 0x30343c, .35);
+scene.add(key, key.target, rim, fill);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(1, 64), new THREE.ShadowMaterial({ opacity: .45 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+let model = null, home = null, until = 0, raf = 0, cur = null;
+
+function resize() { const w = view.clientWidth, h = view.clientHeight; renderer.setPixelRatio(Math.min(devicePixelRatio || 1, HIGH ? 1.5 : 1)); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); wake(); }
+new ResizeObserver(resize).observe(view);
+function wake(ms = 1500) { until = performance.now() + ms; if (!raf) raf = requestAnimationFrame(loop); }
+function loop() { raf = 0; controls.update(); renderer.render(scene, camera); if (!document.hidden && (controls.autoRotate || performance.now() < until)) raf = requestAnimationFrame(loop); }
+controls.addEventListener('change', () => wake()); controls.addEventListener('start', () => wake(4000));
+document.addEventListener('visibilitychange', () => wake());
+
+function disposeModel() {
+  if (!model) return; scene.remove(model); const seen = new Set();
+  model.traverse(o => { if (o.isMesh) { o.geometry.dispose(); seen.add(o.material); } });
+  seen.forEach(m => { glassMats.delete(m); m.dispose(); }); model = null;
+}
+function showSpec(spec) {
+  disposeModel(); cur = spec;
+  const ctx = { mat: matFactory(spec.materials), max: 600 };
+  const root = buildModel(spec, ctx);
+  root.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(root);
+  if (box.isEmpty()) { note('That model came back empty — try again.'); return false; }
+  const c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()), R = Math.max(1e-4, size.length() / 2);
+  const k = 1 / R; root.scale.setScalar(k); root.position.set(-c.x * k, -box.min.y * k, -c.z * k); // normalise to radius 1
+  model = root; scene.add(root);
+  const h = size.y * k;
+  ground.scale.setScalar(6); key.position.set(2.2, h + 3, 2.6); key.target.position.set(0, h / 2, 0); rim.position.set(-3, h + 1.5, -3);
+  const sc = key.shadow.camera; sc.left = sc.bottom = -1.6; sc.right = sc.top = 1.6; sc.near = .1; sc.far = 12; sc.updateProjectionMatrix();
+  const dist = 1.15 / Math.sin(camera.fov * D2R / 2) / Math.min(1, camera.aspect);
+  home = { pos: new THREE.Vector3(dist * .62, h / 2 + dist * .32, dist * .72), tgt: new THREE.Vector3(0, h / 2, 0) };
+  resetView();
+  let tris = 0, meshes = 0; root.traverse(o => { if (o.isMesh) { meshes++; const g = o.geometry; tris += (g.index ? g.index.count : g.attributes.position.count) / 3; } });
+  $('title').textContent = String(spec.name || 'Untitled').slice(0, 60);
+  $('stats').textContent = meshes + ' parts · ' + (tris > 999 ? Math.round(tris / 1000) + 'k' : Math.round(tris)) + ' tris';
+  $('refineBox').classList.toggle('hide', !sample);
+  return true;
+}
+function resetView() { if (!home) return; camera.position.copy(home.pos); controls.target.copy(home.tgt); controls.update(); wake(); }
+$('bReset').onclick = resetView;
+$('bRot').onclick = e => { controls.autoRotate = !controls.autoRotate; e.target.classList.toggle('on', controls.autoRotate); wake(); };
+$('bQ').onclick = e => { HIGH = !HIGH; e.target.textContent = 'Quality: ' + (HIGH ? 'High' : 'Low'); e.target.classList.toggle('on', HIGH);
+  renderer.shadowMap.enabled = HIGH; key.castShadow = HIGH; glassMats.forEach(setGlass); scene.traverse(o => { if (o.material) o.material.needsUpdate = true; }); resize(); };
+if ((navigator.deviceMemory && navigator.deviceMemory <= 3) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)) $('bQ').click();
+
+// ---------- generation ----------
+const RULES = `You are a senior game-studio 3D prop/character modeler. Build the requested object as a JSON model spec that a procedural renderer turns into a realistic PBR 3D model. Think like a modeler: silhouette first, then secondary forms, then small details.
+
+OUTPUT: only one JSON object, no prose, no code fence. Compact (no extra whitespace).
+{"name":"Short name","materials":{"<id>":{...}},"parts":[...]}
+
+COORDINATES: metres, Y up, model stands on y=0, centred on x=0,z=0, front faces +Z. Rotations "r" are degrees [x,y,z]. Use true real-world proportions.
+
+MATERIAL fields: "preset" (metal|chrome|gold|iron|plastic|rubber|glass|paint|wood|fabric|leather|stone|ceramic|skin|emissive), optional "color":"#rrggbb", "rough":0-1, "metal":0-1, "clearcoat":0-1, "glow":0-10, "opacity":0-1, "tex":(none|noise|scratched|brushed|wood|fabric|leather|stone), "texScale":number. Define 4-10 materials; vary colour/roughness between neighbouring parts; real objects are never one flat colour. Slightly desaturated, believable colours.
+
+PART fields (all parts): "n" name, "t" type, "m" material id, "p":[x,y,z] position, "r":[x,y,z] rotation, "sc":[x,y,z] scale, optional "mirror":"x" (adds a copy mirrored across the parent's x=0 plane - use for every left/right pair), optional "repeat":{"n":8,"axis":"y"} (n copies evenly around the parent's axis; add "angle":90 for a partial arc) or {"n":5,"step":[dx,dy,dz]} (linear copies), optional "noise":{"amp":0.03,"freq":3,"seed":1} (organic surface displacement, amp is fraction of part size - use on rock, bark, cloth, flesh, hammered or worn things), optional "children":[parts] (inherit this part's transform).
+TYPES:
+ box      "s":[w,h,d], "bevel":radius (auto small bevel; 0 = sharp)
+ sphere   "s":[radius] (use "sc" for ellipsoids)
+ cyl      "s":[rTop,rBottom,height], "bevel" - axis along Y, centred
+ cone     "s":[radius,height]
+ capsule  "s":[radius,lengthOfStraightSection] - axis along Y
+ torus    "s":[ringRadius,tubeRadius], "arc":degrees - ring lies in the XY plane (r:[90,0,0] to lay it flat)
+ lathe    "pts":[[radius,y],...] bottom to top, revolved around Y; "smooth":true (default, spline) or false (hard edges). Start and end at radius 0 for a closed solid. USE THIS for anything round: bottles, vases, wheels, pommels, barrels, lamp shades, heads, bowls, bells, nozzles.
+ extrude  "pts":[[x,y],...] closed 2D outline in the XY plane, "depth" along Z (centred), "bevel", "smooth":true for curvy outlines, "holes":[[[x,y],...]]. USE THIS for blades, plates, gears, brackets, wings, fins, leaves, letters-as-shapes, any flat profiled part.
+ tube     "path":[[x,y,z],...] smooth curve, "radius" or "radii":[r0,r1,...] along the path (taper to 0 for pointed/rounded tips), "closed":true for loops. USE THIS for handles, cables, pipes, limbs, tails, horns, straps, branches, rails.
+ group    only "children" (plus transform/mirror/repeat).
+
+QUALITY BAR:
+- Prefer lathe/extrude/tube with 8-20 well-placed points over stacks of boxes. Boxes only for genuinely boxy parts.
+- Parts must touch or slightly overlap their neighbours (no floating gaps, no z-fighting: never put two faces exactly coplanar; offset by 1-2 mm).
+- Add the details that sell realism: rims, lips, seams, rivets/screws (repeat), bands, grooves (thin dark rings), buttons, vents, stitching, feet, wear plates, fasteners, labels as plain shapes.
+- Thickness everywhere: edges of plates, glass walls, rims.
+- Organic subjects: build from tapered tubes, scaled spheres and smooth lathes with gentle noise; overlap forms generously so they read as one body.
+- No real brand logos, no text.
+- Every "m" must exist in "materials". Numbers only (no expressions). Max 3 decimals.`;
+const DETAIL = { draft: { parts: '25-45', tier: 'default' }, std: { parts: '60-100', tier: 'default' }, high: { parts: '110-170', tier: 'complex' } };
+let detail = 'std', refFile = null, sample = null, db = null, downloads = null, ctl = null, selId = null;
+const note = t => { $('note').textContent = t || ''; };
+const ERR = { not_granted: 'Allow this page to use Claude to generate models.', rate_limited: 'Usage limit reached — try again in a bit.', refused: 'Claude declined that request. Try a different description.', session_expired: 'Please sign in again.', image_rejected: 'That image could not be used — try another file.', images_unavailable: 'Images are not available here — try text only.', prompt_too_large: 'Too much text — shorten the description.' };
+function parseSpec(text) {
+  const a = text.indexOf('{'), b = text.lastIndexOf('}'); if (a < 0 || b <= a) throw new Error('nojson');
+  const s = JSON.parse(text.slice(a, b + 1)); if (!s || !Array.isArray(s.parts) || !s.parts.length) throw new Error('noparts'); return s;
+}
+async function run(input, images, tier, label, promptText) {
+  if (!sample || ctl) return;
+  ctl = new AbortController(); $('busy').classList.add('show'); $('busyTxt').textContent = label + '\nThinking…'; $('go').disabled = true; note('');
+  try {
+    const { text, truncated } = await sample(input, { signal: ctl.signal, modelTier: tier, cache: false, ...(images ? { images } : {}),
+      onText: ({ text }) => { $('busyTxt').textContent = label + '\n' + ((text.match(/"t":/g) || []).length) + ' parts sculpted'; } });
+    let spec;
+    try { spec = parseSpec(text); } catch (e) { note(truncated ? 'The model was too big and got cut off — try a lower Detail level.' : 'Claude returned something unreadable — tap Generate again.'); return; }
+    if (showSpec(spec)) await saveModel(spec, promptText);
+  } catch (e) {
+    if (e && e.code !== 'cancelled') note(ERR[e.code] || 'Something went wrong — try again.');
+  } finally { ctl = null; $('busy').classList.remove('show'); $('go').disabled = false; }
+}
+$('bStop').onclick = () => ctl && ctl.abort();
+$('go').onclick = () => {
+  const txt = $('prompt').value.trim();
+  if (!txt && !refFile) { note('Describe a model or add a reference image first.'); return; }
+  const d = DETAIL[detail];
+  const ask = RULES + `\n\nPART BUDGET: ${d.parts} parts (repeats/mirrors count once).\n\nREQUEST: ` + (txt || 'Recreate the object in the reference image.') +
+    (refFile ? '\n\nA reference image is attached: match its shape, proportions, colours and materials as closely as the part types allow. Model only the main subject, not the background.' : '');
+  run(ask, refFile ? [refFile] : null, d.tier, 'Forging your model…', txt || 'From image');
+};
+function refineRun(instr, withRender) {
+  if (!cur) return;
+  const ask = RULES + '\n\nCURRENT MODEL SPEC:\n' + JSON.stringify(cur).slice(0, 120000) + '\n\nTASK: ' + instr + '\nReturn the COMPLETE updated spec (all parts, not a diff).';
+  if (!withRender) return run(ask, null, 'default', 'Applying changes…', instr);
+  renderer.render(scene, camera);
+  renderer.domElement.toBlob(b => run(ask, b ? [b] : null, DETAIL.high.tier, 'Enhancing…', 'Auto-enhance'), 'image/jpeg', .85);
+}
+$('bRefine').onclick = () => { const t = $('refine').value.trim(); if (t) { refineRun(t, false); $('refine').value = ''; } };
+$('bEnh').onclick = () => refineRun('The attached image is a render of the current spec. Critique it like an art director, then fix it: correct wrong proportions, floating or intersecting parts, flat or boxy forms (replace with lathe/extrude/tube), and add 20-40 more realistic detail parts and better material variety. Keep what already works.', true);
+$('detail').onclick = e => { const b = e.target.closest('button'); if (!b) return; detail = b.dataset.d; [...$('detail').children].forEach(x => x.classList.toggle('on', x === b)); };
+
+// reference image
+function setRef(f) { refFile = f && /^image\/(png|jpeg|webp)$/.test(f.type) ? f : null; const t = $('thumb');
+  if (t.src) URL.revokeObjectURL(t.src); t.style.display = refFile ? 'block' : 'none'; if (refFile) t.src = URL.createObjectURL(refFile); else t.removeAttribute('src');
+  $('dropTxt').textContent = refFile ? refFile.name : 'Tap to add an image'; $('clr').style.display = refFile ? 'block' : 'none'; }
+$('file').onchange = e => setRef(e.target.files[0]);
+$('clr').onclick = e => { e.preventDefault(); $('file').value = ''; setRef(null); };
+const drop = $('drop');
+['dragover', 'dragenter'].forEach(n => drop.addEventListener(n, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(n => drop.addEventListener(n, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => setRef(e.dataTransfer.files[0]));
+
+// ---------- library (db) ----------
+let models = [], first = true;
+const specOf = d => { try { return typeof d.spec === 'string' ? JSON.parse(d.spec) : d.spec; } catch (e) { return null; } };
+function drawLib() {
+  const lib = $('lib'); lib.replaceChildren();
+  if (!models.length) { const e = document.createElement('div'); e.style.cssText = 'color:var(--dim);font-size:13px'; e.textContent = 'Models you or Claude generate appear here.'; lib.append(e); return; }
+  for (const m of models) {
+    const it = document.createElement('div'); it.className = 'item' + (m.id === selId ? ' sel' : '');
+    const b = document.createElement('b'); b.textContent = m.name; const tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = m.by === 'claude' ? 'Claude' : 'You';
+    const del = document.createElement('button'); del.className = 'del'; del.textContent = '✕'; del.title = 'Delete';
+    del.onclick = async e => { e.stopPropagation(); if (del.dataset.ok) { try { if (db) await db.doc('models/' + m.id).delete(); else { models = models.filter(x => x !== m); drawLib(); } } catch (er) { note('Could not delete.'); } } else { del.dataset.ok = 1; del.textContent = 'Delete?'; setTimeout(() => { del.textContent = '✕'; delete del.dataset.ok; }, 3000); } };
+    it.onclick = () => { const s = specOf(m); if (s && showSpec(s)) { selId = m.id; drawLib(); } };
+    it.append(b, tg, del); lib.append(it);
+  }
+}
+async function saveModel(spec, promptText) {
+  const id = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const doc = { name: String(spec.name || 'Untitled').slice(0, 60), prompt: String(promptText || '').slice(0, 500), by: 'you', at: Date.now(), spec: JSON.stringify(spec) };
+  selId = id;
+  if (db) { try { await db.doc('models/' + id).set(doc); return; } catch (e) { note(e && e.code === 'quota_exceeded' ? 'Library is full — delete some models to save new ones.' : 'Model shown but not saved to the library.'); } }
+  models.unshift({ id, ...doc }); drawLib();
+}
+function subscribe() {
+  db.collection('models').orderBy('at', 'desc').limit(40).onSnapshot(snap => {
+    models = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (first) { first = false; if (models.length && !ctl) { const s = specOf(models[0]); if (s && showSpec(s)) selId = models[0].id; } }
+    else for (const ch of snap.docChanges()) if (ch.type === 'added' && ch.doc.id !== selId && !ctl) { const s = specOf(ch.doc.data()); if (s && showSpec(s)) { selId = ch.doc.id; note('New model added: ' + (s.name || '')); } break; }
+    drawLib();
+  }, () => { db = null; });
+}
+
+// ---------- export ----------
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function zipOne(name, bytes) {
+  let crc = 0xFFFFFFFF; for (let i = 0; i < bytes.length; i++) crc = CRC[(crc ^ bytes[i]) & 255] ^ (crc >>> 8); crc = (crc ^ 0xFFFFFFFF) >>> 0;
+  const nm = new TextEncoder().encode(name), n = bytes.length;
+  const lh = new DataView(new ArrayBuffer(30)), ch = new DataView(new ArrayBuffer(46)), eo = new DataView(new ArrayBuffer(22));
+  lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint32(14, crc, true); lh.setUint32(18, n, true); lh.setUint32(22, n, true); lh.setUint16(26, nm.length, true);
+  ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint32(16, crc, true); ch.setUint32(20, n, true); ch.setUint32(24, n, true); ch.setUint16(28, nm.length, true);
+  eo.setUint32(0, 0x06054b50, true); eo.setUint16(8, 1, true); eo.setUint16(10, 1, true); eo.setUint32(12, 46 + nm.length, true); eo.setUint32(16, 30 + nm.length + n, true);
+  return new Blob([lh, nm, bytes, ch, nm, eo]);
+}
+const fname = () => (String(cur && cur.name || 'model').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'model');
+async function save(filename, data) { try { await downloads.save({ filename, data }); } catch (e) { if (e && e.code !== 'declined') note('Could not save the file here.'); } }
+$('bGlb').onclick = () => { if (!model) return; new GLTFExporter().parse(model, buf => save(fname() + '.zip', zipOne(fname() + '.glb', new Uint8Array(buf))), () => note('Export failed.'), { binary: true }); };
+$('bPng').onclick = () => { renderer.render(scene, camera); renderer.domElement.toBlob(b => b && save(fname() + '.png', b), 'image/png'); };
+
+// ---------- demo + boot ----------
+const DEMO = { name: 'Oil lantern (demo)', materials: {
+  brass: { preset: 'gold', color: '#b98a3c', rough: .32, tex: 'scratched' }, iron: { preset: 'iron' }, glass: { preset: 'glass' },
+  flame: { preset: 'emissive', color: '#ffb040', glow: 4 }, wick: { preset: 'fabric', color: '#e8e0cc' } },
+ parts: [
+  { n: 'base', t: 'lathe', smooth: false, m: 'brass', pts: [[0, 0], [.11, 0], [.118, .008], [.118, .022], [.095, .04], [.085, .06], [0, .06]] },
+  { n: 'tank', t: 'lathe', m: 'brass', pts: [[0, .058], [.086, .06], [.098, .085], [.094, .115], [.06, .135], [.034, .142], [0, .142]] },
+  { n: 'tank band', t: 'torus', m: 'iron', s: [.097, .004], p: [0, .09, 0], r: [90, 0, 0] },
+  { n: 'burner', t: 'cyl', m: 'iron', s: [.03, .036, .03], p: [0, .155, 0] },
+  { n: 'wick', t: 'cyl', m: 'wick', s: [.006, .006, .02], p: [0, .178, 0] },
+  { n: 'flame', t: 'lathe', m: 'flame', pts: [[0, .185], [.012, .195], [.013, .208], [.006, .228], [0, .245]] },
+  { n: 'glass', t: 'lathe', m: 'glass', pts: [[.046, .165], [.066, .2], [.076, .25], [.07, .305], [.052, .345], [.046, .36]] },
+  { n: 'cap', t: 'lathe', smooth: false, m: 'brass', pts: [[0, .43], [.018, .43], [.03, .41], [.058, .385], [.062, .37], [.05, .36], [0, .36]] },
+  { n: 'vent', t: 'cyl', m: 'iron', s: [.02, .024, .03], p: [0, .44, 0] },
+  { n: 'cage ring', t: 'torus', m: 'iron', s: [.08, .003], p: [0, .21, 0], r: [90, 0, 0], repeat: { n: 3, step: [0, .05, 0] } },
+  { n: 'guard', t: 'tube', m: 'iron', radius: .004, path: [[.09, .12, 0], [.1, .18, 0], [.098, .3, 0], [.07, .37, 0], [.05, .39, 0]], repeat: { n: 4, axis: 'y' } },
+  { n: 'handle', t: 'tube', m: 'iron', radius: .0035, path: [[.1, .25, 0], [.13, .36, 0], [.09, .5, 0], [0, .55, 0], [-.09, .5, 0], [-.13, .36, 0], [-.1, .25, 0]] },
+  { n: 'rivet', t: 'sphere', m: 'iron', s: [.005], p: [.118, .015, 0], repeat: { n: 12, axis: 'y' } },
+ ] };
+resize(); showSpec(DEMO);
+window.__forge = { showSpec, DEMO };
+(async () => {
+  if (!window.claude || !claude.use) { $('go').disabled = true; note('Open this page inside Claude to generate models.'); return; }
+  claude.use('db').then(d => { if (d) { db = d; subscribe(); } });
+  claude.use('downloads').then(d => { if (d) { downloads = d; $('bGlb').classList.remove('hide'); $('bPng').classList.remove('hide'); } });
+  sample = await claude.use('sample');
+  if (!sample) { $('go').disabled = true; note('Generating is not available in this view — ask Claude in chat to add a model here.'); }
+  else if (cur) $('refineBox').classList.remove('hide');
+})();
+</script>
+</body>
+</html>
