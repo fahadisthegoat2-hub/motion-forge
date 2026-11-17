@@ -76,7 +76,7 @@ S('kilo', { cut: 'whip', set: ROOM, look: 'cinematic',
   camera: { pos: [[0, [-0.28, 1.3, 0.0]], [dur('kilo'), [-0.24, 1.15, -0.08], 'inOutSine']], look: [[0, [0, TABLE_Y, -0.3]]], fov: 40, roll: 0.2 },
   fx: [...TABLESET(), M('fork', [0.17, TABLE_Y + 0.004, -0.32], { height: 0.21, tilt: [[0, [-P / 2, 0, 0]]] })] });
 // 7 · "It takes him two years." — time-lapse: the plane shrinks behind him
-S('years', { cut: 'dip', set: FIELD, look: 'golden-hour', time: [[0, 0], [dur('years'), dur('years') * 3]],
+S('years', { cut: 'dip', set: FIELD, look: 'cinematic', time: [[0, 0], [dur('years'), dur('years') * 3]],
   camera: { pos: [[0, [2.2, 1.7, 4.2]], [dur('years') * 3, [1.8, 1.6, 3.7], 'linear']], look: [[0, [-0.7, 1.1, -2.8]]], fov: 44 },
   cast: { hero: seated({ reach: FORKUP(9), look: [[0, 'hero.righthand']], acting: 'none' }) },
   fx: [PLANE({ scale: [[0, 1], [dur('years') * 1.2, 0.75, 'inOutSine'], [dur('years') * 2.2, 0.42, 'inOutSine'], [dur('years') * 3, 0.15, 'inOutSine']] }), ...TABLESET(), FORK] });
@@ -109,7 +109,7 @@ S('stomach', { cut: 'zoom', set: 'void', look: 'neon-night',
 S('guinness', { cut: 'whip', set: ROOM, look: 'cinematic',
   camera: { move: 'push', target: 'hero', size: 'ms', az: 35 },
   cast: { hero: seated({ look: [[0, [0, TABLE_Y + 0.15, -0.2]]], face: { smile: [[0.3, 0.5]] }, gestures: [{ type: 'present', start: 0.3, end: dur('guinness'), side: 'left' }] }) },
-  fx: [...TABLESET(), M('plaque', [0.02, TABLE_Y + 0.022, -0.3], { height: 0.26, rotY: 0.55 })] });
+  fx: [...TABLESET(), M('plaque', [-0.16, TABLE_Y, -0.12], { height: 0.26, rotY: 0.35 })] });
 // 14 · "He ate that too." — smash cut: the plate is empty, he smirks
 S('ate', { cut: 'smash', set: ROOM, look: 'cinematic', punch: [0.3],
   camera: { pos: [[0, [0.65, 1.55, 0.75]], [dur('ate'), [0.6, 1.5, 0.65], 'inOutSine']], look: [[0, [0, 1.0, -0.45]]], fov: 42, handheld: 0.3 },
@@ -129,7 +129,7 @@ const titles = [
   { t: at('saws', 0.05), t1: at('swallow', -0.1), style: 'wipe', text: 'MICHEL LOTITO', sub: '"MONSIEUR MANGETOUT"', pos: [0.5, 0.07] },
   { t: at('kilo', 0.1), t1: at('years'), style: 'counter', from: 0, to: 1, suffix: ' KG', sub: 'OF METAL · EVERY DAY', pos: [0.5, 0.13], dur: 0.5 },
   { t: at('years', 0.1), t1: at('worst'), style: 'counter', from: 0, to: 2, suffix: ' YEARS', sub: '1978 → 1980', pos: [0.5, 0.12], dur: 1.2 },
-  { t: at('bikes', 0.9), t1: at('tvs'), style: 'counter', from: 0, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
+  { t: at('bikes', 0.9), t1: at('tvs', -0.25), style: 'counter', from: 0, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
   { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 0, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.5 },
   { t: at('stomach', 0.2), t1: at('guinness'), style: 'callout', at: 'hero.stomach', text: 'STOMACH LINING', sub: '2× THICKER', icon: 'warning', side: 1 },
   { t: at('stomach', 0.1), t1: at('guinness'), style: 'pulse', at: 'hero.stomach', beat: 70 },
