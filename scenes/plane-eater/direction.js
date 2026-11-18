@@ -100,11 +100,11 @@ S('tvs', { cut: 'zoom', set: { type: 'studio' }, look: 'clean-cg',
 // 11 · "Doctors found…" — x-ray
 S('doctors', { cut: 'flash', set: 'void', look: 'neon-night',
   camera: { move: 'push', target: 'hero', size: 'mls', az: 0 },
-  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(4), xray: [[0, 0], [0.4, 1]], look: [[0, [0.4, 1.6, 3]]], acting: 'none' } } });
+  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(4), xray: [[0, 0], [0.4, 0.8]], look: [[0, [0.4, 1.6, 3]]], acting: 'none' } } });
 // 12 · "…his stomach lining was twice as thick."
 S('stomach', { cut: 'zoom', set: 'void', look: 'neon-night',
   camera: { move: 'dolly-in', target: 'hero', size: 'ms', az: 15 },
-  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(4), xray: [[0, 1]], look: [[0, [0.4, 1.6, 3]]], acting: 'none' } } });
+  cast: { hero: { pos: [[0, [0, 0, 0]]], rotY: [[0, 0]], clips: idle(4), xray: [[0, 0.8]], look: [[0, [0.4, 1.6, 3]]], acting: 'none' } } });
 // 13 · "Guinness gave him a plaque."
 S('guinness', { cut: 'whip', set: ROOM, look: 'cinematic',
   camera: { move: 'push', target: 'hero', size: 'ms', az: 35 },
@@ -131,6 +131,7 @@ const titles = [
   { t: at('years', 0.1), t1: at('worst'), style: 'slam', text: '2 YEARS\n1978 → 1980', pos: [0.5, 0.1], size: 0.08, accent: ACC },
   { t: at('bikes', 0.9), t1: at('tvs', -0.55), style: 'counter', from: 3, to: 18, suffix: ' BICYCLES', pos: [0.5, 0.12], dur: 0.9 },
   { t: at('tvs', 0.05), t1: at('doctors'), style: 'counter', from: 3, to: 7, suffix: ' TVs', sub: '+ 1 COFFIN', pos: [0.5, 0.12], dur: 0.4 },
+  { t: at('doctors', 0.05), t1: at('stomach', 0.1), style: 'scan' },
   { t: at('stomach', 0.2), t1: at('guinness'), style: 'callout', at: 'hero.stomach', text: 'STOMACH LINING', sub: '2× THICKER', icon: 'warning', side: 1 },
   { t: at('stomach', 0.1), t1: at('guinness'), style: 'pulse', at: 'hero.stomach', beat: 70 },
   { t: at('guinness', 0.1), t1: at('ate'), style: 'wipe', text: 'GUINNESS RECORD', sub: 'STRANGEST DIET', pos: [0.5, 0.12] },
