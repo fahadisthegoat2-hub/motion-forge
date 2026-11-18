@@ -44,7 +44,7 @@ const out = {};
     { n: 'pipe_stand', t: 'cyl', m: 'steel', s: [0.02, 0.02, gapY + 0.05], p: [1.55, (gapY + 0.05) / 2, pipeZ], mirror: 'x' },
   ];
   out.accel_magnet = { name: 'U-70 Bending Magnet', materials: {
-    paint: { preset: 'paint', color: '#2d5f8a', rough: 0.45, clearcoat: 0.3, tex: 'scratched' }, seam: { preset: 'iron', color: '#1d2a36', rough: 0.7 },
+    paint: { preset: 'paint', color: '#2d5f8a', rough: 0.45, tex: 'scratched' }, seam: { preset: 'iron', color: '#1d2a36', rough: 0.7 },
     pole: { preset: 'metal', color: '#8a9096', rough: 0.3, tex: 'brushed' }, copper: { preset: 'metal', color: '#b4683a', rough: 0.32, tex: 'brushed' },
     tape: { preset: 'fabric', color: '#d9cfa8', rough: 0.85 }, chrome: { preset: 'chrome' }, steel: { preset: 'metal', color: '#a5aab0', rough: 0.35 },
     dark: { preset: 'iron', color: '#2a2c30' }, rubber: { preset: 'rubber', color: '#191a1c' }, blue: { preset: 'paint', color: '#2f6fbf', rough: 0.4 },
@@ -103,7 +103,7 @@ const out = {};
     wallpaint: { preset: 'paint', color: '#4f7a6c', rough: 0.6, tex: 'noise' }, redstripe: { preset: 'paint', color: '#9b2f28', rough: 0.55 }, seam: { preset: 'stone', color: '#58564f', rough: 1 },
     galv: { preset: 'metal', color: '#9ea4a8', rough: 0.55, tex: 'noise' }, steel: { preset: 'metal', color: '#7d8389', rough: 0.45, tex: 'scratched' },
     cableBlk: { preset: 'rubber', color: '#1e1f22' }, cableOr: { preset: 'rubber', color: '#9c4b1c' }, bluepipe: { preset: 'paint', color: '#2f5f9a', rough: 0.45 },
-    greenpipe: { preset: 'paint', color: '#3f6b48', rough: 0.5 }, red: { preset: 'paint', color: '#b02a22', rough: 0.4, clearcoat: 0.4 }, grey: { preset: 'paint', color: '#8d9192', rough: 0.55 },
+    greenpipe: { preset: 'paint', color: '#3f6b48', rough: 0.5 }, red: { preset: 'paint', color: '#b02a22', rough: 0.4 }, grey: { preset: 'paint', color: '#8d9192', rough: 0.55 },
     dark: { preset: 'iron', color: '#26282b' }, yellow: { preset: 'paint', color: '#e2b324', rough: 0.5 }, rubber: { preset: 'rubber' },
     lightglow: { preset: 'emissive', color: '#eaf6ff', glow: 5 }, redglow: { preset: 'emissive', color: '#ff2a18', glow: 5 }, greenglow: { preset: 'emissive', color: '#3cff6a', glow: 4 }, plate: { preset: 'metal', color: '#d6d0bd', rough: 0.4 } }, parts };
 }
@@ -152,7 +152,7 @@ const out = {};
   ];
   out.control_console = { name: 'Soviet Accelerator Control Desk', materials: {
     cabinet: { preset: 'paint', color: '#7c8f86', rough: 0.5, tex: 'scratched' }, cabinet2: { preset: 'paint', color: '#6c7e75', rough: 0.55 }, panelgrey: { preset: 'paint', color: '#5c6560', rough: 0.45, tex: 'noise' },
-    formica: { preset: 'plastic', color: '#c9c1a6', rough: 0.35 }, dark: { preset: 'iron', color: '#26282b' }, chrome: { preset: 'chrome' }, bakelite: { preset: 'plastic', color: '#1a1513', rough: 0.25, clearcoat: 0.5 },
+    formica: { preset: 'plastic', color: '#c9c1a6', rough: 0.35 }, dark: { preset: 'iron', color: '#26282b' }, chrome: { preset: 'chrome' }, bakelite: { preset: 'plastic', color: '#1a1513', rough: 0.25 },
     redknob: { preset: 'plastic', color: '#b0221a', rough: 0.3 }, bezel: { preset: 'metal', color: '#2f3133', rough: 0.4 }, dial: { preset: 'ceramic', color: '#efe8d4', rough: 0.5 },
     glass: { preset: 'glass', opacity: 0.25 }, greenglow: { preset: 'emissive', color: '#52ff7a', glow: 3 }, amberglow: { preset: 'emissive', color: '#ffb12a', glow: 3 }, whiteglow: { preset: 'emissive', color: '#fff4dc', glow: 2 },
     redglow: { preset: 'emissive', color: '#ff2a18', glow: 5 }, yellow: { preset: 'paint', color: '#e2b324' }, plate: { preset: 'metal', color: '#d9d3c0', rough: 0.4 },
@@ -211,5 +211,8 @@ const out = {};
     amber: { preset: 'glass', color: '#9a5a1a', opacity: 0.7 } }, parts };
 }
 
+// renderer-safe: ultra-thin repeated parts (seams, bolts, slats) speckle the hero in front of them — dropped
+const DROP = { accel_magnet: ['lam_low', 'lam_up', 'hazard_s', 'topbolt', 'sidebolt', 'jack'], accel_tunnel: ['grate', 'anchor', 'panelseam', 'sleeper'] };
+for (const [id, names] of Object.entries(DROP)) out[id].parts = out[id].parts.filter((p) => !names.includes(p.n));
 if (require.main === module) { const fs = require('fs'); for (const [id, s] of Object.entries(out)) fs.writeFileSync(__dirname + '/' + id + '.json', JSON.stringify(s)); console.log(Object.keys(out).join(' ')); }
 module.exports = out;

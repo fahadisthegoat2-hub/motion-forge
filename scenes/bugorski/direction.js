@@ -33,7 +33,7 @@ const VOID = { type: 'void', id: 'tunnel' };
 const MAG_H = 2.1, MS = MAG_H / 1.51;                 // magnet scale
 const BEAM_Y = +(0.8 * MS).toFixed(3), BEAM_Z = +(-1.3 + 0.3 * MS).toFixed(3);   // beam line through the magnet gaps
 const PIPE_END = +(4 - 1.45 * MS).toFixed(3);      // open beam section between the two magnets (x = ±PIPE_END)
-const TUNNEL = [-12, -8, -4, 0, 4, 8, 12, 16, 20].map((x) => ({ type: 'model', id: 'accel_tunnel', height: 3.77, p: [[0, [x, 0.004, 0]]] }));
+const TUNNEL = [-12, -8, -4, 0, 4, 8, 12, 16, 20].map((x) => ({ type: 'model', id: 'accel_tunnel', height: 3.77, shadow: false, p: [[0, [x, 0.004, 0]]] }));
 const MAGNETS = [-4, 4, 10.4, 16.8].map((x) => ({ type: 'model', id: 'accel_magnet', height: MAG_H, p: [[0, [x, 0.004, -1.3]]] }));
 const ACCEL = [...TUNNEL, ...MAGNETS];
 const CONSOLE = { type: 'model', id: 'control_console', height: 1.94, p: [[0, [-10.0, 0.004, -1.75]]] };

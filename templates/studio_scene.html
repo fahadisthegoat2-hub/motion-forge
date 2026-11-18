@@ -574,7 +574,7 @@ composer.addPass(bokeh);
 // sanitize HDR before bloom: a single NaN/Inf pixel (bad normals in some imported meshes) would otherwise smear black over the frame
 composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-  fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); bool bad = !(c.r == c.r) || !(c.g == c.g) || !(c.b == c.b) || c.r > 6.0e4 || c.g > 6.0e4 || c.b > 6.0e4; gl_FragColor = bad ? vec4(0., 0., 0., 1.) : vec4(min(c.rgb, vec3(48.)), c.a); }' }));
+  fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; bool bd(vec4 c){ return !(c.r == c.r) || !(c.g == c.g) || !(c.b == c.b) || c.r > 6.0e4 || c.g > 6.0e4 || c.b > 6.0e4; } void main(){ vec4 c = texture2D(tDiffuse, vUv); if (!bd(c)) { gl_FragColor = vec4(min(c.rgb, vec3(48.)), c.a); return; } vec2 px = 1. / vec2(textureSize(tDiffuse, 0)); vec3 acc = vec3(0.); float n = 0.; for (int i = -2; i <= 2; i++) for (int j = -2; j <= 2; j++) { vec4 q = texture2D(tDiffuse, vUv + vec2(float(i), float(j)) * px); if (!bd(q)) { acc += min(q.rgb, vec3(48.)); n += 1.; } } gl_FragColor = vec4(n > 0. ? acc / n : vec3(0.), 1.); }' }));   // a NaN pixel takes the average of its finite neighbours (no black specks)
 const bloom = new UnrealBloomPass(new THREE.Vector2(CONFIG.width, CONFIG.height), 0.3, 0.45, 0.95);
 if (FAST) renderer.shadowMap.type = THREE.PCFShadowMap;
 composer.addPass(bloom);
@@ -2052,7 +2052,7 @@ const FXP = {
       if (!r) { console.warn('model missing', f.id); return; }
       const m = r.scene, b = new THREE.Box3().setFromObject(m), h = (b.max.y - b.min.y) || 1, k = (f.height ?? h) / h;
       m.scale.setScalar(k); m.position.set(-(b.min.x + b.max.x) / 2 * k, -b.min.y * k, -(b.min.z + b.max.z) / 2 * k);
-      m.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (f.color && o.material) { o.material = o.material.clone(); o.material.color = new THREE.Color(f.color); if (f.flat) o.material.map = null; } } });
+      m.traverse((o) => { if (o.isMesh) { o.castShadow = f.shadow !== false; o.receiveShadow = true; if (f.color && o.material) { o.material = o.material.clone(); o.material.color = new THREE.Color(f.color); if (f.flat) o.material.map = null; } } });
       holder.add(m);
     }));
     return { parts: [{ obj: holder, update(lt) {
