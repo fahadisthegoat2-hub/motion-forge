@@ -1,0 +1,8 @@
+FACTS (story-research) — The Fake Surgeon
+- Ferdinand Waldo Demara Jr. (1921–1982), "The Great Impostor".
+- 1951: used the credentials of Dr. Joseph C. Cyr (a real New Brunswick physician) to join the Royal Canadian Navy as a surgeon-lieutenant.
+- Served aboard the destroyer HMCS Cayuga during the Korean War.
+- Treated 16 wounded Korean combatants brought aboard; performed major surgery, including removing a bullet lodged near a patient's heart. Prepared by speed-reading a medical textbook. All patients survived.
+- Navy press office publicised the story; the real Dr. Cyr's family/he saw the coverage → identity exposed; Navy dismissed him (no charges), deported to the US.
+Narration lines checked against the above: "bullet from a man's chest" ✓, "not a doctor" ✓, "1951" ✓, "steals a real doctor's name" ✓, "joins a warship as its surgeon" ✓, "sixteen" ✓, "speed-reads a surgery textbook" ✓ ("locks his door" = dramatised), "an inch from the heart" (sources: "near / a fraction of an inch from the heart") ✓, "every patient lives" ✓, "newspapers call him a hero" ✓, "the real doctor sees the story" ✓, "caught" ✓.
+Graphics: HMCS CAYUGA ✓, DR. JOSEPH CYR ✓, 16 WOUNDED ✓, KOREAN WAR ✓.

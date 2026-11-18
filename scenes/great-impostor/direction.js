@@ -29,16 +29,16 @@ const cast = {
 const SEA = { type: 'ocean', id: 'sea', swell: 1.2, calm: 0 };
 const kneel = (d) => [{ clip: 'kneel', start: -2, end: d + 1, loop: false }];
 const fix = (d) => [{ clip: 'fix', start: 0, end: d + 1 }];
-const lie = (d) => [{ clip: 'die', start: -4, end: d + 1, loop: false }];
+const lie = (d) => [{ clip: 'die', fade: 0, start: -12, end: d + 1, loop: false }];
 const idle = (d) => [{ clip: 'idle', start: 0, end: d + 1 }];
 const at0 = (x, y, z) => [[0, [x, y, z]]];
 // surgery layout: p1 lies on the operating table (long axis X, pad top 0.96 m); the impostor stands on its +Z side facing it
-const TOP = 0.96;
+const TOP = 1.0;
 const OR = (o = {}) => [{ type: 'model', id: 'operating_table', height: 0.97, p: [[0, [0, 0, 0]]] }, { type: 'model', id: 'instrument_tray', height: 1.07, p: [[0, [1.35, 0, 0.55]]], rotY: -0.4 },
   { type: 'model', id: 'surgical_lamp', height: 1.57, p: [[0, [0, 2.25, 0]]] }];
-const PAT = (d, o = {}) => ({ pos: at0(0, TOP, 0), rotY: [[0, 0]], clips: lie(d), acting: 'none', face: { worried: [[0, 0.5]] }, ...o });
-const SURG = (d, o = {}) => ({ pos: at0(0.05, 0, 0.62), rotY: [[0, P]], clips: idle(d), hands: { both: 'pinch' },
-  reach: [{ hand: 'right', to: 'p1.chest', offset: [0.04, 0.06, 0.06], start: 0, end: d }, { hand: 'left', to: 'p1.chest', offset: [-0.1, 0.05, 0.08], start: 0, end: d }],
+const PAT = (d, o = {}) => ({ pos: at0(0, TOP, 0), rotY: [[0, -P / 2]], clips: lie(d), acting: 'none', face: { worried: [[0, 0.5]] }, ...o });
+const SURG = (d, o = {}, rs = -1, bl = 0.01) => ({ pos: at0(0.3, 0, 0.44), rotY: [[0, P]], clips: idle(d), hands: { both: 'pinch' },
+  reach: [{ hand: 'right', to: 'p1.chest', offset: [0.04, 0.06, 0.06], start: rs, end: d + 1, blend: bl }, { hand: 'left', to: 'p1.chest', offset: [-0.1, 0.05, 0.08], start: rs, end: d + 1, blend: bl }],
   look: [[0, 'p1.chest']], face: { squint: [[0, 0.6]], worried: [[0, 0.5]] }, acting: 'none', ...o });
 const FLOOR = (d, o = {}) => ({ pos: at0(0, 0, 0), rotY: [[0, 0]], clips: lie(d), acting: 'none', face: { worried: [[0, 0.6]] }, ...o });
 
@@ -47,8 +47,8 @@ const S = (id, o) => shots.push({ name: id, dur: dur(id), ...o });
 
 // 1 · PAYOFF — mid-surgery in a ship's sickbay; crash-zoom in
 S('payoff', { role: 'payoff', set: 'lab', look: 'cinematic', impact: [0.05], punch: [1.3],
-  camera: { pos: [[0, [2.6, 2.3, 3.2]], [0.35, [1.5, 1.75, 2.2], 'outExpo'], [dur('payoff'), [1.3, 1.65, 1.95]]], look: [[0, [0, 1.0, 0]]], fov: 42, handheld: 0.8 },
-  cast: { hero: SURG(dur('payoff')), p1: PAT(dur('payoff')) }, fx: OR(), sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.05, type: 'whoosh', gain: 0.7 }] });
+  camera: { pos: [[0, [-1.6, 2.6, -3.4]], [0.35, [-0.8, 1.85, -1.9], 'outExpo'], [dur('payoff'), [-0.65, 1.8, -1.65]]], look: [[0, [0.25, 1.3, 0.3]]], fov: 42, handheld: 0.8 },
+  cast: { hero: SURG(dur('payoff'), {}, 0.15, 0.4), p1: PAT(dur('payoff')) }, fx: OR(), sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.05, type: 'whoosh', gain: 0.7 }] });
 // 2 · "He was not a doctor." — his face, sweat
 S('notdoc', { cut: 'glitch', set: 'lab', look: 'cinematic',
   camera: { move: 'push', target: 'hero', size: 'cu', az: 25, handheld: 0.5 },
@@ -63,8 +63,8 @@ S('steal', { set: 'interior', look: 'noir', punch: [1.8],
   cast: { hero: { pos: at0(0, 0, 0), rotY: [[0, 0.1]], clips: [{ clip: 'foldarms', start: 0, end: dur('steal') + 1 }], look: [[0, [1, 1.6, 3]], [1.2, 'camera', 'inOutSine'], [2.2, [-1.5, 1.5, 3], 'inOutSine']], face: { smirk: [[0.4, 0], [1.2, 0.8]] } } } });
 // 5 · "and joins a warship as its surgeon."
 S('ship', { cut: 'whip', set: SEA, look: 'cinematic',
-  camera: { pos: [[0, [-10, 3, 34]], [dur('ship'), [-4, 3.5, 30], 'inOutSine']], look: [[0, [-4, 5, 0]], [dur('ship'), [3, 5, 0], 'inOutSine']], fov: 40, handheld: 0.4 },
-  fx: [{ type: 'model', id: 'destroyer', height: 12, rotY: P / 2, p: [[0, [-6, -1.6, 0]], [dur('ship'), [2, -1.6, 0], 'linear']], tilt: [[0, [0, 0, 0.012]], [dur('ship'), [0, 0, -0.012], 'inOutSine']] }],
+  camera: { pos: [[0, [34, 1.6, 26]], [dur('ship'), [30, 2.4, 22], 'inOutSine']], look: [[0, [4, 3.2, 0]], [dur('ship'), [8, 3.4, 0], 'inOutSine']], fov: 38, handheld: 0.5 },
+  fx: [{ type: 'model', id: 'destroyer', height: 12, rotY: P / 2, p: [[0, [-4, -1.2, 0]], [dur('ship'), [4, -1.2, 0], 'linear']], tilt: [[0, [0, 0, 0.012]], [dur('ship'), [0, 0, -0.012], 'inOutSine']] }],
   sfx: [{ t: 0.1, type: 'swell', gain: 0.6 }] });
 // 6 · "Then the wounded arrive."
 S('wounded', { cut: 'smash', set: 'lab', look: 'cinematic', punch: [0.5],
@@ -77,17 +77,17 @@ S('sixteen', { set: 'lab', look: 'cinematic', punch: [0.1],
   cast: { p1: FLOOR(dur('sixteen'), { pos: at0(0.6, 0, -0.8) }), p2: FLOOR(dur('sixteen'), { pos: at0(-0.7, 0, -1.3), rotY: [[0, 0.4]] }), p3: FLOOR(dur('sixteen'), { pos: at0(1.6, 0, 0.6), rotY: [[0, -0.3]] }) } });
 // 8 · "He locks his door and speed-reads a surgery textbook."
 S('book', { cut: 'zoom', set: 'interior', look: 'noir', time: [[0, 0], [dur('book'), dur('book') * 1.8]],
-  camera: { pos: [[0, [0.9, 1.3, 1.4]], [dur('book'), [-0.6, 1.25, 1.5], 'inOutSine']], look: [[0, [0, 0.45, 0.35]]], fov: 42, handheld: 0.2 },
+  camera: { pos: [[0, [1.5, 0.75, 1.1]], [dur('book'), [1.2, 0.7, 1.5], 'inOutSine']], look: [[0, [0, 0.45, 0.3]]], fov: 40, handheld: 0.2 },
   cast: { hero: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: [{ clip: 'fix', start: 0, end: dur('book') * 2 }], hands: { both: 'soft' }, look: [[0, [0.08, 0.02, 0.5]], [1.2, [-0.1, 0.02, 0.5]], [2.4, [0.08, 0.02, 0.5]], [3.6, [-0.1, 0.02, 0.5]]], face: { squint: [[0, 0.8]] }, acting: 'none' } },
   fx: [{ type: 'model', id: 'textbook', height: 0.04, p: [[0, [0, 0, 0.5]]] }] });
 // 9 · "Then he operates."
 S('operate', { cut: 'whip', set: 'lab', look: 'cinematic', punch: [0.4],
-  camera: { pos: [[0, [-1.5, 1.7, 1.7]], [dur('operate'), [-1.15, 1.6, 1.35], 'inOutSine']], look: [[0, [0, 1.05, 0.15]]], fov: 40, handheld: 0.5 },
-  cast: { hero: SURG(dur('operate')), p1: PAT(dur('operate')) }, fx: OR() });
+  camera: { pos: [[0, [-1.9, 1.55, 2.1]], [dur('operate'), [-1.55, 1.5, 1.75], 'inOutSine']], look: [[0, [0.1, 1.15, 0.2]]], fov: 46, handheld: 0.5 },
+  cast: { hero: SURG(dur('operate'), {}, 0.15, 0.4), p1: PAT(dur('operate')) }, fx: OR() });
 // 10 · "The bullet sits an inch from the heart." — x-ray
-S('bullet', { cut: 'flash', set: 'lab', look: 'neon-night',
-  camera: { pos: [[0, [0.2, 2.0, -1.5]], [dur('bullet'), [0.15, 1.75, -1.05], 'inOutSine']], look: [[0, [0, 1.0, 0]]], fov: 40 },
-  cast: { hero: SURG(dur('bullet')), p1: PAT(dur('bullet'), { xray: [[0.1, 0], [0.5, 1]] }) }, fx: OR() });
+S('bullet', { cut: 'flash', set: 'void', look: 'neon-night',
+  camera: { pos: [[0, [0.3, 2.9, -1.7]], [dur('bullet'), [0.2, 2.5, -1.3], 'inOutSine']], look: [[0, [0, 1.0, 0]]], fov: 42 },
+  cast: { p1: PAT(dur('bullet'), { xray: [[0, 0.4], [0.4, 1]] }) }, fx: OR() });
 // 11 · "Every patient lives."
 S('lives', { cut: 'whip', set: 'lab', look: 'warm-film',
   camera: { move: 'dolly-out', target: 'hero', size: 'ws', az: 0 },
@@ -101,8 +101,8 @@ S('hero', { cut: 'zoom', set: 'city-day', look: 'golden-hour',
 // 13 · "The real doctor sees the story."
 S('real', { cut: 'dip', set: 'interior', look: 'warm-film',
   camera: { move: 'push', target: 'doc', size: 'ms', az: -15 },
-  cast: { doc: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('real')), reach: [{ hand: 'right', to: [0.24, 1.2, 0.36], start: 0, end: dur('real') }, { hand: 'left', to: [-0.24, 1.2, 0.36], start: 0, end: dur('real') }], hands: { both: 'grip' }, look: [[0, [0, 1.25, 0.36]], [0.9, [0, 1.25, 0.36]], [1.1, [0.4, 1.6, 2], 'outCubic']], face: { shock: [[0.5, 0], [0.9, 1, 'outBack']] }, acting: 'none' } },
-  fx: [{ type: 'model', id: 'newspaper', height: 0.42, p: [[0, [0, 1.0, 0.37]]], tilt: [[0, [-0.25, 0, 0]]] }] });
+  cast: { doc: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('real')), reach: [{ hand: 'right', to: [0.2, 1.05, 0.25], start: 0, end: dur('real') }, { hand: 'left', to: [-0.2, 1.05, 0.25], start: 0, end: dur('real') }], hands: { both: 'grip' }, look: [[0, [0, 1.1, 0.34]], [0.9, [0, 1.1, 0.34]], [1.1, [0.4, 1.6, 2], 'outCubic']], face: { shock: [[0.5, 0], [0.9, 1, 'outBack']] }, acting: 'none' } },
+  fx: [{ type: 'model', id: 'newspaper', height: 0.42, p: [[0, [0, 0.83, 0.26]]], tilt: [[0, [-0.12, 0, 0]]] }] });
 // 14 · "Caught."
 S('caught', { cut: 'smash', set: 'lab', look: 'horror', punch: [0.05],
   camera: { move: 'dutch', target: 'hero', size: 'ms', az: 10, roll: 0.2, handheld: 1 },
@@ -110,25 +110,23 @@ S('caught', { cut: 'smash', set: 'lab', look: 'horror', punch: [0.05],
   sfx: [{ t: 0.05, type: 'impact', gain: 1 }] });
 // 15 · back to the surgery (loop)
 S('question', { cut: 'zoom', set: 'lab', look: 'cinematic',
-  camera: { pos: [[0, [1.3, 1.65, 1.95]], [dur('question'), [2.6, 2.2, 3.2], 'inOutSine']], look: [[0, [0, 1.0, 0]]], fov: 42 },
-  cast: { hero: SURG(dur('question')), p1: PAT(dur('question')) }, fx: OR() });
+  camera: { pos: [[0, [1.3, 1.65, 1.95]], [dur('question'), [2.6, 2.2, 3.2], 'inOutSine']], look: [[0, [0.1, 1.35, 0.1]]], fov: 42 },
+  cast: { hero: SURG(dur('question'), {}, 0.15, 0.4), p1: PAT(dur('question')) }, fx: OR() });
 
 // ---------- motion graphics (one system: slam · stamp · wipe · callout · stat) ----------
 const titles = [
-  { t: 0.05, t1: at('notdoc'), style: 'slam', text: 'FAKE\nSURGEON', pos: [0.5, 0.1], size: 0.1, accent: ACC },
+  { t: 0.05, t1: at('notdoc'), style: 'slam', text: 'FAKE\nSURGEON', pos: [0.5, 0.075], size: 0.08, accent: ACC },
   { t: at('notdoc', 0.6), t1: at('year'), style: 'stamp', text: 'NOT A DOCTOR', sub: 'ZERO MEDICAL TRAINING', pos: [0.5, 0.12], size: 0.075, accent: ACC },
-  { t: at('year', 0.1), t1: at('steal'), style: 'wipe', text: 'CANADA', sub: '1951', pos: [0.5, 0.12] },
   { t: at('steal', 0.1), t1: at('steal', 1.6), style: 'wipe', text: 'FERDINAND DEMARA', sub: 'THE GREAT IMPOSTOR', pos: [0.5, 0.12] },
   { t: at('steal', 1.7), t1: at('ship'), style: 'stamp', text: 'DR. JOSEPH CYR', sub: 'A STOLEN NAME', pos: [0.5, 0.12], size: 0.07, accent: ACC },
   { t: at('ship', 0.2), t1: at('wounded'), style: 'wipe', text: 'HMCS CAYUGA', sub: 'WARSHIP · KOREAN WAR', pos: [0.5, 0.12] },
   { t: at('sixteen', 0.05), t1: at('book'), style: 'stat', value: 16, max: 16, suffix: '', text: 'WOUNDED', pos: [0.5, 0.14] },
-  { t: at('book', 0.4), t1: at('operate'), style: 'callout', at: [0, 0.05, 0.5], text: 'SURGERY TEXTBOOK', sub: 'ONE NIGHT', side: 1 },
+  { t: at('book', 0.4), t1: at('operate'), style: 'stamp', text: 'ONE NIGHT', sub: 'ONE SURGERY TEXTBOOK', pos: [0.5, 0.12], size: 0.07, accent: ACC },
   { t: at('bullet', 0.5), t1: at('lives'), style: 'callout', at: 'p1.heart', text: 'BULLET', sub: '1 INCH FROM THE HEART', side: -1 },
-  { t: at('lives', 0.1), t1: at('hero'), style: 'stamp', text: '16 / 16 LIVED', pos: [0.5, 0.12], size: 0.075, accent: '#2fbf5f' },
   { t: at('hero', 0.1), t1: at('real'), style: 'slam', text: 'HERO\nDOCTOR', pos: [0.5, 0.1], size: 0.1, accent: ACC },
   { t: at('real', 0.2), t1: at('caught'), style: 'wipe', text: 'THE REAL DR. CYR', sub: 'READS THE NEWS', pos: [0.5, 0.12] },
   { t: at('caught', 0.05), t1: at('question'), style: 'stamp', text: 'IMPOSTOR', pos: [0.5, 0.12], size: 0.11, accent: ACC },
-  { t: at('question', 0.1), t1: END, style: 'slam', text: 'WOULD YOU\nLET HIM?', pos: [0.5, 0.1], size: 0.09, accent: ACC },
+  { t: at('question', 0.1), t1: END, style: 'slam', text: 'WOULD YOU\nLET HIM?', pos: [0.5, 0.075], size: 0.075, accent: ACC },
 ];
 
 module.exports = {

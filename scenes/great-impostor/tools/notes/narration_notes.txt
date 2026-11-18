@@ -1,0 +1,12 @@
+NARRATION (Kokoro am_michael, base speed 1.15) — per line:
+1 "He pulled a bullet from a man's chest." excited — emphasis on BULLET, 0.25s after.
+2 "He was not a doctor." dramatic (0.86 speed) — 0.45s pause after = the twist beat.
+3 "Nineteen fifty-one. Ferdinand Demara steals a real doctor's name," serious — comma breath 0.15s.
+4 "and joins a warship as its surgeon." serious, 0.3s.
+5 "Then the wounded arrive." dramatic / 6 "Sixteen of them." dramatic — stacked beats.
+7 "He locks his door and speed-reads a surgery textbook." mysterious.
+8 "Then he operates. The bullet sits an inch from the heart." serious.
+9 "Every patient lives." excited / 10 "Newspapers call him a hero." excited.
+11 "The real doctor sees the story." mysterious, 0.35s.
+12 "Caught." dramatic, 0.5s hold.  13 question neutral.
+No monotone run > 2 lines (tones alternate). No clipped first/last syllables (trim pads 20/60 ms).
