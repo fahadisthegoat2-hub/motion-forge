@@ -103,6 +103,72 @@
     "rocks",
     "beach"
    ]
+  },
+  "destroyer": {
+   "file": "models/destroyer.glb",
+   "height": 12,
+   "about": "1950s naval destroyer: hull, bridge, twin gun turrets, funnels, radar mast, lifeboats (Forge 3D Ultra)",
+   "tags": [
+    "ship",
+    "warship",
+    "navy",
+    "destroyer",
+    "sea"
+   ]
+  },
+  "operating_table": {
+   "file": "models/operating_table.glb",
+   "height": 0.97,
+   "about": "1950s hydraulic operating table with leather pads, sheet and strap (Forge 3D Ultra)",
+   "tags": [
+    "hospital",
+    "surgery",
+    "table",
+    "medical"
+   ]
+  },
+  "textbook": {
+   "file": "models/textbook.glb",
+   "height": 0.04,
+   "about": "open leather-bound surgery textbook with diagrams and ribbon (Forge 3D Ultra)",
+   "tags": [
+    "book",
+    "textbook",
+    "study",
+    "medical"
+   ]
+  },
+  "instrument_tray": {
+   "file": "models/instrument_tray.glb",
+   "height": 1.07,
+   "about": "Mayo instrument stand: tray, scalpels, forceps, clamps, gauze, kidney dish (Forge 3D Ultra)",
+   "tags": [
+    "surgery",
+    "medical",
+    "tools",
+    "hospital"
+   ]
+  },
+  "surgical_lamp": {
+   "file": "models/surgical_lamp.glb",
+   "height": 1.57,
+   "about": "hanging surgical dome lamp (Forge 3D Ultra)",
+   "tags": [
+    "lamp",
+    "surgery",
+    "hospital",
+    "light"
+   ]
+  },
+  "newspaper": {
+   "file": "models/newspaper.glb",
+   "height": 0.42,
+   "about": "1950s broadsheet newspaper, front page with headline and photo (Forge 3D Ultra)",
+   "tags": [
+    "newspaper",
+    "news",
+    "paper"
+   ]
   }
  }
 }

@@ -1,0 +1,480 @@
+{
+ "voice": "am_michael",
+ "duration": 28.494,
+ "words": [
+  {
+   "w": "He",
+   "start": 0.05,
+   "end": 0.152,
+   "tone": "excited"
+  },
+  {
+   "w": "pulled",
+   "start": 0.152,
+   "end": 0.458,
+   "tone": "excited"
+  },
+  {
+   "w": "a",
+   "start": 0.458,
+   "end": 0.559,
+   "tone": "excited"
+  },
+  {
+   "w": "bullet",
+   "start": 0.559,
+   "end": 0.865,
+   "tone": "excited"
+  },
+  {
+   "w": "from",
+   "start": 0.865,
+   "end": 1.069,
+   "tone": "excited"
+  },
+  {
+   "w": "a",
+   "start": 1.069,
+   "end": 1.171,
+   "tone": "excited"
+  },
+  {
+   "w": "man's",
+   "start": 1.171,
+   "end": 1.375,
+   "tone": "excited"
+  },
+  {
+   "w": "chest.",
+   "start": 1.375,
+   "end": 1.731,
+   "tone": "excited"
+  },
+  {
+   "w": "He",
+   "start": 1.981,
+   "end": 2.126,
+   "tone": "dramatic"
+  },
+  {
+   "w": "was",
+   "start": 2.126,
+   "end": 2.344,
+   "tone": "dramatic"
+  },
+  {
+   "w": "not",
+   "start": 2.344,
+   "end": 2.562,
+   "tone": "dramatic"
+  },
+  {
+   "w": "a",
+   "start": 2.562,
+   "end": 2.707,
+   "tone": "dramatic"
+  },
+  {
+   "w": "doctor.",
+   "start": 2.707,
+   "end": 3.288,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Nineteen",
+   "start": 3.738,
+   "end": 4.355,
+   "tone": "serious"
+  },
+  {
+   "w": "fifty-one.",
+   "start": 4.355,
+   "end": 5.127,
+   "tone": "serious"
+  },
+  {
+   "w": "Ferdinand",
+   "start": 5.127,
+   "end": 5.821,
+   "tone": "serious"
+  },
+  {
+   "w": "Demara",
+   "start": 5.821,
+   "end": 6.284,
+   "tone": "serious"
+  },
+  {
+   "w": "steals",
+   "start": 6.284,
+   "end": 6.747,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 6.747,
+   "end": 6.902,
+   "tone": "serious"
+  },
+  {
+   "w": "real",
+   "start": 6.902,
+   "end": 7.21,
+   "tone": "serious"
+  },
+  {
+   "w": "doctor's",
+   "start": 7.21,
+   "end": 7.75,
+   "tone": "serious"
+  },
+  {
+   "w": "name,",
+   "start": 7.75,
+   "end": 8.213,
+   "tone": "serious"
+  },
+  {
+   "w": "and",
+   "start": 8.364,
+   "end": 8.552,
+   "tone": "serious"
+  },
+  {
+   "w": "joins",
+   "start": 8.552,
+   "end": 8.866,
+   "tone": "serious"
+  },
+  {
+   "w": "a",
+   "start": 8.866,
+   "end": 8.991,
+   "tone": "serious"
+  },
+  {
+   "w": "warship",
+   "start": 8.991,
+   "end": 9.431,
+   "tone": "serious"
+  },
+  {
+   "w": "as",
+   "start": 9.431,
+   "end": 9.556,
+   "tone": "serious"
+  },
+  {
+   "w": "its",
+   "start": 9.556,
+   "end": 9.744,
+   "tone": "serious"
+  },
+  {
+   "w": "surgeon.",
+   "start": 9.744,
+   "end": 10.309,
+   "tone": "serious"
+  },
+  {
+   "w": "Then",
+   "start": 10.609,
+   "end": 10.889,
+   "tone": "dramatic"
+  },
+  {
+   "w": "the",
+   "start": 10.889,
+   "end": 11.099,
+   "tone": "dramatic"
+  },
+  {
+   "w": "wounded",
+   "start": 11.099,
+   "end": 11.589,
+   "tone": "dramatic"
+  },
+  {
+   "w": "arrive.",
+   "start": 11.589,
+   "end": 12.149,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Sixteen",
+   "start": 12.299,
+   "end": 12.826,
+   "tone": "dramatic"
+  },
+  {
+   "w": "of",
+   "start": 12.826,
+   "end": 12.976,
+   "tone": "dramatic"
+  },
+  {
+   "w": "them.",
+   "start": 12.976,
+   "end": 13.427,
+   "tone": "dramatic"
+  },
+  {
+   "w": "He",
+   "start": 13.727,
+   "end": 13.858,
+   "tone": "mysterious"
+  },
+  {
+   "w": "locks",
+   "start": 13.858,
+   "end": 14.184,
+   "tone": "mysterious"
+  },
+  {
+   "w": "his",
+   "start": 14.184,
+   "end": 14.379,
+   "tone": "mysterious"
+  },
+  {
+   "w": "door",
+   "start": 14.379,
+   "end": 14.64,
+   "tone": "mysterious"
+  },
+  {
+   "w": "and",
+   "start": 14.64,
+   "end": 14.836,
+   "tone": "mysterious"
+  },
+  {
+   "w": "speed-reads",
+   "start": 14.836,
+   "end": 15.488,
+   "tone": "mysterious"
+  },
+  {
+   "w": "a",
+   "start": 15.488,
+   "end": 15.618,
+   "tone": "mysterious"
+  },
+  {
+   "w": "surgery",
+   "start": 15.618,
+   "end": 16.074,
+   "tone": "mysterious"
+  },
+  {
+   "w": "textbook.",
+   "start": 16.074,
+   "end": 16.727,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Then",
+   "start": 16.977,
+   "end": 17.225,
+   "tone": "serious"
+  },
+  {
+   "w": "he",
+   "start": 17.225,
+   "end": 17.349,
+   "tone": "serious"
+  },
+  {
+   "w": "operates.",
+   "start": 17.349,
+   "end": 17.969,
+   "tone": "serious"
+  },
+  {
+   "w": "The",
+   "start": 17.969,
+   "end": 18.155,
+   "tone": "serious"
+  },
+  {
+   "w": "bullet",
+   "start": 18.155,
+   "end": 18.527,
+   "tone": "serious"
+  },
+  {
+   "w": "sits",
+   "start": 18.527,
+   "end": 18.775,
+   "tone": "serious"
+  },
+  {
+   "w": "an",
+   "start": 18.775,
+   "end": 18.899,
+   "tone": "serious"
+  },
+  {
+   "w": "inch",
+   "start": 18.899,
+   "end": 19.147,
+   "tone": "serious"
+  },
+  {
+   "w": "from",
+   "start": 19.147,
+   "end": 19.396,
+   "tone": "serious"
+  },
+  {
+   "w": "the",
+   "start": 19.396,
+   "end": 19.582,
+   "tone": "serious"
+  },
+  {
+   "w": "heart.",
+   "start": 19.582,
+   "end": 20.016,
+   "tone": "serious"
+  },
+  {
+   "w": "Every",
+   "start": 20.316,
+   "end": 20.614,
+   "tone": "excited"
+  },
+  {
+   "w": "patient",
+   "start": 20.614,
+   "end": 21.032,
+   "tone": "excited"
+  },
+  {
+   "w": "lives.",
+   "start": 21.032,
+   "end": 21.45,
+   "tone": "excited"
+  },
+  {
+   "w": "Newspapers",
+   "start": 21.65,
+   "end": 22.229,
+   "tone": "excited"
+  },
+  {
+   "w": "call",
+   "start": 22.229,
+   "end": 22.461,
+   "tone": "excited"
+  },
+  {
+   "w": "him",
+   "start": 22.461,
+   "end": 22.635,
+   "tone": "excited"
+  },
+  {
+   "w": "a",
+   "start": 22.635,
+   "end": 22.751,
+   "tone": "excited"
+  },
+  {
+   "w": "hero.",
+   "start": 22.751,
+   "end": 23.098,
+   "tone": "excited"
+  },
+  {
+   "w": "The",
+   "start": 23.298,
+   "end": 23.506,
+   "tone": "mysterious"
+  },
+  {
+   "w": "real",
+   "start": 23.506,
+   "end": 23.782,
+   "tone": "mysterious"
+  },
+  {
+   "w": "doctor",
+   "start": 23.782,
+   "end": 24.197,
+   "tone": "mysterious"
+  },
+  {
+   "w": "sees",
+   "start": 24.197,
+   "end": 24.473,
+   "tone": "mysterious"
+  },
+  {
+   "w": "the",
+   "start": 24.473,
+   "end": 24.68,
+   "tone": "mysterious"
+  },
+  {
+   "w": "story.",
+   "start": 24.68,
+   "end": 25.164,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Caught.",
+   "start": 25.514,
+   "end": 26.083,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Would",
+   "start": 26.583,
+   "end": 26.835,
+   "tone": "neutral"
+  },
+  {
+   "w": "you",
+   "start": 26.835,
+   "end": 26.986,
+   "tone": "neutral"
+  },
+  {
+   "w": "have",
+   "start": 26.986,
+   "end": 27.187,
+   "tone": "neutral"
+  },
+  {
+   "w": "let",
+   "start": 27.187,
+   "end": 27.338,
+   "tone": "neutral"
+  },
+  {
+   "w": "him",
+   "start": 27.338,
+   "end": 27.489,
+   "tone": "neutral"
+  },
+  {
+   "w": "operate",
+   "start": 27.489,
+   "end": 27.841,
+   "tone": "neutral"
+  },
+  {
+   "w": "on",
+   "start": 27.841,
+   "end": 27.942,
+   "tone": "neutral"
+  },
+  {
+   "w": "you?",
+   "start": 27.942,
+   "end": 28.194,
+   "tone": "neutral"
+  }
+ ]
+}
