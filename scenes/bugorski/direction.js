@@ -121,7 +121,7 @@ S('survives', { cut: 'dip', set: HOSP, look: 'warm-film', punch: [+(wordAt('surv
   cast: { patient: { pos: [[0, [0.6, 0.66, -1.95]]], rotY: [[0, 0]], clips: [{ clip: 'sit', start: -2, end: dur('survives') + 1, loop: false }], look: [[0, [-3.5, 1.6, -0.6]]], face: { smile: [[0.6, 0], [1.3, 0.35]] }, acting: 'none' } },
   fx: [BED] });
 // 13 · "He finishes his PhD." — back in his work clothes, a quiet win
-S('phd', { cut: 'whip', set: HOSP, look: 'warm-film',
+S('phd', { cut: 'whip', set: 'lab', look: 'cinematic',
   camera: { move: 'low-hero', target: 'hero', size: 'ms', az: 20 },
   cast: { hero: { pos: [[0, [-1.2, 0, 0.4]]], rotY: [[0, 0.2]], clips: idle(3), gestures: [{ type: 'fistpump', start: 0.35, end: dur('phd'), side: 'right' }], look: [[0, [0, 1.6, 4]]], face: { smile: [[0.3, 0.2], [0.7, 0.55]] } } },
   fx: [] , sfx: [{ t: 0.45, type: 'hit', gain: 0.5 }] });
