@@ -94,8 +94,8 @@ S('bikes', { cut: 'whip', set: { type: 'studio' }, look: 'clean-cg',
 // 10 · "Seven TVs. A coffin." — the pile
 const TVS = [[-1.9, -1.0], [-1.2, -1.35], [-0.45, -1.5], [-1.55, -0.2], [-0.8, -0.55], [0.25, -1.6], [1.5, -1.0, 0.55]].map((p, i) => M('tv', [p[0], p[2] || 0, p[1]], { height: 0.88, rotY: [0.5, 0.25, 0.05, 0.7, 0.35, -0.1, -0.2][i] }));
 S('tvs', { cut: 'zoom', set: { type: 'studio' }, look: 'clean-cg',
-  camera: { pos: [[0, [1.9, 1.5, 4.1]], [dur('tvs'), [0.9, 1.45, 4.3], 'inOutSine']], look: [[0, [-0.2, 0.75, -0.9]]], fov: 46 },
-  cast: { hero: { pos: [[0, [0.55, 0, 0.6]]], rotY: [[0, -2.6]], clips: idle(4), look: [[0, [-1.0, 0.4, -1.2]], [0.9, [1.5, 0.6, -1.0], 'inOutSine']], gestures: [{ type: 'hips', start: 0.3, end: dur('tvs') }] } },
+  camera: { pos: [[0, [0.6, 1.5, 4.6]], [dur('tvs'), [0.1, 1.45, 4.8], 'inOutSine']], look: [[0, [0.15, 0.75, -0.6]]], fov: 52 },
+  cast: { hero: { pos: [[0, [0.75, 0, 1.3]]], rotY: [[0, -2.0]], clips: idle(4), look: [[0, [-1.0, 0.4, -1.2]], [0.9, [1.5, 0.6, -1.0], 'inOutSine']], gestures: [{ type: 'hips', start: 0.3, end: dur('tvs') }] } },
   fx: [...TVS, M('coffin', [1.5, 0, -1.0], { height: 0.55, rotY: P / 2 - 0.15 })] });
 // 11 · "Doctors found…" — x-ray
 S('doctors', { cut: 'flash', set: 'void', look: 'neon-night',
