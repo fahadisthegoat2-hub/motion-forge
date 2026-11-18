@@ -162,8 +162,8 @@ module.exports = {
     sound: { music: { mood: 'tension', bpm: 96, drops: [tHit, at('flash', tFlash), at('survives', 0.65)] }, sfx: true, ambience: true, voice: { url: 'vo.wav' } },
     captions: { style: 'pop', sync: VO.words.map((w) => [w.w, w.start, w.end]) }, letterbox: 0 },
   thumbs: [
-    { shot: 0, t: tHit + 0.1, text: 'BEAM\nTHROUGH\nHIS HEAD', hi: ['HEAD'], accent: A, face: { hero: { squint: 1, shock: 0.6 } }, size: 'cu', side: 'left' },
-    { shot: 7, t: tFlash + 0.2, text: '1,000\nSUNS', hi: ['SUNS'], accent: A, side: 'right' },
+    { shot: 1, t: 0.25, camera: { pos: [[0, [1.4, 1.14, -0.42]]], look: [[0, [0.3, 1.02, -0.88]]], fov: 40 }, shift: 0, text: 'A BEAM\nWENT THROUGH\nHIS HEAD', hi: ['HEAD'], accent: A, face: { hero: { shock: 0.7, squint: 0.8 } }, side: 'left' },
+    { shot: 1, t: 0.25, camera: { pos: [[0, [1.15, 1.12, -0.55]]], look: [[0, [0.34, 1.05, -0.87]]], fov: 34 }, shift: 0, text: 'HE\nSURVIVED', hi: ['SURVIVED'], accent: A, face: { hero: { shock: 0.6, squint: 0.7 } }, side: 'left' },
   ],
   cast, shots, captions: [], titles,
 };
