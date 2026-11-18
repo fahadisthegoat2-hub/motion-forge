@@ -54,8 +54,8 @@ S('notdoc', { cut: 'glitch', set: 'lab', look: 'cinematic',
   camera: { move: 'push', target: 'hero', size: 'cu', az: 25, handheld: 0.5 },
   cast: { hero: SURG(dur('notdoc'), { look: [[0, 'p1.chest'], [0.9, [-1.5, 1.6, 3], 'inOutSine']], face: { worried: [[0, 0.5], [0.8, 1, 'outBack']], squint: [[0, 0.4]] } }), p1: PAT(dur('notdoc')) }, fx: OR() });
 // 3 · "1951." — a quiet room at night
-S('year', { cut: 'dip', set: 'interior', look: 'noir',
-  camera: { move: 'dolly-in', target: 'hero', size: 'mls', az: -30, handheld: 0.3 },
+S('year', { cut: 'dip', set: 'interior', look: 'noir', punch: [0.7],
+  camera: { move: 'crash-zoom', target: 'hero', size: 'ms', at: 0.05, az: -30, handheld: 0.3 },
   cast: { hero: { pos: at0(0, 0, 0), rotY: [[0, 0.3]], clips: idle(dur('year')), look: [[0, [-2, 1.5, 2]], [0.8, [2, 1.5, 2], 'inOutSine']], face: { squint: [[0, 0.4]] } } } });
 // 4 · "Ferdinand Demara steals a real doctor's name"
 S('steal', { set: 'interior', look: 'noir', punch: [1.8],
@@ -68,13 +68,13 @@ S('ship', { cut: 'whip', set: SEA, look: 'cinematic',
   sfx: [{ t: 0.1, type: 'swell', gain: 0.6 }] });
 // 6 · "Then the wounded arrive."
 S('wounded', { cut: 'smash', set: 'lab', look: 'cinematic', punch: [0.5],
-  camera: { move: 'track', target: 'hero', size: 'mls', side: 'left', handheld: 0.6 },
-  cast: { hero: { pos: [[0, [-2.4, 0, 1.2]], [dur('wounded'), [-2.4 + 1.45 * dur('wounded'), 0, 1.2]]], rotY: [[0, P / 2]], clips: [{ clip: 'walk', start: 0, end: dur('wounded') + 1 }], look: [[0, [1, 0.3, 0]]], face: { worried: [[0, 0.9]] } },
-    p1: FLOOR(dur('wounded'), { pos: at0(0.6, 0, -0.8) }), p2: FLOOR(dur('wounded'), { pos: at0(-0.7, 0, -1.3), rotY: [[0, 0.4]] }) } });
+  camera: { pos: [[0, [1.6, 1.5, 3.4]], [dur('wounded'), [1.3, 1.45, 3.0], 'inOutSine']], look: [[0, [-0.6, 0.7, -0.2]], [dur('wounded'), [0.2, 0.7, -0.2], 'inOutSine']], fov: 46, handheld: 0.6 },
+  cast: { hero: { pos: [[0, [-0.9, 0, 0.7]], [dur('wounded'), [-0.9 + 1.45 * dur('wounded'), 0, 0.7]]], rotY: [[0, P / 2]], clips: [{ clip: 'walk', start: 0, end: dur('wounded') + 1 }], look: [[0, [1, 0.3, 0]]], face: { worried: [[0, 0.9]] } },
+    p1: FLOOR(dur('wounded'), { pos: at0(0.6, 0, -0.8) }), p2: FLOOR(dur('wounded'), { pos: at0(-0.7, 0, -1.0), rotY: [[0, 2.3]] }) } });
 // 7 · "Sixteen of them." — overhead on the bodies
 S('sixteen', { set: 'lab', look: 'cinematic', punch: [0.1],
-  camera: { move: 'overhead', target: 'p1', size: 'ws' },
-  cast: { p1: FLOOR(dur('sixteen'), { pos: at0(0.6, 0, -0.8) }), p2: FLOOR(dur('sixteen'), { pos: at0(-0.7, 0, -1.3), rotY: [[0, 0.4]] }), p3: FLOOR(dur('sixteen'), { pos: at0(1.6, 0, 0.6), rotY: [[0, -0.3]] }) } });
+  camera: { pos: [[0, [2.6, 1.3, 2.4]], [dur('sixteen'), [2.2, 1.2, 2.0], 'inOutSine']], look: [[0, [0.3, 0.2, -0.3]]], fov: 44 },
+  cast: { p1: FLOOR(dur('sixteen'), { pos: at0(0.6, 0, -0.8) }), p2: FLOOR(dur('sixteen'), { pos: at0(-0.7, 0, -1.0), rotY: [[0, 2.3]] }), p3: FLOOR(dur('sixteen'), { pos: at0(1.6, 0, 0.6), rotY: [[0, -0.3]] }) } });
 // 8 · "He locks his door and speed-reads a surgery textbook."
 S('book', { cut: 'zoom', set: 'interior', look: 'noir', time: [[0, 0], [dur('book'), dur('book') * 1.8]],
   camera: { pos: [[0, [1.5, 0.75, 1.1]], [dur('book'), [1.2, 0.7, 1.5], 'inOutSine']], look: [[0, [0, 0.45, 0.3]]], fov: 40, handheld: 0.2 },
@@ -82,26 +82,26 @@ S('book', { cut: 'zoom', set: 'interior', look: 'noir', time: [[0, 0], [dur('boo
   fx: [{ type: 'model', id: 'textbook', height: 0.04, p: [[0, [0, 0, 0.5]]] }] });
 // 9 · "Then he operates."
 S('operate', { cut: 'whip', set: 'lab', look: 'cinematic', punch: [0.4],
-  camera: { pos: [[0, [-1.9, 1.55, 2.1]], [dur('operate'), [-1.55, 1.5, 1.75], 'inOutSine']], look: [[0, [0.1, 1.15, 0.2]]], fov: 46, handheld: 0.5 },
+  camera: { pos: [[0, [-0.9, 1.8, -1.7]], [dur('operate'), [-0.7, 1.75, -1.45], 'inOutSine']], look: [[0, [0.3, 1.3, 0.35]]], fov: 42, handheld: 0.5 },
   cast: { hero: SURG(dur('operate'), {}, 0.15, 0.4), p1: PAT(dur('operate')) }, fx: OR() });
 // 10 · "The bullet sits an inch from the heart." — x-ray
 S('bullet', { cut: 'flash', set: 'void', look: 'neon-night',
   camera: { pos: [[0, [0.3, 2.9, -1.7]], [dur('bullet'), [0.2, 2.5, -1.3], 'inOutSine']], look: [[0, [0, 1.0, 0]]], fov: 42 },
-  cast: { p1: PAT(dur('bullet'), { xray: [[0, 0.4], [0.4, 1]] }) }, fx: OR() });
+  cast: { p1: PAT(dur('bullet'), { xray: [[0, 0.4], [0.4, 1]] }) } });
 // 11 · "Every patient lives."
 S('lives', { cut: 'whip', set: 'lab', look: 'warm-film',
-  camera: { move: 'dolly-out', target: 'hero', size: 'ws', az: 0 },
+  camera: { move: 'dolly-out', target: 'hero', size: 'mls', az: 0 },
   cast: { hero: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('lives')), face: { smile: [[0.3, 0], [0.9, 0.6]] }, look: [[0, [1.2, 1.6, 0]], [0.6, [-1.2, 1.6, 0], 'inOutSine']] },
-    p1: { pos: at0(1.2, 0, -0.5), rotY: [[0, -0.5]], clips: idle(dur('lives')), gestures: [{ type: 'thumbsup', start: 0.2, end: dur('lives') }], look: [[0, 'hero']], face: { smile: [[0, 0.7]] } },
-    p2: { pos: at0(-1.2, 0, -0.5), rotY: [[0, 0.5]], clips: idle(dur('lives')), gestures: [{ type: 'clap', start: 0.1, end: dur('lives') }], look: [[0, 'hero']], face: { smile: [[0, 0.8]] } } } });
+    p1: { pos: at0(0.75, 0, -0.3), rotY: [[0, -0.5]], clips: idle(dur('lives')), gestures: [{ type: 'thumbsup', start: 0.2, end: dur('lives') }], look: [[0, 'hero']], face: { smile: [[0, 0.7]] } },
+    p2: { pos: at0(-0.75, 0, -0.3), rotY: [[0, 0.5]], clips: idle(dur('lives')), gestures: [{ type: 'clap', start: 0.1, end: dur('lives') }], look: [[0, 'hero']], face: { smile: [[0, 0.8]] } } } });
 // 12 · "Newspapers call him a hero."
-S('hero', { cut: 'zoom', set: 'city-day', look: 'golden-hour',
+S('hero', { cut: 'zoom', set: 'city-day', look: 'cinematic',
   camera: { move: 'low-hero', target: 'hero', size: 'mls', az: 15 },
   cast: { hero: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('hero')), gestures: [{ type: 'hips', start: 0.1, end: dur('hero') }], look: [[0, [2, 2, 5]]], face: { smile: [[0, 0.7]] } } } });
 // 13 · "The real doctor sees the story."
 S('real', { cut: 'dip', set: 'interior', look: 'warm-film',
   camera: { move: 'push', target: 'doc', size: 'ms', az: -15 },
-  cast: { doc: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('real')), reach: [{ hand: 'right', to: [0.2, 1.05, 0.25], start: 0, end: dur('real') }, { hand: 'left', to: [-0.2, 1.05, 0.25], start: 0, end: dur('real') }], hands: { both: 'grip' }, look: [[0, [0, 1.1, 0.34]], [0.9, [0, 1.1, 0.34]], [1.1, [0.4, 1.6, 2], 'outCubic']], face: { shock: [[0.5, 0], [0.9, 1, 'outBack']] }, acting: 'none' } },
+  cast: { doc: { pos: at0(0, 0, 0), rotY: [[0, 0]], clips: idle(dur('real')), reach: [{ hand: 'right', to: [0.2, 1.05, 0.25], start: 0, end: dur('real') }, { hand: 'left', to: [-0.2, 1.05, 0.25], start: 0, end: dur('real') }], hands: { both: 'grip' }, look: [[0, [0, 1.1, 0.34]], [0.45, [0, 1.1, 0.34]], [0.65, [0.4, 1.6, 2], 'outCubic']], face: { shock: [[0.3, 0], [0.6, 1, 'outBack']] }, acting: 'none' } },
   fx: [{ type: 'model', id: 'newspaper', height: 0.42, p: [[0, [0, 0.83, 0.26]]], tilt: [[0, [-0.12, 0, 0]]] }] });
 // 14 · "Caught."
 S('caught', { cut: 'smash', set: 'lab', look: 'horror', punch: [0.05],
@@ -110,7 +110,7 @@ S('caught', { cut: 'smash', set: 'lab', look: 'horror', punch: [0.05],
   sfx: [{ t: 0.05, type: 'impact', gain: 1 }] });
 // 15 · back to the surgery (loop)
 S('question', { cut: 'zoom', set: 'lab', look: 'cinematic',
-  camera: { pos: [[0, [1.3, 1.65, 1.95]], [dur('question'), [2.6, 2.2, 3.2], 'inOutSine']], look: [[0, [0.1, 1.35, 0.1]]], fov: 42 },
+  camera: { pos: [[0, [-0.65, 1.8, -1.65]], [dur('question'), [-1.6, 2.4, -3.0], 'inOutSine']], look: [[0, [0.25, 1.3, 0.3]]], fov: 42 },
   cast: { hero: SURG(dur('question'), {}, 0.15, 0.4), p1: PAT(dur('question')) }, fx: OR() });
 
 // ---------- motion graphics (one system: slam · stamp · wipe · callout · stat) ----------
@@ -121,10 +121,10 @@ const titles = [
   { t: at('steal', 1.7), t1: at('ship'), style: 'stamp', text: 'DR. JOSEPH CYR', sub: 'A STOLEN NAME', pos: [0.5, 0.12], size: 0.07, accent: ACC },
   { t: at('ship', 0.2), t1: at('wounded'), style: 'wipe', text: 'HMCS CAYUGA', sub: 'WARSHIP · KOREAN WAR', pos: [0.5, 0.12] },
   { t: at('sixteen', 0.05), t1: at('book'), style: 'stat', value: 16, max: 16, suffix: '', text: 'WOUNDED', pos: [0.5, 0.14] },
-  { t: at('book', 0.4), t1: at('operate'), style: 'stamp', text: 'ONE NIGHT', sub: 'ONE SURGERY TEXTBOOK', pos: [0.5, 0.12], size: 0.07, accent: ACC },
+  { t: at('book', 0.4), t1: at('operate', -0.25), style: 'stamp', text: 'ONE NIGHT', sub: 'ONE SURGERY TEXTBOOK', pos: [0.5, 0.12], size: 0.07, accent: ACC },
   { t: at('bullet', 0.5), t1: at('lives'), style: 'callout', at: 'p1.heart', text: 'BULLET', sub: '1 INCH FROM THE HEART', side: -1 },
   { t: at('hero', 0.1), t1: at('real'), style: 'slam', text: 'HERO\nDOCTOR', pos: [0.5, 0.1], size: 0.1, accent: ACC },
-  { t: at('real', 0.2), t1: at('caught'), style: 'wipe', text: 'THE REAL DR. CYR', sub: 'READS THE NEWS', pos: [0.5, 0.12] },
+  { t: at('real', 0.2), t1: at('caught', -0.25), style: 'wipe', text: 'THE REAL DR. CYR', sub: 'READS THE NEWS', pos: [0.5, 0.12] },
   { t: at('caught', 0.05), t1: at('question'), style: 'stamp', text: 'IMPOSTOR', pos: [0.5, 0.12], size: 0.11, accent: ACC },
   { t: at('question', 0.1), t1: END, style: 'slam', text: 'WOULD YOU\nLET HIM?', pos: [0.5, 0.075], size: 0.075, accent: ACC },
 ];
