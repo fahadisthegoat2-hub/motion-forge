@@ -43,7 +43,7 @@ const S = (id, o) => shots.push({ name: id, dur: dur(id), ...o });
 S('payoff', { role: 'payoff', set: FIELD, look: 'cinematic', punch: [0.45, 1.25],
   camera: { pos: [[0, [1.6, 2.2, 6.5]], [0.45, [0.55, 1.35, 2.3], 'outExpo'], [dur('payoff'), [0.4, 1.32, 1.75], 'inOutSine']], look: [[0, [-0.4, 1.5, -2.5]], [0.45, [-0.15, 1.25, -1.2], 'outExpo']], fov: 44, handheld: 0.6 },
   cast: { hero: seated({ reach: FORKUP(dur('payoff')),
-    look: [[0, 'hero.righthand'], [0.9, [0.9, 1.35, 2.4], 'inOutSine']], bones: { spine: [[0, [-0.14, 0, 0]]], spine1: [[0, [-0.08, 0, 0]]] }, face: { smile: [[0.3, 0], [0.9, 0.35]], squint: [[0, 0.2]] }, acting: 'none' }) },
+    look: [[0, 'hero.righthand'], [0.9, [0.9, 1.35, 2.4], 'inOutSine']], bones: { spine: [[0, [-0.14, 0, 0]]], spine1: [[0, [-0.08, 0, 0]]], head: [[0, [-0.12, 0, 0]], [0.9, [-0.26, 0, 0], 'inOutSine']] }, face: { smile: [[0.3, 0], [0.9, 0.35]], squint: [[0, 0.2]] }, acting: 'none' }) },
   fx: [PLANE(), ...TABLESET(), FORK], sfx: [{ t: 0, type: 'impact', gain: 1 }, { t: 0.05, type: 'whoosh', gain: 0.7 }] });
 // 2 · "Not a toy. A real Cessna." — low hero angle on the plane
 S('toy', { cut: 'whip', set: FIELD, look: 'cinematic',
@@ -118,7 +118,7 @@ S('ate', { cut: 'smash', set: ROOM, look: 'cinematic', punch: [0.3],
 // 15 · "What's the weirdest thing you've eaten?" — back to the field (loop)
 S('question', { cut: 'zoom', set: FIELD, look: 'cinematic',
   camera: { pos: [[0, [0.45, 1.3, 2.0]], [dur('question'), [1.4, 1.9, 5.6], 'inOutSine']], look: [[0, [-0.15, 1.25, -1.2]], [dur('question'), [-0.5, 1.4, -2.5], 'inOutSine']], fov: 44 },
-  cast: { hero: seated({ reach: FORKUP(dur('question')), look: [[0, 'hero.righthand'], [1.2, [0.8, 1.2, 4], 'inOutSine']], face: { smile: [[0.6, 0.4]] }, acting: 'none' }) },
+  cast: { hero: seated({ reach: FORKUP(dur('question')), look: [[0, 'hero.righthand'], [1.0, [0.8, 1.2, 4], 'inOutSine']], face: { smile: [[0.6, 0.4]] }, bones: { spine: [[0, [-0.12, 0, 0]]], head: [[0, [-0.05, 0, 0]], [1.0, [-0.28, 0, 0], 'inOutSine']] }, acting: 'none' }) },
   fx: [PLANE(), ...TABLESET(), FORK] });
 
 // ---------- motion graphics (one family: slam · place · wipe · counter · callout · kinetic) ----------
