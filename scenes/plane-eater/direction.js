@@ -67,7 +67,7 @@ S('saws', { cut: 'whip', set: FIELD, look: 'cinematic', punch: [1.6],
   sfx: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25].map((t) => ({ t, type: 'scratch', gain: 0.45 })) });
 // 5 · "He swallows them with water." — at home, glass to his lips
 S('swallow', { cut: 'zoom', set: ROOM, look: 'cinematic',
-  camera: { move: 'push', target: 'hero', size: 'ms', az: 22 },
+  camera: { move: 'push', target: 'hero', size: 'ms', az: 55 },
   cast: { hero: seated({ reach: SIP(dur('swallow')), look: [[0, 'hero.righthand']], hands: { right: 'grip', left: 'soft' },
     bones: { head: [[0.6, [0, 0, 0]], [1.0, [-0.25, 0, 0], 'inOutSine']] }, face: { squint: [[0.7, 0.6]] }, acting: 'none' }) },
   fx: [...TABLESET().filter((m) => m.id !== 'glass'), { type: 'model', id: 'glass', height: 0.13, attach: 'hero.righthand', grip: true, rot: [0, 0, 0] }] });
@@ -82,7 +82,7 @@ S('years', { cut: 'dip', set: FIELD, look: 'cinematic', time: [[0, 0], [dur('yea
   fx: [PLANE({ scale: [[0, 1], [dur('years') * 1.2, 0.75, 'inOutSine'], [dur('years') * 2.2, 0.42, 'inOutSine'], [dur('years') * 3, 0.15, 'inOutSine']] }), ...TABLESET(), FORK] });
 // 8 · "But that's not the worst part." — he stops, looks up
 S('worst', { cut: 'zoom', set: ROOM, look: 'cinematic', punch: [0.5],
-  camera: { move: 'dolly-in', target: 'hero', size: 'mls', az: -12 },
+  camera: { move: 'dolly-in', target: 'hero', size: 'ms', az: -32 },
   cast: { hero: seated({ look: [[0, [0, 0.9, -0.3]], [0.35, [1.5, 1.2, 3], 'outCubic']], face: { smirk: [[0.4, 0], [0.9, 0.5]] }, acting: 'none' }) },
   fx: [...TABLESET(), FORK] });
 // 9 · "Before the plane, he ate eighteen bicycles." — a row of bikes, he walks past
@@ -113,7 +113,7 @@ S('guinness', { cut: 'whip', set: ROOM, look: 'cinematic',
 // 14 · "He ate that too." — smash cut: the plate is empty, he smirks
 S('ate', { cut: 'smash', set: ROOM, look: 'cinematic', punch: [0.3],
   camera: { pos: [[0, [0.65, 1.55, 0.75]], [dur('ate'), [0.6, 1.5, 0.65], 'inOutSine']], look: [[0, [0, 1.0, -0.45]]], fov: 42, handheld: 0.3 },
-  cast: { hero: seated({ reach: FORKUP(dur('ate')), look: [[0, [0, TABLE_Y + 0.12, -0.3]], [0.8, [1.4, 1.2, 2.5], 'outCubic']], face: { smirk: [[0.8, 0], [1.1, 0.7]] }, acting: 'none' }) },
+  cast: { hero: seated({ reach: FORKUP(dur('ate')), look: [[0, [0, TABLE_Y + 0.12, -0.3]], [0.35, [1.4, 1.2, 2.5], 'outCubic']], face: { smirk: [[0.35, 0], [0.6, 0.7]] }, acting: 'none' }) },
   fx: [...TABLESET(), FORK] });
 // 15 · "What's the weirdest thing you've eaten?" — back to the field (loop)
 S('question', { cut: 'zoom', set: FIELD, look: 'cinematic',
