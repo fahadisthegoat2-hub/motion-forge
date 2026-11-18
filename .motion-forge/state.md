@@ -1,4 +1,6 @@
 # Motion Forge state
+- Last video: "He Ate a Plane" (Michel Lotito true story) — scenes/plane-eater (direction.js → build.js → plane-eater.html). Artifact: https://claude.ai/artifact/6NmydhuZisYEvkVL8jSS34 · star Jake · good/maximum · 28.8s · VO Kokoro am_michael (speed 1.08) · REVIEW PASS 35×6.
+- New: Forge Ultra props (cessna, table, chair, plate, fork, glass, hacksaw, bicycle, tv, coffin, plaque) in assets/models; scripts/forge_glb.js builds Forge 3D Studio specs → GLB headless (--preview renders a 2-view png).
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
