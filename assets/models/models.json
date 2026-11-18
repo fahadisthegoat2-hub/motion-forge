@@ -103,6 +103,49 @@
     "rocks",
     "beach"
    ]
+  },
+  "accel_magnet": {
+   "file": "models/accel_magnet.glb",
+   "height": 1.51,
+   "about": "Soviet U-70 C-yoke bending magnet with beam pipe, coils, hoses, warning lamp (Forge 3D Ultra, Claude spec)",
+   "tags": [
+    "accelerator",
+    "lab",
+    "magnet",
+    "science"
+   ]
+  },
+  "accel_tunnel": {
+   "file": "models/accel_tunnel.glb",
+   "height": 3.77,
+   "about": "4 m accelerator tunnel segment: concrete, cable trays, pipes, lamps, rails, radiation sign; open toward +Z (Forge 3D Ultra, Claude spec)",
+   "tags": [
+    "accelerator",
+    "tunnel",
+    "set",
+    "industrial"
+   ]
+  },
+  "control_console": {
+   "file": "models/control_console.glb",
+   "height": 1.94,
+   "about": "1970s Soviet control desk: slanted panel, meters, toggles, CRT, oscilloscope, phone (Forge 3D Ultra, Claude spec)",
+   "tags": [
+    "control",
+    "console",
+    "lab",
+    "soviet"
+   ]
+  },
+  "hospital_bed": {
+   "file": "models/hospital_bed.glb",
+   "height": 1.95,
+   "about": "1970s clinic bed with IV stand, nightstand, chart (Forge 3D Ultra, Claude spec)",
+   "tags": [
+    "hospital",
+    "bed",
+    "medical"
+   ]
   }
  }
 }
