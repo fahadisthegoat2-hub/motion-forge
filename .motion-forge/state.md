@@ -1,4 +1,6 @@
 # Motion Forge state
+- Last video: "The Beam Through His Head" (Anatoli Bugorski true story) — scenes/bugorski (direction.js → build.js → bugorski.html). Artifact: https://claude.ai/artifact/PWZGAUJpgnPSGoNuLsuqxy · star Jake (+ walt, marcus doctors) · good/maximum · 28.6s · VO Kokoro am_michael speed 1.17. Publish pack scenes/bugorski/publish.md, cover thumbs/thumb_0.jpg.
+- New: Forge 3D Ultra models accel_magnet, accel_tunnel, control_console, hospital_bed (assets/models; exporter merges meshes per material + re-indexes; avoid ultra-thin repeated parts — they speckle actors). Engine: beam motes:false, model shadow:false, NaN heal pass.
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.
