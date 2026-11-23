@@ -94,8 +94,8 @@ S('boom', { cut: 'flash', set: 'space', look: 'cinematic', impact: [0.04], punch
   sfx: [{ t: 0.03, type: 'boom', gain: 1 }, { t: 0.03, type: 'impact', gain: 1 }] });
 S('back', { cut: 'flash', set: 'lab', look: 'warm-film',
   camera: { move: 'crane-up', target: 'hero', size: 'ws', az: 30 },
-  cast: { hero: { pos: [[0, [0, 0, 0.1]]], rotY: [[0, 0.3]], clips: [{ clip: 'die', start: -3, end: 0.01, loop: false }, { clip: 'standup', start: 0.5, end: 2.5, loop: false, fade: 0.2 }, { clip: 'idle', start: 1.8, end: 3, fade: 0.3 }],
-    face: { worried: [[0, 0.5]], smile: [[1.6, 0], [2.0, 0.6]] }, look: [[0, [0, 0, 3]], [1.7, 'camera', 'inOutSine']], acting: 'none' } },
+  cast: { hero: { pos: [[0, [0, 0, 0.1]]], rotY: [[0, 0.3]], clips: idle(3), gestures: [{ type: 'slump', start: 0, end: 0.9 }, { type: 'headhold', start: 0.9, end: 1.5 }],
+    face: { worried: [[0, 0.7], [1.0, 0]], smile: [[1.0, 0], [1.5, 0.6]] }, look: [[0, [0, 0, 3]], [1.3, 'camera', 'inOutSine']], acting: 'none' } },
   fx: [{ type: 'dust', count: 150 }] });
 S('again', { cut: 'dip', set: 'lab', look: 'cinematic',
   camera: cam([0.6, 1.4, 4.2], [0.1, 1.35, 3.0], [-0.3, 1.1, 0], [-0.3, 1.2, 0], 36, dur('again')),
