@@ -1,3 +1,3 @@
-REVIEW FAIL — no gravity-button_qa/review.json; run --init and do the high review
-
-pack refused: finish the review first (only VFX/tool previews may pass --no-review)
+[motion-forge] using chrome
+packed 14 files (48.9 MB): characters/library.json, assets/models/crate.glb, assets/models/gravity_remote.glb, assets/models/traffic_cone.glb, assets/models/coffee_cup.glb, assets/models/city_car.glb, assets/characters/jake.glb, examples/models/gltf/Xbot.glb, assets/animations/ual-starter.glb, assets/animations/ual1.glb, assets/animations/ual2.glb, examples/models/gltf/Soldier.glb, examples/models/gltf/Michelle.glb, vo.wav
+publish with capabilities: { downloads: true } — the page saves the finished MP4 through it (Download MP4 button)

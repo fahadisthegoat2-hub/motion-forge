@@ -1,0 +1,2 @@
+round 3/2 snapshot → gravity-button_qa/r3/ · put your proof files there (crops, strips, grabs), then fill every check:
+  review_log.js gravity-button.html --check C02 --status PASS --evidence "…" --proof r3/file.png
