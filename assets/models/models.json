@@ -103,6 +103,25 @@
     "rocks",
     "beach"
    ]
+  },
+  "red_button": {
+   "file": "models/red_button.glb",
+   "height": 0.79,
+   "about": "big red dome button on a steel pedestal (Forge 3D Studio)",
+   "tags": [
+    "button",
+    "red",
+    "lab"
+   ]
+  },
+  "warning_sign": {
+   "file": "models/warning_sign.glb",
+   "height": 1.86,
+   "about": "yellow triangular warning sign on a post (Forge 3D Studio)",
+   "tags": [
+    "sign",
+    "warning"
+   ]
   }
  }
 }

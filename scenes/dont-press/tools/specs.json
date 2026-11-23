@@ -1,0 +1,34 @@
+{
+"red_button": {"name":"Red Button Console","materials":{
+ "steel":{"preset":"metal","color":"#7b838c","rough":0.35,"tex":"brushed"},
+ "dark":{"preset":"plastic","color":"#1c1f24","rough":0.5},
+ "red":{"preset":"plastic","color":"#d3151b","rough":0.18,"clearcoat":1},
+ "glowred":{"preset":"emissive","color":"#ff2a2a","glow":1.2},
+ "yellow":{"preset":"paint","color":"#e8b41a","rough":0.45},
+ "black":{"preset":"rubber","color":"#111111"}},
+ "parts":[
+ {"n":"base","t":"sculpt","m":"steel","res":110,"detail":{"amp":0.0008,"freq":90},"children":[
+   {"t":"cyl","s":[0.16,0.24,0.62],"p":[0,0.31,0],"blend":0.02,"m":"steel"},
+   {"t":"cyl","s":[0.3,0.3,0.05],"p":[0,0.025,0],"blend":0.015,"m":"dark"},
+   {"t":"cyl","s":[0.3,0.26,0.06],"p":[0,0.64,0],"blend":0.02,"m":"yellow"},
+   {"t":"cyl","s":[0.2,0.2,0.04],"p":[0,0.69,0],"op":"sub"}]},
+ {"n":"stripe","t":"torus","s":[0.285,0.012],"m":"black","p":[0,0.66,0],"r":[90,0,0]},
+ {"n":"seat","t":"cyl","s":[0.19,0.2,0.05],"m":"dark","p":[0,0.675,0]},
+ {"n":"button","t":"lathe","m":"red","p":[0,0.69,0],"pts":[[0,0],[0.16,0],[0.17,0.02],[0.16,0.05],[0.13,0.075],[0.08,0.09],[0.03,0.097],[0,0.1]]},
+ {"n":"glow","t":"torus","s":[0.178,0.006],"m":"glowred","p":[0,0.693,0],"r":[90,0,0]},
+ {"n":"bolts","t":"cyl","s":[0.012,0.012,0.012],"m":"steel","p":[0.27,0.67,0],"repeat":{"n":8,"axis":"y"}}
+ ]},
+"warning_sign": {"name":"Warning Sign","materials":{
+ "yellow":{"preset":"paint","color":"#f0c21a","rough":0.4},
+ "black":{"preset":"plastic","color":"#15151a","rough":0.5},
+ "steel":{"preset":"metal","color":"#6e757d","rough":0.4,"tex":"scratched"},
+ "red":{"preset":"paint","color":"#c8161d","rough":0.35}},
+ "parts":[
+ {"n":"post","t":"cyl","s":[0.025,0.03,1.6],"m":"steel","p":[0,0.8,0]},
+ {"n":"board","t":"extrude","m":"yellow","bevel":0.01,"depth":0.025,"pts":[[0,0.5],[-0.46,-0.3],[0.46,-0.3]],"smooth":false,"p":[0,1.35,0.03]},
+ {"n":"inner","t":"extrude","m":"black","bevel":0.004,"depth":0.012,"pts":[[0,0.36],[-0.32,-0.2],[0.32,-0.2]],"smooth":false,"p":[0,1.33,0.045]},
+ {"n":"bar","t":"box","s":[0.07,0.22,0.01],"m":"yellow","p":[0,1.36,0.056]},
+ {"n":"dot","t":"sphere","s":[0.04],"m":"yellow","p":[0,1.2,0.056],"sc":[1,1,0.2]},
+ {"n":"base","t":"cyl","s":[0.12,0.14,0.04],"m":"steel","p":[0,0.02,0]}
+ ]}
+}

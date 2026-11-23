@@ -1,0 +1,4 @@
+{"C17":["PASS","av_check integrated -15.5 LUFS, LRA 2.8, true peak -5.2 dBTP over 29.9s; voice volume 1.6 keeps voice above music",["audio_notes.txt","wave.png"]],
+"C18":["PASS","av_check dead air none over 29.9s; longest VO gap 0.45s after 'Jake does not read signs.' at 8.9s, music and ambience under it",["audio_notes.txt"]],
+"C19":["PASS","music bpm 128 tension with drops at 9.6s (click) and 21.7s (snap); VO tail ends 29.6s",["audio_notes.txt"]],
+"C23":["PASS","sound off, shots 2-20: titles state each beat (shot 4 RED BUTTON, shot 5 DO NOT PRESS, shot 7 CLICK!, shot 8 GRAVITY: OFF, shot 10 ROOF: GONE, shot 11 SPACE!)",["all_a.png","all_b.png"]]}
