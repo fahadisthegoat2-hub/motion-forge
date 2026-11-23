@@ -1,0 +1,6 @@
+[motion-forge] using chrome
+QA FAIL (4) — fix all, then run again:
+- HANDS: shot 7 "press" @9.7s hero hand is 29 cm from [0.18,1.28,-0.65] (move the target or the character closer)
+- HANDS: shot 10 "coffee" @12.3s hero hand is 96 cm from [0.25,3.95,0.55] (move the target or the character closer)
+- HANDS: shot 16 "again" @20.1s hero hand is 1128 cm from [0.15,700.1,0.55] (move the target or the character closer)
+- HOOK: first shot lasts 2.17s — the hook shot must be ≤ 2s

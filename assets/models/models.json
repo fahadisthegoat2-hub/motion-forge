@@ -103,6 +103,42 @@
     "rocks",
     "beach"
    ]
+  },
+  "gravity_remote": {
+   "file": "models/gravity_remote.glb",
+   "height": 0.09,
+   "about": "handheld red gravity button remote (Forge 3D Studio sculpt)",
+   "tags": [
+    "prop",
+    "button"
+   ]
+  },
+  "city_car": {
+   "file": "models/city_car.glb",
+   "height": 1.5,
+   "about": "blue city car (Forge 3D Studio sculpt)",
+   "tags": [
+    "car",
+    "vehicle"
+   ]
+  },
+  "coffee_cup": {
+   "file": "models/coffee_cup.glb",
+   "height": 0.13,
+   "about": "paper coffee cup (Forge 3D Studio sculpt)",
+   "tags": [
+    "cup",
+    "coffee"
+   ]
+  },
+  "traffic_cone": {
+   "file": "models/traffic_cone.glb",
+   "height": 0.71,
+   "about": "orange traffic cone (Forge 3D Studio sculpt)",
+   "tags": [
+    "cone",
+    "street"
+   ]
   }
  }
 }
