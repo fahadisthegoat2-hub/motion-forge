@@ -18,3 +18,4 @@
 - Brief replies, no summaries; time is money.
 - Hates crooked backs, morphing hands/limbs: engine body guards + qa BODY check + pose_lab must stay green; never ship a deformed body.
 - Plugin overhaul (Sir, Nov 2026): wants REAL 3D models (Forge sculpt engine: fused, carved meshes), visibly bigger upgrades on Improve, no limbs/hands in props or morphing, the 12 principles, a camera that always moves, LOTS of motion graphics, and effort levels that fix bodies/hands/animation first (minor polish never counts). Every plugin fix is pushed to main.
+- Last video: "The 10-Second Lab" — scenes/loop-lab (direction.js → build.js). Artifact: https://claude.ai/artifact/CnCckCdLx6VJBd2EKovz9N · Jake · good/high · 26.2s · VO Kokoro am_michael (setup: /tmp/claude-0/kok, model from HF). render limiter 0.8.

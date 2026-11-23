@@ -46,7 +46,7 @@ S('press', { cut: 'zoom', set: 'lab', look: 'cinematic',
 S('boom', { cut: 'smash', set: 'lab', look: 'cinematic', impact: [0.03], punch: [0.04],
   camera: { move: 'crash-zoom', target: 'hero', size: 'mcu', at: 0.05, az: 10 },
   cast: { hero: { pos: [[0, [0, 0, -0.95]]], rotY: [[0, P]], clips: idle(3), look: [[0, 'camera']], face: { scream: [[0, 1]] }, acting: 'none', secondary: 0, bones: { spine: [[0, [0.18, 0, 0]]], spine1: [[0, [0.12, 0, 0]]] } } },
-  fx: [BOX(), BOOM(0.02, [0, 1, -3.4], 1.2), { type: 'shockwave', t: 0.02, pos: [0, 0.2, -1.4] }], sfx: [{ t: 0.02, type: 'boom', gain: 1 }] });
+  fx: [BOX(), BOOM(0.02, [0, 1, -3.4], 0.9), { type: 'shockwave', t: 0.02, pos: [0, 0.2, -1.4] }], sfx: [{ t: 0.02, type: 'boom', gain: 1 }] });
 S('sprint', { cut: 'flash', set: 'lab', look: 'cinematic', afterimage: 0.5,
   camera: { move: 'track', target: 'hero', size: 'mls', side: 'left', az: 30, handheld: 0.8 },
   cast: { hero: { pos: [[0, [0, 0, 1.2]], [dur('sprint'), [0, 0, 1.2 - 2.6 * dur('sprint')], 'linear']], rotY: [[0, P]], clips: [{ clip: 'run', start: 0, end: 3 }], face: { scared: [[0, 0.9]] } } },
@@ -54,7 +54,7 @@ S('sprint', { cut: 'flash', set: 'lab', look: 'cinematic', afterimage: 0.5,
 S('locked', { cut: 'whip', set: 'lab', look: 'cinematic', punch: [0.9], impact: [0.9],
   camera: { move: 'static', target: 'hero', size: 'ms', az: 160, handheld: 0.9 },
   cast: { hero: { pos: [[0, [0, 0, -3.15]]], rotY: [[0, P]], clips: idle(3), reach: [{ hand: 'right', to: [-0.12, 1.0, -3.4], start: 0.15, end: 0.7 }, { hand: 'left', to: [0.12, 1.0, -3.4], start: 0.5, end: 1.0 }], gestures: [{ type: 'scared', start: 1.0, end: dur('locked') }], face: { shock: [[0.7, 0], [1.1, 1, 'outBack']] } } },
-  fx: [BOOM(0.95, [0, 1, -2], 1.0)], sfx: [{ t: 0.3, type: 'impact', gain: 0.6 }, { t: 0.95, type: 'boom', gain: 1 }] });
+  fx: [BOOM(0.95, [0, 1, -4.5], 0.5)], sfx: [{ t: 0.3, type: 'impact', gain: 0.6 }, { t: 0.95, type: 'boom', gain: 1 }] });
 S('worst', { cut: 'glitch', set: 'lab', look: 'noir',
   camera: { move: 'dolly-in', target: 'hero', size: 'cu', az: 12 },
   cast: { hero: { pos: [[0, [0, 0, 0.6]]], rotY: [[0, 0]], clips: idle(3), look: [[0, 'camera'], [0.9, [-1.5, 1.0, -1.4], 'inOutSine']], face: { worried: [[0, 0.5], [0.6, 1, 'outBack']] } } } });
@@ -105,7 +105,7 @@ const titles = [
   { t: at('locked', 0.9), t1: at('worst'), style: 'stamp', text: 'LOCKED', pos: [0.5, 0.1], size: 0.09 },
   { t: at('worst', 0.05), t1: at('note'), style: 'kinetic', text: "BUT THAT'S|NOT THE WORST", hi: ['WORST'], pos: [0.5, 0.13], size: 0.09 },
   { t: at('note', 0.2), t1: at('dont'), style: 'stamp', text: 'YOUR HANDWRITING', pos: [0.5, 0.08], size: 0.06 },
-  { t: at('dont', 0.1), t1: at('never'), style: 'kinetic', text: "DON'T PRESS|THE RED BUTTON", hi: ['DON\'T'], pos: [0.5, 0.1], size: 0.08 },
+  { t: at('dont', 0.1), t1: at('never', -0.05), style: 'kinetic', text: "DON'T PRESS|THE RED BUTTON", hi: ['DON\'T'], pos: [0.5, 0.1], size: 0.08 },
   { t: at('never', 0.1), t1: at('plug'), style: 'kinetic', text: 'YOU WERE|NEVER STUCK', hi: ['NEVER', 'STUCK'], pos: [0.5, 0.1], size: 0.08 },
   { t: at('plug', 0.15), t1: at('plug', 1.0), style: 'kinetic', text: 'PULL|THE PLUG', hi: ['PLUG'], pos: [0.5, 0.09], size: 0.08 },
   { t: at('door', 0.1), t1: at('door', 1.0), style: 'tag', text: 'LAB 7 · 00:00', pos: [0.5, 0.08] },
