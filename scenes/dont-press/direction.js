@@ -99,7 +99,7 @@ S('another', SP({ look: 'clean-cg', cut: 'whip',
 // 14 · "Press to go home."
 S('home', SP({ look: 'clean-cg', cut: 'zoom',
   camera: { move: 'push', target: 'hero', size: 'ms', az: 8 },
-  cast: { hero: { pos: [[0, [0, 1.3, 0]], [dur('home'), [0.3, 1.5, 0.2], 'inOutSine']], rotX: [[0, 0.1]], rotY: [[0, 0.3]], solid: false, clips: idle(3), face: { smile: [[0.3, 0.8, 'outBack']] }, acting: 'none', look: [[0, [0.55, 2.75, 0.45]]], gestures: [{ type: 'point', start: 0.3, end: dur('home'), to: [0.55, 2.75, 0.45] }] } },
+  cast: { hero: { pos: [[0, [0, 1.3, 0]], [dur('home'), [0.3, 1.5, 0.2], 'inOutSine']], rotX: [[0, 0.1]], rotY: [[0, 0.3]], solid: false, clips: idle(3), face: { smile: [[0.3, 0.8, 'outBack']] }, acting: 'none', look: [[0, [0.55, 2.75, 0.45]]], gestures: [{ type: 'present', start: 0.3, end: dur('home') }] } },
   fx: [BTN({ height: 0.5, pos: [0.55, 2.5, 0.45], p: [[0, [0, 0, 0]], [dur('home'), [0, 0.2, -0.2]]], tilt: [[0, [0, 0, 0]], [dur('home'), [0, 1, 0]]] }), SIGN({ pos: [-0.75, 2.4, 0.2], height: 0.8, p: [[0, [0, 0, 0]], [dur('home'), [0.2, 0.3, 0]]], tilt: [[0, [0, 0, 0]], [dur('home'), [0.4, 1.3, 0.3]]] })] }));
 // 15 · "He presses it."
 S('press', SP({ look: 'clean-cg', cut: 'smash', impact: [0.9], punch: [0.9],
@@ -137,7 +137,6 @@ S('final', { cut: 'smash', set: 'lab', look: 'cinematic', punch: [dur('final') -
 const titles = [
   { t: 0.05, t1: at('earlier'), style: 'slam', text: 'HE PRESSED IT', pos: [0.5, 0.07], size: 0.08, accent: ACC },
   { t: at('earlier', 0.1), t1: at('lab'), style: 'place', text: 'THE LAB', sub: '10 MINUTES EARLIER', pos: [0.08, 0.08] },
-  { t: at('button', 0.15), t1: at('sign'), style: 'stamp', text: 'RED BUTTON', pos: [0.5, 0.06], size: 0.07, accent: '#ff3030' },
   { t: at('sign', 0.6), t1: at('reads'), style: 'stamp', text: 'DO NOT PRESS', pos: [0.5, 0.055], size: 0.075, accent: ACC },
   { t: at('reads', 0.9), t1: at('click'), style: 'stamp', text: 'JAKE: LOL', pos: [0.5, 0.07], size: 0.07, accent: '#ffd23f' },
   { t: at('click', 0.05), t1: at('gravity'), style: 'burst', text: 'CLICK!', pos: [0.5, 0.075], size: 0.1 },

@@ -18,3 +18,4 @@
 - Brief replies, no summaries; time is money.
 - Hates crooked backs, morphing hands/limbs: engine body guards + qa BODY check + pose_lab must stay green; never ship a deformed body.
 - Plugin overhaul (Sir, Nov 2026): wants REAL 3D models (Forge sculpt engine: fused, carved meshes), visibly bigger upgrades on Improve, no limbs/hands in props or morphing, the 12 principles, a camera that always moves, LOTS of motion graphics, and effort levels that fix bodies/hands/animation first (minor polish never counts). Every plugin fix is pushed to main.
+- Last video: "DO NOT PRESS" (scenes/dont-press) good/high 29.9s star Jake, Forge 3D red_button + warning_sign. Artifact: https://claude.ai/artifact/RgvKUofCComDLbRnWGBtYp. High review PASS (5 rounds).
