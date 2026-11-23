@@ -1,0 +1,12 @@
+{"name":"Red Button Pedestal","materials":{"steel":{"preset":"metal","color":"#6b7078","rough":0.38,"tex":"brushed"},"dark":{"preset":"paint","color":"#1c1e22","rough":0.55},"yel":{"preset":"paint","color":"#f2b705","rough":0.5,"clearcoat":0.3},"red":{"preset":"plastic","color":"#e5141b","rough":0.12,"clearcoat":1},"chrome":{"preset":"chrome","color":"#d8dde2","rough":0.1},"glowr":{"preset":"emissive","color":"#ff2a2a","glow":2.2}},"parts":[
+{"n":"base","t":"cyl","m":"dark","s":[0.3,0.34,0.06],"p":[0,0.03,0],"bevel":0.01},
+{"n":"post","t":"sculpt","m":"steel","children":[{"t":"cyl","s":[0.1,0.13,0.8],"p":[0,0.46,0],"blend":0.02},{"t":"cyl","s":[0.16,0.1,0.1],"p":[0,0.9,0],"blend":0.03},{"t":"torus","s":[0.115,0.012],"r":[90,0,0],"p":[0,0.3,0],"blend":0.01},{"t":"torus","s":[0.108,0.012],"r":[90,0,0],"p":[0,0.65,0],"blend":0.01}]},
+{"n":"top","t":"cyl","m":"yel","s":[0.3,0.3,0.07],"p":[0,0.98,0],"bevel":0.015},
+{"n":"stripes","t":"cyl","m":"dark","s":[0.302,0.302,0.02],"p":[0,0.98,0],"repeat":{"n":8,"axis":"y"},"sc":[1,1,0.12]},
+{"n":"collar","t":"lathe","m":"chrome","pts":[[0,1.015],[0.2,1.015],[0.21,1.03],[0.2,1.06],[0.17,1.07],[0,1.07]]},
+{"n":"btn","t":"lathe","m":"red","pts":[[0,1.06],[0.165,1.06],[0.17,1.09],[0.16,1.12],[0.12,1.15],[0.05,1.165],[0,1.167]]},
+{"n":"glow","t":"torus","m":"glowr","s":[0.19,0.008],"r":[90,0,0],"p":[0,1.075,0]},
+{"n":"lampL","t":"sphere","m":"glowr","s":[0.025],"p":[0.25,1.03,0],"mirror":"x"},
+{"n":"lampB","t":"sphere","m":"glowr","s":[0.025],"p":[0,1.03,0.25]},
+{"n":"plate","t":"box","m":"steel","s":[0.14,0.05,0.01],"p":[0,0.78,0.115],"bevel":0.004}
+]}

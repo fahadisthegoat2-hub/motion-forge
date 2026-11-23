@@ -1,0 +1,396 @@
+{
+ "voice": "am_michael",
+ "duration": 25.128,
+ "words": [
+  {
+   "w": "Never",
+   "start": 0.05,
+   "end": 0.349,
+   "tone": "shout"
+  },
+  {
+   "w": "press",
+   "start": 0.349,
+   "end": 0.648,
+   "tone": "shout"
+  },
+  {
+   "w": "the",
+   "start": 0.648,
+   "end": 0.828,
+   "tone": "shout"
+  },
+  {
+   "w": "red",
+   "start": 0.828,
+   "end": 1.007,
+   "tone": "shout"
+  },
+  {
+   "w": "button.",
+   "start": 1.007,
+   "end": 1.486,
+   "tone": "shout"
+  },
+  {
+   "w": "Jake",
+   "start": 1.786,
+   "end": 2.069,
+   "tone": "serious"
+  },
+  {
+   "w": "pressed",
+   "start": 2.069,
+   "end": 2.564,
+   "tone": "serious"
+  },
+  {
+   "w": "it.",
+   "start": 2.564,
+   "end": 2.846,
+   "tone": "serious"
+  },
+  {
+   "w": "Big",
+   "start": 2.996,
+   "end": 3.268,
+   "tone": "dramatic"
+  },
+  {
+   "w": "mistake.",
+   "start": 3.268,
+   "end": 4.083,
+   "tone": "dramatic"
+  },
+  {
+   "w": "The",
+   "start": 4.183,
+   "end": 4.359,
+   "tone": "scared"
+  },
+  {
+   "w": "lab",
+   "start": 4.359,
+   "end": 4.535,
+   "tone": "scared"
+  },
+  {
+   "w": "shook.",
+   "start": 4.535,
+   "end": 4.945,
+   "tone": "scared"
+  },
+  {
+   "w": "The",
+   "start": 4.945,
+   "end": 5.121,
+   "tone": "scared"
+  },
+  {
+   "w": "floor",
+   "start": 5.121,
+   "end": 5.414,
+   "tone": "scared"
+  },
+  {
+   "w": "vanished.",
+   "start": 5.414,
+   "end": 6.001,
+   "tone": "scared"
+  },
+  {
+   "w": "Gravity",
+   "start": 6.101,
+   "end": 6.708,
+   "tone": "dramatic"
+  },
+  {
+   "w": "quit.",
+   "start": 6.708,
+   "end": 7.229,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Now",
+   "start": 7.329,
+   "end": 7.55,
+   "tone": "calm"
+  },
+  {
+   "w": "he's",
+   "start": 7.55,
+   "end": 7.77,
+   "tone": "calm"
+  },
+  {
+   "w": "floating",
+   "start": 7.77,
+   "end": 8.359,
+   "tone": "calm"
+  },
+  {
+   "w": "in",
+   "start": 8.359,
+   "end": 8.506,
+   "tone": "calm"
+  },
+  {
+   "w": "space.",
+   "start": 8.506,
+   "end": 9.02,
+   "tone": "calm"
+  },
+  {
+   "w": "Thirty",
+   "start": 9.17,
+   "end": 9.6,
+   "tone": "serious"
+  },
+  {
+   "w": "seconds",
+   "start": 9.6,
+   "end": 10.101,
+   "tone": "serious"
+  },
+  {
+   "w": "of",
+   "start": 10.101,
+   "end": 10.244,
+   "tone": "serious"
+  },
+  {
+   "w": "air.",
+   "start": 10.244,
+   "end": 10.602,
+   "tone": "serious"
+  },
+  {
+   "w": "No",
+   "start": 10.702,
+   "end": 10.865,
+   "tone": "whisper"
+  },
+  {
+   "w": "sound.",
+   "start": 10.865,
+   "end": 11.436,
+   "tone": "whisper"
+  },
+  {
+   "w": "No",
+   "start": 11.436,
+   "end": 11.599,
+   "tone": "whisper"
+  },
+  {
+   "w": "rescue.",
+   "start": 11.599,
+   "end": 12.251,
+   "tone": "whisper"
+  },
+  {
+   "w": "Then",
+   "start": 12.401,
+   "end": 12.71,
+   "tone": "mysterious"
+  },
+  {
+   "w": "he",
+   "start": 12.71,
+   "end": 12.865,
+   "tone": "mysterious"
+  },
+  {
+   "w": "sees",
+   "start": 12.865,
+   "end": 13.174,
+   "tone": "mysterious"
+  },
+  {
+   "w": "it.",
+   "start": 13.174,
+   "end": 13.484,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Another",
+   "start": 13.684,
+   "end": 14.158,
+   "tone": "whisper"
+  },
+  {
+   "w": "red",
+   "start": 14.158,
+   "end": 14.361,
+   "tone": "whisper"
+  },
+  {
+   "w": "button.",
+   "start": 14.361,
+   "end": 14.902,
+   "tone": "whisper"
+  },
+  {
+   "w": "Everything",
+   "start": 15.202,
+   "end": 15.869,
+   "tone": "serious"
+  },
+  {
+   "w": "says",
+   "start": 15.869,
+   "end": 16.136,
+   "tone": "serious"
+  },
+  {
+   "w": "don't.",
+   "start": 16.136,
+   "end": 16.536,
+   "tone": "serious"
+  },
+  {
+   "w": "Nobody",
+   "start": 16.636,
+   "end": 17.12,
+   "tone": "dramatic"
+  },
+  {
+   "w": "tells",
+   "start": 17.12,
+   "end": 17.522,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Jake",
+   "start": 17.522,
+   "end": 17.844,
+   "tone": "dramatic"
+  },
+  {
+   "w": "what",
+   "start": 17.844,
+   "end": 18.166,
+   "tone": "dramatic"
+  },
+  {
+   "w": "to",
+   "start": 18.166,
+   "end": 18.327,
+   "tone": "dramatic"
+  },
+  {
+   "w": "do.",
+   "start": 18.327,
+   "end": 18.649,
+   "tone": "dramatic"
+  },
+  {
+   "w": "Jake",
+   "start": 18.799,
+   "end": 19.052,
+   "tone": "excited"
+  },
+  {
+   "w": "presses",
+   "start": 19.052,
+   "end": 19.495,
+   "tone": "excited"
+  },
+  {
+   "w": "it.",
+   "start": 19.495,
+   "end": 19.748,
+   "tone": "excited"
+  },
+  {
+   "w": "Boom.",
+   "start": 19.848,
+   "end": 20.412,
+   "tone": "shout"
+  },
+  {
+   "w": "Back",
+   "start": 20.612,
+   "end": 20.902,
+   "tone": "calm"
+  },
+  {
+   "w": "in",
+   "start": 20.902,
+   "end": 21.047,
+   "tone": "calm"
+  },
+  {
+   "w": "the",
+   "start": 21.047,
+   "end": 21.265,
+   "tone": "calm"
+  },
+  {
+   "w": "lab.",
+   "start": 21.265,
+   "end": 21.627,
+   "tone": "calm"
+  },
+  {
+   "w": "Safe.",
+   "start": 21.627,
+   "end": 22.062,
+   "tone": "calm"
+  },
+  {
+   "w": "And",
+   "start": 22.262,
+   "end": 22.482,
+   "tone": "mysterious"
+  },
+  {
+   "w": "there",
+   "start": 22.482,
+   "end": 22.848,
+   "tone": "mysterious"
+  },
+  {
+   "w": "it",
+   "start": 22.848,
+   "end": 22.995,
+   "tone": "mysterious"
+  },
+  {
+   "w": "is",
+   "start": 22.995,
+   "end": 23.142,
+   "tone": "mysterious"
+  },
+  {
+   "w": "again.",
+   "start": 23.142,
+   "end": 23.655,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Would",
+   "start": 23.755,
+   "end": 24.1,
+   "tone": "dramatic"
+  },
+  {
+   "w": "you",
+   "start": 24.1,
+   "end": 24.307,
+   "tone": "dramatic"
+  },
+  {
+   "w": "press",
+   "start": 24.307,
+   "end": 24.652,
+   "tone": "dramatic"
+  },
+  {
+   "w": "it?",
+   "start": 24.652,
+   "end": 24.928,
+   "tone": "dramatic"
+  }
+ ]
+}

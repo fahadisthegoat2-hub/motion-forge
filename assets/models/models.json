@@ -103,6 +103,17 @@
     "rocks",
     "beach"
    ]
+  },
+  "red_button": {
+   "file": "models/red_button.glb",
+   "height": 1.17,
+   "about": "red button on a hazard pedestal (Forge 3D Studio sculpt spec)",
+   "tags": [
+    "button",
+    "red",
+    "lab",
+    "prop"
+   ]
   }
  }
 }
