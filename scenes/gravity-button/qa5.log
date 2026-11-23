@@ -1,1 +1,7 @@
 [motion-forge] using chrome
+QA FAIL (5) — fix all, then run again:
+- FRAMING: shot 13 "ends" @16.5s hero a countdown title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 14 "back" @16.9s hero face is cut off at the top of the frame — wider size or lower camera
+- FRAMING: shot 15 "fall" @19.1s hero a stat title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 18 "tenagain" @23.4s hero a countdown title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 18 "tenagain" @23.5s hero face is cut off at the top of the frame — wider size or lower camera
