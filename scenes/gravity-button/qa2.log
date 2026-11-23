@@ -1,1 +1,5 @@
 [motion-forge] using chrome
+page.evaluate: Target page, context or browser has been closed
+    at /home/user/motion-forge/scripts/qa_check.js:37:34 {
+  log: []
+}
