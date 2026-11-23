@@ -39,6 +39,7 @@ const floatFx = (d, { lift0 = 0, lift1 = 1, drop = false, t0 = 0, tDrop = 0.3 } 
     tilt: drop ? [[0, [0.25 * sp, 0, 0.2]], [d, [0, 0, 0], 'inCubic']] : [[0, [0.05 * sp * lift0, 0, 0.04]], [d, [0.3 * sp * (lift1 + 0.3), 0, 0.2 * sp], 'inOutSine']] };
 });
 const CLOUDS = (y, n = 6, scale = 9, seed = 1) => Array.from({ length: n }, (_, i) => ({ type: 'smoke', start: 0, end: 4, pos: [((i * 37 + seed * 11) % 26) - 13, y + ((i * 53 + seed * 7) % 40) - 20, ((i * 29 + seed * 5) % 24) - 12], scale, color: '#ffffff', opacity: 0.55 }));
+const BACKDROP = (y) => [{ type: 'smoke', start: 0, end: 4, pos: [0, y, -9], scale: 22, color: '#aab8cc', opacity: 0.95 }, { type: 'smoke', start: 0, end: 4, pos: [-8, y + 4, -7], scale: 14, color: '#e8eef6', opacity: 0.8 }, { type: 'smoke', start: 0, end: 4, pos: [8, y - 6, -7], scale: 14, color: '#dfe7f1', opacity: 0.8 }];
 const REMOTE_HAND = { type: 'model', id: 'gravity_remote', attach: 'hero.righthand', grip: true, height: 0.09, solid: false, rot: [0, 0, 0] };
 
 // 1 · PAYOFF — falling forever
@@ -89,7 +90,7 @@ S('floats', { cut: 'flash', set: 'city-day', look: 'golden-hour',
 
 // 9 · "Cars. Cones."
 S('cars', { cut: 'whip', set: 'city-day', look: 'golden-hour',
-  camera: { pos: [[0, [8, 1.2, 7]], [dur('cars'), [6, 2.6, 5], 'inOutSine']], look: [[0, [-2.2, 4.0, 3.2]], [dur('cars'), [-1.5, 5.2, 3.2], 'inOutSine']], fov: 42, handheld: 0.5 },
+  camera: { pos: [[0, [3.5, 1.2, 10]], [dur('cars'), [1.5, 2.6, 8], 'inOutSine']], look: [[0, [-2.0, 2.6, 3.2]], [dur('cars'), [-1.6, 3.8, 3.2], 'inOutSine']], fov: 46, handheld: 0.5 },
   cast: { hero: { pos: [[0, [-0.9, 3.0, 1.2]], [dur('cars'), [-0.9, 3.6, 1.2], 'linear']], rotY: [[0, 2.6]], rotX: [[0, -0.2], [dur('cars'), -0.45]], swimming: true, clips: idle(dur('cars')), acting: 'none',
     gestures: [{ type: 'cheer', start: 0, end: dur('cars') }], face: { smile: [[0, 0.8]] } } },
   fx: floatFx(dur('cars'), { lift0: 0.3, lift1: 0.6 }) });
@@ -104,7 +105,7 @@ S('coffee', { cut: 'zoom', set: 'city-day', look: 'golden-hour',
 
 // 11 · "Best day ever!" — backflip
 S('best', { cut: 'whip', set: 'city-day', look: 'golden-hour', punch: [0.2],
-  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 0.6, 4.6], [-1.2, 0.8, 4.2], 54, 0.6, 1.4),
+  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 0.6, 4.6], [-1.2, 0.8, 4.2], 58, 0.6, 0.2),
   cast: { hero: { pos: [[0, [0, 4.5, 0]], [dur('best'), [0, 7.5, 0], 'outSine']], rotY: [[0, 0.3]], rotX: [[0, 0], [dur('best'), -6.28, 'inOutCubic']], swimming: true, clips: idle(dur('best')), acting: 'none',
     gestures: [{ type: 'cheer', start: 0, end: dur('best') }], face: { smile: [[0, 1]] }, look: [[0, 'camera']] } },
   fx: floatFx(dur('best'), { lift0: 0.6, lift1: 0.95 }) });
@@ -131,19 +132,19 @@ S('back', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.28], pu
   fx: [...floatFx(dur('back'), { lift0: 1, drop: true, tDrop: 0.28 }), { type: 'shockwave', t: 0.28, pos: [0, 36, 0], scale: 4, color: '#ffffff' }], sfx: [{ t: 0.28, type: 'boom', gain: 1 }, { t: 0.3, type: 'riser', gain: 0.4 }] });
 
 // 15 · "You fall. Three kilometers."
-S('fall', { cut: 'whip', set: 'city-day', look: 'golden-hour', impact: [0.05],
-  camera: FOLLOW(dur('fall'), 400, 300, [0.9, 0.9, 2.6], [-0.5, 0.5, 2.1], 42, 1.8, 1.8, 'linear'),
-  cast: { hero: { ...FALL_HERO(dur('fall'), 400, 100), rotY: [[0, 0.2], [dur('fall'), 0.7]] } },
-  fx: [REMOTE_HAND, ...CLOUDS(370, 7, 10, 3)], sfx: [{ t: 0, type: 'whoosh', gain: 0.9 }] });
+S('fall', { cut: 'whip', set: 'city-day', look: 'clean-cg', impact: [0.05],
+  camera: FOLLOW(dur('fall'), 180, 80, [0.9, 2.2, 2.8], [-0.5, 1.9, 2.3], 42, 1.8, 1.5, 'linear'),
+  cast: { hero: { ...FALL_HERO(dur('fall'), 180, 100), rotY: [[0, 0.2], [dur('fall'), 0.7]] } },
+  fx: [REMOTE_HAND, ...BACKDROP(140), ...CLOUDS(150, 7, 10, 3)], sfx: [{ t: 0, type: 'whoosh', gain: 0.9 }] });
 
 // 16 · "You press it again!" — thumb mashes the remote
-S('again', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.2, 0.55, 0.9],
-  camera: FOLLOW(dur('again'), 330, 280, [0.35, 1.3, 1.9], [0.3, 1.25, 1.5], 38, 1.8, 1.5, 'linear'),
-  cast: { hero: { pos: [[0, [0, 330, 0]], [dur('again'), [0, 280, 0], 'linear']], rotX: [[0, -0.3]], rotY: [[0, 0.3]], swimming: true, clips: idle(dur('again')), acting: 'none',
-    hands: { right: 'grip' }, gestures: [{ type: 'beat', start: 0, end: dur('again'), side: 'right' }], look: [[0, [0.2, 330.9, 0.7]], [0.5, 'camera']],
+S('again', { cut: 'smash', set: 'city-day', look: 'clean-cg', punch: [0.2, 0.55, 0.9],
+  camera: FOLLOW(dur('again'), 160, 110, [0.35, 2.0, 2.1], [0.3, 1.9, 1.7], 38, 1.8, 1.5, 'linear'),
+  cast: { hero: { pos: [[0, [0, 160, 0]], [dur('again'), [0, 110, 0], 'linear']], rotX: [[0, -0.3]], rotY: [[0, 0.3]], swimming: true, clips: idle(dur('again')), acting: 'none',
+    hands: { right: 'grip' }, gestures: [{ type: 'beat', start: 0, end: dur('again'), side: 'right' }], look: [[0, [0.2, 160.9, 0.7]], [0.5, 'camera']],
     face: { scream: [[0, 0.8]], shock: [[0.5, 0], [0.8, 0.5]] } } },
-  fx: [REMOTE_HAND,
-    { type: 'sparks', t: 0.2, pos: [0.25, 330.8, 0.7], spread: 0.1, count: 40, color: '#ff3b30' }],
+  fx: [REMOTE_HAND, ...BACKDROP(135),
+    { type: 'sparks', t: 0.2, pos: [0.25, 160.8, 0.7], spread: 0.1, count: 40, color: '#ff3b30' }],
   sfx: [{ t: 0.2, type: 'ding', gain: 0.8 }, { t: 0.55, type: 'ding', gain: 0.8 }, { t: 0.9, type: 'ding', gain: 0.8 }] });
 
 // 17 · "You float. Safe." — floating calmly in the clouds
