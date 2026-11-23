@@ -1,1 +1,13 @@
 [motion-forge] using chrome
+QA FAIL (11) — fix all, then run again:
+- FRAMING: shot 1 "payoff" @0.8s hero a slam title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 11 "best" @13.7s hero a stamp title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 13 "ends" @16.3s hero a countdown title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 14 "back" @16.9s hero face is cut off at the top of the frame — wider size or lower camera
+- FRAMING: shot 15 "fall" @18.3s hero a stat title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 16 "again" @20.1s hero face is cut off at the top of the frame — wider size or lower camera
+- FRAMING: shot 17 "safe" @22.0s hero face is cut off at the top of the frame — wider size or lower camera
+- FRAMING: shot 18 "tenagain" @23.0s hero a countdown title covers the face — move it to the top 25% or the other side
+- FRAMING: shot 18 "tenagain" @23.2s hero face is cut off at the top of the frame — wider size or lower camera
+- FRAMING: shot 20 "question" @27.5s hero a slam title covers the face — move it to the top 25% or the other side
+- LIGHT: shot 15 "fall" is too dark (avg 37/255)

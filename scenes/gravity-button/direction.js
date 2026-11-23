@@ -43,7 +43,7 @@ const REMOTE_HAND = { type: 'model', id: 'gravity_remote', attach: 'hero.rightha
 
 // 1 · PAYOFF — falling forever
 const RX = -0.35;
-const FOLLOW = (d, y0, y1, offA, offB = offA, fov = 38, handheld = 1.2, lookUp = 0.95, ease = 'inOutSine') => ({ pos: [[0, [offA[0], y0 + offA[1], offA[2]]], [d, [offB[0], y1 + offB[1], offB[2]], ease]], look: [[0, [0, y0 + lookUp, 0]], [d, [0, y1 + lookUp, 0], 'linear']], fov, handheld });
+const FOLLOW = (d, y0, y1, offA, offB = offA, fov = 38, handheld = 1.2, lookUp = 1.35, ease = 'inOutSine') => ({ pos: [[0, [offA[0], y0 + offA[1], offA[2]]], [d, [offB[0], y1 + offB[1], offB[2]], ease]], look: [[0, [0, y0 + lookUp, 0]], [d, [0, y1 + lookUp, 0], 'linear']], fov, handheld });
 const FALL_HERO = (d, y0 = 420, dy = 55) => ({ pos: [[0, [0, y0, 0]], [d, [0, y0 - dy, 0], 'linear']], rotX: [[0, RX], [d, RX * 0.85, 'inOutSine']], rotY: [[0, 0.4], [d, 0.9, 'inOutSine']],
   clips: idle(d), swimming: true, acting: 'none', gestures: [{ type: 'handsup', start: 0, end: d }], face: { scream: [[0, 0.95]], scared: [[0, 1]] }, look: [[0, 'camera']], hands: { both: 'claw' } });
 S('payoff', { role: 'payoff', set: 'city-day', look: 'cinematic', impact: [0.05], punch: [0.1],
@@ -104,7 +104,7 @@ S('coffee', { cut: 'zoom', set: 'city-day', look: 'golden-hour',
 
 // 11 · "Best day ever!" — backflip
 S('best', { cut: 'whip', set: 'city-day', look: 'golden-hour', punch: [0.2],
-  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 0.6, 4.6], [-1.2, 0.8, 4.2], 54, 0.6, 1.0),
+  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 0.6, 4.6], [-1.2, 0.8, 4.2], 54, 0.6, 1.4),
   cast: { hero: { pos: [[0, [0, 4.5, 0]], [dur('best'), [0, 7.5, 0], 'outSine']], rotY: [[0, 0.3]], rotX: [[0, 0], [dur('best'), -6.28, 'inOutCubic']], swimming: true, clips: idle(dur('best')), acting: 'none',
     gestures: [{ type: 'cheer', start: 0, end: dur('best') }], face: { smile: [[0, 1]] }, look: [[0, 'camera']] } },
   fx: floatFx(dur('best'), { lift0: 0.6, lift1: 0.95 }) });
@@ -131,14 +131,14 @@ S('back', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.28], pu
   fx: [...floatFx(dur('back'), { lift0: 1, drop: true, tDrop: 0.28 }), { type: 'shockwave', t: 0.28, pos: [0, 36, 0], scale: 4, color: '#ffffff' }], sfx: [{ t: 0.28, type: 'boom', gain: 1 }, { t: 0.3, type: 'riser', gain: 0.4 }] });
 
 // 15 · "You fall. Three kilometers."
-S('fall', { cut: 'whip', set: 'city-day', look: 'cinematic', impact: [0.05],
+S('fall', { cut: 'whip', set: 'city-day', look: 'golden-hour', impact: [0.05],
   camera: FOLLOW(dur('fall'), 400, 300, [0.9, 0.9, 2.6], [-0.5, 0.5, 2.1], 42, 1.8, 0.95, 'linear'),
   cast: { hero: { ...FALL_HERO(dur('fall'), 400, 100), rotY: [[0, 0.2], [dur('fall'), 0.7]] } },
   fx: [REMOTE_HAND, ...CLOUDS(370, 7, 10, 3)], sfx: [{ t: 0, type: 'whoosh', gain: 0.9 }] });
 
 // 16 · "You press it again!" — thumb mashes the remote
 S('again', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.2, 0.55, 0.9], impact: [0.2],
-  camera: FOLLOW(dur('again'), 330, 280, [0.35, 1.3, 1.9], [0.3, 1.25, 1.5], 38, 1.8, 1.15, 'linear'),
+  camera: FOLLOW(dur('again'), 330, 280, [0.35, 1.3, 1.9], [0.3, 1.25, 1.5], 38, 1.8, 1.5, 'linear'),
   cast: { hero: { pos: [[0, [0, 330, 0]], [dur('again'), [0, 280, 0], 'linear']], rotX: [[0, -0.3]], rotY: [[0, 0.3]], swimming: true, clips: idle(dur('again')), acting: 'none',
     hands: { right: 'grip' }, gestures: [{ type: 'beat', start: 0, end: dur('again'), side: 'right' }], look: [[0, [0.2, 330.9, 0.7]], [0.5, 'camera']],
     face: { scream: [[0, 0.8]], shock: [[0.5, 0], [0.8, 0.5]] } } },
@@ -176,14 +176,14 @@ S('question', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.05]
 const titles = [
   { t: 0.05, t1: at('earlier', -0.05), style: 'slam', text: 'YOU PRESSED\nIT', pos: [0.5, 0.11], size: 0.1, accent: ACC },
   { t: at('earlier', 0.15), t1: at('find', -0.05), style: 'place', text: 'DOWNTOWN', sub: '10 SECONDS EARLIER', pos: [0.08, 0.09] },
-  { t: at('label', 0.1), t1: at('batt', -0.05), style: 'stat', value: 10, max: 10, suffix: 's', text: 'GRAVITY: OFF', pos: [0.5, 0.2], accent: ACC },
-  { t: at('batt', 0.15), t1: at('press', -0.05), style: 'stat', value: 1, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.2], accent: ACC },
+  { t: at('label', 0.1), t1: at('batt', -0.05), style: 'stat', value: 10, max: 10, suffix: 's', text: 'GRAVITY: OFF', pos: [0.5, 0.1], accent: ACC },
+  { t: at('batt', 0.15), t1: at('press', -0.05), style: 'stat', value: 1, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.1], accent: ACC },
   { t: at('best', 0.05), t1: at('worst'), style: 'stamp', text: 'BEST DAY EVER', pos: [0.5, 0.11], size: 0.085, accent: ACC },
-  { t: at('ends', 0.0), t1: at('back'), style: 'countdown', from: 3, step: 0.34, pos: [0.5, 0.15], size: 0.07, accent: ACC },
+  { t: at('ends', 0.0), t1: at('back'), style: 'countdown', from: 3, step: 0.34, pos: [0.5, 0.1], size: 0.07, accent: ACC },
   { t: at('back', 0.28), t1: at('fall'), style: 'speedlines', mode: 'radial', center: [0.5, 0.45], density: 1, color: '#ffffff' },
-  { t: at('fall', 0.15), t1: at('again'), style: 'stat', value: 3, max: 3, suffix: ' KM', text: 'TO THE GROUND', pos: [0.5, 0.18], accent: ACC },
-  { t: at('tenagain', 0.0), t1: at('beeps'), style: 'countdown', from: 10, step: 0.15, pos: [0.5, 0.14], size: 0.06, accent: ACC },
-  { t: at('beeps', 1.35), t1: at('question'), style: 'stat', value: 0, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.2], accent: ACC },
+  { t: at('fall', 0.15), t1: at('again'), style: 'stat', value: 3, max: 3, suffix: ' KM', text: 'TO THE GROUND', pos: [0.5, 0.1], accent: ACC },
+  { t: at('tenagain', 0.0), t1: at('beeps'), style: 'countdown', from: 10, step: 0.15, pos: [0.5, 0.1], size: 0.06, accent: ACC },
+  { t: at('beeps', 1.35), t1: at('question'), style: 'stat', value: 0, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.1], accent: ACC },
   { t: at('question', 0.05), t1: END, style: 'slam', text: 'WOULD YOU\nPRESS IT?', pos: [0.5, 0.11], size: 0.1, accent: ACC },
 ];
 
