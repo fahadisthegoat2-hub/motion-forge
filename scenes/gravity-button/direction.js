@@ -118,26 +118,26 @@ S('worst', { cut: 'glitch', set: 'city-day', look: 'cinematic',
 
 // 13 · "Ten seconds ends." — he looks at the remote: it's counting down
 S('ends', { cut: 'zoom', set: 'city-day', look: 'cinematic', punch: [0.15],
-  camera: FOLLOW(dur('ends'), 56, 58, [0.5, 1.45, 1.5], [0.3, 1.5, 0.95], 34, 0.6, 1.5),
+  camera: FOLLOW(dur('ends'), 56, 58, [0.5, 1.45, 2.3], [0.3, 1.5, 1.8], 34, 0.6, 1.75),
   cast: { hero: { pos: [[0, [0, 56, 0]], [dur('ends'), [0, 58, 0], 'linear']], rotY: [[0, 0.1]], rotX: [[0, -0.1]], swimming: true, clips: idle(dur('ends')), acting: 'none', look: [[0, 'camera']],
     face: { worried: [[0, 0.9]], scared: [[0.4, 0], [0.9, 0.9, 'outBack']] } } },
   sfx: [{ t: 0.0, type: 'ding', gain: 0.5 }, { t: 0.33, type: 'ding', gain: 0.55 }, { t: 0.66, type: 'ding', gain: 0.6 }] });
 
 // 14 · "Gravity is back." — everything drops
 S('back', { cut: 'smash', set: 'city-day', look: 'cinematic', impact: [0.28], punch: [0.28],
-  camera: { pos: [[0, [3.2, 33, 9]], [dur('back'), [3.8, 24, 8.5], 'inOutSine']], look: [[0, [0, 34, 0]], [dur('back'), [0, 22, 0], 'inOutSine']], fov: 50, handheld: 1.1 },
+  camera: { pos: [[0, [3.2, 37, 9]], [0.28, [3.2, 37, 9]], [dur('back'), [3.8, 18, 8], 'inCubic']], look: [[0, [0, 37, 0]], [0.28, [0, 37, 0]], [dur('back'), [0, 16, 0], 'inCubic']], fov: 50, handheld: 1.1 },
   cast: { hero: { pos: [[0, [0, 36, 0]], [0.28, [0, 36, 0]], [dur('back'), [0, 14, 0], 'inCubic']], rotY: [[0, 0.1]], rotX: [[0, -0.2], [dur('back'), -0.9, 'inCubic']], swimming: true, clips: idle(dur('back')), acting: 'none', look: [[0, 'camera']],
     gestures: [{ type: 'handsup', start: 0.28, end: dur('back') }], face: { scream: [[0.28, 0], [0.45, 1, 'outBack']], scared: [[0, 1]] } } },
   fx: [...floatFx(dur('back'), { lift0: 1, drop: true, tDrop: 0.28 }), { type: 'shockwave', t: 0.28, pos: [0, 36, 0], scale: 4, color: '#ffffff' }], sfx: [{ t: 0.28, type: 'boom', gain: 1 }, { t: 0.3, type: 'riser', gain: 0.4 }] });
 
 // 15 · "You fall. Three kilometers."
 S('fall', { cut: 'whip', set: 'city-day', look: 'golden-hour', impact: [0.05],
-  camera: FOLLOW(dur('fall'), 400, 300, [0.9, 0.9, 2.6], [-0.5, 0.5, 2.1], 42, 1.8, 0.95, 'linear'),
+  camera: FOLLOW(dur('fall'), 400, 300, [0.9, 0.9, 2.6], [-0.5, 0.5, 2.1], 42, 1.8, 1.8, 'linear'),
   cast: { hero: { ...FALL_HERO(dur('fall'), 400, 100), rotY: [[0, 0.2], [dur('fall'), 0.7]] } },
   fx: [REMOTE_HAND, ...CLOUDS(370, 7, 10, 3)], sfx: [{ t: 0, type: 'whoosh', gain: 0.9 }] });
 
 // 16 · "You press it again!" — thumb mashes the remote
-S('again', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.2, 0.55, 0.9], impact: [0.2],
+S('again', { cut: 'smash', set: 'city-day', look: 'cinematic', punch: [0.2, 0.55, 0.9],
   camera: FOLLOW(dur('again'), 330, 280, [0.35, 1.3, 1.9], [0.3, 1.25, 1.5], 38, 1.8, 1.5, 'linear'),
   cast: { hero: { pos: [[0, [0, 330, 0]], [dur('again'), [0, 280, 0], 'linear']], rotX: [[0, -0.3]], rotY: [[0, 0.3]], swimming: true, clips: idle(dur('again')), acting: 'none',
     hands: { right: 'grip' }, gestures: [{ type: 'beat', start: 0, end: dur('again'), side: 'right' }], look: [[0, [0.2, 330.9, 0.7]], [0.5, 'camera']],
@@ -155,13 +155,13 @@ S('safe', { cut: 'flash', set: 'city-day', look: 'dreamy',
 
 // 18 · "Ten seconds. Again." — the loop begins to feel normal: floating, counting
 S('tenagain', { cut: 'whip', set: 'city-day', look: 'dreamy',
-  camera: FOLLOW(dur('tenagain'), 290, 293, [1.2, -0.3, 2.9], [0.6, 1.2, 2.2], 36, 0.4),
+  camera: FOLLOW(dur('tenagain'), 290, 293, [1.2, 0.8, 3.4], [0.6, 1.0, 3.0], 38, 0.4, 1.5),
   cast: { hero: { pos: [[0, [0, 290, 0]], [dur('tenagain'), [0, 293, 0], 'inOutSine']], rotY: [[0, -0.4]], rotX: [[0, 0.1], [dur('tenagain'), -0.15, 'inOutSine']], swimming: true, clips: idle(dur('tenagain')), acting: 'none',
     gestures: [{ type: 'thumbsup', start: 0.1, end: dur('tenagain') }], look: [[0, 'camera']], face: { smile: [[0, 0.7]], squint: [[0.9, 0], [1.4, 0.3]] } } },
   fx: [REMOTE_HAND, ...CLOUDS(275, 7, 9, 6)] });
 
 // 19 · "The button beeps. Battery: zero." — macro, mirrors the battery shot
-S('beeps', { cut: 'zoom', set: 'void', look: process.env.ML || 'cinematic', impact: [dur('beeps') - 0.8],
+S('beeps', { cut: 'zoom', set: 'void', look: process.env.ML || 'cinematic', punch: [dur('beeps') - 0.8],
   camera: { pos: [[0, [0.05, 0.08, 0.13]], [dur('beeps'), [0.03, 0.058, 0.09], 'inOutSine']], look: [[0, [0.03, 0.047, 0.075]]], fov: 28 },
   cast: {}, fx: [{ type: 'model', id: 'gravity_remote', pos: [0, 0, 0], height: 0.09, solid: false, rotY: 0 }, { type: 'sparks', t: 0.25, pos: [0.03, 0.05, 0.075], spread: 0.012, count: 20, color: '#ff3a2a' }, { type: 'sparks', t: 1.2, pos: [0.03, 0.05, 0.075], spread: 0.012, count: 20, color: '#ff3a2a' }],
   sfx: [{ t: 0.2, type: 'ding', gain: 0.8 }, { t: 0.45, type: 'ding', gain: 0.8 }, { t: 1.15, type: 'ding', gain: 0.9 }, { t: dur('beeps') - 0.8, type: 'subdrop', gain: 1 }] });
@@ -179,17 +179,17 @@ const titles = [
   { t: at('label', 0.1), t1: at('batt', -0.05), style: 'stat', value: 10, max: 10, suffix: 's', text: 'GRAVITY: OFF', pos: [0.5, 0.1], accent: ACC },
   { t: at('batt', 0.15), t1: at('press', -0.05), style: 'stat', value: 1, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.1], accent: ACC },
   { t: at('best', 0.05), t1: at('worst'), style: 'stamp', text: 'BEST DAY EVER', pos: [0.5, 0.11], size: 0.085, accent: ACC },
-  { t: at('ends', 0.0), t1: at('back'), style: 'countdown', from: 3, step: 0.34, pos: [0.5, 0.1], size: 0.07, accent: ACC },
+  { t: at('ends', 0.0), t1: at('back'), style: 'countdown', from: 3, step: 0.34, pos: [0.5, 0.075], size: 0.05, accent: ACC },
   { t: at('back', 0.28), t1: at('fall'), style: 'speedlines', mode: 'radial', center: [0.5, 0.45], density: 1, color: '#ffffff' },
-  { t: at('fall', 0.15), t1: at('again'), style: 'stat', value: 3, max: 3, suffix: ' KM', text: 'TO THE GROUND', pos: [0.5, 0.1], accent: ACC },
-  { t: at('tenagain', 0.0), t1: at('beeps'), style: 'countdown', from: 10, step: 0.15, pos: [0.5, 0.1], size: 0.06, accent: ACC },
+  { t: at('fall', 0.15), t1: at('again'), style: 'stat', value: 3, max: 3, suffix: ' KM', text: 'TO THE GROUND', pos: [0.5, 0.075], accent: ACC },
+  { t: at('tenagain', 0.0), t1: at('beeps'), style: 'countdown', from: 10, step: 0.15, pos: [0.5, 0.075], size: 0.05, accent: ACC },
   { t: at('beeps', 1.35), t1: at('question'), style: 'stat', value: 0, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.1], accent: ACC },
   { t: at('question', 0.05), t1: END, style: 'slam', text: 'WOULD YOU\nPRESS IT?', pos: [0.5, 0.11], size: 0.1, accent: ACC },
 ];
 
 module.exports = {
   title: 'The Gravity Button', T, END,
-  config: { targetDuration: END, set: 'city-day', look: 'cinematic', quality: 'good', effort: 'high', fps: 30, accent: ACC,
+  config: { targetDuration: END, set: 'city-day', look: 'cinematic', quality: 'good', effort: 'standard', fps: 30, accent: ACC,
     sound: { music: { mood: 'upbeat', bpm: 118, drops: [at('press', 0.34), at('back', 0.28), at('question', 0)] }, sfx: true, ambience: true, ...(VO ? { voice: { url: 'vo.wav' } } : {}) },
     captions: { style: 'pop', ...(VO ? { sync: VO.words.map((w) => [w.w, w.start, w.end]) } : {}) }, letterbox: 0 },
   thumbs: [
