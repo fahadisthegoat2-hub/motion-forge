@@ -1,4 +1,5 @@
 # Motion Forge state
+- Last video: "Day 3 at Sea" — scenes/crazy-short (direction.js → build.js). Artifact: https://claude.ai/artifact/Sik28tAMCYHZQ5uFYWiQFt · star Jake · good/high · 20.7s · VO Kokoro am_michael (vo_cloud.mjs via /tmp/claude-0/kok, install kokoro-js with --onnxruntime-node-install-cuda=skip). Outside CC0 Kenney props approved by Sir.
 - Last video: "133 Days Alone" (Poon Lim true story) — scenes/poon-lim (direction.js → build.js → poon-lim.html). Artifact: https://claude.ai/artifact/WC3n76taM98jg4KYbpLuav · star Jake, fishermen Luis + Marcus · good/maximum · 34.5s · VO Kokoro am_michael (BASE 1.05).
 - New (approved by Sir): ocean set, sea ambience, model tilt/flat, cast swimming flag, Kenney Pirate Kit CC0 sea models, scripts/glb_embed.js; render mux 48 kHz + alimiter (true peak ≤ -1 dBTP).
 - Sir's orders: SILENT/PRIVATE — no progress messages, no photos/image reads shown.

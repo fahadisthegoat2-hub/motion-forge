@@ -1,0 +1,312 @@
+{
+ "voice": "am_michael",
+ "duration": 20.02,
+ "words": [
+  {
+   "w": "Three",
+   "start": 0.05,
+   "end": 0.498,
+   "tone": "dramatic"
+  },
+  {
+   "w": "days",
+   "start": 0.498,
+   "end": 0.857,
+   "tone": "dramatic"
+  },
+  {
+   "w": "lost",
+   "start": 0.857,
+   "end": 1.215,
+   "tone": "dramatic"
+  },
+  {
+   "w": "at",
+   "start": 1.215,
+   "end": 1.394,
+   "tone": "dramatic"
+  },
+  {
+   "w": "sea.",
+   "start": 1.394,
+   "end": 1.842,
+   "tone": "dramatic"
+  },
+  {
+   "w": "No",
+   "start": 1.992,
+   "end": 2.178,
+   "tone": "serious"
+  },
+  {
+   "w": "land.",
+   "start": 2.178,
+   "end": 2.736,
+   "tone": "serious"
+  },
+  {
+   "w": "No",
+   "start": 2.736,
+   "end": 2.921,
+   "tone": "serious"
+  },
+  {
+   "w": "food.",
+   "start": 2.921,
+   "end": 3.479,
+   "tone": "serious"
+  },
+  {
+   "w": "Day",
+   "start": 3.679,
+   "end": 3.891,
+   "tone": "neutral"
+  },
+  {
+   "w": "one.",
+   "start": 3.891,
+   "end": 4.244,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 4.244,
+   "end": 4.456,
+   "tone": "neutral"
+  },
+  {
+   "w": "paddle",
+   "start": 4.456,
+   "end": 4.88,
+   "tone": "neutral"
+  },
+  {
+   "w": "east.",
+   "start": 4.88,
+   "end": 5.304,
+   "tone": "neutral"
+  },
+  {
+   "w": "A",
+   "start": 5.404,
+   "end": 5.554,
+   "tone": "neutral"
+  },
+  {
+   "w": "barrel",
+   "start": 5.554,
+   "end": 6.005,
+   "tone": "neutral"
+  },
+  {
+   "w": "floats",
+   "start": 6.005,
+   "end": 6.456,
+   "tone": "neutral"
+  },
+  {
+   "w": "past.",
+   "start": 6.456,
+   "end": 6.907,
+   "tone": "neutral"
+  },
+  {
+   "w": "Day",
+   "start": 7.157,
+   "end": 7.365,
+   "tone": "neutral"
+  },
+  {
+   "w": "two.",
+   "start": 7.365,
+   "end": 7.711,
+   "tone": "neutral"
+  },
+  {
+   "w": "You",
+   "start": 7.711,
+   "end": 7.919,
+   "tone": "neutral"
+  },
+  {
+   "w": "paddle",
+   "start": 7.919,
+   "end": 8.334,
+   "tone": "neutral"
+  },
+  {
+   "w": "harder.",
+   "start": 8.334,
+   "end": 8.889,
+   "tone": "neutral"
+  },
+  {
+   "w": "The",
+   "start": 8.989,
+   "end": 9.22,
+   "tone": "mysterious"
+  },
+  {
+   "w": "same",
+   "start": 9.22,
+   "end": 9.528,
+   "tone": "mysterious"
+  },
+  {
+   "w": "barrel.",
+   "start": 9.528,
+   "end": 10.146,
+   "tone": "mysterious"
+  },
+  {
+   "w": "Day",
+   "start": 10.396,
+   "end": 10.591,
+   "tone": "excited"
+  },
+  {
+   "w": "three.",
+   "start": 10.591,
+   "end": 11.046,
+   "tone": "excited"
+  },
+  {
+   "w": "You",
+   "start": 11.046,
+   "end": 11.241,
+   "tone": "excited"
+  },
+  {
+   "w": "paddle",
+   "start": 11.241,
+   "end": 11.632,
+   "tone": "excited"
+  },
+  {
+   "w": "faster.",
+   "start": 11.632,
+   "end": 12.152,
+   "tone": "excited"
+  },
+  {
+   "w": "That",
+   "start": 12.252,
+   "end": 12.489,
+   "tone": "scared"
+  },
+  {
+   "w": "barrel",
+   "start": 12.489,
+   "end": 12.844,
+   "tone": "scared"
+  },
+  {
+   "w": "again.",
+   "start": 12.844,
+   "end": 13.258,
+   "tone": "scared"
+  },
+  {
+   "w": "Wait.",
+   "start": 13.558,
+   "end": 14.195,
+   "tone": "whisper"
+  },
+  {
+   "w": "Behind",
+   "start": 14.545,
+   "end": 14.964,
+   "tone": "shout"
+  },
+  {
+   "w": "you.",
+   "start": 14.964,
+   "end": 15.313,
+   "tone": "shout"
+  },
+  {
+   "w": "A",
+   "start": 15.313,
+   "end": 15.453,
+   "tone": "shout"
+  },
+  {
+   "w": "cargo",
+   "start": 15.453,
+   "end": 15.802,
+   "tone": "shout"
+  },
+  {
+   "w": "ship.",
+   "start": 15.802,
+   "end": 16.221,
+   "tone": "shout"
+  },
+  {
+   "w": "The",
+   "start": 16.421,
+   "end": 16.629,
+   "tone": "excited"
+  },
+  {
+   "w": "crew",
+   "start": 16.629,
+   "end": 16.907,
+   "tone": "excited"
+  },
+  {
+   "w": "waved",
+   "start": 16.907,
+   "end": 17.255,
+   "tone": "excited"
+  },
+  {
+   "w": "for",
+   "start": 17.255,
+   "end": 17.463,
+   "tone": "excited"
+  },
+  {
+   "w": "three",
+   "start": 17.463,
+   "end": 17.811,
+   "tone": "excited"
+  },
+  {
+   "w": "days.",
+   "start": 17.811,
+   "end": 18.228,
+   "tone": "excited"
+  },
+  {
+   "w": "Would",
+   "start": 18.528,
+   "end": 18.818,
+   "tone": "dramatic"
+  },
+  {
+   "w": "you",
+   "start": 18.818,
+   "end": 18.992,
+   "tone": "dramatic"
+  },
+  {
+   "w": "have",
+   "start": 18.992,
+   "end": 19.224,
+   "tone": "dramatic"
+  },
+  {
+   "w": "looked",
+   "start": 19.224,
+   "end": 19.572,
+   "tone": "dramatic"
+  },
+  {
+   "w": "back?",
+   "start": 19.572,
+   "end": 19.919,
+   "tone": "dramatic"
+  }
+ ]
+}

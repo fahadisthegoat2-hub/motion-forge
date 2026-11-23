@@ -1,0 +1,3 @@
+[motion-forge] using chrome
+packed 16 files (55.5 MB): characters/library.json, assets/models/raft.glb, assets/models/cargo_ship.glb, assets/models/paddle.glb, assets/models/barrel.glb, assets/models/rowboat.glb, assets/characters/jake.glb, characters/marcus.glb, characters/luis.glb, examples/models/gltf/Xbot.glb, assets/animations/ual-starter.glb, assets/animations/ual1.glb, assets/animations/ual2.glb, examples/models/gltf/Soldier.glb, examples/models/gltf/Michelle.glb, vo.wav
+publish with capabilities: { downloads: true } — the page saves the finished MP4 through it (Download MP4 button)
