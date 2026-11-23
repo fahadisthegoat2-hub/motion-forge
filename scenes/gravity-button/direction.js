@@ -105,7 +105,7 @@ S('coffee', { cut: 'zoom', set: 'city-day', look: 'golden-hour',
 
 // 11 · "Best day ever!" — backflip
 S('best', { cut: 'whip', set: 'city-day', look: 'golden-hour', punch: [0.2],
-  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 0.6, 4.6], [-1.2, 0.8, 4.2], 58, 0.6, 0.2),
+  camera: FOLLOW(dur('best'), 4.5, 7.5, [1.6, 1.4, 6.2], [-1.2, 1.0, 5.6], 58, 0.6, 0.8),
   cast: { hero: { pos: [[0, [0, 4.5, 0]], [dur('best'), [0, 7.5, 0], 'outSine']], rotY: [[0, 0.3]], rotX: [[0, 0], [dur('best'), -6.28, 'inOutCubic']], swimming: true, clips: idle(dur('best')), acting: 'none',
     gestures: [{ type: 'cheer', start: 0, end: dur('best') }], face: { smile: [[0, 1]] }, look: [[0, 'camera']] } },
   fx: floatFx(dur('best'), { lift0: 0.6, lift1: 0.95 }) });
@@ -179,7 +179,7 @@ const titles = [
   { t: at('earlier', 0.15), t1: at('find', -0.05), style: 'place', text: 'DOWNTOWN', sub: '10 SECONDS EARLIER', pos: [0.08, 0.09] },
   { t: at('label', 0.1), t1: at('batt', -0.05), style: 'stat', value: 10, max: 10, suffix: 's', text: 'GRAVITY: OFF', pos: [0.5, 0.1], accent: ACC },
   { t: at('batt', 0.15), t1: at('press', -0.05), style: 'stat', value: 1, max: 100, suffix: '%', text: 'BATTERY', pos: [0.5, 0.1], accent: ACC },
-  { t: at('best', 0.05), t1: at('worst'), style: 'stamp', text: 'BEST DAY EVER', pos: [0.5, 0.11], size: 0.085, accent: ACC },
+  { t: at('best', 0.05), t1: at('worst'), style: 'stamp', text: 'BEST DAY EVER', pos: [0.5, 0.075], size: 0.06, accent: ACC },
   { t: at('ends', 0.0), t1: at('back'), style: 'countdown', from: 3, step: 0.34, pos: [0.5, 0.075], size: 0.05, accent: ACC },
   { t: at('back', 0.28), t1: at('fall'), style: 'speedlines', mode: 'radial', center: [0.5, 0.45], density: 1, color: '#ffffff' },
   { t: at('fall', 0.15), t1: at('again'), style: 'stat', value: 3, max: 3, suffix: ' KM', text: 'TO THE GROUND', pos: [0.5, 0.075], accent: ACC },
